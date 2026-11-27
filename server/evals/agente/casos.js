@@ -5,7 +5,9 @@
 //
 // Cada caso: { id, categoria, perfil, pregunta, esperado(api) }.
 // esperado(api) devuelve { contiene, contieneAlguno, noContiene, herramientas, sinHerramientas, guia, sinGuia }:
-//   contiene        valores que deben aparecer en la respuesta (cada uno puede ser una lista de variantes)
+//   contiene        valores que deben aparecer (cada uno puede ser una lista de variantes); los números
+//                   se comparan como números y sin contar fechas AAAAMMDD
+//   contienePatron  expresiones regulares que el texto debe cumplir (número junto a su palabra)
 //   noContiene      textos que no deben aparecer (por ejemplo, un promedio que la IA no debe calcular)
 //   herramientas    herramientas que debe usar; sinHerramientas, las que no debe usar
 //   guia / sinGuia  identificadores data-guia que deben (o no) estar en los pasos de la guía
@@ -158,7 +160,9 @@ export const CASOS = [
     esperado: async (api) => {
       const d = await api('/movimientos?desde=20260831&hasta=20260930&ranking=COMERCIO', 'analista');
       const mov = banco(d.rankings[0].movimientos, '108');
-      return { contiene: [variantes(Math.abs(mov.Cambio_Posicion), 0)] };
+      const n = Math.abs(mov.Cambio_Posicion);
+      // El número tiene que ir con 'posiciones' o 'puestos': '4.º lugar' no cuenta como 'subió 4'.
+      return { contienePatron: [new RegExp(`(?<![\\d.])${n}\\s+(posici|puesto|lugar)`, 'i')] };
     },
   },
   {
