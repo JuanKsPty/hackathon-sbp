@@ -1,0 +1,5 @@
+node_modules/
+salidas/
+.env
+.env.*
+!.env.example
