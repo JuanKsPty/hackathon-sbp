@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { leerAT03, procesarPeriodo, ErrorDeDatos } from '../src/engine/index.js';
-import { CARPETA_DATOS, catalogosReales, filaSintetica, comoFilas, textoCsv, paqueteReal } from './ayuda.js';
+import { CARPETA_DATOS, catalogosReales, filaSintetica, comoFilas, textoCsv, paqueteReal, leerReferencia } from './ayuda.js';
 
 const campos = () => catalogosReales().campos.map((c) => c.campo);
 
@@ -93,7 +93,8 @@ test('banco o facilidad fuera de catálogo generan alerta, no error', () => {
 test('los 3 períodos reales se leen sin alertas de tipo ni de integridad', () => {
   const { periodos } = paqueteReal();
   assert.deepEqual(periodos.map((p) => p.fecha), ['20260731', '20260831', '20260930']);
-  assert.deepEqual(periodos.map((p) => p.calidad.filasLeidas), [25000, 27500, 30000]);
+  // Filas leídas de cada período: del cálculo de control de tests/referencia (R2).
+  assert.deepEqual(periodos.map((p) => p.calidad.filasLeidas), leerReferencia('referencia_calidad.csv').map((f) => Number(f.Filas_Leidas)));
   for (const p of periodos) {
     assert.equal(p.calidad.alertasTipoDeDato, 0, `${p.fecha}: ${JSON.stringify(p.alertas.slice(0, 3))}`);
     assert.equal(p.calidad.alertasBancoFueraDeCatalogo, 0);
