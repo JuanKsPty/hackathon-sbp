@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { formatearCorte, formatearMes } from '@/lib/formato.js'
+import { TODOS_LOS_PERIODOS } from '@/lib/periodos.js'
 import { cn } from '@/lib/utils'
 
 // Período de trabajo de toda la app, como mes ("Septiembre 2026"). Las opciones salen de
@@ -28,6 +29,17 @@ export function SelectorPeriodo({ className, guia = 'global.selector-periodo', i
         <SelectValue placeholder={marcador}>{periodo ? formatearMes(periodo) : undefined}</SelectValue>
       </SelectTrigger>
       <SelectContent position="popper" align="end">
+        {/* Acumulado de todos los cortes: lo calcula el API con ?periodo=todos. */}
+        {!sinOpciones && (
+          <SelectItem value={TODOS_LOS_PERIODOS} textValue="Todos los períodos" className="py-1.5">
+            <span className="flex flex-col items-start gap-0.5">
+              <span>Todos los períodos</span>
+              <span className="text-xs text-muted-foreground">
+                acumulado de {periodos.length} {periodos.length === 1 ? 'corte' : 'cortes'}
+              </span>
+            </span>
+          </SelectItem>
+        )}
         {lista.map((p) => (
           <SelectItem key={p.Fecha} value={p.Fecha} textValue={formatearMes(p.Fecha)} className="py-1.5">
             <span className="flex flex-col items-start gap-0.5">

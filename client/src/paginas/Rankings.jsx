@@ -27,6 +27,7 @@ import { decidirPeriodo, escribirFiltros, leerFiltros } from '@/lib/filtrosUrl.j
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Pagina } from './Pagina.jsx'
+import { TODOS_LOS_PERIODOS } from '@/lib/periodos.js'
 import { NUEVA_PREGUNTA } from '@/components/asistente/conversacion.js'
 
 // Cuánto queda resaltada la fila que marca el agente.
@@ -45,7 +46,11 @@ export default function Rankings() {
   const listaBancos = catalogo.datos?.bancos ?? []
 
   const [parametros, setParametros] = useSearchParams()
-  const filtros = leerFiltros(parametros, { periodos: periodos.map((p) => p.Fecha), rankings: listaRankings, bancos: listaBancos })
+  const filtros = leerFiltros(parametros, {
+    periodos: [...periodos.map((p) => p.Fecha), TODOS_LOS_PERIODOS],
+    rankings: listaRankings,
+    bancos: listaBancos,
+  })
   // El período de la vista sale de la URL desde el primer render (un enlace compartido no pide antes
   // el período por defecto); si la URL no trae uno válido, es el del encabezado.
   const periodo = filtros.periodo ?? periodoGlobal

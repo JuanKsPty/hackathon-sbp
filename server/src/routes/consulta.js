@@ -12,6 +12,8 @@ export function rutasDeConsulta(almacen) {
       ...encabezado(),
       ultimo: almacen.ultimaFecha(),
       periodos: almacen.todos().map(resumenDePeriodo),
+      // "Todos los períodos": el acumulado de los cortes cargados (null si no hay ninguno).
+      acumulado: almacen.todos().length > 0 ? resumenDePeriodo(almacen.acumulado()) : null,
     });
   });
 
@@ -27,7 +29,7 @@ export function rutasDeConsulta(almacen) {
 
   // Rankings de un período (por defecto el último), filtrables por ranking y banco.
   rutas.get('/rankings', (req, res) => {
-    const periodo = periodoPedido(almacen, req.query.periodo);
+    const periodo = periodoPedido(almacen, req.query.periodo, { permitirTodos: true });
     const ranking = rankingPedido(almacen, req.query.ranking);
     const banco = bancoPedido(almacen, req.query.banco);
     const rankings = periodo.rankings
@@ -41,7 +43,7 @@ export function rutasDeConsulta(almacen) {
 
   // Desglose por subactividad (incluye la reclasificación SB21 a Tarjeta).
   rutas.get('/subactividades', (req, res) => {
-    const periodo = periodoPedido(almacen, req.query.periodo);
+    const periodo = periodoPedido(almacen, req.query.periodo, { permitirTodos: true });
     const ranking = rankingPedido(almacen, req.query.ranking);
     const banco = bancoPedido(almacen, req.query.banco);
     const subactividad = subactividadPedida(almacen, req.query.subactividad);
@@ -54,12 +56,12 @@ export function rutasDeConsulta(almacen) {
 
   // Calidad: cascada E1-E4, universo válido, alertas y reconciliaciones. Sin ?periodo devuelve todos.
   rutas.get('/calidad', (req, res) => {
-    res.json({ ...encabezado(), periodos: periodosPedidos(almacen, req.query.periodo).map(calidadDePeriodo) });
+    res.json({ ...encabezado(), periodos: periodosPedidos(almacen, req.query.periodo, { acumular: true }).map(calidadDePeriodo) });
   });
 
   // Exclusión auditable: filas excluidas con su motivo, filtrables por motivo y banco.
   rutas.get('/excluidas', (req, res) => {
-    const periodo = periodoPedido(almacen, req.query.periodo);
+    const periodo = periodoPedido(almacen, req.query.periodo, { permitirTodos: true });
     const motivo = motivoPedido(req.query.motivo);
     const banco = bancoPedido(almacen, req.query.banco);
     const excluidas = periodo.excluidas

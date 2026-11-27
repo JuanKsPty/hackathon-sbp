@@ -2,13 +2,22 @@
 // Los valores válidos salen de los catálogos y de los períodos cargados, nunca de listas fijas.
 import { ErrorApi } from './errores.js';
 import { MOTIVOS } from '../engine/cascada.js';
+import { TODOS } from '../engine/acumulado.js';
 
 const invalido = (mensaje) => new ErrorApi(400, 'PARAMETRO_INVALIDO', mensaje);
 
 // Período pedido o, si no se indica, el último cargado.
-export function periodoPedido(almacen, valor) {
+// `todos` ("Todos los períodos") devuelve el acumulado de los cortes cargados, solo donde se
+// permite (`permitirTodos`): no en movimientos ni descomposición, que comparan dos cortes.
+export function periodoPedido(almacen, valor, { permitirTodos = false } = {}) {
+  if (valor === TODOS && permitirTodos) {
+    const acumulado = almacen.acumulado();
+    if (!acumulado) throw new ErrorApi(404, 'PERIODO_SIN_DATOS', 'Todavía no hay períodos cargados.');
+    return acumulado;
+  }
   if (valor !== undefined && !/^\d{8}$/.test(valor)) {
-    throw invalido(`periodo debe tener el formato AAAAMMDD (llegó "${valor}").`);
+    const opciones = permitirTodos ? ` o "${TODOS}"` : '';
+    throw invalido(`periodo debe tener el formato AAAAMMDD${opciones} (llegó "${valor}").`);
   }
   const fecha = valor ?? almacen.ultimaFecha();
   if (!fecha) throw new ErrorApi(404, 'PERIODO_SIN_DATOS', 'Todavía no hay períodos cargados.');
@@ -17,9 +26,11 @@ export function periodoPedido(almacen, valor) {
   return periodo;
 }
 
-// Todos los períodos, o solo el pedido.
-export function periodosPedidos(almacen, valor) {
-  if (valor !== undefined) return [periodoPedido(almacen, valor)];
+// Todos los períodos, o solo el pedido. `todos`: con `acumular`, el acumulado en un solo período;
+// sin `acumular` (las descargas CSV), cada período por separado, igual que sin ?periodo.
+export function periodosPedidos(almacen, valor, { acumular = false } = {}) {
+  if (valor === TODOS && acumular) return [periodoPedido(almacen, valor, { permitirTodos: true })];
+  if (valor !== undefined && valor !== TODOS) return [periodoPedido(almacen, valor)];
   const todos = almacen.todos();
   if (todos.length === 0) throw new ErrorApi(404, 'PERIODO_SIN_DATOS', 'Todavía no hay períodos cargados.');
   return todos;

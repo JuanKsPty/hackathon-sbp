@@ -8,7 +8,7 @@ import { requiereOpcion } from '../middleware/perfiles.js';
 export function rutasDeDashboard(almacen) {
   const rutas = Router();
   rutas.get('/exportar/dashboard.html', requiereOpcion('descargar'), (req, res) => {
-    const periodo = periodoPedido(almacen, req.query.periodo);
+    const periodo = periodoPedido(almacen, req.query.periodo, { permitirTodos: true });
     const ranking = rankingPedido(almacen, req.query.ranking);
     const banco = bancoPedido(almacen, req.query.banco);
     const html = dashboardHtml({ periodo, ranking, banco, catalogos: almacen.catalogos });
