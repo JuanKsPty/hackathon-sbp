@@ -28,28 +28,50 @@
         },
         "Conteos_Independientes": { "E1": 2, "E2": 41, "E3": 11, "E4": 8 },
         "Reconciliaciones": {
-          "R1": {
-            "ok": true,
-            "diferencias": []
-          },
-          "R2": {
-            "ok": true,
-            "diferencias": []
-          },
+          "R1": { "ok": true, "diferencias": [] },
+          "R2": { "ok": true, "diferencias": [] },
           "R3": {
             "ok": true,
             "Suma_Totales": 131000000.25,
             "Suma_Universo": 131000000.25
           },
-          "Unicidad": {
-            "ok": true,
-            "repetidos": []
-          }
+          "Unicidad": { "ok": true, "repetidos": [] }
         },
         "Alertas_Total": 0,
         "alertas": []
       },
-      "Comparacion": null
+      "Comparacion": {
+        "periodo_anterior": "20260831",
+        "periodo_actual": "20260930",
+        "regla_significativo": {
+          "min_cambio_posicion_abs": 2,
+          "cambio_lider": true,
+          "min_var_saldo_pct_abs": 10
+        },
+        "rankings": [
+          {
+            "Ranking": "HIPOTECARIO",
+            "Lider_anterior": { "Codigo_Banco": "101", "Banco": "Banco Istmo" },
+            "Lider_actual": { "Codigo_Banco": "104", "Banco": "Banco Pacifico" },
+            "Cambio_Lider": true,
+            "movimientos": [
+              {
+                "Codigo_Banco": "104",
+                "Banco": "Banco Pacifico",
+                "Posicion_anterior": 3,
+                "Posicion_actual": 1,
+                "Cambio_Posicion": 2,
+                "Saldo_anterior": 1250000.5,
+                "Saldo_actual": 1400000.25,
+                "Var_Saldo": 149999.75,
+                "Var_Saldo_Pct": 11.9999,
+                "Significativo": true,
+                "Motivos": ["cambio_posicion", "cambio_lider", "var_saldo_pct"]
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

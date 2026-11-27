@@ -4,15 +4,11 @@
 // Al arrancar, recargarPeriodosGuardados vuelve a leer esas copias: lo cargado no se pierde al reiniciar.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { procesarArchivo, ErrorDeDatos } from '../engine/index.js';
+import { carpetaStorage as carpetaStoragePorDefecto } from './bitacora.js';
 
-const aqui = path.dirname(fileURLToPath(import.meta.url));
-
-// storage/ está en la raíz del repo. STORAGE_DIR permite cambiarla (las pruebas usan una carpeta temporal).
-export const CARPETA_STORAGE = path.resolve(process.env.STORAGE_DIR ?? path.join(aqui, '..', '..', '..', 'storage'));
-
-export const carpetaDePeriodos = (carpetaStorage = CARPETA_STORAGE) => path.join(carpetaStorage, 'periodos');
+// La carpeta storage/ es la misma de la bitácora (#31): raíz del repo, o STORAGE_DIR si está definida.
+export const carpetaDePeriodos = (carpetaStorage = carpetaStoragePorDefecto()) => path.join(carpetaStorage, 'periodos');
 
 // Las copias se llaman "<marca de carga>__<nombre original>", por ejemplo
 // "1795793400123__AT03_sintetico_202609.csv". Ordenadas por nombre, quedan en orden de carga.
@@ -49,7 +45,7 @@ function marcaDeCarga() {
 }
 
 // Guarda una copia del archivo tal como llegó y devuelve el nombre de la copia.
-export function guardarCopia(texto, nombreArchivo, carpetaStorage = CARPETA_STORAGE) {
+export function guardarCopia(texto, nombreArchivo, carpetaStorage = carpetaStoragePorDefecto()) {
   const carpeta = carpetaDePeriodos(carpetaStorage);
   fs.mkdirSync(carpeta, { recursive: true });
   const copia = `${marcaDeCarga()}${SEPARADOR}${nombreArchivo}`;
@@ -66,7 +62,7 @@ export function periodoAnterior(almacen, fecha) {
 // Carga completa: validar y procesar, guardar la copia y publicar en el almacén.
 // Primero se valida: un archivo inválido no se guarda ni cambia lo que ya estaba cargado.
 // Un período con una Fecha ya cargada la reemplaza y se informa como ACTUALIZACION.
-export function cargarPeriodo(almacen, texto, nombreArchivo, { carpetaStorage = CARPETA_STORAGE } = {}) {
+export function cargarPeriodo(almacen, texto, nombreArchivo, { carpetaStorage = carpetaStoragePorDefecto() } = {}) {
   const archivo = limpiarNombreArchivo(nombreArchivo);
   const periodos = procesarTextoAT03(texto, archivo, almacen.catalogos);
   const copia = guardarCopia(texto, archivo, carpetaStorage);
@@ -88,7 +84,7 @@ export function nombreOriginal(copia) {
 // Al arrancar, después de procesar data/: vuelve a cargar las copias en el orden en que se subieron.
 // Si dos copias traen la misma Fecha, queda la más reciente. Una copia que ya no se puede
 // procesar no detiene el arranque: se informa en los avisos.
-export function recargarPeriodosGuardados(almacen, carpetaStorage = CARPETA_STORAGE) {
+export function recargarPeriodosGuardados(almacen, carpetaStorage = carpetaStoragePorDefecto()) {
   const carpeta = carpetaDePeriodos(carpetaStorage);
   const recargados = [];
   const avisos = [];

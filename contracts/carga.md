@@ -36,10 +36,11 @@ curl -X POST -H "X-Perfil: admin" -H "X-Nombre-Archivo: AT03_sintetico_202609.cs
 ### Qué hace
 
 1. **Valida y procesa** el archivo con el motor: 61 columnas del diccionario, `Fecha` y `Saldo` válidos, cascada E1–E4, clasificación, rankings y reconciliaciones. El período sale del campo `Fecha`, no del nombre del archivo. Si algo falla, responde **422** y **no guarda nada**: lo que ya estaba cargado no cambia.
-2. **Guarda una copia** en `storage/periodos/`, que está ignorada por git. Se llama `<marca de carga>__<nombre original>`.
+2. **Guarda una copia** en `storage/periodos/`, ignorada por git. Es la misma carpeta `storage/` de la bitácora: la raíz del repo, o la de `STORAGE_DIR`. La copia se llama `<marca de carga>__<nombre original>`.
 3. **Publica** el período: desde ese momento lo ven `GET /api/periodos`, `/api/rankings` y las demás consultas.
 4. **Al reiniciar** el servidor, las copias se recargan después de `data/`, en el orden en que se subieron. Lo cargado no se pierde.
-5. **Avisa** al gancho `alPublicarPeriodo` (`server/src/automation/publicacion.js`). Ahí se conectarán las alertas por correo (#7).
+5. **Registra la operación** en la bitácora (#31) como `carga_periodo`, con resultado `exito` (una por período) o `error` (con el mensaje). Los 403 ya quedan como `acceso_denegado`.
+6. **Avisa** al gancho `alPublicarPeriodo` (`server/src/automation/publicacion.js`). Ahí se conectarán las alertas por correo (#7).
 
 Un período con una `Fecha` que ya estaba cargada **la reemplaza** y se informa como `ACTUALIZACION`. Eso vale también para los de `data/`.
 
@@ -54,7 +55,7 @@ Un período con una `Fecha` que ya estaba cargada **la reemplaza** y se informa 
 | `Mensaje` | texto listo para mostrar |
 | `Periodo_Anterior` | la `Fecha` cargada justo antes, contra la que se comparan los rankings, o `null` si es el primero |
 | `Calidad` | el mismo formato que un período de `GET /api/calidad`: `Filas_Leidas`, `E1_Duplicados` a `E4_Actividad_No_Catalogada`, `Universo_Local_Valido`, `Saldo_Total_Valido`, `Cascada_Cuadra`, alertas y `Reconciliaciones` (R1, R2, R3 y unicidad) |
-| `Comparacion` | cambios de ranking contra `Periodo_Anterior`, con el formato de `GET /api/movimientos` ([`movimientos.json`](https://github.com/JuanKsPty/hackathon-sbp/blob/feat/1-contrato-movimientos/contracts/movimientos.json)), o `null` si no hay período anterior. **Pendiente de #32:** mientras la comparación no esté en `main`, vale `null` |
+| `Comparacion` | cambios de ranking contra `Periodo_Anterior`. Es la misma respuesta de `GET /api/movimientos?desde=<Periodo_Anterior>&hasta=<Fecha>` ([`movimientos.json`](https://github.com/JuanKsPty/hackathon-sbp/blob/feat/1-contrato-movimientos/contracts/movimientos.json)), sin `fuente` ni `aviso`. Vale `null` si no hay período anterior, o si el servidor arrancó sin el cálculo de movimientos de #32 (`crearApp({ almacen, obtenerMovimientos })`) |
 
 ### Errores
 
