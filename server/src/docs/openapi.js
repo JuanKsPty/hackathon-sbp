@@ -327,6 +327,18 @@ export function crearDocumentoOpenApi(catalogos) {
           },
         },
       },
+      '/prestamos': {
+        get: {
+          tags: ['Descargas'],
+          summary: 'Préstamos válidos de un banco en un ranking (número, subactividad y saldo, de mayor a menor saldo), para elegir uno (Analista y Admin)',
+          parameters: [
+            ref('periodo'),
+            { name: 'banco', in: 'query', required: true, description: 'Código de banco', schema: { type: 'string' } },
+            { name: 'ranking', in: 'query', required: true, description: 'Ranking (macroactividad)', schema: { type: 'string' } },
+          ],
+          responses: { ...jsonOk('Lista de préstamos del banco y ranking'), ...errores(400, 403, 404) },
+        },
+      },
       '/prestamos/{numero}': {
         get: {
           tags: ['Descargas'],
