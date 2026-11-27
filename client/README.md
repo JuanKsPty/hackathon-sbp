@@ -45,7 +45,7 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 | `sitios/` | Tabla de rutas de cada sitio (`publico.jsx`, `interno.jsx`). |
 | `hooks/` | `useConsulta`: carga, error y reintento de una consulta. |
 | `guia/` | Cursor guía del asistente (#72): motor, búsqueda de `data-guia` y capa visual. Ver [`src/guia/README.md`](src/guia/README.md). |
-| `components/layout/` | `AppShell`, `Encabezado` (arriba a la derecha solo el botón del agente), `BarraFuente` (siempre visible) y el menú lateral, que cambia según el perfil. Al pie del menú, `PerfilLateral` reúne el período de los datos, `SesionUsuario` (usuario y Salir en el sitio interno; "Consulta pública" en el público) y el tema. |
+| `components/layout/` | `AppShell`, `Encabezado` (arriba a la derecha solo el botón del agente), `BarraFuente` (siempre visible) y el menú lateral, que cambia según el perfil. Al pie del menú, `PerfilLateral` reúne `SesionUsuario` (usuario y Salir en el sitio interno; "Consulta pública" en el público) y el tema. El período de los datos (`PeriodoDePagina`, por mes: "Septiembre 2026") va junto al título de Panel, Rankings y Calidad, con la prop `acciones` de `Pagina`. |
 | `components/estados/` | `Cargando`, `Vacio` y `ErrorApi`. |
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
 | `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |

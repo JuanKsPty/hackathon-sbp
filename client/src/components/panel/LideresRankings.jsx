@@ -23,7 +23,7 @@ export function LideresRankings() {
     <Card data-guia="panel.lideres">
       <CardHeader>
         <CardTitle>Líder de cada ranking</CardTitle>
-        <CardDescription>{periodo ? `Primer lugar por saldo al ${formatearPeriodo(periodo)}` : 'Período elegido en el menú lateral'}</CardDescription>
+        <CardDescription>{periodo ? `Primer lugar por saldo al ${formatearPeriodo(periodo)}` : 'Período elegido junto al título'}</CardDescription>
         <CardAction>
           <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
             Ver rankings

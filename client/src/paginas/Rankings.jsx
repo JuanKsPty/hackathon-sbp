@@ -24,12 +24,13 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { decidirPeriodo, escribirFiltros, leerFiltros } from '@/lib/filtrosUrl.js'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
+import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Pagina } from './Pagina.jsx'
 
 // La regla SB21 (sección 6) solo mueve saldo dentro de este ranking: Crédito personal con facilidad 07 → Tarjeta.
 const RANKING_CON_REGLA_SB21 = 'CONSUMO'
 
-// Página Rankings (#64): período (encabezado), los 6 rankings, tabla ordenable, gráfico,
+// Página Rankings (#64): período (junto al título), los 6 rankings, tabla ordenable, gráfico,
 // filtros por banco y subactividad, y desglose por subactividad. Todas las cifras vienen del API (R2).
 // Los filtros viven en la URL (#129): la vista se recarga igual y se puede compartir.
 export default function Rankings() {
@@ -169,7 +170,7 @@ export default function Rankings() {
       <Card>
         <CardHeader>
           <CardTitle>Ranking y filtros</CardTitle>
-          <CardDescription>El período se elige en el encabezado. La dirección de la página guarda esta vista.</CardDescription>
+          <CardDescription>Elige el ranking y, si quieres, un banco o una subactividad. El período está junto al título. La dirección de la página guarda esta vista.</CardDescription>
           <CardAction>
             <CopiarEnlace />
           </CardAction>
@@ -264,7 +265,7 @@ export default function Rankings() {
 
 function Contenedor({ children }) {
   return (
-    <Pagina titulo="Rankings" descripcion="Posición de cada banco en las actividades de crédito, con su saldo, ponderación y desglose.">
+    <Pagina titulo="Rankings" descripcion="Posición de cada banco en las actividades de crédito, con su saldo, ponderación y desglose." acciones={<PeriodoDePagina />}>
       {children}
     </Pagina>
   )

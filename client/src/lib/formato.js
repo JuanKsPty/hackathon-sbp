@@ -12,6 +12,29 @@ export function formatearPeriodo(fecha) {
   return `${Number(dia)} ${nombreMes} ${anio}`
 }
 
+const MESES_LARGOS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+// Período como mes, para el selector: '20260930' -> 'Septiembre 2026'.
+// Cada período es un corte mensual; en los textos donde importa la fecha de corte se sigue usando
+// formatearPeriodo. Si no es una fecha AAAAMMDD, devuelve el texto tal cual.
+export function formatearMes(fecha) {
+  const partes = /^(\d{4})(\d{2})(\d{2})$/.exec(String(fecha ?? ''))
+  if (!partes) return fecha ?? ''
+  const [, anio, mes] = partes
+  const nombreMes = MESES_LARGOS[Number(mes) - 1]
+  if (!nombreMes) return fecha
+  return `${nombreMes} ${anio}`
+}
+
+// Fecha de corte del período, corta: '20260930' -> 'corte al 30 sep'.
+export function formatearCorte(fecha) {
+  const partes = /^(\d{4})(\d{2})(\d{2})$/.exec(String(fecha ?? ''))
+  if (!partes) return ''
+  const [, , mes, dia] = partes
+  const nombreMes = MESES[Number(mes) - 1]
+  return nombreMes ? `corte al ${Number(dia)} ${nombreMes}` : ''
+}
+
 // Panamá usa punto decimal y coma de miles, igual que los CSV del reto.
 const enteros = new Intl.NumberFormat('es-PA', { maximumFractionDigits: 0 })
 const montos = new Intl.NumberFormat('es-PA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

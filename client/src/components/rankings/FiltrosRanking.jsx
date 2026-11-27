@@ -1,18 +1,13 @@
-import { SelectorPeriodo } from '@/components/layout/SelectorPeriodo.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // Radix Select no admite un valor vacío: "todos" significa sin filtro.
 export const TODOS = 'todos'
 
-// Filtros de la página (lám. 5): período (el mismo del menú lateral, a mano junto a los demás),
-// banco (los 12 del catálogo) y subactividad (las del ranking elegido).
+// Filtros de la página (lám. 5): banco (los 12 del catálogo) y subactividad (las del ranking elegido).
+// El período va junto al título de la página (PeriodoDePagina), para que haya un solo selector.
 export function FiltrosRanking({ bancos, subactividades, banco, subactividad, alCambiarBanco, alCambiarSubactividad }) {
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-        Período
-        <SelectorPeriodo guia={null} className="min-w-40 text-foreground" />
-      </label>
       <Filtro etiqueta="Banco" guia="rankings.filtro-banco" valor={banco} alCambiar={alCambiarBanco}>
         <SelectItem value={TODOS}>Todos los bancos</SelectItem>
         {bancos.map((b) => (

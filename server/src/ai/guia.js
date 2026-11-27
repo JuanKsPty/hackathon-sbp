@@ -17,7 +17,7 @@ export const ELEMENTOS_GUIA = [
   el('global.menu-admin', null, 'Enlace del menú a Administración', 'cargar_periodo'),
   // Solo existe en el sitio interno (SesionUsuario): Público no lo ve, como Analista y Administrador.
   el('global.selector-perfil', null, 'Sesión del sitio interno: usuario, perfil y Salir', 'comparar_periodos'),
-  el('global.selector-periodo', null, 'Selector de período'),
+  el('global.selector-periodo', null, 'Período de los datos (mes), junto al título de Panel, Rankings y Calidad'),
   el('global.selector-tema', null, 'Tema claro, oscuro o sistema'),
   el('global.barra-fuente', null, 'Fuente, período y aviso de datos ficticios'),
   el('global.abrir-asistente', null, 'Botón que abre el asistente IA'),

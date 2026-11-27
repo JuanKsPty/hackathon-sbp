@@ -47,7 +47,7 @@ export function ResumenPeriodo() {
         <CardDescription className="@max-md/card-header:col-start-1">
           {detallePeriodo
             ? `${formatearPeriodo(detallePeriodo.Fecha)} · ${detallePeriodo.Archivo}`
-            : 'Período elegido en el menú lateral'}
+            : 'Período elegido junto al título'}
         </CardDescription>
         {detallePeriodo && typeof reconciliado === 'boolean' && (
           <CardAction className="@max-md/card-header:col-start-1 @max-md/card-header:row-span-1 @max-md/card-header:row-start-3 @max-md/card-header:mt-2 @max-md/card-header:justify-self-start">

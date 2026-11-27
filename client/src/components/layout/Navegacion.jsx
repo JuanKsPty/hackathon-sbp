@@ -7,7 +7,7 @@ import { PerfilLateral } from './PerfilLateral.jsx'
 // Menú lateral. Se usa en la barra lateral (escritorio) y dentro del Sheet (móvil).
 // - Arriba: el emblema de la SBP y el nombre de la app.
 // - En medio: las secciones que el perfil puede usar (opciones de GET /api/perfil).
-// - Al pie: el bloque de perfil con el período de los datos, la sesión y el tema (PerfilLateral).
+// - Al pie: el bloque de perfil con la sesión y el tema (PerfilLateral).
 export function Navegacion({ alNavegar }) {
   const { puede } = usePerfil()
   return (

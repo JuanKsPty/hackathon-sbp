@@ -72,7 +72,7 @@ export function MovimientosSignificativos() {
       <Vacio
         icono={CalendarRangeIcon}
         titulo="No hay un período anterior para comparar"
-        descripcion={`${formatearPeriodo(periodo)} es el primer período cargado. Elige uno posterior en «Período de los datos», en el menú lateral, para ver sus movimientos.`}
+        descripcion={`${formatearPeriodo(periodo)} es el primer período cargado. Elige uno posterior en «Período de los datos», arriba junto al título, para ver sus movimientos.`}
       />
     )
   } else {
