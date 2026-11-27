@@ -5,6 +5,8 @@
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { FUENTE, AVISO } from '../routes/formato.js';
+import { PERFILES } from '../middleware/perfiles.js';
+import { MOTIVOS } from '../engine/cascada.js';
 
 const CARPETA_CONTRATOS = fileURLToPath(new URL('../../../contracts/', import.meta.url));
 
@@ -17,12 +19,15 @@ function ejemplo(archivo) {
   }
 }
 
-const jsonOk = (descripcion, archivoEjemplo) => ({
-  200: {
-    description: descripcion,
-    content: { 'application/json': { schema: { type: 'object' }, ...(archivoEjemplo && ejemplo(archivoEjemplo) ? { example: ejemplo(archivoEjemplo) } : {}) } },
-  },
-});
+function jsonOk(descripcion, archivoEjemplo) {
+  const ejemploDeContrato = archivoEjemplo ? ejemplo(archivoEjemplo) : undefined; // se lee una sola vez
+  return {
+    200: {
+      description: descripcion,
+      content: { 'application/json': { schema: { type: 'object' }, ...(ejemploDeContrato ? { example: ejemploDeContrato } : {}) } },
+    },
+  };
+}
 
 const csvOk = (descripcion) => ({
   200: { description: descripcion, content: { 'text/csv': { schema: { type: 'string' } } } },
@@ -110,7 +115,7 @@ export function crearDocumentoOpenApi(catalogos) {
           requestBody: { required: true, content: { 'text/csv': { schema: { type: 'string' } } } },
           responses: {
             ...jsonOk('Período cargado', 'carga.json'),
-            ...errores(400, 403),
+            ...errores(400, 403, 413, 415),
             422: { description: 'Archivo AT03 inválido (ARCHIVO_INVALIDO), con el detalle en `detalles`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           },
         },
@@ -138,7 +143,7 @@ export function crearDocumentoOpenApi(catalogos) {
         get: {
           tags: ['Consulta'],
           summary: 'Reporte de calidad: cascada E1–E4, universo local válido, alertas y reconciliaciones',
-          parameters: [{ ...ref('periodo') }],
+          parameters: [ref('periodo')],
           responses: { ...jsonOk('Sin periodo devuelve todos los períodos', 'calidad.json'), ...errores(400, 404) },
         },
       },
@@ -149,6 +154,15 @@ export function crearDocumentoOpenApi(catalogos) {
           description: '`puntos` tiene una clave por punto: calidad (1, E1–E4 y universo), rankings_obligatorios (2), rankings_adicionales (3, COMERCIO y CONSUMO), ponderacion (4), subactividades (5, con Tarjeta) y periodos (6, reconciliaciones). Con `banco` se acotan los datos; los chequeos usan siempre todos los bancos.',
           parameters: [ref('periodo'), ref('banco')],
           responses: { ...jsonOk('Los 6 puntos con sus datos y chequeos', 'verificacion.json'), ...errores(400, 404) },
+        },
+      },
+      '/indicadores': {
+        get: {
+          tags: ['Consulta'],
+          summary: 'Indicadores adicionales: morosidad, vencimientos y concentración (análisis adicional, fuera de los 6 rankings)',
+          description: 'Se calculan sobre el universo local válido del período. Con `ranking` se limita la morosidad y los vencimientos a esa macroactividad, y la concentración a ese ranking. No forman parte de los 6 rankings oficiales: la respuesta lo indica en `analisis`.',
+          parameters: [ref('periodo'), ref('ranking')],
+          responses: { ...jsonOk('Morosidad, vencimientos y concentración (top 3 y HHI)', 'indicadores.json'), ...errores(400, 404) },
         },
       },
       '/excluidas': {
@@ -212,8 +226,8 @@ export function crearDocumentoOpenApi(catalogos) {
         post: {
           tags: ['IA'],
           summary: 'MCP remoto (Streamable HTTP, sin estado): conectar Claude u otro cliente MCP por URL',
-          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. Perfil con `?perfil=publico|analista|admin` (por defecto publico). Instrucciones en `server/src/mcp/README.md`.',
-          parameters: [{ name: 'perfil', in: 'query', required: false, schema: { type: 'string', enum: ['publico', 'analista', 'admin'] } }],
+          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. Perfil con `?perfil=` (por defecto publico). Solo acepta POST: GET y DELETE responden 405 (modo sin estado). Instrucciones en `server/src/mcp/README.md`.',
+          parameters: [{ name: 'perfil', in: 'query', required: false, schema: { type: 'string', enum: PERFILES } }],
           requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' }, example: { jsonrpc: '2.0', id: 1, method: 'tools/list' } } } },
           responses: { ...jsonOk('Respuesta JSON-RPC'), ...errores(400) },
         },
@@ -223,7 +237,7 @@ export function crearDocumentoOpenApi(catalogos) {
           tags: ['IA'],
           summary: 'Explicación en texto de los movimientos significativos (Analista y Admin)',
           parameters: [ref('desde'), ref('hasta'), ref('ranking')],
-          responses: { ...jsonOk('Frases con su fuente (ia o reglas)'), ...errores(400, 403, 404, 422) },
+          responses: { ...jsonOk('Frases con su fuente (ia o reglas)'), ...errores(400, 403, 404, 422, 429) },
         },
       },
       '/ia/preguntar': {
@@ -253,7 +267,7 @@ export function crearDocumentoOpenApi(catalogos) {
               },
             },
           },
-          responses: { ...jsonOk('Respuesta verificada contra el motor, con las consultas usadas'), ...errores(400) },
+          responses: { ...jsonOk('Respuesta verificada contra el motor, con las consultas usadas'), ...errores(400, 429) },
         },
       },
     }),
@@ -264,7 +278,7 @@ export function crearDocumentoOpenApi(catalogos) {
           in: 'header',
           required: false,
           description: 'Perfil de quien consulta. Sin header: publico. Comparar períodos es de analista y admin; administrar, solo admin.',
-          schema: { type: 'string', enum: ['publico', 'analista', 'admin'], default: 'publico' },
+          schema: { type: 'string', enum: PERFILES, default: 'publico' },
         },
         periodo: periodoParam('periodo', 'Período AAAAMMDD. Si se omite, el último cargado (en /calidad y las descargas: todos).'),
         desde: periodoParam('desde', 'Período inicial AAAAMMDD. Por defecto, el anterior a `hasta`.'),
@@ -272,7 +286,7 @@ export function crearDocumentoOpenApi(catalogos) {
         ranking: { name: 'ranking', in: 'query', required: false, schema: { type: 'string', enum: rankings } },
         banco: { name: 'banco', in: 'query', required: false, description: 'Código de banco', schema: { type: 'string', enum: bancos } },
         subactividad: { name: 'subactividad', in: 'query', required: false, schema: { type: 'string', enum: subactividades } },
-        motivo: { name: 'motivo', in: 'query', required: false, schema: { type: 'string', enum: ['E1', 'E2', 'E3', 'E4'] } },
+        motivo: { name: 'motivo', in: 'query', required: false, schema: { type: 'string', enum: Object.keys(MOTIVOS) } },
         soloSignificativos: { name: 'solo_significativos', in: 'query', required: false, schema: { type: 'string', enum: ['true', 'false'] } },
       },
       schemas: {
@@ -293,7 +307,10 @@ export function crearDocumentoOpenApi(catalogos) {
           [400, 'Parámetro inválido (PARAMETRO_INVALIDO)'],
           [403, 'El perfil no tiene esta opción (PERFIL_NO_AUTORIZADO)'],
           [404, 'Período sin datos (PERIODO_SIN_DATOS)'],
+          [413, 'El archivo supera el límite de 50 MB (ARCHIVO_MUY_GRANDE)'],
+          [415, 'Formato no soportado: el cuerpo debe ser texto CSV en UTF-8 (FORMATO_NO_SOPORTADO)'],
           [422, 'Períodos inválidos: desde debe ser anterior a hasta (PERIODOS_INVALIDOS)'],
+          [429, 'Demasiados pedidos a la IA (DEMASIADOS_PEDIDOS); el header Retry-After dice cuántos segundos esperar'],
         ].map(([codigo, descripcion]) => [
           `Error${codigo}`,
           { description: descripcion, content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },

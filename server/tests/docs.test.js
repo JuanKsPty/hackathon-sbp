@@ -7,6 +7,7 @@ import { crearAlmacen } from '../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
 import { paqueteReal } from './ayuda.js';
 
+let app;
 let servidor;
 let base;
 let documento;
@@ -14,7 +15,8 @@ let documento;
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
-  servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } }).listen(0);
+  app = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } });
+  servidor = app.listen(0);
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
   documento = await (await fetch(`${base}/openapi.json`)).json();
@@ -77,4 +79,66 @@ test('Swagger UI se sirve en /api/docs', async () => {
   const html = await respuesta.text();
   assert.match(html, /swagger-ui/);
   assert.match(html, /API rankings de crédito/);
+});
+
+// Recorre las rutas que montó crearApp (Express 5: app.router.stack) y devuelve "método /ruta" sin el /api.
+function rutasMontadas() {
+  const rutas = [];
+  const recorrer = (capas) => {
+    for (const capa of capas) {
+      if (capa.route) {
+        for (const metodo of Object.keys(capa.route.methods)) rutas.push(`${metodo} ${capa.route.path.replace(/^\/api(?=\/)/, '')}`);
+      } else if (capa.handle?.stack) {
+        recorrer(capa.handle.stack);
+      }
+    }
+  };
+  recorrer(app.router.stack);
+  return rutas.sort();
+}
+
+test('#86 (B4): toda ruta montada en la app está en el spec, y el spec no documenta rutas que no existen', () => {
+  // Fuera del spec a propósito: el propio documento, y GET y DELETE de /mcp, que solo responden 405
+  // (se explica en la descripción de POST /mcp).
+  const aProposito = new Set(['get /openapi.json', 'get /mcp', 'delete /mcp']);
+  const montadas = rutasMontadas().filter((r) => !aProposito.has(r));
+  const documentadas = Object.entries(documento.paths)
+    .flatMap(([ruta, operaciones]) => Object.keys(operaciones).map((metodo) => `${metodo} ${ruta}`))
+    .sort();
+  assert.ok(montadas.length >= 25, `solo se encontraron ${montadas.length} rutas montadas`);
+  assert.deepEqual(montadas.filter((r) => !documentadas.includes(r)), [], 'rutas montadas que faltan en el spec');
+  assert.deepEqual(documentadas.filter((r) => !montadas.includes(r)), [], 'rutas del spec que no existen');
+});
+
+test('#86 (B4): GET /indicadores documenta periodo, ranking y el ejemplo de contracts/indicadores.json', async () => {
+  const { get } = documento.paths['/indicadores'];
+  assert.deepEqual(get.parameters.slice(1).map((p) => p.$ref), ['#/components/parameters/periodo', '#/components/parameters/ranking']);
+  const ejemplo = get.responses[200].content['application/json'].example;
+  assert.ok(ejemplo.morosidad && ejemplo.vencimientos && ejemplo.concentracion);
+  assert.ok(get.responses[400] && get.responses[404]);
+  // El ejemplo tiene las mismas claves que la respuesta real.
+  const real = await (await fetch(`${base}/indicadores`)).json();
+  assert.deepEqual(Object.keys(real).sort(), Object.keys(ejemplo).sort());
+});
+
+test('#86 (B4): POST /periodos documenta el 413 ARCHIVO_MUY_GRANDE y responde con ese código', async () => {
+  const { post } = documento.paths['/periodos'];
+  assert.ok(post.responses[413]);
+  assert.match(documento.components.responses.Error413.description, /ARCHIVO_MUY_GRANDE/);
+  // 51 MB de texto: pasa el límite de 50 MB de la carga.
+  const grande = await fetch(`${base}/periodos`, {
+    method: 'POST',
+    headers: { 'X-Perfil': 'admin', 'X-Nombre-Archivo': 'grande.csv', 'content-type': 'text/csv' },
+    body: 'x'.repeat(51 * 1024 * 1024),
+  });
+  assert.equal(grande.status, 413);
+  assert.equal((await grande.json()).error.codigo, 'ARCHIVO_MUY_GRANDE');
+});
+
+test('#86 (C5): los enums de perfiles y motivos salen del código, no de listas escritas a mano', async () => {
+  const { PERFILES } = await import('../src/middleware/perfiles.js');
+  const { MOTIVOS } = await import('../src/engine/cascada.js');
+  assert.deepEqual(documento.components.parameters.perfil.schema.enum, PERFILES);
+  assert.deepEqual(documento.paths['/mcp'].post.parameters[1].schema.enum, PERFILES);
+  assert.deepEqual(documento.components.parameters.motivo.schema.enum, Object.keys(MOTIVOS));
 });
