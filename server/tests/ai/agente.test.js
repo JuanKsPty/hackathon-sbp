@@ -133,6 +133,9 @@ test('si inventa un número, pide corregir; si corrige, responde verificado', as
     responder('En total se excluyeron 123456789 filas.'),
     (params) => {
       assert.match(params.messages.at(-1).content, /123456789/); // se le indica qué número no existe
+      // El usuario no ve el aviso: la respuesta nueva no debe decir "te reescribo" (evaluación del agente).
+      assert.match(params.messages.at(-1).content, /No menciones esta corrección/);
+      assert.match(params.messages.at(-1).content, /separador de miles/);
       const calidad = params.messages
         .flatMap((m) => (Array.isArray(m.content) ? m.content : []))
         .filter((b) => b.type === 'tool_result')
@@ -144,6 +147,15 @@ test('si inventa un número, pide corregir; si corrige, responde verificado', as
   const { cuerpo } = await preguntar(base, { pregunta: '¿Cuántas filas quedaron válidas en septiembre?' });
   assert.equal(cuerpo.verificada, true);
   assert.match(cuerpo.respuesta, /universo local válido/);
+});
+
+test('el prompt pide montos con separador de miles y negarse a recomendar sin repetir "te conviene"', async () => {
+  const cliente = clienteGuionado([responder('No doy recomendaciones de bancos.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: '¿En qué banco me conviene sacar un préstamo?' }, 'publico');
+  const sistema = cliente.llamadas[0].system;
+  assert.match(sistema, /separador de miles/);
+  assert.match(sistema, /no das recomendaciones/);
 });
 
 test('si insiste en números que no están en el motor, no muestra la respuesta', async () => {
