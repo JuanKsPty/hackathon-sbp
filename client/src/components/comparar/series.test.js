@@ -1,7 +1,7 @@
 // Series del gráfico de posiciones y comparación de 2 bancos (#61). Corre con: npm test (en client/).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { armarComparacionBancos, armarSerieDePosiciones, tendenciaDePosiciones } from './series.js'
+import { armarComparacionBancos, armarSerieDePosiciones, elegirParDeBancos, tendenciaDePosiciones } from './series.js'
 
 const banco = (Codigo_Banco, Banco, Posicion, Saldo_Actividad = 100, Ponderacion_Pct = 10) => ({
   Posicion,
@@ -97,4 +97,24 @@ test('armarComparacionBancos: una fila por ranking con los dos bancos en cada pe
 
 test('armarComparacionBancos: sin respuestas no hay filas', () => {
   assert.deepEqual(armarComparacionBancos(null, null, ['101', '102']), [])
+})
+
+test('elegirParDeBancos: sin elección usa los candidatos, sin repetir banco', () => {
+  const validos = ['101', '102', '103']
+  assert.deepEqual(elegirParDeBancos({ candidatos: ['103', '101'], validos }), { a: '103', b: '101' })
+  assert.deepEqual(elegirParDeBancos({ candidatos: ['103', '103', '101'], validos }), { a: '103', b: '101' })
+})
+
+test('elegirParDeBancos: respeta lo elegido y completa lo que falta', () => {
+  const validos = ['101', '102', '103']
+  // el usuario elige B igual al primer candidato: A toma el siguiente
+  assert.deepEqual(elegirParDeBancos({ elegidoB: '103', candidatos: ['103', '101'], validos }), { a: '101', b: '103' })
+  assert.deepEqual(elegirParDeBancos({ elegidoA: '102', candidatos: ['102', '101'], validos }), { a: '102', b: '101' })
+  assert.deepEqual(elegirParDeBancos({ elegidoA: '101', elegidoB: '102', candidatos: ['103'], validos }), { a: '101', b: '102' })
+})
+
+test('elegirParDeBancos: ignora bancos que ya no están en el catálogo y tolera listas cortas', () => {
+  assert.deepEqual(elegirParDeBancos({ elegidoA: '999', candidatos: ['101', '102'], validos: ['101', '102'] }), { a: '101', b: '102' })
+  assert.deepEqual(elegirParDeBancos({ candidatos: ['101'], validos: ['101'] }), { a: '101', b: null })
+  assert.deepEqual(elegirParDeBancos({}), { a: null, b: null })
 })

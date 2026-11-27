@@ -63,3 +63,15 @@ export function armarComparacionBancos(respuestaDesde, respuestaHasta, codigos) 
     }),
   }))
 }
+
+// Par de bancos a comparar. Respeta lo que eligió el usuario mientras exista en el catálogo; lo que
+// falte se completa con los `candidatos` (por ejemplo, los mejor posicionados) sin repetir banco.
+export function elegirParDeBancos({ elegidoA, elegidoB, candidatos = [], validos = [] }) {
+  const existe = (codigo) => Boolean(codigo) && validos.includes(codigo)
+  const opciones = [...new Set(candidatos)].filter(existe)
+  let a = existe(elegidoA) ? elegidoA : null
+  const b0 = existe(elegidoB) ? elegidoB : null
+  a ??= opciones.find((c) => c !== b0) ?? null
+  const b = b0 ?? opciones.find((c) => c !== a) ?? null
+  return { a, b }
+}
