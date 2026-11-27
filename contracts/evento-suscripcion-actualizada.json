@@ -1,0 +1,11 @@
+{
+  "evento": "suscripcion_actualizada",
+  "id_evento": "suscripcion_actualizada-alta-e5f6a7b8",
+  "enviado_en": "2026-11-27T15:20:00-05:00",
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "correo": "equipo@ejemplo.com",
+  "accion": "alta",
+  "bancos": ["104", "111"],
+  "rankings": []
+}
