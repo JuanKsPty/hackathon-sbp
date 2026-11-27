@@ -64,7 +64,7 @@ export function EvolucionPosiciones() {
   let contenido
   if (fechas.length === 0 && !periodo) contenido = <Vacio titulo="No hay períodos cargados" />
   else if (consulta.error) contenido = <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
-  else if (consulta.cargando || !consulta.datos) contenido = <PlaceholderGrafico alto={352} />
+  else if (!consulta.datos) contenido = <PlaceholderGrafico alto={352} />
   else if (!ranking || bancos.length === 0) contenido = <Vacio titulo="Sin posiciones" descripcion="El API no devolvió rankings para estos períodos." />
   else {
     contenido = (

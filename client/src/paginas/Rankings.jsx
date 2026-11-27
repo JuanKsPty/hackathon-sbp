@@ -303,7 +303,9 @@ function Contenedor({ filtros = null, children }) {
 // Carga, error o contenido de una consulta.
 // `alto` (px): si es un gráfico, la carga ocupa ese alto para que no cambie el tamaño.
 function Estado({ consulta, vacio, alto, children }) {
-  if (consulta.cargando) return alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
+  // Al volver a pedir (otro ranking u otro período), lo anterior sigue a la vista hasta que llegan
+  // los datos nuevos: la página no se achica y el scroll no salta.
+  if (consulta.cargando && !consulta.datos) return alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   if (vacio) return <Vacio titulo="Sin datos" descripcion="No hay datos para los filtros elegidos." />
   return children
