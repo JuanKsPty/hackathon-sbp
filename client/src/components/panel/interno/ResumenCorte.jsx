@@ -1,10 +1,11 @@
 import { ArrowRightIcon, CheckCircle2Icon, RadarIcon, TriangleAlertIcon } from 'lucide-react'
+import { BloqueOscuro, Cifra, Etiqueta, TituloDosTonos } from '@/components/marca'
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
-import { BloqueOscuro, Cifra, Etiqueta, TituloDosTonos } from './marca.jsx'
+import { cn } from '@/lib/utils'
 
 // Compara dos cifras del API sin hacer cuentas: solo dice si subió, bajó o quedó igual (R2).
 function tendencia(actual, anterior) {
@@ -14,13 +15,14 @@ function tendencia(actual, anterior) {
   return 'igual'
 }
 
-const FLECHA = { sube: '▲', baja: '▼', igual: '=' }
-
-function variacionFrente(actual, anterior, formatear, fechaAnterior) {
+// Variación para <Cifra>: la tendencia y el valor del corte anterior, tal como lo manda el API.
+function variacionFrente(actual, anterior, formatear) {
   const t = tendencia(actual, anterior)
-  if (!t) return undefined
-  return { tendencia: t, texto: `${FLECHA[t]} antes ${formatear(anterior)}`, titulo: `Al ${formatearPeriodo(fechaAnterior)}` }
+  return t ? { tendencia: t, texto: `antes ${formatear(anterior)}` } : undefined
 }
+
+// El saldo completo (12 cifras) no cabe a 30 px en 360: el valor de la Cifra baja a 24 px hasta sm.
+const claseCifra = 'min-w-0 [&>p:nth-child(2)]:text-2xl [&>p:nth-child(2)]:break-words sm:[&>p:nth-child(2)]:text-3xl'
 
 // Bloque oscuro del panel interno (#140): el período elegido, el corte anterior y las cifras clave
 // con su variación. Las cifras salen de GET /api/periodos, GET /api/movimientos y
@@ -34,7 +36,7 @@ export function ResumenCorte({ nombrePerfil, desde, movimientos, descomposicion 
   else if (error) contenido = <ErrorApi error={error} alReintentar={reintentar} />
   else if (!detallePeriodo)
     contenido = (
-      <div className="rounded-2xl bg-white p-4 text-foreground">
+      <div className="rounded-tarjeta bg-card p-4 text-card-foreground">
         <Vacio imagen="/marca/vacio-periodo.webp" titulo="No hay períodos cargados" descripcion="Cuando el API cargue un archivo AT03 aparecerá aquí su resumen." />
       </div>
     )
@@ -46,72 +48,80 @@ export function ResumenCorte({ nombrePerfil, desde, movimientos, descomposicion 
     const continuidad = descomposicion?.Continuidad
 
     contenido = (
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-6 min-[420px]:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
         <Cifra
+          className={claseCifra}
           etiqueta="Saldo total válido"
           valor={formatearMonto(p.Saldo_Total_Valido)}
-          variacion={anterior ? variacionFrente(p.Saldo_Total_Valido, anterior.Saldo_Total_Valido, formatearMonto, anterior.Fecha) : undefined}
+          variacion={anterior ? variacionFrente(p.Saldo_Total_Valido, anterior.Saldo_Total_Valido, formatearMonto) : undefined}
         />
         <Cifra
+          className={claseCifra}
           etiqueta="Préstamos en el universo válido"
           valor={formatearEntero(p.Universo_Local_Valido)}
-          variacion={anterior ? variacionFrente(p.Universo_Local_Valido, anterior.Universo_Local_Valido, formatearEntero, anterior.Fecha) : undefined}
+          variacion={anterior ? variacionFrente(p.Universo_Local_Valido, anterior.Universo_Local_Valido, formatearEntero) : undefined}
           detalle={
             continuidad
-              ? `${formatearEntero(continuidad.Entran)} entran · ${formatearEntero(continuidad.Salen)} salen · ${formatearEntero(continuidad.Continuan)} continúan`
+              ? `${formatearEntero(continuidad.Entran)} entran · ${formatearEntero(continuidad.Salen)} salen`
               : `${formatearEntero(p.Filas_Leidas)} filas leídas`
           }
         />
         <Cifra
+          className={claseCifra}
           etiqueta="Movimientos significativos"
           valor={movimientos ? formatearEntero(significativos) : '—'}
-          detalle={movimientos ? 'Según la regla vigente del Administrador' : anterior ? 'Cargando…' : 'Sin corte anterior para comparar'}
+          detalle={movimientos ? 'Según la regla vigente' : anterior ? 'Cargando…' : 'Sin corte anterior para comparar'}
         />
         <Cifra
+          className={claseCifra}
           etiqueta="Cambios de líder"
           valor={movimientos ? formatearEntero(cambiosLider.length) : '—'}
-          detalle={cambiosLider.length > 0 ? cambiosLider.map((r) => `${r.Ranking}: ${r.Lider_actual?.Banco ?? 'sin líder'}`).join(' · ') : movimientos ? 'Ningún ranking cambió de líder' : undefined}
+          detalle={
+            cambiosLider.length > 0
+              ? cambiosLider.map((r) => `${r.Ranking}: ${r.Lider_actual?.Banco ?? 'sin líder'}`).join(' · ')
+              : movimientos
+                ? 'Ningún ranking cambió de líder'
+                : undefined
+          }
         />
-      </dl>
+      </div>
     )
   }
 
   const reconciliado = detallePeriodo?.Reconciliaciones_OK
 
   return (
-    <BloqueOscuro className="p-5 sm:p-8">
+    <BloqueOscuro className="animate-aparecer">
       <div data-guia="panel.indicadores" className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Etiqueta icono={RadarIcon} className="bg-emerald-400/15 text-emerald-300">
-              Panel del {nombrePerfil}
-            </Etiqueta>
+            <Etiqueta icono={RadarIcon}>Panel del {nombrePerfil}</Etiqueta>
             {detallePeriodo && typeof reconciliado === 'boolean' && (
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${reconciliado ? 'bg-white/10 text-white/80' : 'bg-rose-400/15 text-rose-300'}`}
+                className={cn(
+                  'inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-xs font-medium',
+                  reconciliado ? 'bg-bloque-foreground/10 text-bloque-foreground' : 'bg-baja-fondo text-baja',
+                )}
               >
-                {reconciliado ? <CheckCircle2Icon className="size-3.5" aria-hidden="true" /> : <TriangleAlertIcon className="size-3.5" aria-hidden="true" />}
+                {reconciliado ? (
+                  <CheckCircle2Icon className="size-3.5 text-brillo" aria-hidden="true" />
+                ) : (
+                  <TriangleAlertIcon className="size-3.5" aria-hidden="true" />
+                )}
                 {reconciliado ? 'Reconciliaciones OK' : 'Hay descuadres'}
               </span>
             )}
           </div>
-          <TituloDosTonos
-            como="h1"
-            fuerte="Qué cambió"
-            suave={detallePeriodo ? `al ${formatearPeriodo(detallePeriodo.Fecha)}` : 'en el período'}
-            className="text-3xl text-white sm:text-5xl [&>span:last-child]:text-white/45"
-          />
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/60">
-            {detallePeriodo && (
-              <>
-                <span>Corte {formatearPeriodo(detallePeriodo.Fecha)}</span>
-                <ArrowRightIcon className="size-3.5" aria-hidden="true" />
-                <span>{anterior ? `frente a ${formatearPeriodo(anterior.Fecha)}` : 'primer corte cargado'}</span>
-                <span aria-hidden="true">·</span>
-                <span className="font-mono text-xs break-all">{detallePeriodo.Archivo}</span>
-              </>
-            )}
-          </p>
+          <TituloDosTonos como="h1" fuerte="Qué cambió" suave={detallePeriodo ? `al ${formatearPeriodo(detallePeriodo.Fecha)}` : 'en el período'} />
+          {detallePeriodo && (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-bloque-muted">
+              <span>Corte {formatearPeriodo(detallePeriodo.Fecha)}</span>
+              <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+              <span>{anterior ? `frente a ${formatearPeriodo(anterior.Fecha)}` : 'primer corte cargado'}</span>
+              <span aria-hidden="true">·</span>
+              <span className="font-mono text-xs break-all">{detallePeriodo.Archivo}</span>
+            </p>
+          )}
         </div>
         {contenido}
       </div>

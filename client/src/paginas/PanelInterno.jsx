@@ -6,7 +6,7 @@ import { EstadoOperacion } from '@/components/panel/interno/EstadoOperacion.jsx'
 import { EvolucionPosiciones } from '@/components/panel/interno/EvolucionPosiciones.jsx'
 import { MovimientosExplicados } from '@/components/panel/interno/MovimientosExplicados.jsx'
 import { ResumenCorte } from '@/components/panel/interno/ResumenCorte.jsx'
-import { SeccionGris, TituloDosTonos } from '@/components/panel/interno/marca.jsx'
+import { SeccionGris, TituloDosTonos } from '@/components/marca'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
@@ -56,7 +56,7 @@ export default function PanelInterno() {
 
       <EvolucionPosiciones />
 
-      <SeccionGris aria-labelledby="titulo-control">
+      <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-control">
         <TituloDosTonos fuerte={<span id="titulo-control">Calidad y siguientes pasos</span>} suave="del corte" />
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <AlertasCalidad consulta={consultaCalidad} />

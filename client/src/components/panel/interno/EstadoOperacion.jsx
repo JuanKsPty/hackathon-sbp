@@ -19,7 +19,8 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Etiqueta, SeccionGris, Tarjeta, TituloDosTonos } from './marca.jsx'
+import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
+import { Tarjeta } from './Tarjeta.jsx'
 
 const ULTIMAS = 5
 
@@ -40,13 +41,13 @@ export function EstadoOperacion() {
   if (!esAdmin) return null
 
   return (
-    <SeccionGris aria-labelledby="titulo-operacion">
+    <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-operacion">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-2">
           <Etiqueta icono={ServerCogIcon}>Administración</Etiqueta>
           <TituloDosTonos fuerte={<span id="titulo-operacion">Estado de la operación</span>} suave="del último corte" />
         </div>
-        <Link to="/admin" className={buttonVariants({ size: 'lg', className: 'w-fit rounded-full' })}>
+        <Link to="/admin" className={buttonVariants({ size: 'pildora', className: 'w-fit' })}>
           <FileUpIcon aria-hidden="true" />
           Cargar período
         </Link>
@@ -106,7 +107,7 @@ function UltimoCorte({ consulta, ultimo }) {
               </dl>
               <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {cascada.map(([nombre, valor]) => (
-                  <div key={nombre} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-muted/60 px-3 py-2 dark:bg-muted/40">
+                  <div key={nombre} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-seccion px-3 py-2">
                     <dt className="text-[11px] text-muted-foreground">{nombre}</dt>
                     <dd className="cifra text-lg font-medium">{formatearEntero(valor)}</dd>
                   </div>
@@ -156,7 +157,7 @@ function ReglaActual({ consulta }) {
           <p className="text-sm text-muted-foreground">Todos los criterios están apagados.</p>
         )}
       </Estado>
-      <Link to="/admin" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit rounded-full' })}>
+      <Link to="/admin" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit' })}>
         Cambiar la regla
         <ArrowRightIcon aria-hidden="true" />
       </Link>
@@ -194,7 +195,7 @@ function UltimasOperaciones({ consulta }) {
           </ul>
         )}
       </Estado>
-      <Link to="/admin" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit rounded-full' })}>
+      <Link to="/admin" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit' })}>
         Ver la bitácora completa
         <ArrowRightIcon aria-hidden="true" />
       </Link>

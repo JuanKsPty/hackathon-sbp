@@ -9,7 +9,8 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Etiqueta, SeccionGris, Tarjeta, TituloDosTonos } from './marca.jsx'
+import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
+import { Tarjeta } from './Tarjeta.jsx'
 
 const MAXIMO = 4
 
@@ -85,7 +86,7 @@ export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consu
               ? `Se muestran ${formatearEntero(MAXIMO)} de ${formatearEntero(lista.length)}, los de mayor cambio de posición.`
               : `${formatearEntero(lista.length)} ${lista.length === 1 ? 'movimiento' : 'movimientos'} en total.`}
           </p>
-          <Link to="/comparar" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'rounded-full' })}>
+          <Link to="/comparar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
             Ver todos en Comparar
             <ArrowRightIcon aria-hidden="true" />
           </Link>
@@ -96,7 +97,7 @@ export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consu
   }
 
   return (
-    <SeccionGris aria-labelledby="titulo-movimientos">
+    <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-movimientos">
       <div className="flex flex-col gap-2">
         <Etiqueta icono={SparklesIcon}>Movimientos</Etiqueta>
         <TituloDosTonos
@@ -112,7 +113,7 @@ export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consu
       </div>
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <Tarjeta data-guia="panel.movimientos">{contenido}</Tarjeta>
-        <ExplicacionesMovimientos guia="panel.explicaciones" className="rounded-2xl border-0 shadow-sm ring-1 ring-border/60" />
+        <ExplicacionesMovimientos guia="panel.explicaciones" />
       </div>
     </SeccionGris>
   )
@@ -158,16 +159,17 @@ function FilaMovimiento({ movimiento: m, piezas, cargandoPiezas }) {
         </span>
       </div>
       {piezas ? (
-        <dl className="grid grid-cols-3 gap-2 rounded-lg bg-muted/60 p-2 dark:bg-muted/40" aria-label="Descomposición del cambio de saldo">
+        // En pantallas angostas, una pieza por fila para que el monto se lea completo.
+        <dl className="grid gap-1.5 rounded-lg bg-seccion p-2 sm:grid-cols-3 sm:gap-2" aria-label="Descomposición del cambio de saldo">
           {PIEZAS.map((p) => {
             const pieza = piezas[p.clave]
             return (
-              <div key={p.clave} className="flex min-w-0 flex-col gap-0.5">
-                <dt className="text-[11px] text-muted-foreground">{p.titulo}</dt>
-                <dd className={cn('cifra truncate text-xs font-medium sm:text-sm', claseSigno(pieza?.Saldo))} title={formatearMonto(pieza?.Saldo)}>
+              <div key={p.clave} className="flex min-w-0 items-baseline gap-2 sm:flex-col sm:items-start sm:gap-0.5">
+                <dt className="min-w-0 flex-1 text-[11px] text-muted-foreground">{p.titulo}</dt>
+                <dd className={cn('cifra text-xs font-medium whitespace-nowrap sm:text-sm', claseSigno(pieza?.Saldo))}>
                   {conSigno(pieza?.Saldo, formatearMonto(pieza?.Saldo))}
                 </dd>
-                <dd className="cifra text-[11px] text-muted-foreground">{formatearEntero(pieza?.Operaciones)} op.</dd>
+                <dd className="cifra shrink-0 text-[11px] text-muted-foreground">{formatearEntero(pieza?.Operaciones)} op.</dd>
               </div>
             )
           })}

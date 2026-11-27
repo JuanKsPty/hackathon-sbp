@@ -13,7 +13,8 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Etiqueta, SeccionGris, Segmentado, Tarjeta, TituloDosTonos } from './marca.jsx'
+import { Etiqueta, SeccionGris, Segmentado, TituloDosTonos } from '@/components/marca'
+import { Tarjeta } from './Tarjeta.jsx'
 
 // Eje en millones: 87562053.92 -> "87.6 M".
 const compacto = new Intl.NumberFormat('es-PA', { notation: 'compact', maximumFractionDigits: 1 })
@@ -103,13 +104,13 @@ export function EvolucionPosiciones() {
   }
 
   return (
-    <SeccionGris aria-labelledby="titulo-evolucion">
+    <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-evolucion">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-2">
           <Etiqueta icono={ChartAreaIcon}>Analytics</Etiqueta>
           <TituloDosTonos fuerte={<span id="titulo-evolucion">Evolución de posiciones</span>} suave="por ranking" />
         </div>
-        <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit rounded-full' })}>
+        <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit' })}>
           Ver rankings
           <ArrowRightIcon aria-hidden="true" />
         </Link>

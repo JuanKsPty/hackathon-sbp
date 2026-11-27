@@ -6,7 +6,7 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Tarjeta } from './marca.jsx'
+import { Tarjeta } from './Tarjeta.jsx'
 
 // Tipos de alerta del reporte de calidad (los mismos de components/calidad/AlertasPorTipo.jsx).
 // Una alerta no excluye la fila del cálculo.
@@ -79,7 +79,7 @@ export function AlertasCalidad({ consulta }) {
         </div>
       </div>
       {contenido}
-      <Link to="/calidad" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit rounded-full' })}>
+      <Link to="/calidad" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit' })}>
         Ver calidad de los datos
         <ArrowRightIcon aria-hidden="true" />
       </Link>
