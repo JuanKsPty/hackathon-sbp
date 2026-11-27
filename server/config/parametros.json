@@ -1,0 +1,7 @@
+{
+  "movimientos": {
+    "min_cambio_posicion_abs": 2,
+    "cambio_lider": true,
+    "min_var_saldo_pct_abs": 10
+  }
+}
