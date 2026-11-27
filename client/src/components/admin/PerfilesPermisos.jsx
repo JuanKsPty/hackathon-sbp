@@ -33,9 +33,9 @@ function alternar(perfiles, perfil, marcado) {
 const iguales = (a, b) => a.length === b.length && a.every((x, i) => x === b[i])
 
 // Perfiles y permisos (lámina 6, Administrador): qué perfil puede usar cada opción.
-// GET/PUT/DELETE /api/admin/permisos. Al guardar, el menú se vuelve a pedir (GET /api/perfil).
+// GET/PUT/DELETE /api/admin/permisos.
 export function PerfilesPermisos({ alCambiar }) {
-  const { perfil, perfiles, recargar } = usePerfil()
+  const { perfil, perfiles } = usePerfil()
   const consulta = useConsulta((opciones) => leerPermisos(perfil, opciones), [perfil])
   const [guardado, setGuardado] = useState(null)
   const [editado, setEditado] = useState(null)
@@ -53,8 +53,9 @@ export function PerfilesPermisos({ alCambiar }) {
       const respuesta = await accion()
       setGuardado(respuesta)
       setEditado(null)
+      // No hace falta volver a pedir GET /api/perfil: el Administrador siempre tiene todas las opciones,
+      // así que su menú no cambia. Los demás ven el cambio en su próxima carga.
       setAviso({ tipo: 'ok', texto: textoOk })
-      recargar() // el menú y las opciones de la sesión salen de GET /api/perfil
     } catch (error) {
       setAviso({ tipo: 'error', texto: error.mensaje ?? error.message, codigo: error.codigo })
     } finally {
