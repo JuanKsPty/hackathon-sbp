@@ -8,13 +8,16 @@ import { rutasDePerfil } from './routes/perfil.js';
 import { rutasDeBitacora } from './routes/bitacora.js';
 import { rutasDeAdministracion } from './routes/administracion.js';
 import { rutasDeCarga } from './routes/carga.js';
+import { rutasDeIA } from './routes/ia.js';
+import { rutasDeDocumentacion } from './routes/docs.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
 
 // obtenerMovimientos (opcional): cálculo de /api/movimientos (#32, crearObtenerMovimientos en
 // routes/movimientos.js). Si se pasa, monta GET /api/movimientos y la exportación del entregable 5,
 // y la carga de un período (#29) responde también los cambios de ranking.
-export function crearApp({ almacen, obtenerMovimientos }) {
+// opcionesIA (opcional, para tests): { cliente, apiKey, modelo }; por defecto se leen del .env.
+export function crearApp({ almacen, obtenerMovimientos, opcionesIA }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
@@ -22,7 +25,8 @@ export function crearApp({ almacen, obtenerMovimientos }) {
   app.use('/api', leerPerfil);
   // Comparar períodos es de Analista y Administrador (sección 10): /api/movimientos (y lo que
   // cuelgue de ahí, como /api/movimientos/descomposicion) y su descarga, el entregable 5.
-  app.use(['/api/movimientos', '/api/exportar/movimientos.csv'], requiereOpcion('comparar_periodos'));
+  // La explicación de movimientos (/api/explicaciones, #2) sigue la misma regla.
+  app.use(['/api/movimientos', '/api/exportar/movimientos.csv', '/api/explicaciones'], requiereOpcion('comparar_periodos'));
 
   app.get('/api/salud', (req, res) => res.json({ ok: true, periodos: almacen.fechas() }));
   app.use('/api', rutasDePerfil());
@@ -35,6 +39,8 @@ export function crearApp({ almacen, obtenerMovimientos }) {
   // Queda bajo /api/movimientos, así que la restricción de arriba (comparar_periodos) también la cubre.
   app.use('/api', rutasDeDescomposicion(crearObtenerDescomposicion(almacen)));
   app.use('/api', rutasDeCarga(almacen, { obtenerMovimientos })); // POST /api/periodos, solo admin (#29)
+  app.use('/api', rutasDeIA({ obtenerMovimientos, opcionesIA }));
+  app.use('/api', rutasDeDocumentacion(almacen));
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.
 
   app.use(rutaNoEncontrada);

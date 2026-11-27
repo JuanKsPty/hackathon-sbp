@@ -8,13 +8,17 @@
     "start": "node src/servidor.js",
     "dev": "node --watch src/servidor.js",
     "test": "node --test \"tests/**/*.test.js\"",
-    "procesar": "node scripts/procesar.js"
+    "procesar": "node scripts/procesar.js",
+    "mcp": "node src/mcp/index.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "csv-parse": "^7.0.3",
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "swagger-ui-express": "^5.0.1"
   }
 }
