@@ -1,15 +1,10 @@
 // Orden de las láminas de /presentacion. `titulo` va al lector de pantalla y al título de la pestaña.
-// La historia: problema, propuesta, Público, lo que nos diferencia, confianza, QR y cierre.
-// Después del cierre, el anexo técnico, solo para las preguntas del jurado.
+// La historia: problema, propuesta, Público, lo que nos diferencia y cierre. Después, la
+// arquitectura y, al final, el QR al sitio público para que el jurado lo pruebe.
 import {
-  Anexo,
   Arquitectura,
-  Cascada,
   Cierre,
-  Confianza,
-  Decisiones,
   Diferencia,
-  Flujo,
   Portada,
   Problema,
   Propuesta,
@@ -23,12 +18,7 @@ export const LAMINAS = [
   { id: 'propuesta', titulo: 'La propuesta', Componente: Propuesta },
   { id: 'publico', titulo: 'Público', Componente: RolPublico },
   { id: 'diferencia', titulo: 'Lo que nos diferencia', Componente: Diferencia },
-  { id: 'confianza', titulo: 'Por qué confiar en los números', Componente: Confianza },
-  { id: 'qr', titulo: 'Pruébalo: código QR al sitio público', Componente: Qr },
   { id: 'cierre', titulo: 'Cierre', Componente: Cierre },
-  { id: 'anexo', titulo: 'Anexo técnico', Componente: Anexo },
-  { id: 'flujo', titulo: 'Anexo: del archivo al ranking', Componente: Flujo },
-  { id: 'cascada', titulo: 'Anexo: cascada E1 a E4', Componente: Cascada },
-  { id: 'arquitectura', titulo: 'Anexo: arquitectura', Componente: Arquitectura },
-  { id: 'decisiones', titulo: 'Anexo: decisiones técnicas', Componente: Decisiones },
+  { id: 'arquitectura', titulo: 'Arquitectura', Componente: Arquitectura },
+  { id: 'qr', titulo: 'Pruébalo: código QR al sitio público', Componente: Qr },
 ]
