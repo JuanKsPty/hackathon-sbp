@@ -95,18 +95,38 @@ test('datos reales: las tres piezas suman Var_Saldo de /api/movimientos al centa
 
 let servidor;
 let base;
+let storagePrueba;
 before(async () => {
+  // Los accesos rechazados quedan en la bitácora: que se escriban en una carpeta temporal.
+  storagePrueba = fs.mkdtempSync(path.join(os.tmpdir(), 'sbp-storage-'));
+  process.env.STORAGE_DIR = storagePrueba;
   const { catalogos, periodos } = paqueteReal();
   servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0);
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
 });
-after(() => servidor.close());
+after(() => {
+  servidor.close();
+  delete process.env.STORAGE_DIR;
+  fs.rmSync(storagePrueba, { recursive: true, force: true });
+});
 
-async function pedir(ruta) {
-  const respuesta = await fetch(base + ruta);
+// Comparar períodos es de Analista y Administrador: por defecto se pide como analista.
+async function pedir(ruta, perfil = 'analista') {
+  const headers = perfil ? { 'X-Perfil': perfil } : {};
+  const respuesta = await fetch(base + ruta, { headers });
   return { status: respuesta.status, cuerpo: await respuesta.json() };
 }
+
+test('acceso por perfil: público recibe 403; analista y administrador, 200', async () => {
+  const publico = await pedir('/movimientos/descomposicion', null);
+  assert.equal(publico.status, 403);
+  assert.equal(publico.cuerpo.error.codigo, 'PERFIL_NO_AUTORIZADO');
+  assert.equal((await pedir('/movimientos/descomposicion', 'publico')).status, 403);
+  assert.equal((await pedir('/movimientos/descomposicion?ranking=COMERCIO&banco=108&evidencia=true', 'publico')).status, 403);
+  assert.equal((await pedir('/movimientos/descomposicion', 'analista')).status, 200);
+  assert.equal((await pedir('/movimientos/descomposicion', 'admin')).status, 200);
+});
 
 test('GET /api/movimientos/descomposicion sin parámetros: último período contra el anterior', async () => {
   const { status, cuerpo } = await pedir('/movimientos/descomposicion');

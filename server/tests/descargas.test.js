@@ -23,6 +23,9 @@ const MOVIMIENTOS_EJEMPLO = {
   ],
 };
 
+// El entregable 5 compara períodos: es de Analista y Administrador (sección 10).
+const COMO_ANALISTA = { 'X-Perfil': 'analista' };
+
 let servidor;
 let base;
 
@@ -71,7 +74,7 @@ test('parámetros inválidos responden JSON con el formato común', async () => 
 });
 
 test('movimientos.csv (entregable 5) aplana la respuesta de /api/movimientos', async () => {
-  const respuesta = await fetch(`${base}/exportar/movimientos.csv?desde=20260831&hasta=20260930`);
+  const respuesta = await fetch(`${base}/exportar/movimientos.csv?desde=20260831&hasta=20260930`, { headers: COMO_ANALISTA });
   assert.equal(respuesta.status, 200);
   assert.match(respuesta.headers.get('content-disposition'), /movimientos_20260831_20260930\.csv/);
   const texto = await respuesta.text();
@@ -89,7 +92,9 @@ test('sin el cálculo de movimientos conectado, movimientos.csv responde 501', a
   const sinMovimientos = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, paqueteReal().periodos) }).listen(0);
   await once(sinMovimientos, 'listening');
   try {
-    const respuesta = await fetch(`http://127.0.0.1:${sinMovimientos.address().port}/api/exportar/movimientos.csv`);
+    const respuesta = await fetch(`http://127.0.0.1:${sinMovimientos.address().port}/api/exportar/movimientos.csv`, {
+      headers: COMO_ANALISTA,
+    });
     assert.equal(respuesta.status, 501);
     assert.equal((await respuesta.json()).error.codigo, 'NO_DISPONIBLE');
   } finally {

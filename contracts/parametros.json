@@ -1,0 +1,5 @@
+{
+  "regla_significativo": { "min_cambio_posicion_abs": 3, "cambio_lider": true, "min_var_saldo_pct_abs": 15 },
+  "origen": "administrador",
+  "por_defecto": { "min_cambio_posicion_abs": 2, "cambio_lider": true, "min_var_saldo_pct_abs": 10 }
+}
