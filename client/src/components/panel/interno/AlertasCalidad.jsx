@@ -24,7 +24,7 @@ export function AlertasCalidad({ consulta }) {
 
   let contenido
   if (consulta.error) contenido = <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
-  else if (consulta.cargando || !consulta.datos) contenido = <Cargando filas={3} />
+  else if (!consulta.datos) contenido = <Cargando filas={3} />
   else if (!calidad) contenido = <Vacio titulo="Sin reporte de calidad" />
   else {
     const total = calidad.Alertas_Total ?? 0

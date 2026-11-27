@@ -27,7 +27,7 @@ export function FilasExcluidas({ periodo }) {
   const nombreBanco = (codigo) => bancos.find((b) => b.Codigo_Banco === codigo)?.Banco ?? `Banco ${codigo}`
 
   let contenido
-  if (consulta.cargando) contenido = <Cargando filas={5} />
+  if (consulta.cargando && !consulta.datos) contenido = <Cargando filas={5} />
   else if (consulta.error) contenido = <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   else if (consulta.datos.excluidas.length === 0)
     contenido = <Vacio titulo="Sin filas excluidas" descripcion="Ninguna fila del período cumple el filtro elegido." />

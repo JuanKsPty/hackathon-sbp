@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 export function MarcoGrafico({ titulo, descripcion, accion, consulta, vacio, mensajeVacio, alto, children, className, ...props }) {
   let cuerpo = children
   if (consulta?.error) cuerpo = <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
-  else if (consulta && (consulta.cargando || !consulta.datos)) cuerpo = alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
+  else if (consulta && !consulta.datos) cuerpo = alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
   else if (vacio) cuerpo = <Vacio titulo="Sin datos para graficar" descripcion={mensajeVacio} />
 
   return (

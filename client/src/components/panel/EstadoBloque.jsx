@@ -24,7 +24,8 @@ export function EstadoBloque({ consulta, filas = 3, alto, vacio = false, tituloV
     )
   }
   // Entre elegir el período y que arranque la consulta hay un instante sin datos ni error: sigue siendo carga.
-  if (consulta.cargando || (!consulta.datos && !consulta.error)) return carga
+  // Al volver a pedir, lo anterior sigue a la vista: la página no se achica ni salta el scroll.
+  if (!consulta.datos && !consulta.error) return carga
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   if (vacio) return <Vacio titulo={tituloVacio} descripcion={mensajeVacio} />
   return children

@@ -186,9 +186,9 @@ function Seccion({ titulo, descripcion, consulta, ruta, alto, children }) {
         <h3 className="text-sm font-semibold">{titulo}</h3>
         {descripcion && <p className="text-xs text-muted-foreground">{descripcion}</p>}
       </div>
-      {consulta.cargando && (alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />)}
+      {consulta.cargando && !consulta.datos && (alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />)}
       {!consulta.cargando && consulta.error && <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />}
-      {!consulta.cargando && !consulta.error && consulta.datos && children}
+      {!consulta.error && consulta.datos && children}
       <p className="font-mono text-[11px] break-all text-muted-foreground">Datos: GET /api{ruta}</p>
     </section>
   )

@@ -68,7 +68,7 @@ export function EstadoOperacion() {
 
 function Estado({ consulta, filas = 3, children }) {
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
-  if (consulta.cargando || !consulta.datos) return <Cargando filas={filas} />
+  if (!consulta.datos) return <Cargando filas={filas} />
   return children
 }
 

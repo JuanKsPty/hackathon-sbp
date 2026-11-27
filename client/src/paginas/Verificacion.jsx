@@ -59,9 +59,9 @@ export default function Verificacion() {
         banco={banco}
         alCambiarBanco={setBanco}
       />
-      {consulta.cargando && <Cargando filas={6} />}
+      {consulta.cargando && !consulta.datos && <Cargando filas={6} />}
       {!consulta.cargando && consulta.error && <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />}
-      {!consulta.cargando && consulta.datos && <Puntos datos={consulta.datos} />}
+      {consulta.datos && <Puntos datos={consulta.datos} />}
     </Contenedor>
   )
 }
