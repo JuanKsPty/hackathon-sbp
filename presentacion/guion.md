@@ -23,7 +23,7 @@ Quien maneja el teclado en **toda** la demo es Juan (un solo computador, sin cam
 | 4:00–5:00 | 5. Rankings | Agustín (módulo) y Jesús (SB21) | Período, pestañas de ranking, filtros, gráfico, tabla ordenable y desglose con Tarjeta |
 | 5:00–5:45 | 6. Calidad | Jesús | E1–E4 de los 3 períodos y reconciliaciones |
 | 5:45–7:00 | 7. Comparar y regla | Agustín (módulo) y Jesús (regla) | Movimientos, evolución, descomposición y 2 bancos |
-| 7:00–7:50 | 8. Verificación del jurado | Jesús | Los 6 puntos de la sección 11.1 con sus chequeos |
+| 7:00–7:50 | 8. Autoverificación | Jesús | La lista de la sección 12 en verde en la terminal y dónde está cada punto de la sección 11.1 |
 | 7:50–9:00 | 9. Asistente IA y cursor guía | Agustín | Respuesta corta, botones y el cursor haciendo clic en la pantalla |
 | 9:00–9:40 | 10. Reportes | Jesús | Descargas de los entregables 2 a 5 y los correos |
 | 9:40–10:00 | 11. Cierre | Juan | URL pública, MCP y Swagger |
@@ -58,7 +58,7 @@ Reparto por tema (R6: **todos** deben poder explicar el código, no solo su part
    - `curl http://localhost:3001/api/periodos` devuelve 2 períodos;
    - `http://localhost:5174/entrar` abre el inicio de sesión ("Sitio interno para Analistas y Administradores. Datos ficticios.") y entran las dos cuentas: al pie del menú lateral se ve el usuario y su perfil (por ejemplo, "admin" y "Perfil Administrador");
    - si hay llave, `curl http://localhost:3001/api/ia/estado` dice `ia_disponible: true`.
-   - **Dos cosas normales con solo 2 períodos y sin Zapier:** en Verificación del jurado el punto 6 dice "no cumple" (pide los 3 períodos; pasa a "cumple" al cargar septiembre en el bloque 3), y en el registro de operaciones, después de cargar, aparece arriba una fila roja "Aviso por correo (Zapier)" con "PENDIENTE (ZAPIER_WEBHOOK_URL no está configurada)": es el aviso sin configurar, la carga queda en "Éxito".
+   - **Una cosa normal sin Zapier:** en el registro de operaciones, después de cargar, aparece arriba una fila roja "Aviso por correo (Zapier)" con "PENDIENTE (ZAPIER_WEBHOOK_URL no está configurada)": es el aviso sin configurar, la carga queda en "Éxito".
 4. Preparar el respaldo en CSV (plan B) fuera del repo:
 
    ```bash
@@ -93,7 +93,7 @@ El sitio público trae su propia presentación en `http://localhost:5173/present
 
 ### 2. Perfiles (0:40–1:40) · Agustín y Jesús
 
-1. **Agustín.** En el sitio público (5173), clic en **"Ver los datos"** y señala el menú lateral: **Panel, Rankings y Reportes**. **No aparecen** "Comparar períodos", "Administración", "Calidad de datos" ni "Verificación del jurado": esas páginas son del sitio interno. Abajo a la derecha está el botón flotante del asistente. Al pie del menú dice "Consulta pública · Abierta, sin cuenta": no hay inicio de sesión, el público siempre es Público.
+1. **Agustín.** En el sitio público (5173), clic en **"Ver los datos"** y señala el menú lateral: **Panel, Rankings y Reportes**. **No aparecen** "Comparar períodos", "Administración" ni "Calidad de datos": esas páginas son del sitio interno. Abajo a la derecha está el botón flotante del asistente. Al pie del menú dice "Consulta pública · Abierta, sin cuenta": no hay inicio de sesión, el público siempre es Público.
 2. Escribe `localhost:5173/admin` en la barra de direcciones. Cae en **"Página no encontrada"** (Error 404): el sitio público no tiene esa ruta. "El sitio interno, en cambio, pide iniciar sesión."
 3. **Jesús.** "La pantalla es una comodidad. Lo que protege es el servidor." En una terminal (ya abierta, lista para pegar):
 
@@ -136,7 +136,7 @@ Es el **entregable 7**: procesar un período nuevo sin tocar código. **Solo en 
 
 ### 5. Rankings (4:00–5:00) · Agustín y Jesús
 
-Sigue en la pestaña 2 (5174). Rankings es igual en los dos sitios; Calidad y Verificación son solo del sitio interno (en el público dan 404).
+Sigue en la pestaña 2 (5174). Rankings es igual en los dos sitios; Calidad es solo del sitio interno (en el público da 404).
 
 1. Menú → **Rankings**. Arriba de la página, junto al título, están el **período** y los filtros de banco y subactividad. En la tarjeta **"Ranking"**, elige la pestaña **CONSUMO** (las pestañas van en la misma línea del título).
 2. **Filtros:** en el filtro de banco (arriba, junto al período) elige uno. Después clic en otra barra del gráfico **"Saldos por banco"** (un clic en una barra filtra ese banco; otro clic lo quita). El gráfico alterna entre "Saldo de la actividad" y "Ponderación". La dirección de la página guarda la vista (#129): el período, el ranking y los filtros van en la URL, así que se puede copiar y compartir.
@@ -166,19 +166,39 @@ Sigue en la pestaña 2 (5174). Rankings es igual en los dos sitios; Calidad y Ve
    - regresa a Administración y clic en **"Restablecer"**.
 - **Si falta tiempo:** omitir el paso 3 y mostrar la tarjeta sin cambiarla.
 
-### 8. Verificación del jurado (7:00–7:50) · Jesús
+### 8. Autoverificación (7:00–7:50) · Jesús
 
-- **Dónde:** en la pestaña 2 (5174), con la sesión de Administrador (o de Analista). Es solo del sitio interno: en el público, `/verificacion` da 404, así que el jurado ve los 6 puntos en el interno.
-- **Clic:** menú → **Verificación del jurado** (o `/verificacion` en la barra de direcciones). Arriba dice "Todos los chequeos cumplen · 6 de 6 puntos" cuando están los 3 períodos (con 2, el punto 6 no cumple).
-- **Mostrar los 6 puntos de la sección 11.1**, cada uno con su chequeo (✓):
-  1. **Calidad:** E1–E4 y universo válido por período.
-  2. **Rankings obligatorios:** HIPOTECARIO, CONSTRUCCION, INDUSTRIA y AGROPECUARIO, con posición y saldo.
-  3. **COMERCIO y CONSUMO.**
-  4. **Ponderación:** total de cartera y ponderación por banco, con el mismo denominador en los 6 rankings.
-  5. **Subactividades:** CONSUMO con Crédito personal, Automóvil y Tarjeta, y cuántas operaciones movió la regla SB21.
-  6. **Los 3 períodos** con las reconciliaciones R1 y R2 cuadradas.
-- **Banco:** elige el banco que el jurado pida (conserva su posición real) y vuelve a mostrar el punto 4.
-- **Decir:** "El jurado va a pedir un dato de cada punto y, si no lo mostramos, cuenta como incorrecto. Aquí están los seis en una pantalla, y los chequeos usan siempre los 12 bancos."
+La página "Verificación del jurado" ya no existe (#205). Este bloque muestra la lista de la sección 12 como pruebas automáticas y deja a mano dónde está cada punto de la sección 11.1 en la app.
+
+1. **Clic:** pasa a la terminal (ya abierta en la raíz del repo, lista para pegar) y corre:
+
+   ```bash
+   cd server && node --test tests/autoverificacion.test.js
+   ```
+
+   Tarda unos segundos, porque procesa los 3 períodos de `data/`.
+2. **Debe verse:** "Sección 12: lista de autoverificación" con sus 8 casillas en verde (✔):
+   - 61 columnas y los ceros conservados;
+   - la cascada cuadrada y ningún `Numero_Prestamo` repetido;
+   - 12 bancos con posiciones de 1 a 12;
+   - las reconciliaciones al centavo;
+   - el total de CONSUMO igual con y sin SB21 y el mismo denominador en los 6 rankings;
+   - un corte nuevo procesado sin cambiar el código.
+3. **Decir:** "Esta es la lista de autoverificación de la sección 12, hecha pruebas automáticas, que corren en cada PR en GitHub Actions. Y si nos piden un dato de cada punto de la sección 11.1, lo mostramos en la app."
+4. **Dónde está cada punto de la sección 11.1**, en la pestaña 2 (5174). Es para responder en vivo; no se recorre en la demo:
+
+   | Punto | Dónde mostrarlo |
+   | :--- | :--- |
+   | 1. Calidad: E1–E4 y universo local válido | **Calidad de datos** → "Cascada de exclusiones por período" |
+   | 2. Rankings obligatorios: posiciones y saldos | **Rankings** → pestañas HIPOTECARIO, CONSTRUCCION, INDUSTRIA y AGROPECUARIO → tabla "Posición de los bancos" |
+   | 3. COMERCIO y CONSUMO | **Rankings** → pestañas COMERCIO y CONSUMO |
+   | 4. Total de cartera y ponderación | **Rankings** → tabla "Posición de los bancos", columnas "Total cartera válida" y "Ponderación" (o el gráfico en "Ponderación") |
+   | 5. Desglose por subactividad con la regla SB21 | **Rankings** → CONSUMO → "Desglose por subactividad", con el aviso de la reclasificación a Tarjeta |
+   | 6. Los 3 períodos y las reconciliaciones 1 y 2 | El selector "Período de los datos" (3 meses) y **Calidad de datos** → "Reconciliaciones" |
+
+   - **Banco:** si el jurado pide un banco, elígelo en el filtro de banco de Rankings y lee su fila.
+   - **Respaldo:** **Reportes** → CSV de los entregables 2, 3 y 4.
+- **Si falla la terminal:** decirlo y pasar directo a la tabla, con las páginas de la app.
 
 ### 9. Asistente IA y cursor guía (7:50–9:00) · Agustín
 
