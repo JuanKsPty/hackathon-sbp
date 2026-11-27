@@ -17,6 +17,10 @@ export const COLUMNAS = {
   ],
   excluidas: ['Fecha', 'Fila_Archivo', 'Numero_Prestamo', 'Codigo_Banco', 'Motivo', 'Detalle'],
   alertas: ['Fecha', 'Fila_Archivo', 'Numero_Prestamo', 'Tipo', 'Detalle'],
+  movimientos: [
+    'Periodo_Anterior', 'Periodo_Actual', 'Ranking', 'Codigo_Banco', 'Banco', 'Posicion_anterior', 'Posicion_actual',
+    'Cambio_Posicion', 'Saldo_anterior', 'Saldo_actual', 'Var_Saldo', 'Var_Saldo_Pct', 'Significativo', 'Motivos',
+  ],
 };
 
 // Entregable 2: rankings por período.
@@ -76,6 +80,26 @@ export function csvAlertas(periodos) {
     for (const a of p.alertas) filas.push([p.fecha, a.fila, a.numeroPrestamo ?? '', a.tipo, a.detalle]);
   }
   return aCsv(COLUMNAS.alertas, filas);
+}
+
+// Entregable 5: movimientos de posición entre dos períodos (sección 8).
+// Recibe la respuesta de /api/movimientos (formato de contracts/movimientos.json, issue #1),
+// que ya trae los montos como número; aquí solo se aplanan a una fila por banco y ranking.
+export function csvMovimientos(respuesta) {
+  const decimales = (valor, n) => (valor === null || valor === undefined ? '' : Number(valor).toFixed(n));
+  const filas = [];
+  for (const r of respuesta.rankings) {
+    for (const m of r.movimientos) {
+      filas.push([
+        respuesta.periodo_anterior, respuesta.periodo_actual, r.Ranking, m.Codigo_Banco, m.Banco,
+        m.Posicion_anterior, m.Posicion_actual, m.Cambio_Posicion,
+        decimales(m.Saldo_anterior, 2), decimales(m.Saldo_actual, 2), decimales(m.Var_Saldo, 2),
+        decimales(m.Var_Saldo_Pct, 4), // vacío si Saldo_anterior = 0
+        m.Significativo ? 'SI' : 'NO', (m.Motivos ?? []).join(' | '),
+      ]);
+    }
+  }
+  return aCsv(COLUMNAS.movimientos, filas);
 }
 
 function aCsv(columnas, filas) {
