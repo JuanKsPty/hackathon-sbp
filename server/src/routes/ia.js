@@ -116,8 +116,13 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
       });
       // Si la IA respondió con una guía (#72), la pregunta era de cómo usar la app: sin gráficos.
       const accion = resultado.accion ?? (resultado.guia ? null : porReglas());
-      // #121: si la IA no dejó la pantalla lista (o no hay IA), las reglas lo intentan.
-      const pantalla = resultado.pantalla ?? (resultado.guia ? null : pantallaReglas());
+      // #121: la pantalla de la IA si llega hasta el resultado (resalta algo); si quedó a medias o no
+      // hay, las reglas (salen de las mismas filas del motor y siempre resaltan la fila).
+      const deIA = resultado.pantalla;
+      const completa = deIA?.acciones.some((a) => a.tipo === 'resaltar' || a.tipo === 'señalar');
+      let pantalla = null;
+      if (completa) pantalla = deIA;
+      else if (!resultado.guia || deIA) pantalla = pantallaReglas() ?? deIA ?? null;
       res.json({ ...encabezado(), pregunta, ...resultado, accion, pantalla });
     } catch (error) {
       console.error('[ia] el agente falló:', error.message);
