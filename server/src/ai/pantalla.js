@@ -111,5 +111,12 @@ export function validarAccion(accion, { contexto, perfil = 'publico' }) {
     if (!['asc', 'desc'].includes(orden)) return { ok: false, error: `${control}: el orden debe ser "asc" o "desc".` };
     return { ok: true, accion: { tipo, control, ruta, columna: accion.columna, orden, texto } };
   }
+
+  if (tipo === 'resaltar') {
+    // Se resalta una fila concreta: "todos" no aplica.
+    const error = accion.fila === SIN_FILTRO.banco ? 'hay que indicar un banco, no "todos".' : errorDeValor(admite.resaltar, accion.fila, contexto);
+    if (error) return { ok: false, error: `${control}: ${error}` };
+    return { ok: true, accion: { tipo, control, ruta, fila: accion.fila.trim(), texto } };
+  }
   return { ok: false, error: `acción "${tipo}" todavía no soportada.` };
 }

@@ -81,3 +81,13 @@ test('ordenar: columna del control y orden asc/desc (desc por defecto)', () => {
   assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Banco', orden: 'random' }, { contexto: c }).error, /asc.*desc/);
   assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.selector-ranking', columna: 'Banco' }, { contexto: c }).error, /no admite "ordenar"/);
 });
+
+test('resaltar: fila de un banco del catálogo', () => {
+  const c = contexto();
+  assert.deepEqual(validarAccion({ tipo: 'resaltar', control: 'rankings.tabla', fila: '104', texto: 'Este es Banco Pacifico.' }, { contexto: c }), {
+    ok: true, accion: { tipo: 'resaltar', control: 'rankings.tabla', ruta: '/rankings', fila: '104', texto: 'Este es Banco Pacifico.' },
+  });
+  assert.match(validarAccion({ tipo: 'resaltar', control: 'rankings.tabla', fila: '999' }, { contexto: c }).error, /no existe/);
+  assert.match(validarAccion({ tipo: 'resaltar', control: 'rankings.tabla', fila: 'todos' }, { contexto: c }).error, /no "todos"/);
+  assert.match(validarAccion({ tipo: 'resaltar', control: 'rankings.filtro-banco', fila: '104' }, { contexto: c }).error, /no admite "resaltar"/);
+});
