@@ -1,7 +1,7 @@
 import { CasosDeUso } from '@/components/inicio/CasosDeUso.jsx'
 import { PortadaPublica } from '@/components/inicio/PortadaPublica.jsx'
 import { EncabezadoCorte } from '@/components/landing/EncabezadoCorte.jsx'
-import { CalidadCorte, ComposicionCartera, Concentracion, Morosidad } from '@/components/landing/GraficasDelCorte.jsx'
+import { ComposicionCartera, Concentracion, Morosidad } from '@/components/landing/GraficasDelCorte.jsx'
 import { GraficoPrincipal } from '@/components/landing/GraficoPrincipal.jsx'
 import { LideresDelCorte } from '@/components/landing/LideresDelCorte.jsx'
 import { useDatosLanding } from '@/components/landing/useDatosLanding.js'
@@ -26,10 +26,8 @@ export default function Inicio() {
         <EncabezadoCorte datos={datos} />
         <SeccionGris className="flex min-w-0 flex-col gap-4">
           <GraficoPrincipal datos={datos} />
-          <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-            <ComposicionCartera indicadores={datos.indicadores} />
-            <CalidadCorte calidad={datos.calidad} />
-          </div>
+          {/* Sin el bloque "Calidad del corte": la calidad de datos no se muestra en el sitio público. */}
+          <ComposicionCartera indicadores={datos.indicadores} />
           {/* Análisis adicional (concentración y morosidad), fuera de los 6 rankings oficiales. */}
           <div data-guia="panel.indicadores-adicionales" className="grid min-w-0 gap-4 lg:grid-cols-2">
             <Concentracion indicadores={datos.indicadores} />

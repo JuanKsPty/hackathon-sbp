@@ -77,7 +77,15 @@ export const ELEMENTOS_GUIA = [
 
 const POR_GUIA = new Map(ELEMENTOS_GUIA.map((e) => [e.guia, e]));
 
+// Público solo usa el sitio público (sbp.juank.tech), que no tiene Calidad de datos ni Verificación
+// del jurado: la guía no puede señalar ni llevar a esas páginas con ese perfil.
+const RUTAS_SOLO_INTERNAS = ['/calidad', '/verificacion'];
+const MENU_SOLO_INTERNO = ['global.menu-calidad', 'global.menu-verificacion'];
+
 function puedeVer(elemento, perfil) {
+  if (perfil === 'publico' && (RUTAS_SOLO_INTERNAS.includes(elemento.ruta) || MENU_SOLO_INTERNO.includes(elemento.guia))) {
+    return false;
+  }
   if (!elemento.opcion) return true;
   return OPCIONES.find((o) => o.opcion === elemento.opcion)?.perfiles.includes(perfil) ?? false;
 }
