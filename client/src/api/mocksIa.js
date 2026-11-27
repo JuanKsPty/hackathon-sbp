@@ -100,6 +100,30 @@ function mockPreguntar({ pregunta = '' } = {}, perfil) {
       consultas: [{ herramienta: 'listar_periodos', entrada: {}, ok: true, ruta: '/periodos' }],
     }
   }
+  // Acciones de pantalla (#121): "¿cuál…?" ejecuta en el dashboard; "¿cómo…?" demuestra con el cursor.
+  // Coinciden con los mocks de /rankings (contracts/rankings.json): HIPOTECARIO, 30 sep 2026.
+  if (/operaci|m[aá]s saldo|ponderaci/i.test(pregunta)) {
+    const demostrar = /c[oó]mo|d[oó]nde/i.test(pregunta)
+    return {
+      ...base,
+      ia_disponible: true,
+      motivo: null,
+      respuesta: demostrar
+        ? 'Te muestro en la pantalla cómo encontrarlo (modo mock).'
+        : 'En el ejemplo (modo mock), el banco con más operaciones en HIPOTECARIO es **Banco Pacifico**. Te lo dejé resaltado en Rankings.',
+      verificada: true,
+      consultas: [],
+      pantalla: {
+        modo: demostrar ? 'demostrar' : 'ejecutar',
+        acciones: [
+          { tipo: 'ir', ruta: '/rankings', texto: 'Entra a Rankings desde el menú.' },
+          { tipo: 'elegir', control: 'rankings.selector-ranking', ruta: '/rankings', valor: 'HIPOTECARIO', texto: 'Elige el ranking HIPOTECARIO.' },
+          { tipo: 'ordenar', control: 'rankings.tabla', ruta: '/rankings', columna: 'Operaciones_Validas', orden: 'desc', texto: 'Ordena la columna Operaciones de mayor a menor.' },
+          { tipo: 'resaltar', control: 'rankings.tabla', ruta: '/rankings', fila: '104', texto: 'Aquí está Banco Pacifico.' },
+        ],
+      },
+    }
+  }
   // Cursor guía (#72): preguntas de "cómo" o "dónde" traen pasos para probar la guía sin IA.
   if (/c[oó]mo|d[oó]nde/i.test(pregunta)) {
     return {
