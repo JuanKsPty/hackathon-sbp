@@ -123,6 +123,12 @@ export const movimientos = ({ desde, hasta, ranking, solo_significativos } = {},
 export const indicadores = ({ periodo, ranking } = {}, opciones) =>
   pedir('/indicadores', { periodo, ranking }, opciones)
 
+// Por qué se movió el saldo de cada banco entre dos períodos: préstamos nuevos, que salen y
+// amortización (contracts/consulta.md, #61). Como /movimientos, es de Analista y Administrador.
+// evidencia=true exige ranking y banco.
+export const movimientosDescomposicion = ({ desde, hasta, ranking, banco, evidencia } = {}, opciones) =>
+  pedir('/movimientos/descomposicion', { desde, hasta, ranking, banco, evidencia: evidencia ? 'true' : undefined }, opciones)
+
 // Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
 // para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)

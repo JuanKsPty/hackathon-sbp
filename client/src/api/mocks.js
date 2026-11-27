@@ -33,6 +33,38 @@ const ARCHIVOS = {
   '/perfil': 'perfil',
 }
 
+// /api/movimientos/descomposicion no tiene JSON propio en contracts/: se arma con el ejemplo de
+// /api/movimientos. Valores ilustrativos de modo mock, no son resultados del motor (R2); las tres
+// piezas suman el Var_Saldo del ejemplo.
+function mockDescomposicion({ ranking, banco } = {}) {
+  const ejemplo = contrato('movimientos')
+  if (!ejemplo) return null
+  const elegido = ejemplo.rankings.find((r) => r.Ranking === ranking) ?? ejemplo.rankings[0]
+  const fila = elegido.movimientos.find((m) => m.Codigo_Banco === banco) ?? elegido.movimientos[0]
+  const salen = -100000
+  const amortizacion = -50000
+  return {
+    fuente: ejemplo.fuente,
+    aviso: ejemplo.aviso,
+    periodo_anterior: ejemplo.periodo_anterior,
+    periodo_actual: ejemplo.periodo_actual,
+    Continuidad: { Continuan: 20, Entran: 6, Salen: 4 },
+    descomposicion: [
+      {
+        Ranking: elegido.Ranking,
+        Codigo_Banco: fila.Codigo_Banco,
+        Banco: fila.Banco,
+        Saldo_anterior: fila.Saldo_anterior,
+        Saldo_actual: fila.Saldo_actual,
+        Var_Saldo: fila.Var_Saldo,
+        Nuevos: { Saldo: fila.Var_Saldo - salen - amortizacion, Operaciones: 5 },
+        Salen: { Saldo: salen, Operaciones: 2 },
+        Amortizacion: { Saldo: amortizacion, Operaciones: 9 },
+      },
+    ],
+  }
+}
+
 // Perfil mínimo que pide cada opción (contracts/perfiles.md). perfil.json es la respuesta de
 // Administrador: para los demás perfiles se filtra con esta tabla. Una opción que no esté aquí
 // se trata como de Administrador.
@@ -60,6 +92,12 @@ function mockPerfil(ejemplo, perfil) {
 export async function responderConMock(ruta, parametros, perfil) {
   // Una pequeña espera para ver los estados de carga.
   await new Promise((listo) => setTimeout(listo, 250))
+
+  if (ruta === '/movimientos/descomposicion') {
+    const ejemplo = mockDescomposicion(parametros)
+    if (!ejemplo) throw sinMock(ruta)
+    return ejemplo
+  }
 
   if (ruta === '/salud') {
     // /api/salud no tiene archivo propio: se arma con los períodos del ejemplo.
