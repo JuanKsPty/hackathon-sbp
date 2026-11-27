@@ -1,7 +1,7 @@
 // Acciones de pantalla por reglas (#121).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { modoDe, columnaDe, ordenDe, bancoArriba, pantallaPorReglas } from '../../src/ai/pantallaReglas.js';
+import { modoDe, columnaDe, ordenDe, bancoArriba, pantallaPorReglas, demostracionPorReglas } from '../../src/ai/pantallaReglas.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { paqueteReal } from '../ayuda.js';
 
@@ -79,3 +79,31 @@ test('un banco sin ranking: no cambia de ranking (se queda en el abierto)', () =
   assert.ok(!p.acciones.some((a) => a.control === 'rankings.selector-ranking'));
   assert.equal(p.acciones.at(-1).fila, '108');
 })
+
+test('"muéstrame cómo…", "enséñame…" y "paso a paso" son demostraciones', () => {
+  for (const q of ['muéstrame cómo descargar el ranking', 'enséñame a comparar períodos', 'guíame paso a paso para ver la calidad']) {
+    assert.equal(modoDe(q), 'demostrar', q);
+  }
+  assert.equal(modoDe('muestra el banco 108'), 'ejecutar');
+});
+
+test('"¿cómo hago X?" en la app: entra a la página y señala el elemento', () => {
+  const { catalogos, periodos } = paqueteReal();
+  const almacen = crearAlmacen(catalogos, periodos);
+  const casos = [
+    ['muéstrame cómo descargar el ranking en CSV', 'rankings.descargar', '/rankings'],
+    ['¿cómo veo las filas excluidas?', 'calidad.excluidas', '/calidad'],
+    ['muéstrame cómo hacer un reporte', 'reportes.descarga-rankings', '/reportes'],
+    ['¿cómo filtro por banco?', 'rankings.filtro-banco', '/rankings'],
+  ];
+  for (const [q, control, ruta] of casos) {
+    const p = demostracionPorReglas(q, almacen);
+    assert.equal(p.modo, 'demostrar', q);
+    assert.deepEqual(p.acciones.map((a) => a.tipo), ['ir', 'señalar'], q);
+    assert.equal(p.acciones[1].control, control, q);
+    assert.equal(p.acciones[0].ruta, ruta, q);
+  }
+  // Comparar períodos no es del perfil Público.
+  assert.equal(demostracionPorReglas('muéstrame cómo comparar períodos', almacen, 'publico')?.acciones.at(-1).control === 'comparar.selector-desde', false);
+  assert.equal(demostracionPorReglas('dame el top 5', almacen), null);
+});

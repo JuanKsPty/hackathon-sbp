@@ -382,6 +382,28 @@ export function crearDocumentoOpenApi(catalogos) {
           responses: { ...jsonOk('Solicitud guardada y estado del correo de confirmación'), ...errores(400, 429) },
         },
       },
+      '/reportes/correo': {
+        post: {
+          tags: ['Alertas'],
+          summary: 'Envía el reporte de un corte a un correo (Zapier manda el correo; no suscribe)',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['correo'],
+                  properties: {
+                    correo: { type: 'string', format: 'email' },
+                    periodo: { type: 'string', pattern: '^\\d{8}$', description: 'AAAAMMDD. Vacío: el último publicado' },
+                  },
+                },
+              },
+            },
+          },
+          responses: { ...jsonOk('Estado del envío del reporte'), ...errores(400, 404, 429) },
+        },
+      },
       '/suscripciones/confirmar': {
         get: {
           tags: ['Alertas'],

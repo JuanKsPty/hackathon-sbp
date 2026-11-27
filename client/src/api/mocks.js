@@ -90,9 +90,37 @@ function mockPerfil(ejemplo, perfil) {
   }
 }
 
+// POST /api/suscripciones no tiene JSON propio en contracts/: se arma con fuente y aviso del
+// ejemplo de /api/catalogos. Valores ilustrativos de modo mock: no guarda nada ni manda correos. Como
+// el API real, devuelve la solicitud sin tokens y pendiente de confirmar (doble confirmación).
+function mockSuscripcion({ correo } = {}) {
+  const ejemplo = contrato('catalogos')
+  if (!ejemplo) return null
+  return {
+    fuente: ejemplo.fuente,
+    aviso: ejemplo.aviso,
+    confirmacion_enviada: true,
+    mensaje: 'Te enviamos un correo para confirmar la suscripción. Abre el enlace en las próximas 48 horas.',
+    suscripcion: {
+      correo,
+      bancos: [],
+      rankings: [],
+      activo: false,
+      actualizado_en: new Date().toISOString(),
+      pendiente_de_confirmar: true,
+    },
+  }
+}
+
 export async function responderConMock(ruta, parametros, perfil) {
   // Una pequeña espera para ver los estados de carga.
   await new Promise((listo) => setTimeout(listo, 250))
+
+  if (ruta === '/suscripciones') {
+    const ejemplo = mockSuscripcion(parametros)
+    if (!ejemplo) throw sinMock(ruta)
+    return ejemplo
+  }
 
   if (ruta === '/movimientos/descomposicion') {
     const ejemplo = mockDescomposicion(parametros)
