@@ -5,9 +5,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { procesarArchivo, ErrorDeDatos } from '../engine/index.js';
-import { carpetaStorage as carpetaStoragePorDefecto } from './bitacora.js';
+import { carpetaStorage as carpetaStoragePorDefecto } from './storage.js';
 
-// La carpeta storage/ es la misma de la bitácora (#31): raíz del repo, o STORAGE_DIR si está definida.
+// La carpeta storage/ es la misma de la bitácora y los parámetros (storage.js): raíz del repo, o STORAGE_DIR.
 export const carpetaDePeriodos = (carpetaStorage = carpetaStoragePorDefecto()) => path.join(carpetaStorage, 'periodos');
 
 // Las copias se llaman "<marca de carga>__<nombre original>", por ejemplo

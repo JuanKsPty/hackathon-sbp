@@ -10,6 +10,7 @@ import { crearAlmacen } from '../src/datos/almacen.js';
 import { carpetaDePeriodos } from '../src/datos/cargaPeriodo.js';
 import { leerOperaciones } from '../src/datos/bitacora.js';
 import { calidadDePeriodo } from '../src/routes/formato.js';
+import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
 import { CARPETA_DATOS, paqueteReal, catalogosReales, filaSintetica, textoCsv } from './ayuda.js';
 
 // Las copias de los períodos y la bitácora de estas pruebas van a una carpeta temporal propia.
@@ -169,6 +170,26 @@ test('sin X-Nombre-Archivo responde 400 y con otro Content-Type responde 415', a
   const json = await subir(JSON.stringify({ a: 1 }), { tipo: 'application/json' });
   assert.equal(json.status, 415);
   assert.equal(json.cuerpo.error.codigo, 'FORMATO_NO_SOPORTADO');
+});
+
+test('con el cálculo real de movimientos, Comparacion es lo mismo que GET /api/movimientos', async () => {
+  const almacen = crearAlmacen(paqueteReal().catalogos, paqueteReal().periodos.filter((p) => p.fecha !== '20260930'));
+  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0);
+  await once(servidor, 'listening');
+  servidores.push(servidor);
+  const real = `http://127.0.0.1:${servidor.address().port}/api`;
+
+  const { status, cuerpo } = await subir(textoSeptiembre(), { nombre: SEPTIEMBRE, en: real });
+  assert.equal(status, 200);
+  const comparacion = cuerpo.periodos[0].Comparacion;
+  assert.equal(comparacion.periodo_anterior, '20260831');
+  assert.equal(comparacion.rankings.length, 6);
+  assert.equal(comparacion.rankings.every((r) => r.movimientos.length === 12), true);
+
+  const respuesta = await fetch(`${real}/movimientos?desde=20260831&hasta=20260930`, { headers: { 'X-Perfil': 'admin' } });
+  const movimientos = await respuesta.json();
+  assert.deepEqual(comparacion.rankings, movimientos.rankings);
+  assert.deepEqual(comparacion.regla_significativo, movimientos.regla_significativo);
 });
 
 test('sin el cálculo de movimientos, o si falla, la carga igual se publica con Comparacion = null', async () => {

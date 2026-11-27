@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { crearApp } from './app.js';
 import { almacenDesdeCarpeta } from './datos/almacen.js';
+import { crearObtenerMovimientos } from './routes/movimientos.js';
 import { registrarOperacion } from './datos/bitacora.js';
 import { recargarPeriodosGuardados } from './datos/cargaPeriodo.js';
 
@@ -28,7 +29,8 @@ try {
   const { recargados, avisos } = recargarPeriodosGuardados(almacen);
   avisos.forEach((aviso) => console.warn(`Aviso: ${aviso}`));
   if (recargados.length > 0) console.log(`Períodos recargados de storage/periodos: ${recargados.join(', ')}`);
-  crearApp({ almacen }).listen(puerto, () => {
+  const obtenerMovimientos = crearObtenerMovimientos(almacen);
+  crearApp({ almacen, obtenerMovimientos }).listen(puerto, () => {
     console.log(`API lista en http://localhost:${puerto}/api · períodos: ${almacen.fechas().join(', ') || 'ninguno'}`);
   });
 } catch (error) {
