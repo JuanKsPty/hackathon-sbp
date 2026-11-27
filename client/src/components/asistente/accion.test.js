@@ -13,37 +13,29 @@ import {
   reconciliaciones,
   subactividadesPorBanco,
   sugerenciasDeGraficos,
-  pideGraficos,
   ultimaAccion,
 } from './accion.js'
 
 const banco = (Posicion, Codigo_Banco, extra = {}) => ({ Posicion, Codigo_Banco, Banco: `Banco ${Codigo_Banco}`, Saldo_Actividad: 10 * Posicion, ...extra })
 
-test('ultimaAccion: solo la última respuesta y si la pregunta pedía gráficos', () => {
+test('ultimaAccion: los gráficos solo se ven con "Ver gráficos"', () => {
   const informe = { tipo: 'informe', graficos: ['rankings', 'calidad'] }
   const ranking = { tipo: 'ranking', graficos: ['rankings'] }
-  const conInforme = [
+  const mensajes = [
     { id: 1, rol: 'usuario', texto: 'Dame el informe de septiembre' },
     { id: 2, rol: 'asistente', datos: { accion: informe } },
+    { id: 3, rol: 'usuario', texto: '¿Quién lidera COMERCIO?' },
+    { id: 4, rol: 'asistente', datos: { accion: ranking } },
+    { id: 5, rol: 'asistente', datos: { accion: null } },
   ]
-  assert.deepEqual(ultimaAccion(conInforme), { id: 2, ...informe })
-  // Al mandar otra pregunta ya no se ven los gráficos de la anterior.
-  assert.equal(ultimaAccion([...conInforme, { id: 3, rol: 'usuario', texto: 'hola' }]), null)
-  // Una pregunta que no pide gráficos no los muestra solos…
-  const sinPedir = [...conInforme, { id: 3, rol: 'usuario', texto: '¿Quién lidera COMERCIO?' }, { id: 4, rol: 'asistente', datos: { accion: ranking } }]
-  assert.equal(ultimaAccion(sinPedir), null)
-  // …pero sí con "Ver gráficos", de esa respuesta o de una anterior.
-  assert.deepEqual(ultimaAccion(sinPedir, 4), { id: 4, ...ranking })
-  assert.deepEqual(ultimaAccion(sinPedir, 2), { id: 2, ...informe })
-  assert.equal(ultimaAccion([]), null)
-  assert.equal(ultimaAccion([{ id: 1, rol: 'error', error: {} }]), null)
-})
-
-test('pideGraficos: gráfico, informe, comparar, evolución, calidad', () => {
-  for (const q of ['muéstrame el gráfico de consumo', 'Dame el informe de septiembre', 'compara agosto y septiembre', 'evolución del banco 104', 'Calidad de datos de septiembre']) {
-    assert.equal(pideGraficos(q), true, q)
-  }
-  for (const q of ['¿Quién lidera COMERCIO?', 'muestra el banco 108', 'hola']) assert.equal(pideGraficos(q), false, q)
+  // Nunca aparecen solos, aunque la pregunta pida un informe.
+  assert.equal(ultimaAccion(mensajes), null)
+  // Con el botón, los de esa respuesta (también una anterior).
+  assert.deepEqual(ultimaAccion(mensajes, 4), { id: 4, ...ranking })
+  assert.deepEqual(ultimaAccion(mensajes, 2), { id: 2, ...informe })
+  assert.equal(ultimaAccion(mensajes, 5), null)
+  assert.equal(ultimaAccion(mensajes, 1), null)
+  assert.equal(ultimaAccion([], 1), null)
 })
 
 test('nombreMes y sugerencias con los períodos cargados, según el perfil', () => {
