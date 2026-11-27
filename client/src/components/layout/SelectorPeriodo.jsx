@@ -1,11 +1,19 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { formatearPeriodo } from '@/lib/formato.js'
+import { useControlGuia } from '@/agente/useControlGuia.js'
 
 // Período de trabajo de toda la app. Las opciones salen de GET /api/periodos.
 export function SelectorPeriodo() {
   const { periodos, periodo, cambiarPeriodo, cargando, error } = usePeriodo()
   const sinOpciones = periodos.length === 0
+
+  // Acciones de pantalla del agente (#125): elegir el período y deshacerlo.
+  useControlGuia('global.selector-periodo', {
+    elegir: (valor) => cambiarPeriodo(valor),
+    estado: () => periodo,
+    restaurar: (anterior) => anterior && cambiarPeriodo(anterior),
+  })
 
   let marcador = 'Período'
   if (cargando) marcador = 'Cargando…'
