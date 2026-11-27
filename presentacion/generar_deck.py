@@ -433,7 +433,7 @@ Buenas. Somos Jesús, Agustín y yo, y les presentamos Rankings de Crédito: una
 
 Tres cosas para ubicarnos: todo lo que van a ver sale de los archivos, con un motor determinista; la IA solo consulta y explica, nunca calcula; y todos los datos son ficticios, la app lo dice en cada pantalla.
 
-Orden de la presentación: problema y propuesta, arquitectura, demo en vivo de unos 9 minutos, y después las reglas, la automatización, la IA y las decisiones técnicas.
+Orden de la presentación: problema y propuesta, arquitectura, demo en vivo de unos 10 minutos, y después las reglas, la automatización, la IA y las decisiones técnicas.
 """)
     return L
 
@@ -672,7 +672,7 @@ def lamina_demo(prs, d):
         L.texto(x + 0.9, y + 0.1, ancho - 1.05, 0.38, titulo, size=17, bold=True, color=INDIGO, nombre="Paso título")
         L.texto(x + 0.9, y + 0.5, ancho - 1.05, 0.6, sub, size=14, color=APAGADO, nombre="Paso detalle")
     L.notas("""
-[Todos · 9 a 10 min. El guion con los clics exactos está en presentacion/guion.md]
+[Todos · 10 min. El guion con los clics exactos está en presentacion/guion.md]
 Aquí pasamos al navegador. Antes de esta lámina, la app ya está corriendo en local con solo julio y agosto cargados (R1).
 
 Orden: perfiles, con el sitio público y el sitio interno con login; cargar septiembre en el interno y ver cómo cambian los rankings; Panel; Rankings con filtros y gráfico; Calidad; Comparar; Modo verificación; Asistente IA con el cursor guía; y Reportes con las descargas.
@@ -988,7 +988,7 @@ MCP remoto: se pega la URL {URL_PUBLICA}/api/mcp en Claude, como conector, y se 
 
 PWA: la app se puede instalar en el celular. Y la API está documentada con Swagger en /api/docs.
 
-(Solo si preguntan: el server ya valida acciones de pantalla para el agente, #131, con ir, elegir, ordenar, resaltar y señalar, cada una contra el catálogo y el perfil. El front todavía no las ejecuta, así que no se muestran en la demo.)
+(Acciones de pantalla, #131 y #137: ir, elegir, ordenar, resaltar y señalar, cada una validada por el server contra el catálogo y el perfil. El front las ejecuta en dos modos: ejecutar, que deja la pantalla lista con "Muéstrame cómo", y demostrar, que mueve el cursor paso a paso.)
 """)
     return L
 
