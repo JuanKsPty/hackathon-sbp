@@ -4,7 +4,7 @@ import { suscribirse } from '@/api/cliente.js'
 import { useFuente } from '@/api/fuente.js'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   alternarElegido,
@@ -22,6 +22,7 @@ import {
 export function AlertasPorCorreo({ bancos, rankings }) {
   const idCorreo = useId()
   const idErrorCorreo = useId()
+  const idFormulario = useId()
   const { aviso } = useFuente()
   const [correo, setCorreo] = useState('')
   const [bancosElegidos, setBancosElegidos] = useState([])
@@ -60,9 +61,16 @@ export function AlertasPorCorreo({ bancos, rankings }) {
           Recibe un correo con los movimientos significativos cada vez que se publique un período. Sin elegir bancos ni
           rankings, te avisamos de todos.
         </CardDescription>
+        {/* Arriba a la derecha; envía el formulario de abajo con el atributo `form`. */}
+        <CardAction>
+          <Button type="submit" form={idFormulario} disabled={enviando} aria-busy={enviando}>
+            <BellRingIcon aria-hidden="true" />
+            {enviando ? 'Enviando…' : 'Suscribirse'}
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent>
-        <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
+        <form id={idFormulario} onSubmit={enviar} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor={idCorreo} className="text-sm font-medium">
               Correo electrónico
@@ -106,13 +114,6 @@ export function AlertasPorCorreo({ bancos, rankings }) {
               elegidos={rankingsElegidos}
               alCambiar={setRankingsElegidos}
             />
-          </div>
-
-          <div>
-            <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={enviando} aria-busy={enviando}>
-              <BellRingIcon aria-hidden="true" />
-              {enviando ? 'Enviando…' : 'Suscribirse'}
-            </Button>
           </div>
 
           <div aria-live="polite">{resultado && <Resultado resultado={resultado} />}</div>

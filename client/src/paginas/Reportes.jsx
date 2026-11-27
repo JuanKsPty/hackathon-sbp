@@ -136,30 +136,32 @@ function DescargasAbiertas({ periodos }) {
       <CardHeader>
         <CardTitle>Entregables 2 a 4</CardTitle>
         <CardDescription>Sin período, cada archivo trae todos los períodos cargados (cada fila con su Fecha).</CardDescription>
+        <CardAction>
+          <Selector etiqueta="Período" valor={periodo} alCambiar={setPeriodo}>
+            <SelectItem value={TODOS}>Todos los períodos</SelectItem>
+            {periodos.map((p) => (
+              <SelectItem key={p.Fecha} value={p.Fecha}>
+                {formatearPeriodo(p.Fecha)}
+              </SelectItem>
+            ))}
+          </Selector>
+        </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <Selector etiqueta="Período" valor={periodo} alCambiar={setPeriodo}>
-          <SelectItem value={TODOS}>Todos los períodos</SelectItem>
-          {periodos.map((p) => (
-            <SelectItem key={p.Fecha} value={p.Fecha}>
-              {formatearPeriodo(p.Fecha)}
-            </SelectItem>
-          ))}
-        </Selector>
+      <CardContent>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {DESCARGAS_ABIERTAS.map((d) => (
             <Card key={d.tipo} size="sm">
               <CardHeader>
                 <CardTitle>{d.titulo}</CardTitle>
                 <CardDescription>{d.entregable}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                <p className="text-sm text-muted-foreground">{d.descripcion}</p>
-                <div>
-                  <Descarga href={urlDescarga(d.tipo, parametros)} guia={d.guia}>
-                    {d.tipo}.csv
+                <CardAction>
+                  <Descarga href={urlDescarga(d.tipo, parametros)} guia={d.guia} titulo={`Descargar ${d.tipo}.csv`}>
+                    CSV
                   </Descarga>
-                </div>
+                </CardAction>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{d.descripcion}</p>
               </CardContent>
             </Card>
           ))}
@@ -257,6 +259,9 @@ function ReportePersonalizado({ periodos, rankings, bancos }) {
       <CardHeader>
         <CardTitle>Reporte personalizado</CardTitle>
         <CardDescription>Mismas columnas que el entregable 2. Una lista sin marcas incluye todo.</CardDescription>
+        <CardAction>
+          <BotonDescarga descarga={descarga} alDescargar={descargar}>personalizado.csv</BotonDescarga>
+        </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="grid gap-4 md:grid-cols-3">
@@ -278,9 +283,6 @@ function ReportePersonalizado({ periodos, rankings, bancos }) {
             elegidos={bancosElegidos}
             alCambiar={setBancosElegidos}
           />
-        </div>
-        <div>
-          <BotonDescarga descarga={descarga} alDescargar={descargar}>Descargar reporte</BotonDescarga>
         </div>
         {descarga.error && <ErrorApi error={descarga.error} titulo="No se pudo descargar el reporte" />}
       </CardContent>
@@ -316,9 +318,9 @@ function BotonDescarga({ descarga, alDescargar, children }) {
 }
 
 // `guia`: identificador data-guia para el agente guía (contracts/guia.md), si el contrato lo define.
-function Descarga({ href, guia, children }) {
+function Descarga({ href, guia, titulo, children }) {
   return (
-    <a href={href} download data-guia={guia} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+    <a href={href} download data-guia={guia} title={titulo} aria-label={titulo} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
       <DownloadIcon aria-hidden="true" />
       {children}
     </a>
