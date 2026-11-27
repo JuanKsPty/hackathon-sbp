@@ -1,5 +1,5 @@
 import { useControlGuia } from '@/agente/useControlGuia.js'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDownIcon, ArrowUpIcon, ArrowUpDownIcon } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatearEntero, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
@@ -24,6 +24,9 @@ function comparar(a, b, clave) {
 // Tabla ordenable: un clic en el encabezado ordena por esa columna; otro clic invierte el orden.
 export function TablaRanking({ bancos, bancoResaltado }) {
   const [orden, setOrden] = useState({ clave: 'Posicion', ascendente: true })
+  // Fila que resalta el agente (#125): aparte del filtro de banco (bancoResaltado).
+  const [delAgente, setDelAgente] = useState(null)
+  const cuerpo = useRef(null)
 
   const filas = useMemo(() => {
     const copia = [...bancos].sort((a, b) => comparar(a, b, orden.clave))
@@ -36,9 +39,19 @@ export function TablaRanking({ bancos, bancoResaltado }) {
   // Acciones de pantalla del agente (#125): ordenar por una columna y deshacerlo.
   useControlGuia('rankings.tabla', {
     ordenar: (columna, sentido) => setOrden({ clave: columna, ascendente: sentido === 'asc' }),
-    estado: () => ({ orden }),
-    restaurar: (anterior) => anterior?.orden && setOrden(anterior.orden),
+    resaltar: (codigo) => setDelAgente(codigo),
+    estado: () => ({ orden, delAgente }),
+    restaurar: (anterior) => {
+      if (anterior?.orden) setOrden(anterior.orden)
+      setDelAgente(anterior?.delAgente ?? null)
+    },
   })
+
+  // La fila resaltada por el agente se lleva a la vista.
+  useEffect(() => {
+    if (!delAgente) return
+    cuerpo.current?.querySelector(`[data-fila-banco="${delAgente}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, [delAgente])
 
   return (
     <Table data-guia="rankings.tabla">
@@ -67,12 +80,14 @@ export function TablaRanking({ bancos, bancoResaltado }) {
           })}
         </TableRow>
       </TableHeader>
-      <TableBody>
+      <TableBody ref={cuerpo}>
         {filas.map((fila) => (
           <TableRow
             key={fila.Codigo_Banco}
             data-fila-banco={fila.Codigo_Banco}
             data-state={fila.Codigo_Banco === bancoResaltado ? 'selected' : undefined}
+            data-resaltada-agente={fila.Codigo_Banco === delAgente ? '' : undefined}
+            className={fila.Codigo_Banco === delAgente ? 'bg-sky-400/15 [&_td:nth-child(2)_span:first-child]:underline [&_td:nth-child(2)_span:first-child]:decoration-sky-400 [&_td:nth-child(2)_span:first-child]:decoration-2 [&_td:nth-child(2)_span:first-child]:underline-offset-4' : undefined}
           >
             {COLUMNAS.map(({ clave, formato }) =>
               clave === 'Banco' ? (
