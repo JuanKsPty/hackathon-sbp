@@ -158,6 +158,21 @@ export function eventoPeriodoPublicado(publicado, { archivo, catalogos, suscript
   };
 }
 
+// reporte_solicitado: alguien pide desde la app que le manden el reporte de un corte a su correo.
+// Mismas cifras que periodo_publicado, pero para un solo correo, sin tocar la hoja ni abrir casos.
+// No hay enlace de baja (no es una suscripción); enlace_app lleva el botón del correo a la app.
+export function eventoReporteSolicitado(publicado, { catalogos, correo, enviadoEn = ahoraEnPanama() } = {}) {
+  const base = eventoPeriodoPublicado(publicado, { catalogos, suscriptores: [], enviadoEn });
+  return {
+    ...base,
+    evento: "reporte_solicitado",
+    id_evento: idEvento("reporte_solicitado", publicado.fecha),
+    enlace_app: urlPublica(),
+    destinatarios: [{ correo, enlace_baja: "", movimientos: base.movimientos_significativos }],
+    casos: [],
+  };
+}
+
 // confirmacion_suscripcion: correo con el enlace para confirmar (doble confirmación).
 // Así nadie puede suscribir un correo ajeno: sin hacer clic en el enlace no recibe alertas.
 export function eventoConfirmacion(suscripcion, { enviadoEn = ahoraEnPanama() } = {}) {

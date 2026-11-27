@@ -10,6 +10,7 @@ import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { AlertasPorCorreo } from '@/components/reportes/AlertasPorCorreo.jsx'
+import { ReportePorCorreo } from '@/components/reportes/ReportePorCorreo.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -37,7 +38,7 @@ const DESCARGAS_ABIERTAS = [
 // eligen filtros y se piden los CSV.
 export default function Reportes() {
   const { perfil, puede, opcionesListas } = usePerfil()
-  const { periodos, cargando, error, reintentar } = usePeriodo()
+  const { periodo, periodos, cargando, error, reintentar } = usePeriodo()
   const catalogo = useConsulta(pedirCatalogos)
 
   if (cargando || catalogo.cargando) {
@@ -105,6 +106,7 @@ export default function Reportes() {
       )}
       {/* Abierta a los 3 perfiles y a los dos sitios: no depende de las opciones del perfil. */}
       <AlertasPorCorreo bancos={bancos} rankings={rankings} />
+      <ReportePorCorreo periodo={periodo} />
     </Contenedor>
   )
 }
