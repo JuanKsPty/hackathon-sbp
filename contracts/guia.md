@@ -14,7 +14,8 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 - **Un identificador por elemento y por página** (no se repite).
 - Va en el elemento que el usuario toca o mira: el botón, el selector o el contenedor de la tabla o el gráfico. No en un `div` externo que ocupe media pantalla.
 - Si el elemento solo existe para un perfil, igual lleva su `data-guia`. El agente no señala lo que el perfil no puede ver (la columna *Perfil* de abajo).
-- Los identificadores son para la guía: no se usan como estilos ni en los tests.
+- Los identificadores son para la guía: no se usan como estilos ni como selectores en pruebas de UI.
+- Todo identificador de esta lista tiene que existir en `client/src`: lo comprueba `server/tests/ai/guia-client.test.js`. Si la IA eligiera uno que no está en la pantalla, el cursor no encontraría nada.
 
 ## Global (layout, todas las páginas)
 
