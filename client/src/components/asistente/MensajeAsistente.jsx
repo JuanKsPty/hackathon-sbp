@@ -1,10 +1,22 @@
-import { BadgeCheckIcon, BotIcon, BotOffIcon, CircleAlertIcon, MousePointer2Icon, RotateCwIcon, SearchXIcon } from 'lucide-react'
+import { useNavigate } from 'react-router'
+import {
+  ArrowDownIcon,
+  BadgeCheckIcon,
+  BotIcon,
+  BotOffIcon,
+  ChartColumnIcon,
+  CircleAlertIcon,
+  MousePointer2Icon,
+  RotateCwIcon,
+  SearchXIcon,
+} from 'lucide-react'
 import { useGuia } from '@/guia/GuiaContext.jsx'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ETIQUETA_RESPUESTA } from '@/api/ia.js'
 import { EtiquetaIA } from './EtiquetaIA.jsx'
 import { FuentesConsultadas } from './FuentesConsultadas.jsx'
+import { Avisos } from './GraficosAsistente.jsx'
 
 // Negritas (**texto**) y viñetas simples: la IA a veces responde con algo de Markdown.
 function conNegritas(linea) {
@@ -45,11 +57,15 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
   const etiqueta = datos?.etiqueta || ETIQUETA_RESPUESTA
 
   if (datos?.ia_disponible === false) {
+    // Sin IA, la pregunta se interpreta por reglas (#108): si pidió datos, se muestran sus gráficos.
+    if (datos.accion) return <RespuestaPorReglas accion={datos.accion} />
     return (
       <Burbuja icono={BotOffIcon}>
         <p className="font-medium">La IA no está disponible</p>
         <p className="text-muted-foreground">{datos.motivo ?? 'El servidor no tiene la IA configurada.'}</p>
-        <p className="text-muted-foreground">Puedes seguir usando los rankings, la comparación y los reportes.</p>
+        <p className="text-muted-foreground">
+          Igual puedo mostrarte gráficos: pide un informe, un ranking, una comparación de períodos o cómo va un banco.
+        </p>
       </Burbuja>
     )
   }
@@ -61,6 +77,7 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
         <p className="text-muted-foreground">
           {datos?.motivo ?? 'Prueba con una pregunta más concreta (un ranking, un banco o un período).'}
         </p>
+        <ResumenAccion accion={datos?.accion} />
         <FuentesConsultadas consultas={datos?.consultas} guia={guiaFuentes} />
       </Burbuja>
     )
@@ -78,9 +95,67 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
           </Badge>
         )}
       </div>
+      <ResumenAccion accion={datos.accion} />
       <BotonGuia pasos={datos.guia?.pasos} />
       <FuentesConsultadas consultas={datos.consultas} guia={guiaFuentes} />
     </Burbuja>
+  )
+}
+
+// Sin IA: la frase fija que arma el server con lo que se muestra (no trae cifras del motor).
+function RespuestaPorReglas({ accion }) {
+  return (
+    <Burbuja icono={ChartColumnIcon}>
+      <p>{accion.resumen}</p>
+      <Avisos avisos={accion.avisos} />
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge
+          variant="outline"
+          className="h-auto text-left whitespace-normal"
+          title="Sin IA: la pregunta se interpretó por palabras clave (mes, ranking, banco e informe)"
+        >
+          Interpretado por reglas · cifras del motor
+        </Badge>
+        {accion.graficos?.length > 0 && <BotonVerGraficos />}
+      </div>
+    </Burbuja>
+  )
+}
+
+// Con IA: qué gráficos se mostraron junto a la respuesta.
+function ResumenAccion({ accion }) {
+  if (!accion) return null
+  return (
+    <div className="flex flex-col gap-2 border-t pt-2">
+      <p className="flex items-center gap-1.5 text-xs font-medium">
+        <ChartColumnIcon className="size-3.5" aria-hidden="true" />
+        {accion.graficos?.length > 0 ? `Gráficos en pantalla: ${accion.titulo}` : accion.titulo}
+      </p>
+      <Avisos avisos={accion.avisos} />
+      {accion.graficos?.length > 0 && (
+        <div>
+          <BotonVerGraficos />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Lleva a los gráficos: el último panel en pantalla (el del panel lateral, si está abierto) o la
+// página /asistente si el chat está en otro lugar.
+function BotonVerGraficos() {
+  const navegar = useNavigate()
+  function verGraficos() {
+    const paneles = document.querySelectorAll('[data-graficos-asistente]')
+    const panel = paneles[paneles.length - 1]
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    else navegar('/asistente')
+  }
+  return (
+    <Button variant="outline" size="sm" onClick={verGraficos}>
+      <ArrowDownIcon aria-hidden="true" />
+      Ver gráficos
+    </Button>
   )
 }
 

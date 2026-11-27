@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { BotIcon, ExternalLinkIcon } from 'lucide-react'
 import { ChatAsistente } from '@/components/asistente/ChatAsistente.jsx'
+import { GraficosAsistente } from '@/components/asistente/GraficosAsistente.jsx'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useGuia } from '@/guia/GuiaContext.jsx'
 
 // Asistente IA en un panel lateral, disponible desde cualquier página (#62).
-// La conversación es la misma de la página /asistente (conversacion.js).
+// La conversación es la misma de la página /asistente (conversacion.js). Debajo del chat aparecen
+// los gráficos de la última pregunta (#108).
 export function PanelAsistente() {
   const [abierto, setAbierto] = useState(false)
   const { estado } = useGuia()
@@ -28,7 +30,7 @@ export function PanelAsistente() {
           <span className="hidden sm:inline">Asistente</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full gap-0 sm:max-w-lg">
+      <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
         <SheetHeader className="border-b pr-12">
           <SheetTitle>Asistente IA</SheetTitle>
           <SheetDescription>Pregunta por los rankings en lenguaje natural.</SheetDescription>
@@ -41,8 +43,9 @@ export function PanelAsistente() {
             <ExternalLinkIcon className="size-3" aria-hidden="true" />
           </Link>
         </SheetHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
           <ChatAsistente />
+          <GraficosAsistente />
         </div>
       </SheetContent>
     </Sheet>
