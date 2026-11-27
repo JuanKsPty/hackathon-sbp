@@ -79,6 +79,17 @@ function puedeVer(elemento, perfil) {
   return OPCIONES.find((o) => o.opcion === elemento.opcion)?.perfiles.includes(perfil) ?? false;
 }
 
+/** Elemento del catálogo por su data-guia, o null si no existe. */
+export function elementoGuia(id) {
+  return POR_GUIA.get(id) ?? null;
+}
+
+/** ¿El perfil puede ver ese elemento? (false si no existe) */
+export function perfilVeElemento(id, perfil = 'publico') {
+  const elemento = POR_GUIA.get(id);
+  return Boolean(elemento && puedeVer(elemento, perfil));
+}
+
 /** Elementos que el perfil puede ver (la IA solo puede señalar estos). */
 export function elementosPara(perfil = 'publico') {
   return ELEMENTOS_GUIA.filter((e) => puedeVer(e, perfil));

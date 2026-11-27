@@ -57,3 +57,13 @@ test('definicionGuia solo admite los identificadores del perfil', () => {
   assert.ok(!enumDe('analista').includes('admin.bitacora'));
   assert.match(definicionGuia('publico').description, /rankings\.tabla: Tabla del ranking/);
 });
+
+test('elementoGuia y perfilVeElemento consultan el catálogo', async () => {
+  const { elementoGuia, perfilVeElemento } = await import('../../src/ai/guia.js');
+  assert.equal(elementoGuia('rankings.tabla').ruta, '/rankings');
+  assert.equal(elementoGuia('rankings.no-existe'), null);
+  assert.equal(perfilVeElemento('rankings.tabla', 'publico'), true);
+  assert.equal(perfilVeElemento('admin.bitacora', 'publico'), false);
+  assert.equal(perfilVeElemento('admin.bitacora', 'admin'), true);
+  assert.equal(perfilVeElemento('no.existe', 'admin'), false);
+});
