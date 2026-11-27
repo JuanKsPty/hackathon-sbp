@@ -1,7 +1,7 @@
 // Acciones de pantalla por reglas (#121).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { modoDe, columnaDe, ordenDe, bancoArriba } from '../../src/ai/pantallaReglas.js';
+import { modoDe, columnaDe, ordenDe, bancoArriba, pantallaPorReglas } from '../../src/ai/pantallaReglas.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { paqueteReal } from '../ayuda.js';
 
@@ -40,4 +40,27 @@ test('bancoArriba ordena las filas del motor como la tabla', () => {
   // El de menos saldo es el último del ranking (ordenado por saldo).
   assert.equal(bancoArriba(almacen, '20260930', 'COMERCIO', 'Saldo_Actividad', 'asc'), filas.find((f) => f.posicion === filas.length).codigoBanco);
   assert.equal(bancoArriba(almacen, '20261031', 'COMERCIO', 'Posicion', 'asc'), null);
+});
+
+test('pantallaPorReglas arma y valida la pantalla de una pregunta típica', () => {
+  const { catalogos, periodos } = paqueteReal();
+  const almacen = crearAlmacen(catalogos, periodos);
+  const p = pantallaPorReglas('¿Cuál es el banco con más operaciones en comercio en agosto?', almacen);
+  assert.equal(p.modo, 'ejecutar');
+  assert.deepEqual(p.acciones.map((a) => a.tipo), ['ir', 'elegir', 'elegir', 'ordenar', 'resaltar']);
+  assert.equal(p.acciones[1].valor, '20260831');
+  assert.equal(p.acciones[2].valor, 'COMERCIO');
+  assert.deepEqual([p.acciones[3].columna, p.acciones[3].orden], ['Operaciones_Validas', 'desc']);
+  assert.equal(p.acciones[4].fila, bancoArriba(almacen, '20260831', 'COMERCIO', 'Operaciones_Validas', 'desc'));
+
+  const demo = pantallaPorReglas('¿Cómo veo el banco con más operaciones?', almacen);
+  assert.equal(demo.modo, 'demostrar');
+  assert.ok(demo.acciones.every((a) => a.texto));
+  assert.equal(demo.acciones[1].valor, '20260930'); // sin mes: el último período
+
+  // Un banco nombrado se resalta con su posición.
+  const capital = pantallaPorReglas('¿En qué puesto está Banco Capital en consumo?', almacen);
+  assert.equal(capital.acciones.at(-1).fila, '108');
+
+  assert.equal(pantallaPorReglas('Hola, ¿qué tal?', almacen), null);
 });
