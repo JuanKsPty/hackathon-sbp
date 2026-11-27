@@ -34,3 +34,13 @@ Sin key, o si la IA falla, todo sale por reglas y `motivo` explica por qué.
 Variables en `.env` (ver [`.env.example`](../../../.env.example)): `ANTHROPIC_API_KEY` y `AI_MODEL` (por defecto `claude-opus-5-5`).
 
 Tests: `cd server && npm test`.
+
+## Agente de exploración (#3)
+
+`POST /api/ia/preguntar` ([contrato](../../../contracts/ia.md)): el usuario pregunta en lenguaje natural y Claude responde consultando la API con herramientas de solo lectura.
+
+- [`herramientas.js`](herramientas.js): 7 herramientas, cada una un GET a la API (`/periodos`, `/catalogos`, `/rankings`, `/subactividades`, `/calidad`, `/excluidas`, `/movimientos`). Las listas largas se recortan a una muestra y se indica cuántas se muestran. El servidor MCP (#6) va a reutilizar este módulo.
+- [`agente.js`](agente.js): el ciclo de herramientas (Messages API, hasta 8 vueltas). La respuesta final pasa por el verificador contra los resultados que consultó la IA. Si cita un número que no está, se le pide corregir una vez; si vuelve a fallar, no se muestra.
+- La respuesta incluye `consultas`, con qué endpoints usó la IA, para mostrarlos como fuentes.
+
+`GET /api/explicaciones` expone la explicación de movimientos (#2) y `GET /api/ia/estado` indica si la IA está disponible.
