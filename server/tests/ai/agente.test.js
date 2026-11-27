@@ -408,3 +408,44 @@ test('#86 (B2): el número del usuario sí se puede citar si el motor también l
   const { cuerpo } = await preguntar(base, { pregunta: `¿Es cierto que el universo local válido es de ${valor} filas?` });
   assert.equal(cuerpo.verificada, true);
 });
+
+test('#86 (B5): un rechazo de la IA no es "IA no disponible"', async () => {
+  const cliente = clienteGuionado([() => ({ stop_reason: 'refusal', content: [] })]);
+  const base = await levantar({ cliente });
+  const { status, cuerpo } = await preguntar(base, { pregunta: 'Pregunta que la IA no contesta' });
+  assert.equal(status, 200);
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.respuesta, null);
+  assert.equal(cuerpo.verificada, false);
+  assert.equal(cuerpo.guia, null);
+  assert.match(cuerpo.motivo, /^La IA no responde ese tipo de preguntas/);
+  assert.doesNotMatch(cuerpo.motivo, /no disponible/);
+});
+
+test('#86 (B5): un rechazo después de consultar conserva las consultas hechas', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('listar_periodos', {}),
+    () => ({ stop_reason: 'refusal', content: [] }),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Qué períodos hay?' });
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.respuesta, null);
+  assert.deepEqual(cuerpo.consultas.map((c) => c.herramienta), ['listar_periodos']);
+});
+
+test('#86 (B5): si la respuesta se corta por max_tokens, la IA sigue disponible', async () => {
+  const cliente = clienteGuionado([() => ({ stop_reason: 'max_tokens', content: [{ type: 'text', text: 'El ranking' }] })]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: 'Cuéntame todo' });
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.respuesta, null);
+  assert.match(cuerpo.motivo, /demasiado larga/);
+});
+
+test('#86 (B5): un stop_reason desconocido sigue siendo un fallo de la IA', async () => {
+  const cliente = clienteGuionado([() => ({ stop_reason: 'pause_turn', content: [] })]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: 'Hola' });
+  assert.equal(cuerpo.ia_disponible, false);
+});

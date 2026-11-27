@@ -14,6 +14,10 @@ export const ETIQUETA_AGENTE =
 
 const MAX_VUELTAS = 8;
 
+// La IA sí está disponible pero no entrega respuesta: no es "IA no disponible" (#86, B5).
+const MOTIVO_RECHAZO = 'La IA no responde ese tipo de preguntas. Prueba con una pregunta sobre los rankings, la calidad de los datos o los movimientos.';
+const MOTIVO_CORTADA = 'La IA no pudo terminar la respuesta porque le quedó demasiado larga. Prueba con una pregunta más concreta.';
+
 const SISTEMA = `Eres el asistente de un panel de rankings de crédito bancario de la Superintendencia de Bancos de Panamá, construido con datos 100% ficticios (12 bancos sintéticos, cortes de julio, agosto y septiembre de 2026).
 Respondes preguntas en español consultando las herramientas, que leen los resultados de un motor de cálculo determinista.
 
@@ -67,12 +71,23 @@ export async function preguntarAlAgente(pregunta, opciones) {
     { role: 'user', content: pregunta },
   ];
   const consultas = [];
+  let accion = null; // gráficos que se muestran en pantalla (#108), ya validados
+  const sinRespuesta = (motivo) => ({
+    ia_disponible: true,
+    motivo,
+    etiqueta: ETIQUETA_AGENTE,
+    respuesta: null,
+    verificada: false,
+    consultas,
+    guia: null,
+    // Los gráficos sí se muestran: su acción ya se validó y sus datos salen de la API, no de la IA.
+    accion,
+  });
   // Lo que el modelo puede citar: resultados de herramientas y, si propone una guía, los números
   // del catálogo de esos elementos. Los números que escribe el usuario no cuentan (#86, B2).
   const fuentes = { resultados: [], catalogo: [] };
   let reintento = false;
   let guia = null; // pasos del cursor guía (#72), ya validados contra el catálogo
-  let accion = null; // gráficos que se muestran en pantalla (#108), ya validados
   const herramientas = [...definicionesPara(perfil), definicionGuia(perfil)];
   if (contexto?.fechas?.length) herramientas.push(definicionGraficos(contexto));
 
@@ -140,6 +155,10 @@ export async function preguntarAlAgente(pregunta, opciones) {
       continue;
     }
 
+    // refusal: la IA rechazó la pregunta (con fallbacks: 'default' ya probaron los modelos de respaldo).
+    // max_tokens: la respuesta se cortó, y no hay otro modelo al que recurrir. Ninguna es una caída.
+    if (respuesta.stop_reason === 'refusal') return sinRespuesta(MOTIVO_RECHAZO);
+    if (respuesta.stop_reason === 'max_tokens') return sinRespuesta(MOTIVO_CORTADA);
     if (respuesta.stop_reason !== 'end_turn') {
       throw new Error(`La IA no completó la respuesta (stop_reason: ${respuesta.stop_reason})`);
     }
@@ -159,15 +178,5 @@ export async function preguntarAlAgente(pregunta, opciones) {
     });
   }
 
-  return {
-    ia_disponible: true,
-    motivo: 'La IA no pudo responder solo con números verificados del motor; prueba con una pregunta más concreta.',
-    etiqueta: ETIQUETA_AGENTE,
-    respuesta: null,
-    verificada: false,
-    consultas,
-    guia: null,
-    // Los gráficos sí se muestran: su acción ya se validó y sus datos salen de la API, no de la IA.
-    accion,
-  };
+  return sinRespuesta('La IA no pudo responder solo con números verificados del motor; prueba con una pregunta más concreta.');
 }

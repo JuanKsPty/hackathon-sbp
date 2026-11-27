@@ -70,6 +70,7 @@ Respuesta (siempre HTTP 200, salvo un 400 si la pregunta es inválida):
 - `consultas`: qué endpoints usó la IA. La UI puede mostrarlos como "fuentes" y enlazar a la vista correspondiente.
 - `accion` (#108): `null`, o los gráficos que la UI muestra en pantalla junto a la respuesta. Ver abajo.
 - Si la IA no logra responder solo con números del motor: `respuesta: null`, `verificada: false` y `motivo` explica por qué.
+- Si la IA rechaza la pregunta (`stop_reason: refusal`) o su respuesta se corta (`max_tokens`): `ia_disponible: true`, `respuesta: null`, `verificada: false` y `motivo` ("La IA no responde ese tipo de preguntas…"). La IA sí está disponible: no es una caída.
 - Si no hay key o la IA falla: `ia_disponible: false` y `motivo`.
 
 ### `accion`: gráficos de la pregunta (#108)
