@@ -46,7 +46,7 @@ export function ResumenCorte({ nombrePerfil, desde, movimientos, descomposicion 
     const continuidad = descomposicion?.Continuidad
 
     contenido = (
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-6 min-[420px]:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-6 min-[420px]:grid-cols-2 xl:grid-cols-4">
         <Cifra
           etiqueta="Saldo total válido"
           valor={formatearMonto(p.Saldo_Total_Valido)}
