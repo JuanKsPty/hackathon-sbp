@@ -49,6 +49,7 @@ export const ELEMENTOS_GUIA = [
   el('reportes.descarga-calidad', '/reportes', 'Descarga del entregable 4: calidad E1–E4'),
   el('reportes.descarga-movimientos', '/reportes', 'Descarga del entregable 5: movimientos', 'comparar_periodos'),
   el('reportes.personalizado', '/reportes', 'Reporte personalizado', 'reportes_personalizados'),
+  el('reportes.suscribirse', '/reportes', 'Alertas por correo: suscribirse con tu correo y, si quieres, los bancos y rankings a seguir'),
   // Calidad de datos
   el('calidad.cascada', '/calidad', 'Exclusiones E1–E4 y universo local válido'),
   el('calidad.reconciliaciones', '/calidad', 'Reconciliaciones 1, 2, 3 y unicidad'),

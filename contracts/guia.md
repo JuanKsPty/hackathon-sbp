@@ -77,6 +77,7 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `reportes.descarga-calidad` | Entregable 4: calidad E1–E4 | todos |
 | `reportes.descarga-movimientos` | Entregable 5: movimientos | analista, admin |
 | `reportes.personalizado` | Reporte personalizado | analista, admin |
+| `reportes.suscribirse` | Alertas por correo: suscribirse (correo, bancos y rankings opcionales) | todos |
 
 ## Calidad de datos (`/calidad`)
 
