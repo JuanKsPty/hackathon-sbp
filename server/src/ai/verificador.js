@@ -11,7 +11,9 @@ const NUMERO = /\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/g;
 //    y con números de 1 o 2 dígitos que no sean una cifra ("criterio 2, 10.5%" deja el 10.5).
 // Se borran del texto (se reemplazan por espacios) antes de buscar números.
 const LETRA = 'A-Za-zÁÉÍÓÚÜáéíóúüÑñ';
-const CODIGO = new RegExp(`[${LETRA}]+\\d+(?:[.,]\\d+)*`, 'g');
+// Un código lleva a lo más 3 dígitos y termina ahí: "USD9,999,999.00" o "B/.1,500" no son códigos,
+// son montos pegados a una moneda y se verifican.
+const CODIGO = new RegExp(`[${LETRA}]+\\d{1,3}(?!\\d|[.,]\\d)`, 'g');
 const ETIQUETAS = 'entregables?|reconciliaci(?:ón|on|ones)|reconciliacion(?:es)?|secci(?:ón|on|ones)|láminas?|laminas?|criterios?|puntos?|pasos?|reglas?';
 const REFERENCIA_NUM = '\\d+(?:\\.\\d+)*';
 const CONTINUA = '\\d{1,2}(?![\\d%]|[.,]\\d)';
@@ -20,7 +22,7 @@ const REFERENCIA = new RegExp(
     `${REFERENCIA_NUM}(?:\\s*,\\s*${CONTINUA})+\\s+(?:y|e)\\s+${CONTINUA}` + // 1, 2 y 3
     `|${REFERENCIA_NUM}\\s+(?:y|e|a)\\s+${CONTINUA}` + // 1 y 2
     `|${REFERENCIA_NUM}\\s*[–-]\\s*${CONTINUA}` + // 1–4
-    `|${REFERENCIA_NUM})`, // 4
+    `|${REFERENCIA_NUM}(?![\\d%]|[.,]\\d))`, // 4 (pero "punto 99.5%" es una cifra)
   'gi',
 );
 const enBlanco = (texto) => ' '.repeat(texto.length);

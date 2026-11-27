@@ -38,8 +38,10 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp,
   // La explicación de movimientos (/api/explicaciones, #2) sigue la misma regla.
   app.use(['/api/movimientos', '/api/exportar/movimientos.csv', '/api/explicaciones'], requiereOpcion('comparar_periodos'));
   // Los endpoints que gastan la llave de IA tienen un límite de pedidos por IP y uno global (#84).
-  // Va después del control de perfil: un 403 no cuenta.
-  app.use(['/api/ia/preguntar', '/api/explicaciones'], limitarPedidos(limiteIA));
+  // Va después del control de perfil: un 403 no cuenta. Cada endpoint tiene su propio contador:
+  // el Panel pide /api/explicaciones al entrar y no debe dejar sin cupo al chat.
+  app.use('/api/ia/preguntar', limitarPedidos(limiteIA));
+  app.use('/api/explicaciones', limitarPedidos(limiteIA));
 
   app.get('/api/salud', (req, res) => res.json({ ok: true, periodos: almacen.fechas() }));
   app.use('/api', rutasDePerfil());

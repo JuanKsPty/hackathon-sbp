@@ -40,7 +40,7 @@ Sin key, o si la IA falla, todo sale por reglas y `motivo` explica por qué.
 
 **Qué no se verifica porque no es una cifra del motor.** `extraerNumeros` ignora los *códigos* y las *referencias*:
 
-- **Códigos:** letras con dígitos pegados: `E1`, `E1–E4`, `SB21`, `AT03`, `R2`. Son nombres, no cantidades; antes un "(E1)" en la respuesta contaba como el número 1 y, al no estar en los datos, descartaba una respuesta correcta.
+- **Códigos:** letras con 1 a 3 dígitos pegados: `E1`, `E1–E4`, `SB21`, `AT03`, `R2`. Son nombres, no cantidades; antes un "(E1)" en la respuesta contaba como el número 1 y, al no estar en los datos, descartaba una respuesta correcta. Un monto pegado a la moneda (`USD9,999,999.00`) no es un código: se verifica.
 - **Referencias:** una etiqueta y su número: `entregable 4`, `reconciliación 1 y 2`, `sección 11.1`, `lámina`, `criterio`, `punto`, `paso` o `regla` seguidos de un número. Una lista sigue con `y`, `e`, `a` o un guion, solo con números de 1 o 2 dígitos que no sean una cifra: en "criterio 2, 10.5%" se ignora el 2 y se verifica el 10.5. Si la etiqueta va *después* del número ("subió 3 puntos"), es una cifra y se verifica.
 
 Siguen verificándose los montos (`B/. 1,234.56`), los conteos (`20 duplicados`), los ordinales (`3.º lugar`) y las fechas.
@@ -49,6 +49,7 @@ Lo que sí protege de forma práctica es lo que más importa en la demo: **monto
 
 - Cada respuesta trae `consultas` (qué endpoints leyó la IA) para contrastarla con los datos, y los rankings oficiales y los reportes nunca pasan por la IA: salen del motor.
 - Los números que escribe el usuario en la pregunta **no cuentan** como fuente: si repite una cifra falsa, la IA solo puede citarla si el motor también la trae (#86).
+  El costo: si la pregunta trae un umbral propio ("bancos con ponderación mayor a 15 %") y la respuesta lo repite, ese número no está en el motor y la respuesta se rechaza. La IA tiene un reintento para reescribirla sin citarlo.
 
 Si hiciera falta endurecerlo: aceptar los enteros pequeños solo cuando vengan de campos como `Posicion` o `Cambio_Posicion`. No está hecho porque obligaría a que el verificador conozca cada campo del motor. Dos tests lo dejan documentado (`tests/ai/explicaciones.test.js`).
 

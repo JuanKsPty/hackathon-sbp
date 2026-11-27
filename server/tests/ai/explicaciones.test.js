@@ -116,11 +116,16 @@ test('extraerNumeros sigue extrayendo las cifras', () => {
   assert.deepEqual(valores('criterio 2, 10.5% de variación'), ['10.5']);
   assert.deepEqual(valores('reconciliación 1 y 5,000.00'), ['5,000.00']);
   assert.deepEqual(valores('reconciliación 1 y 50%'), ['50']);
+  // Un monto pegado a la moneda no es un código, y un porcentaje tras "punto" no es una referencia.
+  assert.deepEqual(valores('lidera con USD9,999,999.00.'), ['9,999,999.00']);
+  assert.deepEqual(valores('subió en el punto 99.5%'), ['99.5']);
+  assert.deepEqual(valores('pasó a USD1500'), ['1500']);
 });
 
 test('el verificador acepta códigos y referencias pero sigue pidiendo las cifras', () => {
   assert.equal(verificarNumeros('Entregable 4: exclusiones E1–E4 y reconciliación 1 de SB21 en AT03.', {}).ok, true);
   assert.deepEqual(verificarNumeros('Se excluyeron 987654 filas (E1).', {}).noEncontrados, ['987654']);
+  assert.equal(verificarNumeros('Banco X lidera con USD9,999,999.00.', {}).ok, false);
 });
 
 // Límite documentado en src/ai/README.md (#86, B3): el verificador comprueba que el número exista
