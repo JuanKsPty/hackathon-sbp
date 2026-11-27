@@ -26,7 +26,6 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `global.menu-comparar` | Enlace a Comparar períodos | analista, admin |
 | `global.menu-reportes` | Enlace a Reportes | todos |
 | `global.menu-calidad` | Enlace a Calidad de datos | todos |
-| `global.menu-verificacion` | Enlace a Verificación del jurado | todos |
 | `global.menu-admin` | Enlace a Administración | admin |
 | `global.selector-perfil` | Sesión del sitio interno: usuario, perfil y Salir (`SesionUsuario`) | analista, admin (solo sitio interno, no depende de una opción) |
 | `global.selector-periodo` | Período de los datos (mes), junto al título de Panel, Rankings y Calidad | todos |
@@ -87,18 +86,6 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `calidad.reconciliaciones` | Reconciliaciones 1, 2, 3 y unicidad | todos |
 | `calidad.alertas` | Alertas por tipo | todos |
 | `calidad.excluidas` | Filas excluidas con su motivo | todos |
-
-## Verificación (`/verificacion`)
-
-| `data-guia` | Elemento | Perfil |
-| :--- | :--- | :--- |
-| `verificacion.filtros` | Filtros de período y banco | todos |
-| `verificacion.punto-1` | Punto 1: calidad E1–E4 y universo local válido | todos |
-| `verificacion.punto-2` | Punto 2: rankings obligatorios, posiciones y saldos | todos |
-| `verificacion.punto-3` | Punto 3: COMERCIO y CONSUMO | todos |
-| `verificacion.punto-4` | Punto 4: total de cartera y ponderación | todos |
-| `verificacion.punto-5` | Punto 5: desglose por subactividad con la reclasificación a Tarjeta | todos |
-| `verificacion.punto-6` | Punto 6: los 3 períodos y las reconciliaciones 1 y 2 | todos |
 
 ## Administración (`/admin`)
 

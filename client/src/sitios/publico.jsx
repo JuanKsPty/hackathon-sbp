@@ -1,7 +1,7 @@
 // Rutas del sitio público (sbp.juank.tech): sin inicio de sesión y sin las páginas de Analista ni de
 // Administrador. La ruta / es la landing (Inicio, a pantalla completa, sin el menú) y lleva a los
-// datos: el Panel del público está en /panel, dentro del AppShell. Calidad de datos y Verificación
-// del jurado viven solo en el sitio interno (RUTAS_SOLO_INTERNAS en navegacion.js).
+// datos: el Panel del público está en /panel, dentro del AppShell. Calidad de datos vive solo en
+// el sitio interno (RUTAS_SOLO_INTERNAS en navegacion.js).
 // Vite apunta `#sitio` a este archivo cuando SITIO=publico (vite.config.js), así que
 // el código de sitios/interno.jsx no entra en este bundle.
 import { lazy, Suspense } from 'react'

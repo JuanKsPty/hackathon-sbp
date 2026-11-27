@@ -1,6 +1,5 @@
 import {
   ArrowLeftRightIcon,
-  ClipboardCheckIcon,
   FileDownIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
@@ -17,13 +16,13 @@ export const SECCIONES = [
   { ruta: '/comparar', nombre: 'Comparar períodos', icono: ArrowLeftRightIcon, guia: 'global.menu-comparar', opcion: 'comparar_periodos' },
   { ruta: '/reportes', nombre: 'Reportes', icono: FileDownIcon, guia: 'global.menu-reportes' },
   { ruta: '/calidad', nombre: 'Calidad de datos', icono: ShieldCheckIcon, guia: 'global.menu-calidad' },
-  { ruta: '/verificacion', nombre: 'Verificación del jurado', icono: ClipboardCheckIcon, guia: 'global.menu-verificacion' },
   { ruta: '/admin', nombre: 'Administración', icono: SettingsIcon, guia: 'global.menu-admin', opcion: 'cargar_periodo' },
 ]
 
 // Páginas que existen solo en el sitio interno: el sitio público (sbp.juank.tech) no muestra Calidad de
-// datos ni Verificación del jurado (decisión de Jesús). Sus descargas CSV siguen en Reportes.
-export const RUTAS_SOLO_INTERNAS = ['/calidad', '/verificacion']
+// datos (decisión de Jesús). Sus descargas CSV siguen en Reportes. La página Verificación del jurado se
+// quitó de la app (decisión de Jesús): el endpoint GET /api/verificacion sigue disponible.
+export const RUTAS_SOLO_INTERNAS = ['/calidad']
 
 // Menú del sitio público: la ruta / es la landing (paginas/Inicio.jsx, a pantalla completa y fuera
 // del menú) y el Panel con los datos está en /panel. No hay secciones de Analista ni de

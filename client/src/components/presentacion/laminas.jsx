@@ -268,9 +268,6 @@ export function Cierre() {
             <Link to="/rankings" data-slot="button" className={buttonVariants({ variant: 'borde-claro', size: 'pildora', className: 'h-14 border-bloque-foreground/40 px-7 text-lg' })}>
               Ver rankings
             </Link>
-            <Link to="/verificacion" data-slot="button" className={buttonVariants({ variant: 'borde-claro', size: 'pildora', className: 'h-14 border-bloque-foreground/40 px-7 text-lg' })}>
-              Verificación del jurado
-            </Link>
           </div>
         </div>
         <p className="flex flex-col gap-1 text-xl">

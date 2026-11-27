@@ -6,7 +6,7 @@ const rutas = (puede, sitio = { interno: true }) => seccionesVisibles(puede, sit
 const conOpciones = (...opciones) => (opcion) => opciones.includes(opcion)
 
 test('interno sin opciones (cargando o API caída) quedan solo las secciones públicas', () => {
-  assert.deepEqual(rutas(() => false), ['/', '/rankings', '/reportes', '/calidad', '/verificacion'])
+  assert.deepEqual(rutas(() => false), ['/', '/rankings', '/reportes', '/calidad'])
 })
 
 test('Analista ve Comparar períodos pero no Administración', () => {
@@ -28,7 +28,7 @@ test('cada sección restringida pide una opción y todas llevan data-guia', () =
 
 test('el menú del sitio público empieza en el Panel (/panel) y nunca muestra secciones de Analista ni de Administrador', () => {
   const todas = () => true
-  // Calidad de datos y Verificación del jurado solo están en el sitio interno.
+  // Calidad de datos solo está en el sitio interno.
   assert.deepEqual(rutas(todas, { interno: false }), ['/panel', '/rankings', '/reportes'])
   assert.equal(seccionesVisibles(todas, { interno: false })[0].nombre, 'Panel')
   assert.equal(SECCIONES_PUBLICO[0].guia, 'global.menu-panel')
@@ -42,11 +42,16 @@ test('rutaEnElSitio: en el público / (Panel del catálogo) es /panel; en el int
   assert.equal(rutaEnElSitio(null, { interno: false }), null)
 })
 
-test('rutaDisponible: Calidad y Verificación no existen en el sitio público, sí en el interno', () => {
+test('rutaDisponible: Calidad no existe en el sitio público, sí en el interno', () => {
   assert.equal(rutaDisponible('/calidad', { interno: false }), false)
   assert.equal(rutaDisponible('/calidad?periodo=20260930', { interno: false }), false)
-  assert.equal(rutaDisponible('/verificacion', { interno: false }), false)
   assert.equal(rutaDisponible('/rankings', { interno: false }), true)
   assert.equal(rutaDisponible('/calidad', { interno: true }), true)
-  assert.equal(rutaDisponible('/verificacion', { interno: true }), true)
+})
+
+test('Verificación del jurado ya no está en el menú de ningún perfil ni sitio', () => {
+  const todas = () => true
+  assert.ok(!SECCIONES.some((s) => s.ruta === '/verificacion'))
+  assert.ok(!rutas(todas).includes('/verificacion'))
+  assert.ok(!rutas(todas, { interno: false }).includes('/verificacion'))
 })
