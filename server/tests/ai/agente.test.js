@@ -251,13 +251,13 @@ test('guía: si señala algo que el perfil no ve, vuelve como error y corrige', 
       const resultado = params.messages.at(-1).content[0];
       assert.equal(resultado.is_error, true);
       assert.match(resultado.content, /no está disponible para el perfil publico/);
-      return usarHerramienta('guiar_usuario', { pasos: [{ guia: 'global.selector-perfil', texto: 'Cambia al perfil Administrador.' }] })();
+      return usarHerramienta('guiar_usuario', { pasos: [{ guia: 'global.menu-rankings', texto: 'Mientras tanto, consulta los rankings aquí.' }] })();
     },
     responder('Cargar un período es una opción del perfil Administrador.'),
   ]);
   const base = await levantar({ cliente });
   const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo cargo un período?' }, 'publico');
-  assert.deepEqual(cuerpo.guia.pasos, [{ ruta: null, guia: 'global.selector-perfil', texto: 'Cambia al perfil Administrador.' }]);
+  assert.deepEqual(cuerpo.guia.pasos, [{ ruta: null, guia: 'global.menu-rankings', texto: 'Mientras tanto, consulta los rankings aquí.' }]);
 });
 
 test('guía: un número inventado en los pasos invalida la respuesta', async () => {
@@ -505,13 +505,15 @@ async function promptPara(perfil) {
 
 test('prompt de Público: menciona al Analista y al Administrador para lo que no tiene', async () => {
   const sistema = await promptPara('publico');
-  assert.match(sistema, /el perfil Público y lo cambia con el selector de perfil del encabezado/);
+  assert.match(sistema, /el perfil Público\. Hay dos sitios/);
+  assert.match(sistema, /entrar al sitio interno con una cuenta de ese perfil/);
+  assert.doesNotMatch(sistema, /selector de perfil/);
   const ajenas = sistema.split('Opciones que su perfil no tiene: ')[1].split('\n')[0];
   // Comparar períodos es del Analista (y del Administrador); cargar un período, solo del Administrador.
   assert.match(ajenas, /Comparar períodos \(solo Analista o Administrador\)/);
   assert.match(ajenas, /Cargar o actualizar un período \(solo Administrador\)/);
   // Y la instrucción: decir qué perfil la tiene, no armar un sustituto ni decir que la app no lo tiene.
-  assert.match(sistema, /dile qué perfil tiene esa opción y que se cambia con el selector de perfil/);
+  assert.match(sistema, /dile qué perfil tiene esa opción y que para usarla hay que entrar al sitio interno/);
   assert.match(sistema, /no digas que la app no lo tiene/);
   assert.match(sistema, /Nunca armes una comparación por tu cuenta/);
 });

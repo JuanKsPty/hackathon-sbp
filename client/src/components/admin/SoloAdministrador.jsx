@@ -9,7 +9,7 @@ export function SoloAdministrador({ perfil }) {
     <Vacio
       icono={LockIcon}
       titulo="Esta sección es solo para el perfil Administrador"
-      descripcion={`Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. La carga de períodos, los parámetros, los catálogos y el registro de operaciones son del Administrador. Para entrar, usa una cuenta de Administrador.`}
+      descripcion={`Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. La carga de períodos, los parámetros, los catálogos, los usuarios y permisos y el registro de operaciones son del Administrador. Para entrar, usa una cuenta de Administrador.`}
     />
   )
 }

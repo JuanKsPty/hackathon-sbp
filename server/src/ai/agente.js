@@ -44,13 +44,13 @@ function seccionPerfil(perfil) {
   const propias = OPCIONES.filter((o) => o.perfiles.includes(perfil)).map((o) => o.nombre);
   const ajenas = OPCIONES.filter((o) => !o.perfiles.includes(perfil)).map((o) => `${o.nombre} (solo ${quienes(o)})`);
   const lineas = [
-    `Perfiles de la app: quien pregunta tiene el perfil ${NOMBRES_PERFIL[perfil]} y lo cambia con el selector de perfil del encabezado.`,
+    `Perfiles de la app: quien pregunta tiene el perfil ${NOMBRES_PERFIL[perfil]}. Hay dos sitios: el público, sin inicio de sesión y siempre con perfil Público, y el interno, donde Analista y Administrador entran con su cuenta. El perfil no se elige: sale de la cuenta con la que se inicia sesión.`,
     `- Opciones de su perfil: ${propias.join('; ')}.`,
   ];
   if (ajenas.length > 0) {
     lineas.push(
       `- Opciones que su perfil no tiene: ${ajenas.join('; ')}.`,
-      'Si pide o pregunta cómo hacer algo de esa lista, no lo hagas por otra vía ni armes un sustituto con los datos de otras herramientas, y no digas que la app no lo tiene: dile qué perfil tiene esa opción y que se cambia con el selector de perfil del encabezado (puedes señalarlo con guiar_usuario).',
+      'Si pide o pregunta cómo hacer algo de esa lista, no lo hagas por otra vía ni armes un sustituto con los datos de otras herramientas, y no digas que la app no lo tiene: dile qué perfil tiene esa opción y que para usarla hay que entrar al sitio interno con una cuenta de ese perfil.',
     );
   }
   return lineas.join('\n');

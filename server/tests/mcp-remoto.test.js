@@ -8,6 +8,7 @@ import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
 import { paqueteReal } from './ayuda.js';
+import { perfilDe } from '../src/routes/mcp.js';
 
 let servidor;
 let base;
@@ -78,4 +79,16 @@ test('perfil inválido responde 400 y GET responde 405', async () => {
   const get = await fetch(`${base}/mcp`);
   assert.equal(get.status, 405);
   assert.equal(get.headers.get('allow'), 'POST');
+});
+
+// ?perfil= solo vale en llamadas directas desde la misma máquina (#141): con npm run dev el server
+// escucha en la red y otra máquina no debe poder pedir ?perfil=admin.
+test('?perfil= del MCP solo se acepta desde loopback y nunca en los sitios', () => {
+  const pedido = (ip, extra = {}) => ({ sitio: 'directo', perfil: 'publico', query: { perfil: 'admin' }, socket: { remoteAddress: ip }, ...extra });
+  assert.equal(perfilDe(pedido('127.0.0.1')), 'admin');
+  assert.equal(perfilDe(pedido('::ffff:127.0.0.1')), 'admin');
+  assert.equal(perfilDe(pedido('192.168.1.20')), 'publico');
+  assert.equal(perfilDe(pedido('192.168.1.20', { perfil: 'analista' })), 'analista'); // token o sesión
+  assert.equal(perfilDe(pedido('127.0.0.1', { sitio: 'publico' })), 'publico');
+  assert.equal(perfilDe(pedido('127.0.0.1', { sitio: 'interno', perfil: 'analista' })), 'analista');
 });
