@@ -28,24 +28,22 @@ export function AgenteFlotante() {
           aria-label="Asistente IA"
           className="flex h-[min(620px,calc(100svh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
         >
-          <header className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold">Asistente IA</p>
-              <Link
-                to="/asistente"
-                onClick={cerrar}
-                className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Abrir página completa
-                <ExternalLinkIcon className="size-3" aria-hidden="true" />
-              </Link>
+          <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-2">
+            <p className="text-sm font-semibold">Asistente IA</p>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon-sm" asChild>
+                <Link to="/asistente" onClick={cerrar} aria-label="Abrir en página completa" title="Abrir en página completa">
+                  <ExternalLinkIcon aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon-sm" onClick={cerrar} aria-label="Minimizar el asistente" title="Minimizar">
+                <MinusIcon aria-hidden="true" />
+              </Button>
             </div>
-            <Button variant="ghost" size="icon" onClick={cerrar} aria-label="Minimizar el asistente">
-              <MinusIcon aria-hidden="true" />
-            </Button>
           </header>
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <ChatAsistente />
+          {/* Tamaño fijo: el chat ocupa el alto del panel y solo su lista de mensajes hace scroll. */}
+          <div className="flex min-h-0 flex-1 flex-col p-4">
+            <ChatAsistente enPanel />
           </div>
         </section>
       )}
