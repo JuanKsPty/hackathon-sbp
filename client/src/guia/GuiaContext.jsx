@@ -4,6 +4,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { ESTADO_INICIAL, necesitaNavegar, pasoActual, reductorGuia, selectorDe } from './motor.js'
+import { rutaEnElSitio } from '@/components/layout/navegacion.js'
 import { esperarElemento, llevarALaVista, prefiereMenosMovimiento, rectDe } from './dom.js'
 
 const GuiaContext = createContext(null)
@@ -20,7 +21,9 @@ export function GuiaProvider({ children }) {
   // 1. Navegar a la página del paso, si hace falta.
   useEffect(() => {
     if (estado.fase !== 'navegando' || !paso) return
-    if (necesitaNavegar(paso, pathname)) navegar(paso.ruta)
+    // En el público, el Panel del catálogo (/) está en /panel (rutaEnElSitio).
+    const destino = rutaEnElSitio(paso.ruta)
+    if (necesitaNavegar({ ...paso, ruta: destino }, pathname)) navegar(destino)
     despachar({ tipo: 'navegado' })
     // pathname queda afuera a propósito: solo se decide al entrar en la fase.
     // eslint-disable-next-line react-hooks/exhaustive-deps

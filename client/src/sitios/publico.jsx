@@ -1,5 +1,6 @@
 // Rutas del sitio público (sbp.juank.tech): sin inicio de sesión y sin las páginas de Analista ni de
-// Administrador (tampoco el Panel: la ruta / es el Inicio para el público).
+// Administrador. La ruta / es la landing (Inicio, a pantalla completa, sin el menú) y lleva a los
+// datos: el Panel del público está en /panel, dentro del AppShell.
 // Vite apunta `#sitio` a este archivo cuando SITIO=publico (vite.config.js), así que
 // el código de sitios/interno.jsx no entra en este bundle.
 import { lazy, Suspense } from 'react'
@@ -9,11 +10,13 @@ import Asistente from '@/paginas/Asistente.jsx'
 import Calidad from '@/paginas/Calidad.jsx'
 import Inicio from '@/paginas/Inicio.jsx'
 import NoEncontrada from '@/paginas/NoEncontrada.jsx'
+import PanelPublico from '@/paginas/PanelPublico.jsx'
 import Rankings from '@/paginas/Rankings.jsx'
 import Reportes from '@/paginas/Reportes.jsx'
 import Verificacion from '@/paginas/Verificacion.jsx'
 
-// Presentación de la app para la demo (/presentacion): pantalla completa, sin el AppShell. Se carga
+// Presentación de la app para la demo (/presentacion): URL privada, solo para presentar; ningún
+// botón ni enlace de la app lleva aquí. Pantalla completa, sin el AppShell. Se carga
 // aparte para no sumar peso al resto del sitio.
 const Presentacion = lazy(() => import('@/paginas/Presentacion.jsx'))
 
@@ -28,9 +31,11 @@ export function RutasDelSitio() {
           </Suspense>
         }
       />
+      {/* Landing: portada, casos de uso y "Ver los datos". */}
+      <Route index element={<Inicio />} />
       <Route element={<AppShell />}>
-        {/* Inicio para el público: portada, casos de uso y dashboard del corte (#139). */}
-        <Route index element={<Inicio />} />
+        {/* Panel del público: dashboard del corte (#139). */}
+        <Route path="panel" element={<PanelPublico />} />
         <Route path="rankings" element={<Rankings />} />
         <Route path="reportes" element={<Reportes />} />
         <Route path="calidad" element={<Calidad />} />

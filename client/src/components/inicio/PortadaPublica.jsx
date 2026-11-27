@@ -1,9 +1,10 @@
 import { Link } from 'react-router'
-import { ArrowRightIcon, PresentationIcon, UsersIcon } from 'lucide-react'
+import { ArrowRightIcon, UsersIcon } from 'lucide-react'
 import { BloqueOscuro, Etiqueta, TituloDosTonos } from '@/components/marca'
+import { RUTA_PANEL_PUBLICO } from '@/components/layout/navegacion.js'
 import { Button } from '@/components/ui/button'
 
-// Portada del Inicio público: para quién es, qué responde y las dos llamadas principales. Las cifras
+// Portada del Inicio público: para quién es, qué responde y la llamada a ver los datos. Las cifras
 // del período van en el encabezado del dashboard (landing/EncabezadoCorte.jsx).
 export function PortadaPublica() {
   return (
@@ -25,15 +26,9 @@ export function PortadaPublica() {
         </p>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="claro" size="pildora">
-            <Link to="/rankings">
-              Consultar rankings
+            <Link to={RUTA_PANEL_PUBLICO}>
+              Ver los datos
               <ArrowRightIcon aria-hidden="true" />
-            </Link>
-          </Button>
-          <Button asChild variant="borde-claro" size="pildora">
-            <Link to="/presentacion">
-              <PresentationIcon aria-hidden="true" />
-              Ver la presentación
             </Link>
           </Button>
         </div>
