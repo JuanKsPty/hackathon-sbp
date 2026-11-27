@@ -11,6 +11,9 @@ const MENU_POR_RUTA = {
   '/admin': 'global.menu-admin',
 }
 
+/** Botón que abre el menú cuando las secciones no caben en el encabezado. */
+export const BOTON_MENU = 'button[aria-label="Abrir menú"]'
+
 const guia = (id) => `[data-guia="${id}"]`
 
 /**
@@ -21,7 +24,18 @@ const guia = (id) => `[data-guia="${id}"]`
 export function objetivosDe(accion) {
   const uno = objetivoDe(accion)
   if (accion?.tipo === 'elegir') return [`${guia(accion.control)} [data-guia-opcion="${accion.valor}"]`, uno]
+  // En pantallas angostas el menú está dentro del botón de menú (arriba a la izquierda).
+  if (accion?.tipo === 'ir' && uno) return [uno, BOTON_MENU]
   return uno ? [uno] : []
+}
+
+/**
+ * Si el cursor hace clic de verdad en el objetivo: el enlace del menú, la pestaña o la columna. No en
+ * el control general (el selector de período abriría su lista) ni en la fila resaltada.
+ */
+export function seTocaDeVerdad(accion, indice) {
+  if (accion?.tipo === 'ir' || accion?.tipo === 'ordenar') return true
+  return accion?.tipo === 'elegir' && indice === 0
 }
 
 /** Selector principal del elemento (sin la opción). */

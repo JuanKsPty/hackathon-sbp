@@ -1,7 +1,7 @@
 // Objetivo del cursor en la demostración (#123). Corre con: npm test (en client/).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { objetivoDe } from './objetivo.js'
+import { BOTON_MENU, objetivoDe, objetivosDe, seTocaDeVerdad } from './objetivo.js'
 
 test('objetivoDe: menú, columna, fila y control', () => {
   assert.equal(objetivoDe({ tipo: 'ir', ruta: '/rankings' }), '[data-guia="global.menu-rankings"]')
@@ -28,4 +28,16 @@ test('objetivosDe: al elegir, primero la opción y después el control', async (
   ])
   assert.deepEqual(objetivosDe({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Banco' }), ['[data-guia="rankings.tabla"] [data-guia-columna="Banco"]'])
   assert.deepEqual(objetivosDe({ tipo: 'ir', ruta: '/otra' }), [])
+})
+
+test('ir: el enlace del menú y, si no se ve, el botón de menú', () => {
+  assert.deepEqual(objetivosDe({ tipo: 'ir', ruta: '/rankings' }), ['[data-guia="global.menu-rankings"]', BOTON_MENU])
+})
+
+test('clic de verdad: menú, columna y la opción; no el control general ni la fila', () => {
+  assert.equal(seTocaDeVerdad({ tipo: 'ir' }, 0), true)
+  assert.equal(seTocaDeVerdad({ tipo: 'ordenar' }, 0), true)
+  assert.equal(seTocaDeVerdad({ tipo: 'elegir' }, 0), true)
+  assert.equal(seTocaDeVerdad({ tipo: 'elegir' }, 1), false)
+  assert.equal(seTocaDeVerdad({ tipo: 'resaltar' }, 0), false)
 })

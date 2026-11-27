@@ -34,26 +34,22 @@ export function AgenteFlotante() {
       }}
       className="fixed top-[5.75rem] right-4 z-40 flex h-[min(680px,calc(100svh-6.75rem))] w-[min(440px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
     >
-      <header className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold">Asistente IA</p>
-          <p className="text-xs text-muted-foreground">Pregunta en lenguaje natural. No calcula: cada cifra sale del motor.</p>
-          <Link
-            to="/asistente"
-            onClick={cerrar}
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Abrir página completa
-            <ExternalLinkIcon className="size-3" aria-hidden="true" />
-          </Link>
+      <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-2">
+        <p className="text-sm font-semibold">Asistente IA</p>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon-sm" asChild>
+            <Link to="/asistente" onClick={cerrar} aria-label="Abrir en página completa" title="Abrir en página completa">
+              <ExternalLinkIcon aria-hidden="true" />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="icon-sm" onClick={cerrar} aria-label="Minimizar el asistente" title="Minimizar">
+            <MinusIcon aria-hidden="true" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={cerrar} aria-label="Minimizar el asistente">
-          <MinusIcon aria-hidden="true" />
-        </Button>
       </header>
-      <div data-desplazable="" className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-4">
-        <ChatAsistente enPanel className="min-h-[24rem]" />
-        <GraficosAsistente />
+      {/* Tamaño fijo y un solo scroll: el de la lista de mensajes, que lleva los gráficos al final. */}
+      <div className="flex min-h-0 flex-1 flex-col p-4">
+        <ChatAsistente enPanel pie={<GraficosAsistente />} />
       </div>
     </section>
   )

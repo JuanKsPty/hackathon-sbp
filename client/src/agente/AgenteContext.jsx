@@ -38,7 +38,8 @@ export function AgenteProvider({ children }) {
     async (pantalla, { antesDe, signal } = {}) => {
       const resultado = await ejecutarAcciones(pantalla?.acciones ?? [], {
         registro,
-        navegar: (destino) => navegar(destino),
+        // Si el clic del cursor ya llevó a esa página, no se navega otra vez (evita una entrada repetida).
+        navegar: (destino) => window.location.pathname !== destino && navegar(destino),
         rutaActual: () => ruta.current,
         antesDe,
         signal,

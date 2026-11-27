@@ -1,5 +1,5 @@
 // Rutas del sitio público (sbp.juank.tech): sin inicio de sesión y sin las páginas de Analista ni de
-// Administrador. La ruta / es el Inicio para el público (no el Panel del Analista).
+// Administrador (tampoco el Panel: la ruta / es el Inicio para el público).
 // Vite apunta `#sitio` a este archivo cuando SITIO=publico (vite.config.js), así que
 // el código de sitios/interno.jsx no entra en este bundle.
 import { lazy, Suspense } from 'react'
@@ -29,6 +29,7 @@ export function RutasDelSitio() {
         }
       />
       <Route element={<AppShell />}>
+        {/* Inicio para el público: portada, casos de uso y dashboard del corte (#139). */}
         <Route index element={<Inicio />} />
         <Route path="rankings" element={<Rankings />} />
         <Route path="reportes" element={<Reportes />} />

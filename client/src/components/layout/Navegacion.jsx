@@ -23,7 +23,7 @@ export function Navegacion({ alNavegar }) {
       </div>
       <nav aria-label="Secciones">
         <ul className="flex flex-col gap-1">
-          {seccionesVisibles(puede, { interno: __INTERNO__ }).map(({ ruta, nombre, icono: Icono, guia }) => (
+          {seccionesVisibles(puede).map(({ ruta, nombre, icono: Icono, guia }) => (
             <li key={ruta}>
               <NavLink
                 to={ruta}
