@@ -77,6 +77,9 @@ try {
     } else {
       console.log(`Evaluando ${casos.length} casos × ${repeticiones} con ${estado.modelo} en ${base}\n`);
       const resultados = [];
+      // La API desplegada limita a 10 preguntas por minuto por IP (#84): contra ella se deja al menos
+      // 6.5 s entre preguntas para no recibir 429. La API en memoria no tiene límite.
+      const esperaMinimaMs = process.env.EVAL_API_URL ? 6500 : 0;
       for (const caso of casos) {
         const esperado = await caso.esperado(api);
         for (let i = 0; i < repeticiones; i++) {
@@ -91,6 +94,7 @@ try {
           const { ok, fallas } = calificar(respuesta, esperado);
           resultados.push({ id: caso.id, categoria: caso.categoria, perfil: caso.perfil, pregunta: caso.pregunta, ok, fallas, ms, respuesta });
           console.log(`${ok ? '✔' : '✖'} ${caso.id} (${(ms / 1000).toFixed(1)} s)${ok ? '' : `\n    ${fallas.join('\n    ')}`}`);
+          if (ms < esperaMinimaMs) await new Promise((listo) => setTimeout(listo, esperaMinimaMs - ms));
         }
       }
       imprimirResumen(resultados);

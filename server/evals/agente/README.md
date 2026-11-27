@@ -16,7 +16,8 @@ npm run eval:agente -- --confirmar --caso guia-carga-admin --repeticiones 3
 ```
 
 - **Por defecto** levanta la API en memoria con los datos de `data/` y usa `ANTHROPIC_API_KEY` y `AI_MODEL`.
-- **Con `EVAL_API_URL=https://…/api`** evalúa una API ya desplegada (la IA la configura ese servidor).
+- **Con `EVAL_API_URL=https://…/api`** evalúa una API ya desplegada (la IA la configura ese servidor). Esa API limita a 10 preguntas por minuto por IP, así que el script deja al menos 6.5 s entre preguntas.
+  Ojo: desde el inicio de sesión (#120) el sitio público responde siempre como Público, así que los casos de Analista y Administrador solo se evalúan bien con la API en memoria.
 - Sin IA disponible, avisa y no evalúa nada.
 - **Costo:** `--confirmar` hace una pregunta por caso y repetición (hoy son 18 casos).
 
