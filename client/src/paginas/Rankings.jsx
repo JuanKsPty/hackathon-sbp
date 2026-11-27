@@ -17,7 +17,7 @@ import { DesgloseSubactividades } from '@/components/rankings/DesgloseSubactivid
 import { FiltrosRanking, TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { GraficoRanking } from '@/components/rankings/GraficoRanking.jsx'
 import { SelectorRanking } from '@/components/rankings/SelectorRanking.jsx'
-import { TablaRanking } from '@/components/rankings/TablaRanking.jsx'
+import { ORDEN_INICIAL, TablaRanking } from '@/components/rankings/TablaRanking.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
@@ -110,6 +110,19 @@ export default function Rankings() {
     estado: () => ({ ranking: filtros.ranking, subactividad: filtros.subactividad }),
     restaurar: (anterior) => cambiarEnUrl({ ranking: anterior?.ranking, subactividad: anterior?.subactividad }),
   })
+  // La tabla: su orden y la fila del agente viven aquí, así sobreviven a que la tabla se vuelva a
+  // montar cuando cambian los datos (por ejemplo, justo después de elegir otro ranking).
+  const [ordenTabla, setOrdenTabla] = useState(ORDEN_INICIAL)
+  const [delAgente, setDelAgente] = useState(null)
+  useControlGuia('rankings.tabla', {
+    ordenar: (columna, sentido) => setOrdenTabla({ clave: columna, ascendente: sentido === 'asc' }),
+    resaltar: (codigo) => setDelAgente(codigo),
+    estado: () => ({ orden: ordenTabla, delAgente }),
+    restaurar: (anterior) => {
+      setOrdenTabla(anterior?.orden ?? ORDEN_INICIAL)
+      setDelAgente(anterior?.delAgente ?? null)
+    },
+  })
   useControlGuia('rankings.filtro-banco', {
     elegir: (valor) => cambiarEnUrl({ banco: sinFiltro(valor) }),
     actual: () => filtros.banco ?? 'todos',
@@ -179,7 +192,13 @@ export default function Rankings() {
         </CardHeader>
         <CardContent>
           <Estado consulta={consultaRanking} vacio={bancosVisibles.length === 0}>
-            <TablaRanking bancos={bancosVisibles} bancoResaltado={bancoFiltrado} />
+            <TablaRanking
+              bancos={bancosVisibles}
+              bancoResaltado={bancoFiltrado}
+              orden={ordenTabla}
+              alOrdenar={setOrdenTabla}
+              delAgente={delAgente}
+            />
           </Estado>
         </CardContent>
       </Card>

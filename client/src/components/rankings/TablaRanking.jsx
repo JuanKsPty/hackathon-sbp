@@ -1,4 +1,3 @@
-import { useControlGuia } from '@/agente/useControlGuia.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDownIcon, ArrowUpIcon, ArrowUpDownIcon } from 'lucide-react'
 import { AyudaTermino } from '@/components/glosario/AyudaTermino.jsx'
@@ -23,11 +22,16 @@ function comparar(a, b, clave) {
   return String(x).localeCompare(String(y), 'es')
 }
 
+export const ORDEN_INICIAL = { clave: 'Posicion', ascendente: true }
+
 // Tabla ordenable: un clic en el encabezado ordena por esa columna; otro clic invierte el orden.
-export function TablaRanking({ bancos, bancoResaltado }) {
-  const [orden, setOrden] = useState({ clave: 'Posicion', ascendente: true })
-  // Fila que resalta el agente (#125): aparte del filtro de banco (bancoResaltado).
-  const [delAgente, setDelAgente] = useState(null)
+// `orden`/`alOrdenar` (opcionales) dejan el orden en manos de la página, para que sobreviva a que la
+// tabla se vuelva a montar al recargar datos (el agente ordena justo después de cambiar el ranking).
+// `delAgente`: fila que resalta el agente (#125), aparte del filtro de banco (bancoResaltado).
+export function TablaRanking({ bancos, bancoResaltado, orden: ordenDePagina, alOrdenar, delAgente = null }) {
+  const [ordenPropio, setOrdenPropio] = useState(ORDEN_INICIAL)
+  const orden = ordenDePagina ?? ordenPropio
+  const setOrden = alOrdenar ?? setOrdenPropio
   const cuerpo = useRef(null)
 
   const filas = useMemo(() => {
@@ -37,17 +41,6 @@ export function TablaRanking({ bancos, bancoResaltado }) {
 
   const ordenarPor = (clave) =>
     setOrden((previo) => ({ clave, ascendente: previo.clave === clave ? !previo.ascendente : true }))
-
-  // Acciones de pantalla del agente (#125): ordenar por una columna y deshacerlo.
-  useControlGuia('rankings.tabla', {
-    ordenar: (columna, sentido) => setOrden({ clave: columna, ascendente: sentido === 'asc' }),
-    resaltar: (codigo) => setDelAgente(codigo),
-    estado: () => ({ orden, delAgente }),
-    restaurar: (anterior) => {
-      if (anterior?.orden) setOrden(anterior.orden)
-      setDelAgente(anterior?.delAgente ?? null)
-    },
-  })
 
   // La fila resaltada por el agente se lleva a la vista.
   useEffect(() => {
