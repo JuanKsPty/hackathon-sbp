@@ -7,7 +7,7 @@ import {
   ordenarMovimientos,
   ORDEN_INICIAL,
   periodosPorDefecto,
-  resolverPeriodo,
+  resolverOpcion,
   tendenciaDeCambio,
   validarRango,
 } from './movimientos.js'
@@ -38,11 +38,11 @@ test('periodosPorDefecto: el penúltimo y el último, sin importar el orden reci
   assert.deepEqual(periodosPorDefecto([]), { desde: null, hasta: null })
 })
 
-test('resolverPeriodo: respeta la elección mientras el período siga cargado', () => {
+test('resolverOpcion: respeta la elección mientras siga siendo una opción válida', () => {
   const fechas = ['20260731', '20260831', '20260930']
-  assert.equal(resolverPeriodo('20260731', fechas, '20260831'), '20260731')
-  assert.equal(resolverPeriodo('20250101', fechas, '20260831'), '20260831')
-  assert.equal(resolverPeriodo(null, fechas, '20260831'), '20260831')
+  assert.equal(resolverOpcion('20260731', fechas, '20260831'), '20260731')
+  assert.equal(resolverOpcion('20250101', fechas, '20260831'), '20260831')
+  assert.equal(resolverOpcion(null, fechas, '20260831'), '20260831')
 })
 
 test('validarRango: desde debe ser anterior a hasta', () => {

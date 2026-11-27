@@ -29,9 +29,10 @@ export function periodosPorDefecto(fechas) {
   return { desde: orden.length >= 2 ? orden.at(-2) : null, hasta: orden.at(-1) ?? null }
 }
 
-// Usa la elección del usuario si sigue existiendo entre los períodos cargados; si no, la de omisión.
-export function resolverPeriodo(elegido, fechas, porDefecto) {
-  return elegido && fechas.includes(elegido) ? elegido : porDefecto
+// Usa la elección del usuario si sigue existiendo entre las opciones válidas (períodos cargados,
+// rankings del catálogo); si no, la de omisión.
+export function resolverOpcion(elegido, validas, porDefecto) {
+  return elegido && validas.includes(elegido) ? elegido : porDefecto
 }
 
 // Las fechas son AAAAMMDD, así que comparar texto equivale a comparar fechas.
