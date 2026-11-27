@@ -70,3 +70,14 @@ test('elegir: control existente, visible para el perfil y con un valor del catá
   assert.match(validarAccion({ tipo: 'elegir', control: 'rankings.boton-magico', valor: 'x' }, { contexto: c }).error, /no existe o no se puede manejar/);
   assert.match(validarAccion({ tipo: 'elegir', control: 'rankings.tabla', valor: 'x' }, { contexto: c }).error, /no admite "elegir"/);
 });
+
+test('ordenar: columna del control y orden asc/desc (desc por defecto)', () => {
+  const c = contexto();
+  assert.deepEqual(validarAccion({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Operaciones_Validas' }, { contexto: c }), {
+    ok: true, accion: { tipo: 'ordenar', control: 'rankings.tabla', ruta: '/rankings', columna: 'Operaciones_Validas', orden: 'desc', texto: '' },
+  });
+  assert.equal(validarAccion({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Posicion', orden: 'asc' }, { contexto: c }).accion.orden, 'asc');
+  assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Tasa' }, { contexto: c }).error, /no se puede ordenar/);
+  assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Banco', orden: 'random' }, { contexto: c }).error, /asc.*desc/);
+  assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.selector-ranking', columna: 'Banco' }, { contexto: c }).error, /no admite "ordenar"/);
+});

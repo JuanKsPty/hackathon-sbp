@@ -102,5 +102,14 @@ export function validarAccion(accion, { contexto, perfil = 'publico' }) {
     if (error) return { ok: false, error: `${control}: ${error}` };
     return { ok: true, accion: { tipo, control, ruta, valor: accion.valor.trim(), texto } };
   }
+
+  if (tipo === 'ordenar') {
+    if (!admite.ordenar.includes(accion.columna)) {
+      return { ok: false, error: `${control}: no se puede ordenar por "${accion.columna}" (${admite.ordenar.join(', ')}).` };
+    }
+    const orden = accion.orden ?? 'desc';
+    if (!['asc', 'desc'].includes(orden)) return { ok: false, error: `${control}: el orden debe ser "asc" o "desc".` };
+    return { ok: true, accion: { tipo, control, ruta, columna: accion.columna, orden, texto } };
+  }
   return { ok: false, error: `acción "${tipo}" todavía no soportada.` };
 }
