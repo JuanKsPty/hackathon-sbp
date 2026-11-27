@@ -41,7 +41,7 @@ export function Reconciliaciones({ reconciliaciones }) {
         <CardDescription>Controles que deben cuadrar al centavo en cada período.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="flex flex-col divide-y">
+        <ul className="flex flex-col divide-y" data-guia="calidad.reconciliaciones">
           {controles.map((c) => (
             <li key={c.nombre} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
               <div className="flex items-center justify-between gap-2">

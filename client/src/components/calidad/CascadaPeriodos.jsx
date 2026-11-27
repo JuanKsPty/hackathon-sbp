@@ -18,7 +18,8 @@ export function CascadaPeriodos({ periodos, periodoElegido }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Table>
+        {/* data-guia: identificador para el agente guía (contracts/guia.md, #72) */}
+        <Table data-guia="calidad.cascada">
           <TableHeader>
             <TableRow>
               <TableHead>Período</TableHead>

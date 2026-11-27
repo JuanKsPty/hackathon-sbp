@@ -32,7 +32,7 @@ export function AlertasPorTipo({ calidad }) {
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <dl className="grid gap-3 sm:grid-cols-2">
+        <dl className="grid gap-3 sm:grid-cols-2" data-guia="calidad.alertas">
           {TIPOS.map((t) => (
             <div key={t.campo} className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2">
               <dt className="text-sm">{t.nombre}</dt>

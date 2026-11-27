@@ -101,7 +101,7 @@ function TablaPaginada({ filas, nombreBanco }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Table>
+      <Table data-guia="calidad.excluidas">
         <TableHeader>
           <TableRow>
             <TableHead className="text-right">Fila</TableHead>
