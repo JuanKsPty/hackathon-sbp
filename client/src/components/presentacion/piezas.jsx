@@ -51,16 +51,6 @@ export function IconoCirculo({ icono: Icono, className }) {
   )
 }
 
-// Cifra grande: etiqueta arriba, valor (del API) y detalle.
-export function CifraGrande({ etiqueta, valor, detalle, className }) {
-  return (
-    <Tarjeta className={cn('gap-2', className)}>
-      <p className="text-lg text-muted-foreground">{etiqueta}</p>
-      <p className="cifra text-[46px] leading-none font-medium tracking-tight">{valor}</p>
-      {detalle && <p className="text-base text-muted-foreground">{detalle}</p>}
-    </Tarjeta>
-  )
-}
 
 // Texto de reemplazo mientras llegan los datos o si el API no responde.
 export function SinDatos({ cargando }) {

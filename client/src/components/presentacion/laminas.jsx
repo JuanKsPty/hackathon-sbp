@@ -1,12 +1,13 @@
-// Láminas de la presentación web (/presentacion). Siguen la historia del deck de presentacion/
-// (#71), más corta. Ninguna cifra se escribe aquí (R2): todas llegan en `datos`
-// (useDatosPresentacion), y mientras no llegan se ve "—".
+// Láminas de la presentación web (/presentacion). La historia va por roles y con poco lenguaje
+// técnico: el problema de cada persona (Público, Analista, Administrador), lo que la app le da a
+// cada una y por qué confiar en los números. Lo técnico queda en un anexo, para las preguntas del
+// jurado. Ninguna cifra se escribe aquí (R2): todas llegan en `datos` (useDatosPresentacion), y
+// mientras no llegan se ve "—".
 import { Link } from 'react-router'
 import {
   ArrowLeftRightIcon,
   ArrowRightIcon,
   BellRingIcon,
-  BotIcon,
   CalculatorIcon,
   CheckCircle2Icon,
   ClipboardCheckIcon,
@@ -17,10 +18,8 @@ import {
   FileSpreadsheetIcon,
   FilterIcon,
   FlaskConicalIcon,
-  GitCompareArrowsIcon,
   GlobeIcon,
   KeyRoundIcon,
-  LayoutDashboardIcon,
   ListOrderedIcon,
   LockIcon,
   MessageSquareTextIcon,
@@ -29,8 +28,10 @@ import {
   RadarIcon,
   RefreshCwIcon,
   ScaleIcon,
+  SearchIcon,
   ServerIcon,
   ShieldCheckIcon,
+  SlidersHorizontalIcon,
   SparklesIcon,
   TagsIcon,
   TrendingUpIcon,
@@ -43,13 +44,11 @@ import { buttonVariants } from '@/components/ui/button'
 import { BloqueOscuro, Etiqueta, SeccionGris } from '@/components/marca'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { CifraGrande, EncabezadoLamina, IconoCirculo, Lamina, SinDatos, Tarjeta } from './piezas.jsx'
+import { EncabezadoLamina, IconoCirculo, Lamina, SinDatos, Tarjeta } from './piezas.jsx'
 
 // '20260930' -> 'sep 2026' (sin el día: en la lámina se habla del mes).
 const mesDe = (fecha) => formatearPeriodo(fecha).replace(/^\d+\s/, '')
 
-const sumar = (lista, campo) =>
-  lista.length > 0 && lista.every((p) => typeof p[campo] === 'number') ? lista.reduce((t, p) => t + p[campo], 0) : null
 
 // ---------------------------------------------------------------------------------------------
 // 1. Portada
@@ -74,7 +73,7 @@ export function Portada({ datos }) {
               Rankings de Crédito
             </h1>
             <p className="max-w-[760px] text-[30px] leading-snug text-balance text-bloque-muted">
-              Del archivo AT03 al ranking de cada banco y actividad económica, con cada cifra verificable.
+              Qué bancos prestan más en cada sector de la economía y cómo cambia mes a mes. Para el público, el analista y el administrador.
             </p>
           </div>
 
@@ -122,15 +121,35 @@ export function Portada({ datos }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 2. El problema
+// 2. El problema, contado por las tres personas que usan la información
 // ---------------------------------------------------------------------------------------------
 export function Problema({ datos }) {
   const c = datos.calidadUltimo
-  const trampas = [
-    { nombre: 'Préstamos duplicados', campo: 'E1_Duplicados' },
-    { nombre: 'Operaciones extranjeras', campo: 'E2_Destino_Extranjero' },
-    { nombre: 'Saldos en cero o negativos', campo: 'E3_Saldo_No_Positivo' },
-    { nombre: 'Actividades fuera del catálogo CINU', campo: 'E4_Actividad_No_Catalogada' },
+  const conErrores = c && MOTIVOS.every(({ campo }) => typeof c[campo] === 'number') ? MOTIVOS.reduce((t, { campo }) => t + c[campo], 0) : null
+  const personas = [
+    {
+      icono: GlobeIcon,
+      rol: 'Público',
+      pregunta: '¿Qué banco presta más para vivienda?',
+      hoy: ['Busca en archivos Excel y PDF', 'No puede filtrar ni comparar a su gusto'],
+    },
+    {
+      icono: UsersIcon,
+      rol: 'Analista',
+      pregunta: '¿Qué cambió de agosto a septiembre?',
+      hoy: ['Cruza hojas a mano durante horas', 'Entender el porqué de cada cambio es otro trabajo'],
+    },
+    {
+      icono: KeyRoundIcon,
+      rol: 'Administrador',
+      pregunta: '¿Cómo publico el mes sin errores?',
+      hoy: [
+        'Prepara cada corte a mano',
+        conErrores != null
+          ? `El archivo trae errores: ${formatearEntero(conErrores)} filas con problemas en el último corte`
+          : 'El archivo trae errores: préstamos repetidos, saldos en cero, sectores que no existen',
+      ],
+    },
   ]
 
   return (
@@ -138,148 +157,318 @@ export function Problema({ datos }) {
       <EncabezadoLamina
         icono={TriangleAlertIcon}
         etiqueta="El problema"
-        fuerte="Consultar el crédito es lento y manual,"
-        suave="y los datos traen trampas."
+        fuerte="La información de crédito existe,"
+        suave="pero llegar a ella cuesta."
       />
-      <div className="grid flex-1 grid-cols-2 gap-8">
-        <SeccionGris className="flex flex-col gap-6 p-10 sm:p-10">
-          <h3 className="text-2xl font-medium">Hoy</h3>
-          <ul className="flex flex-col gap-5 text-[26px] leading-snug">
-            {[
-              'Estadísticas en archivos Excel y PDF',
-              'Exploración interactiva limitada',
-              'Comparar entidades y períodos toma tiempo',
-              'Cada corte se prepara a mano',
-            ].map((texto) => (
-              <li key={texto} className="flex items-start gap-4">
-                <span aria-hidden="true" className="mt-3 size-2.5 shrink-0 rounded-full bg-muted-foreground" />
-                {texto}
-              </li>
-            ))}
-          </ul>
-        </SeccionGris>
-
-        <SeccionGris className="flex flex-col gap-6 p-10 sm:p-10">
-          <div className="flex items-baseline justify-between gap-4">
-            <h3 className="text-2xl font-medium">Casos de calidad en el AT03</h3>
-            {c && <span className="text-base text-muted-foreground">corte {formatearPeriodo(c.Fecha)}</span>}
-          </div>
-          <ul className="flex flex-col gap-3">
-            {trampas.map(({ nombre, campo }) => (
-              <li key={campo} className="flex items-center justify-between gap-4 rounded-tarjeta bg-card px-6 py-4 shadow-tarjeta dark:shadow-none">
-                <span className="text-[22px]">{nombre}</span>
-                <span className="cifra text-[28px] font-medium">{formatearEntero(c?.[campo])}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-lg text-muted-foreground">
-            Hace falta calcular con reglas explícitas, comparar entre períodos y explicar cada resultado.
-          </p>
-        </SeccionGris>
+      <div className="grid flex-1 grid-cols-3 gap-6">
+        {personas.map(({ icono, rol, pregunta, hoy }) => (
+          <Tarjeta key={rol} className="gap-6 p-8">
+            <div className="flex items-center gap-4">
+              <IconoCirculo icono={icono} />
+              <span className="text-xl font-medium text-muted-foreground">{rol}</span>
+            </div>
+            <p className="text-[32px] leading-tight font-medium tracking-tight">“{pregunta}”</p>
+            <div className="mt-auto flex flex-col gap-3">
+              <span className="text-base font-medium tracking-wide text-muted-foreground uppercase">Hoy</span>
+              <ul className="flex flex-col gap-3 text-[21px] leading-snug">
+                {hoy.map((texto) => (
+                  <li key={texto} className="flex items-start gap-3">
+                    <span aria-hidden="true" className="mt-2.5 size-2.5 shrink-0 rounded-full bg-baja" />
+                    {texto}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Tarjeta>
+        ))}
       </div>
     </Lamina>
   )
 }
 
 // ---------------------------------------------------------------------------------------------
-// 3. La propuesta
+// 3. La propuesta: una app, tres roles
 // ---------------------------------------------------------------------------------------------
 export function Propuesta() {
-  const pilares = [
-    { icono: CalculatorIcon, titulo: 'Calcular', texto: 'Un motor determinista arma los rankings desde los archivos, sin cifras escritas a mano.' },
-    { icono: GitCompareArrowsIcon, titulo: 'Comparar', texto: 'Movimientos de posición entre períodos, con una regla configurable.' },
-    { icono: SparklesIcon, titulo: 'Explicar', texto: 'La IA consulta y redacta, con un verificador de números. Nunca calcula.' },
-    { icono: ClipboardCheckIcon, titulo: 'Verificar', texto: 'El modo del jurado muestra los 6 puntos de la sección 11.1 en un clic.' },
+  const roles = [
+    { icono: GlobeIcon, rol: 'Público', acceso: 'Sin cuenta', texto: 'Consulta, explora, pregunta y descarga.' },
+    { icono: UsersIcon, rol: 'Analista', acceso: 'Con usuario', texto: 'Todo lo del público, más comparar meses y bancos y armar reportes a la medida.' },
+    { icono: KeyRoundIcon, rol: 'Administrador', acceso: 'Con usuario', texto: 'Todo lo anterior, más cargar el mes, decidir las reglas y quién entra.' },
   ]
   return (
     <Lamina>
       <EncabezadoLamina
         icono={RadarIcon}
         etiqueta="La propuesta"
-        fuerte="Una app web para calcular, comparar, explicar y verificar"
-        suave="los rankings de crédito."
+        fuerte="Una sola app,"
+        suave="y cada persona ve lo que necesita."
       />
-      <div className="grid flex-1 grid-cols-4 gap-6">
-        {pilares.map(({ icono, titulo, texto }, i) => (
-          <Tarjeta key={titulo} className="justify-between gap-6 p-8">
+      <div className="grid flex-1 grid-cols-3 gap-6">
+        {roles.map(({ icono, rol, acceso, texto }, i) => (
+          <Tarjeta key={rol} className="gap-8 p-8">
             <div className="flex items-center justify-between">
               <IconoCirculo icono={icono} />
-              <span className="cifra text-lg text-muted-foreground">0{i + 1}</span>
+              <Badge variant="outline" size="pildora" className="h-8 px-3 text-base">
+                {acceso}
+              </Badge>
             </div>
             <div className="flex flex-col gap-3">
-              <h3 className="text-[32px] font-medium tracking-tight">{titulo}</h3>
-              <p className="text-[21px] leading-snug text-muted-foreground">{texto}</p>
+              <span className="cifra text-lg text-muted-foreground">0{i + 1}</span>
+              <h3 className="text-[40px] font-medium tracking-tight">{rol}</h3>
+              <p className="text-[23px] leading-snug text-muted-foreground">{texto}</p>
             </div>
           </Tarjeta>
         ))}
       </div>
-      <p className="text-xl text-muted-foreground">
-        React + Node.js, corre en local (R1) y está publicada en <span className="font-medium text-foreground">sbp.juank.tech</span>.
-      </p>
+      <BloqueOscuro className="flex items-center gap-5 px-8 py-6 sm:px-8 sm:py-6">
+        <ShieldCheckIcon aria-hidden="true" className="size-8 shrink-0 text-brillo" />
+        <p className="text-[24px] leading-snug text-bloque-foreground">
+          Para todos, lo mismo: cada número sale del archivo del mes y se puede comprobar.
+        </p>
+      </BloqueOscuro>
     </Lamina>
   )
 }
 
 // ---------------------------------------------------------------------------------------------
-// 4. Los datos, en vivo
+// Lámina de un rol: quién es y su pregunta a la izquierda, lo que la app le da a la derecha.
 // ---------------------------------------------------------------------------------------------
-export function DatosEnVivo({ datos }) {
-  const { periodos, rankings, cargando, sinApi } = datos
+function LaminaRol({ icono, etiqueta, fuerte, suave, quien, pregunta, funciones, pie }) {
+  return (
+    <Lamina className="gap-8">
+      <EncabezadoLamina icono={icono} etiqueta={etiqueta} fuerte={fuerte} suave={suave} />
+      <div className="grid flex-1 grid-cols-[340px_1fr] gap-6">
+        <BloqueOscuro className="flex flex-col justify-between gap-6 p-8 sm:p-8">
+          <div className="flex flex-col gap-2">
+            <span className="text-base text-bloque-muted">Para quién</span>
+            <p className="text-[24px] leading-snug font-medium text-bloque-foreground">{quien}</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-base text-bloque-muted">Su pregunta</span>
+            <p className="text-[30px] leading-tight font-medium text-bloque-foreground">“{pregunta}”</p>
+          </div>
+        </BloqueOscuro>
+        <ul className="grid grid-cols-3 grid-rows-2 gap-4">
+          {funciones.map(({ icono: Icono, titulo, texto }) => (
+            <li key={titulo}>
+              <Tarjeta className="h-full gap-3 p-6">
+                <IconoCirculo icono={Icono} />
+                <h3 className="text-[25px] leading-tight font-medium tracking-tight">{titulo}</h3>
+                <p className="text-[19px] leading-snug text-muted-foreground">{texto}</p>
+              </Tarjeta>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {pie && <p className="text-xl text-muted-foreground">{pie}</p>}
+    </Lamina>
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// 4. Público
+// ---------------------------------------------------------------------------------------------
+export function RolPublico() {
+  return (
+    <LaminaRol
+      icono={GlobeIcon}
+      etiqueta="Público · sin cuenta"
+      fuerte="Consultar sin saber nada técnico."
+      suave="Si sabes hacer una pregunta, sabes usar la app."
+      quien="Un ciudadano, un periodista, un estudiante."
+      pregunta="¿Qué banco presta más para vivienda?"
+      funciones={[
+        { icono: CrownIcon, titulo: 'Ver quién lidera', texto: 'Seis rankings por sector, siempre con los doce bancos.' },
+        { icono: FilterIcon, titulo: 'Filtrar y explorar', texto: 'Por mes, banco y sector. Un clic en el gráfico filtra y la tabla se ordena.' },
+        { icono: MessageSquareTextIcon, titulo: 'Preguntar en español', texto: 'El asistente responde con los datos y deja la pantalla lista.' },
+        { icono: MousePointerClickIcon, titulo: 'Te enseña dónde', texto: 'Si preguntas “¿cómo…?”, un cursor recorre la app y señala dónde tocar.' },
+        { icono: FileDownIcon, titulo: 'Descargar', texto: 'Rankings, sectores y calidad de los datos, en CSV.' },
+        { icono: BellRingIcon, titulo: 'Alertas por correo', texto: 'Se suscribe a los bancos y sectores que le interesan.' },
+      ]}
+      pie="Funciona en el celular y se instala como app. Cada pantalla dice la fuente, el período y que los datos son ficticios."
+    />
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// 6. Analista
+// ---------------------------------------------------------------------------------------------
+export function RolAnalista() {
+  return (
+    <LaminaRol
+      icono={UsersIcon}
+      etiqueta="Analista · con usuario"
+      fuerte="Entender qué cambió"
+      suave="y por qué cambió."
+      quien="Quien sigue el mercado bancario mes a mes."
+      pregunta="¿Qué cambió de agosto a septiembre?"
+      funciones={[
+        { icono: ArrowLeftRightIcon, titulo: 'Comparar dos meses', texto: 'Qué bancos subieron o bajaron de puesto y quién es el nuevo líder.' },
+        { icono: TrendingUpIcon, titulo: 'Lo importante, marcado', texto: 'La app señala los movimientos significativos de cada ranking.' },
+        { icono: MessageSquareTextIcon, titulo: 'Una frase por cambio', texto: 'Cada movimiento viene explicado en lenguaje claro.' },
+        { icono: SearchIcon, titulo: 'Por qué cambió el saldo', texto: 'Cuánto vino de préstamos nuevos, de los que salieron y de lo que se pagó.' },
+        { icono: ScaleIcon, titulo: 'Dos bancos lado a lado', texto: 'Su posición y su saldo, uno junto al otro.' },
+        { icono: FileSpreadsheetIcon, titulo: 'Reportes a la medida', texto: 'Los meses, sectores y bancos que quiera, listos para descargar.' },
+      ]}
+      pie="Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida."
+    />
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// 7. Administrador
+// ---------------------------------------------------------------------------------------------
+export function RolAdministrador({ datos }) {
+  const { regla } = datos
+  // La regla vigente, en palabras: llega de GET /api/parametros.
+  const criterios = regla
+    ? [
+        regla.min_cambio_posicion_abs != null && `sube o baja ${regla.min_cambio_posicion_abs} puestos o más`,
+        regla.cambio_lider && 'cambia el líder',
+        regla.min_var_saldo_pct_abs != null && `el saldo varía ${regla.min_var_saldo_pct_abs} % o más`,
+      ].filter(Boolean)
+    : []
+
+  return (
+    <LaminaRol
+      icono={KeyRoundIcon}
+      etiqueta="Administrador · con usuario"
+      fuerte="Publicar el mes"
+      suave="sin trabajo manual."
+      quien="Quien publica la información cada mes."
+      pregunta="¿Cómo publico el mes sin errores?"
+      funciones={[
+        { icono: UploadIcon, titulo: 'Subir el archivo del mes', texto: 'La app reconoce el mes sola y recalcula todo en segundos.' },
+        { icono: RefreshCwIcon, titulo: 'Ver qué cambió', texto: 'Muestra los nuevos líderes y los cambios de puesto, y avisa a los suscriptores.' },
+        { icono: ShieldCheckIcon, titulo: 'Errores, aparte', texto: 'Las filas con problemas quedan fuera, cada una con su motivo.' },
+        { icono: SlidersHorizontalIcon, titulo: 'Decidir qué es importante', texto: 'Ajusta cuándo se marca un movimiento, sin programar nada.' },
+        { icono: LockIcon, titulo: 'Quién entra y qué ve', texto: 'Crea usuarios y decide qué puede hacer cada perfil.' },
+        { icono: ClipboardCheckIcon, titulo: 'Registro de todo', texto: 'Qué archivo se cargó, cuándo, quién y con qué resultado.' },
+      ]}
+      pie={
+        criterios.length > 0
+          ? `Hoy se marca un movimiento si ${criterios.join(', o ')}.`
+          : 'El mes nuevo se publica en segundos, no en días.'
+      }
+    />
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// 8. Por qué confiar en los números (lo técnico, en palabras simples)
+// ---------------------------------------------------------------------------------------------
+const MOTIVOS = [
+  { campo: 'E1_Duplicados', nombre: 'Repetidas', color: 'bg-chart-3' },
+  { campo: 'E2_Destino_Extranjero', nombre: 'Del extranjero', color: 'bg-chart-2' },
+  { campo: 'E3_Saldo_No_Positivo', nombre: 'Saldo en cero o negativo', color: 'bg-chart-4' },
+  { campo: 'E4_Actividad_No_Catalogada', nombre: 'Sector que no existe', color: 'bg-chart-5' },
+]
+
+export function Confianza({ datos }) {
+  const { periodos } = datos
+  const c = datos.calidadUltimo
+  const leidas = c?.Filas_Leidas
   const reconciliado = periodos.length > 0 && periodos.every((p) => p.Reconciliaciones_OK === true)
-  const bancos = rankings[0]?.bancos?.length
+  const razones = [
+    'Ningún número está escrito a mano: todo sale del archivo del mes.',
+    'Cada fila que se quita tiene su motivo, y se puede revisar.',
+    reconciliado
+      ? `Todo cuadra al centavo, en los ${formatearEntero(periodos.length)} meses cargados.`
+      : 'Todo se cuadra al centavo, mes por mes.',
+    'La IA ayuda a preguntar y a explicar. Nunca calcula un ranking.',
+    'Un botón, “Verificación del jurado”, reúne todo en una pantalla.',
+  ]
 
   return (
     <Lamina>
       <EncabezadoLamina
-        icono={DatabaseIcon}
-        etiqueta="En vivo"
-        fuerte="Las cifras de esta lámina las calculó el motor"
-        suave="al leer los CSV. Nada está escrito a mano (R2)."
+        icono={ShieldCheckIcon}
+        etiqueta="Confianza"
+        fuerte="¿Por qué confiar en los números?"
+        suave="Porque cualquiera los puede comprobar."
       />
-      {periodos.length === 0 ? (
-        <SinDatos cargando={cargando && !sinApi} />
-      ) : (
-        <SeccionGris className="grid flex-1 grid-cols-3 content-start gap-5 p-8 sm:p-8">
-          <CifraGrande
-            etiqueta="Períodos procesados"
-            valor={formatearEntero(periodos.length)}
-            detalle={`${mesDe(periodos[0].Fecha)} a ${mesDe(periodos.at(-1).Fecha)}`}
-          />
-          <CifraGrande etiqueta="Filas AT03 leídas" valor={formatearEntero(sumar(periodos, 'Filas_Leidas'))} detalle="En todos los períodos" />
-          <CifraGrande
-            etiqueta="Universo local válido"
-            valor={formatearEntero(sumar(periodos, 'Universo_Local_Valido'))}
-            detalle="Préstamos que entran a los rankings"
-          />
-          <CifraGrande
-            etiqueta="Rankings por período"
-            valor={formatearEntero(rankings.length || null)}
-            detalle={rankings.map((r) => r.Ranking).join(' · ') || undefined}
-          />
-          <CifraGrande etiqueta="Bancos en cada ranking" valor={formatearEntero(bancos ?? null)} detalle="Siempre todos, con saldo 0.00 si no tienen" />
-          <Tarjeta className="gap-2">
-            <p className="text-lg text-muted-foreground">Reconciliaciones R1, R2 y R3</p>
-            {reconciliado ? (
-              <p className="flex items-center gap-3 text-[40px] leading-none font-medium tracking-tight text-sube">
-                <CheckCircle2Icon aria-hidden="true" className="size-10" />
-                Cuadran
-              </p>
-            ) : (
-              <p className="flex items-center gap-3 text-[40px] leading-none font-medium tracking-tight text-baja">
-                <TriangleAlertIcon aria-hidden="true" className="size-10" />
-                Revisar
-              </p>
-            )}
-            <p className="text-base text-muted-foreground">Al centavo, en cada período</p>
-          </Tarjeta>
+      <div className="grid flex-1 grid-cols-[1fr_620px] gap-6">
+        <SeccionGris className="flex flex-col gap-6 p-8 sm:p-8">
+          {!c ? (
+            <SinDatos cargando={datos.cargando && !datos.sinApi} />
+          ) : (
+            <>
+              <div className="flex flex-col gap-1">
+                <span className="text-lg text-muted-foreground">Archivo de {formatearPeriodo(c.Fecha)}</span>
+                <span className="cifra text-[44px] leading-none font-medium tracking-tight">
+                  {formatearEntero(leidas)} <span className="text-2xl font-normal text-muted-foreground">filas</span>
+                </span>
+              </div>
+              <div className="flex h-10 w-full overflow-hidden rounded-full bg-muted" role="img" aria-label="Filas válidas y filas quitadas por cada motivo">
+                <div className="h-full bg-chart-1" style={{ width: `${(c.Universo_Local_Valido / leidas) * 100}%` }} />
+                {MOTIVOS.map(({ campo, color }) => (
+                  <div key={campo} className={cn('h-full', color)} style={{ width: `${(c[campo] / leidas) * 100}%`, minWidth: c[campo] > 0 ? 6 : 0 }} />
+                ))}
+              </div>
+              <ul className="flex flex-col gap-3">
+                <li className="flex items-center justify-between gap-4 rounded-tarjeta bg-accent px-5 py-3">
+                  <span className="flex items-center gap-3 text-[21px] font-medium">
+                    <span aria-hidden="true" className="size-3 rounded-full bg-chart-1" />
+                    Válidas: entran al ranking
+                  </span>
+                  <span className="cifra text-[24px] font-medium">{formatearEntero(c.Universo_Local_Valido)}</span>
+                </li>
+                {MOTIVOS.map(({ campo, nombre, color }) => (
+                  <li key={campo} className="flex items-center justify-between gap-4 rounded-tarjeta bg-card px-5 py-3 shadow-tarjeta dark:shadow-none">
+                    <span className="flex items-center gap-3 text-[20px]">
+                      <span aria-hidden="true" className={cn('size-3 rounded-full', color)} />
+                      Quitadas · {nombre}
+                    </span>
+                    <span className="cifra text-[22px] font-medium">{formatearEntero(c[campo])}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </SeccionGris>
-      )}
+        <ul className="flex flex-col justify-center gap-4">
+          {razones.map((texto) => (
+            <li key={texto} className="flex items-start gap-4 text-[24px] leading-snug">
+              <CheckCircle2Icon aria-hidden="true" className="mt-1 size-7 shrink-0 text-sube" />
+              {texto}
+            </li>
+          ))}
+        </ul>
+      </div>
     </Lamina>
   )
 }
 
 // ---------------------------------------------------------------------------------------------
-// 5. Cascada E1 a E4
+// Anexo técnico: separador. Lo que sigue se muestra solo si el jurado pregunta.
+// ---------------------------------------------------------------------------------------------
+export function Anexo() {
+  const temas = ['Del archivo al ranking', 'Cómo se limpia el archivo', 'Arquitectura', 'Decisiones técnicas']
+  return (
+    <div className="h-full p-6 pb-0">
+      <BloqueOscuro className="flex h-full flex-col justify-between p-16 sm:p-16">
+        <Etiqueta icono={CalculatorIcon} className="h-8 self-start px-4 text-sm">
+          Anexo técnico
+        </Etiqueta>
+        <div className="flex flex-col gap-10">
+          <h2 className="text-[84px] leading-[1.02] font-medium tracking-tight text-bloque-foreground">Cómo funciona por dentro</h2>
+          <ol className="grid grid-cols-2 gap-x-12 gap-y-4 text-[28px] text-bloque-muted">
+            {temas.map((t, i) => (
+              <li key={t} className="flex items-baseline gap-4">
+                <span className="cifra text-xl text-brillo">0{i + 1}</span>
+                {t}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <p className="text-xl text-bloque-muted">Para las preguntas del jurado.</p>
+      </BloqueOscuro>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// Anexo 2. Cascada E1 a E4
 // ---------------------------------------------------------------------------------------------
 const ETAPAS = [
   { clave: 'E1', campo: 'E1_Duplicados', nombre: 'Duplicados', regla: 'Se conserva la primera ocurrencia', color: 'bg-chart-3' },
@@ -298,7 +487,7 @@ export function Cascada({ datos }) {
     <Lamina className="gap-9">
       <EncabezadoLamina
         icono={FilterIcon}
-        etiqueta="Motor · cascada E1 a E4"
+        etiqueta="Anexo · cascada E1 a E4"
         fuerte="Cada fila excluida cuenta una sola vez,"
         suave="en el primer filtro que incumple."
       />
@@ -369,7 +558,7 @@ export function Cascada({ datos }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 6. Del archivo al ranking
+// Anexo 1. Del archivo al ranking
 // ---------------------------------------------------------------------------------------------
 export function Flujo({ datos }) {
   const reclasificadas = datos.calidadUltimo?.Reclasificadas_Tarjeta
@@ -392,7 +581,7 @@ export function Flujo({ datos }) {
     <Lamina>
       <EncabezadoLamina
         icono={CalculatorIcon}
-        etiqueta="Motor · del archivo al ranking"
+        etiqueta="Anexo · del archivo al ranking"
         fuerte="Seis pasos deterministas y reproducibles."
         suave="La IA no participa en ninguno."
       />
@@ -415,7 +604,7 @@ export function Flujo({ datos }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 7. Líderes en vivo
+// 5. Líderes en vivo: lo que ve el público
 // ---------------------------------------------------------------------------------------------
 export function Lideres({ datos }) {
   const { rankings, ultimo } = datos
@@ -423,7 +612,7 @@ export function Lideres({ datos }) {
     <Lamina className="gap-8">
       <EncabezadoLamina
         icono={CrownIcon}
-        etiqueta={ultimo ? `Rankings · ${formatearPeriodo(ultimo)}` : 'Rankings'}
+        etiqueta={ultimo ? `Lo que ve el público · ${formatearPeriodo(ultimo)}` : 'Lo que ve el público'}
         fuerte="Seis rankings, doce bancos."
         suave="Así queda el primer lugar de cada uno."
       />
@@ -474,195 +663,7 @@ export function Lideres({ datos }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 8. La plataforma
-// ---------------------------------------------------------------------------------------------
-export function Plataforma() {
-  const modulos = [
-    { icono: LayoutDashboardIcon, nombre: 'Panel', texto: 'Resumen del período, líderes, movimientos e indicadores extra.' },
-    { icono: ListOrderedIcon, nombre: 'Rankings', texto: 'Filtros por período, banco, ranking y subactividad; gráfico y tabla ordenable.' },
-    { icono: ArrowLeftRightIcon, nombre: 'Comparar períodos', texto: 'Cambios de posición y de saldo, y de dónde sale cada variación.' },
-    { icono: FileDownIcon, nombre: 'Reportes', texto: 'CSV de los entregables 2 a 5 y reportes personalizados.' },
-    { icono: ShieldCheckIcon, nombre: 'Calidad de datos', texto: 'Cascada E1 a E4, filas excluidas con su motivo y alertas.' },
-    { icono: ClipboardCheckIcon, nombre: 'Verificación del jurado', texto: 'Los 6 puntos de la sección 11.1 con sus chequeos.' },
-  ]
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={LayoutDashboardIcon}
-        etiqueta="La plataforma"
-        fuerte={'Los cinco módulos de la lámina\u00A05,'}
-        suave="más un modo para el jurado."
-      />
-      <div className="grid flex-1 grid-cols-3 grid-rows-2 gap-5">
-        {modulos.map(({ icono, nombre, texto }) => (
-          <Tarjeta key={nombre} className="gap-4 p-7">
-            <IconoCirculo icono={icono} />
-            <h3 className="text-[28px] font-medium tracking-tight">{nombre}</h3>
-            <p className="text-[20px] leading-snug text-muted-foreground">{texto}</p>
-          </Tarjeta>
-        ))}
-      </div>
-      <p className="text-xl text-muted-foreground">
-        En todas las pantallas: fuente, período y el aviso de datos ficticios (lámina 9).
-      </p>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 9. Perfiles
-// ---------------------------------------------------------------------------------------------
-export function Perfiles() {
-  const perfiles = [
-    { icono: GlobeIcon, nombre: 'Público', sub: 'Consulta · sin login', puntos: ['Rankings, filtros, gráficos y tablas', 'Descarga de los entregables 2 a 4', 'No ve Comparar ni la carga de períodos'] },
-    { icono: UsersIcon, nombre: 'Analista', sub: 'Análisis · con login', puntos: ['Todo lo de Público', 'Compara períodos y entidades', 'Reportes personalizados y entregable 5'] },
-    { icono: KeyRoundIcon, nombre: 'Administrador', sub: 'Control · con login', puntos: ['Todo lo de Analista', 'Carga o actualiza un período', 'Parámetros, catálogos y registro de operaciones'] },
-  ]
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={UsersIcon}
-        etiqueta="Perfiles"
-        fuerte="Tres perfiles con opciones distintas"
-        suave="y cada uno ve solo lo suyo."
-      />
-      <div className="grid flex-1 grid-cols-3 gap-6">
-        {perfiles.map(({ icono, nombre, sub, puntos }, i) => (
-          <Tarjeta key={nombre} className="gap-5 p-8">
-            <div className="flex items-center justify-between">
-              <IconoCirculo icono={icono} />
-              <span className="cifra text-lg text-muted-foreground">0{i + 1}</span>
-            </div>
-            <div>
-              <h3 className="text-[32px] font-medium tracking-tight">{nombre}</h3>
-              <p className="text-lg text-muted-foreground">{sub}</p>
-            </div>
-            <ul className="flex flex-col gap-3 text-[21px] leading-snug">
-              {puntos.map((p) => (
-                <li key={p} className="flex items-start gap-3">
-                  <CheckCircle2Icon aria-hidden="true" className="mt-1 size-5 shrink-0 text-marca" />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </Tarjeta>
-        ))}
-      </div>
-      <p className="flex items-center gap-3 text-xl text-muted-foreground">
-        <LockIcon aria-hidden="true" className="size-5 text-marca" />
-        La UI oculta lo que no corresponde y el servidor responde 403. Sin contraseñas en el repo (R5).
-      </p>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 10. Automatización
-// ---------------------------------------------------------------------------------------------
-export function Automatizacion({ datos }) {
-  const { regla } = datos
-  const pasos = [
-    { icono: UploadIcon, titulo: 'Cargar', texto: 'El Administrador sube el AT03. El período sale del campo Fecha.' },
-    { icono: RefreshCwIcon, titulo: 'Recalcular', texto: 'Cascada, rankings y reconciliaciones, al momento.' },
-    { icono: GitCompareArrowsIcon, titulo: 'Comparar', texto: 'Contra el período anterior: Cambio_Posicion y Var_Saldo.' },
-    { icono: TrendingUpIcon, titulo: 'Señalar', texto: 'Movimientos significativos según la regla vigente.' },
-    { icono: MessageSquareTextIcon, titulo: 'Explicar', texto: 'Una frase por movimiento: por reglas, o con IA verificada.' },
-    { icono: BellRingIcon, titulo: 'Avisar', texto: 'Correo a los suscriptores con Zapier.' },
-  ]
-  const criterios = regla
-    ? [
-        ['Cambio de posición', regla.min_cambio_posicion_abs == null ? 'apagado' : `|Δ| ≥ ${regla.min_cambio_posicion_abs}`],
-        ['Cambio de líder', regla.cambio_lider ? 'sí' : 'no'],
-        ['Variación de saldo', regla.min_var_saldo_pct_abs == null ? 'apagado' : `|Δ %| ≥ ${regla.min_var_saldo_pct_abs} %`],
-      ]
-    : []
-
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={RefreshCwIcon}
-        etiqueta="Automatización"
-        fuerte="Un período nuevo se procesa y se compara"
-        suave="sin tocar el código."
-      />
-      <div className="grid flex-1 grid-cols-[1fr_400px] gap-6">
-        <ol className="grid grid-cols-3 grid-rows-2 gap-4">
-          {pasos.map(({ icono, titulo, texto }) => (
-            <li key={titulo}>
-              <Tarjeta className="h-full gap-3 p-6">
-                <IconoCirculo icono={icono} />
-                <h3 className="text-[26px] font-medium tracking-tight">{titulo}</h3>
-                <p className="text-[19px] leading-snug text-muted-foreground">{texto}</p>
-              </Tarjeta>
-            </li>
-          ))}
-        </ol>
-        <BloqueOscuro className="flex flex-col gap-6 p-8 sm:p-8">
-          <Etiqueta icono={TrendingUpIcon}>Regla vigente · en vivo</Etiqueta>
-          <h3 className="text-[28px] leading-tight font-medium">Movimiento significativo si cumple al menos uno:</h3>
-          {criterios.length === 0 ? (
-            <p className="text-lg text-bloque-muted">La regla llega de GET /api/parametros.</p>
-          ) : (
-            <dl className="flex flex-col gap-4">
-              {criterios.map(([nombre, valor]) => (
-                <div key={nombre} className="flex items-baseline justify-between gap-4 border-b border-bloque-foreground/15 pb-3">
-                  <dt className="text-lg text-bloque-muted">{nombre}</dt>
-                  <dd className="cifra text-2xl font-medium">{valor}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-          <p className="mt-auto text-base text-bloque-muted">El Administrador la cambia desde la app y se aplica sin reiniciar.</p>
-        </BloqueOscuro>
-      </div>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 11. IA
-// ---------------------------------------------------------------------------------------------
-export function Ia({ datos }) {
-  const { ia } = datos
-  const tarjetas = [
-    { icono: BotIcon, titulo: 'Consulta', texto: 'Preguntas en lenguaje natural. El agente usa los endpoints del motor como herramientas.' },
-    { icono: SparklesIcon, titulo: 'Explicación', texto: 'Cada movimiento tiene su frase por reglas. Si la IA cita un número que el motor no dio, se usa la de reglas.' },
-    { icono: MousePointerClickIcon, titulo: 'Cursor guía', texto: 'Si preguntas cómo o dónde, un cursor recorre la app y señala cada elemento que tu perfil ve.' },
-  ]
-  return (
-    <Lamina>
-      <div className="flex items-start justify-between gap-6">
-        <EncabezadoLamina
-          icono={SparklesIcon}
-          etiqueta="Inteligencia artificial"
-          fuerte="La IA consulta, explica y guía."
-          suave="Nunca calcula un ranking."
-        />
-        {ia && (
-          <Badge variant={ia.ia_disponible ? 'sube' : 'igual'} size="pildora" className="mt-1 h-9 shrink-0 px-4 text-base">
-            {ia.ia_disponible ? <CheckCircle2Icon aria-hidden="true" /> : <TriangleAlertIcon aria-hidden="true" />}
-            {ia.ia_disponible ? 'IA disponible ahora' : 'IA no disponible: responde por reglas'}
-          </Badge>
-        )}
-      </div>
-      <div className="grid flex-1 grid-cols-3 gap-6">
-        {tarjetas.map(({ icono, titulo, texto }) => (
-          <Tarjeta key={titulo} className="gap-5 p-8">
-            <IconoCirculo icono={icono} />
-            <h3 className="text-[32px] font-medium tracking-tight">{titulo}</h3>
-            <p className="text-[22px] leading-snug text-muted-foreground">{texto}</p>
-          </Tarjeta>
-        ))}
-      </div>
-      <p className="text-xl text-muted-foreground">
-        Sin llave de IA la app funciona igual. También se conecta a Claude por MCP, de solo lectura.
-      </p>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 12. Arquitectura
+// Anexo 3. Arquitectura
 // ---------------------------------------------------------------------------------------------
 function Caja({ icono: Icono, titulo, texto, className }) {
   return (
@@ -683,7 +684,7 @@ export function Arquitectura() {
     <Lamina>
       <EncabezadoLamina
         icono={ServerIcon}
-        etiqueta="Arquitectura"
+        etiqueta="Anexo · arquitectura"
         fuerte="Un client, un server y un motor puro."
         suave="Todo corre en local con Docker."
       />
@@ -732,7 +733,7 @@ export function Arquitectura() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 13. Decisiones y calidad técnica
+// Anexo 4. Decisiones y calidad técnica
 // ---------------------------------------------------------------------------------------------
 export function Decisiones() {
   const filas = [
@@ -747,7 +748,7 @@ export function Decisiones() {
     <Lamina>
       <EncabezadoLamina
         icono={FlaskConicalIcon}
-        etiqueta="Decisiones técnicas"
+        etiqueta="Anexo · decisiones técnicas"
         fuerte="Resultados reproducibles"
         suave="y cálculos que se pueden verificar."
       />
@@ -767,7 +768,7 @@ export function Decisiones() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 14. Cierre
+// 9. Cierre
 // ---------------------------------------------------------------------------------------------
 export function Cierre() {
   return (
@@ -781,7 +782,7 @@ export function Cierre() {
         </div>
         <div className="flex flex-col gap-8">
           <h2 className="max-w-[1150px] text-[84px] leading-[1.02] font-medium tracking-tight text-balance text-bloque-foreground">
-            Rankings confiables para decisiones mejor informadas.
+            Una app, tres personas y la misma información confiable.
           </h2>
           <div className="flex flex-wrap gap-4">
             <Link to="/" data-slot="button" className={buttonVariants({ variant: 'claro', size: 'pildora', className: 'h-14 px-7 text-lg' })}>

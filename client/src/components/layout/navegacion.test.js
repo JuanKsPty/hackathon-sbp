@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { SECCIONES, SECCIONES_PUBLICO, rutaDisponible, seccionesVisibles } from './navegacion.js'
+import { SECCIONES, SECCIONES_PUBLICO, rutaDisponible, rutaEnElSitio, seccionesVisibles } from './navegacion.js'
 
 const rutas = (puede, sitio = { interno: true }) => seccionesVisibles(puede, sitio).map((s) => s.ruta)
 const conOpciones = (...opciones) => (opcion) => opciones.includes(opcion)
@@ -26,13 +26,20 @@ test('cada sección restringida pide una opción y todas llevan data-guia', () =
   assert.ok(SECCIONES.every((s) => s.guia?.startsWith('global.menu-')))
 })
 
-test('el sitio público abre en Inicio y nunca muestra secciones de Analista ni de Administrador', () => {
+test('el menú del sitio público empieza en el Panel (/panel) y nunca muestra secciones de Analista ni de Administrador', () => {
   const todas = () => true
   // Calidad de datos y Verificación del jurado solo están en el sitio interno.
-  assert.deepEqual(rutas(todas, { interno: false }), ['/', '/rankings', '/reportes'])
-  assert.equal(seccionesVisibles(todas, { interno: false })[0].nombre, 'Inicio')
+  assert.deepEqual(rutas(todas, { interno: false }), ['/panel', '/rankings', '/reportes'])
+  assert.equal(seccionesVisibles(todas, { interno: false })[0].nombre, 'Panel')
   assert.equal(SECCIONES_PUBLICO[0].guia, 'global.menu-panel')
   assert.ok(SECCIONES_PUBLICO.every((s) => !s.opcion && s.guia?.startsWith('global.menu-')))
+})
+
+test('rutaEnElSitio: en el público / (Panel del catálogo) es /panel; en el interno no cambia', () => {
+  assert.equal(rutaEnElSitio('/', { interno: false }), '/panel')
+  assert.equal(rutaEnElSitio('/rankings', { interno: false }), '/rankings')
+  assert.equal(rutaEnElSitio('/', { interno: true }), '/')
+  assert.equal(rutaEnElSitio(null, { interno: false }), null)
 })
 
 test('rutaDisponible: Calidad y Verificación no existen en el sitio público, sí en el interno', () => {

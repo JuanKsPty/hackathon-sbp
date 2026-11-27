@@ -1,41 +1,63 @@
+import { Link } from 'react-router'
+import { ArrowRightIcon } from 'lucide-react'
 import { CasosDeUso } from '@/components/inicio/CasosDeUso.jsx'
 import { PortadaPublica } from '@/components/inicio/PortadaPublica.jsx'
-import { EncabezadoCorte } from '@/components/landing/EncabezadoCorte.jsx'
-import { ComposicionCartera, Concentracion, Morosidad } from '@/components/landing/GraficasDelCorte.jsx'
-import { GraficoPrincipal } from '@/components/landing/GraficoPrincipal.jsx'
-import { LideresDelCorte } from '@/components/landing/LideresDelCorte.jsx'
-import { useDatosLanding } from '@/components/landing/useDatosLanding.js'
-import { SeccionGris } from '@/components/marca'
+import { BarraFuente } from '@/components/layout/BarraFuente.jsx'
+import { NOMBRE_APP, RUTA_PANEL_PUBLICO } from '@/components/layout/navegacion.js'
+import { Button } from '@/components/ui/button'
 
-// Inicio del sitio público (ruta /, #139), con el estilo SBP (paleta E+):
-// 1. Portada: para quién es y qué responde, con las llamadas a Rankings y a la presentación.
-// 2. Casos de uso: las preguntas del público y la sección que responde cada una.
-// 3. Dashboard del corte elegido, con gráficas de datos del API (R2). Solo el corte vigente: no
-//    compara períodos. Conserva los data-guia públicos de la ruta / (contracts/guia.md):
-//    panel.indicadores (encabezado del corte), panel.lideres y panel.indicadores-adicionales.
-// No muestra nada del Analista ni del Administrador, ni enlaces al sitio interno. Fuente, período y
-// aviso van al pie (BarraFuente).
+// Landing del sitio público (ruta /): página propia, a pantalla completa y sin el menú de la app.
+// Presenta el proyecto y lleva a los datos con "Ver los datos" (el Panel, /panel) o directo a la
+// sección que responde cada pregunta (CasosDeUso). Fuente, período y aviso de datos ficticios van en
+// el pie fijo (BarraFuente), como en el resto de las pantallas (lámina 9).
 export default function Inicio() {
-  const datos = useDatosLanding()
-
   return (
-    <div className="flex flex-col gap-10 sm:gap-12">
-      <PortadaPublica />
-      <CasosDeUso />
-      <section aria-label="Dashboard del corte" className="flex min-w-0 flex-col gap-4 sm:gap-6">
-        <EncabezadoCorte datos={datos} />
-        <SeccionGris className="flex min-w-0 flex-col gap-4">
-          <GraficoPrincipal datos={datos} />
-          {/* Sin el bloque "Calidad del corte": la calidad de datos no se muestra en el sitio público. */}
-          <ComposicionCartera indicadores={datos.indicadores} />
-          {/* Análisis adicional (concentración y morosidad), fuera de los 6 rankings oficiales. */}
-          <div data-guia="panel.indicadores-adicionales" className="grid min-w-0 gap-4 lg:grid-cols-2">
-            <Concentracion indicadores={datos.indicadores} />
-            <Morosidad indicadores={datos.indicadores} />
+    <div className="flex min-h-svh flex-col bg-background">
+      <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 lg:px-6">
+          <img src="/marca/logo.svg" alt="Superintendencia de Bancos de Panamá" className="size-9 shrink-0 rounded-md" />
+          <div className="min-w-0">
+            <p className="truncate text-sm leading-tight font-semibold text-primary sm:text-base">{NOMBRE_APP}</p>
+            <p className="hidden text-xs text-muted-foreground sm:block">Hackathon SBP 2026</p>
           </div>
-          <LideresDelCorte datos={datos} />
-        </SeccionGris>
-      </section>
+          <nav aria-label="Ir a la app" className="ml-auto flex items-center gap-1 sm:gap-2">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link to="/rankings">Rankings</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link to={RUTA_PANEL_PUBLICO}>
+                Ver los datos
+                <ArrowRightIcon aria-hidden="true" />
+              </Link>
+            </Button>
+          </nav>
+        </div>
+      </header>
+
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-4 py-8 sm:gap-12 lg:px-6 lg:py-12">
+        <PortadaPublica />
+        <CasosDeUso />
+        <section
+          aria-label="Ver los datos"
+          className="flex flex-col items-start gap-4 rounded-xl border bg-card p-6 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold tracking-tight">Todos los datos del período, en un solo lugar</h2>
+            <p className="text-sm text-muted-foreground">
+              El Panel resume la cartera, los líderes de cada ranking y los indicadores adicionales. Desde ahí
+              vas a Rankings y a Reportes.
+            </p>
+          </div>
+          <Button asChild size="lg" className="shrink-0">
+            <Link to={RUTA_PANEL_PUBLICO}>
+              Ver los datos
+              <ArrowRightIcon aria-hidden="true" />
+            </Link>
+          </Button>
+        </section>
+      </main>
+
+      <BarraFuente />
     </div>
   )
 }
