@@ -10,7 +10,7 @@
  *   sube / baja / igual  -> cambio de posición entre períodos
  *   destacado            -> movimientos significativos (dorado)
  *   aviso                -> franja de datos ficticios
- *   agente               -> cursor y resaltados del agente en pantalla (naranja, distinto del azul)
+ *   agente               -> cursor y resaltados del agente en pantalla (celeste, sky-400)
  *   marca, brillo, bloque, seccion -> componentes de marca (components/marca): bloque azul marino
  *                                    institucional con brillo azul claro, para la landing pública y
  *                                    la presentación.
@@ -68,7 +68,7 @@
   --bloque-foreground: #FFFFFF;
   --bloque-muted: #BCCBDF;
   --seccion: #EDF1F6;
-  --agente: #C8651A;
+  --agente: #38BDF8;
   --radius: 0.375rem;
   /* Radios de los componentes de marca (tarjeta, sección y bloque): sobrios, como el resto de E+. */
   --radio-tarjeta: 10px;
@@ -125,7 +125,7 @@
   --bloque-foreground: #FFFFFF;
   --bloque-muted: #B3C2D6;
   --seccion: #131920;
-  --agente: #E39150;
+  --agente: #38BDF8;
 }
 
 /* Landing (#138): base monocromática con acento verde. */
@@ -179,7 +179,7 @@
   --bloque-muted: #A1A1A8;
   --seccion: #F4F4F5;
   --radius: 0.625rem;
-  --agente: #C8651A;
+  --agente: #38BDF8;
   --radio-tarjeta: 16px;
   --radio-seccion: 24px;
   --radio-bloque: 28px;
@@ -234,5 +234,5 @@
   --bloque-foreground: #FFFFFF;
   --bloque-muted: #A1A1A8;
   --seccion: #111113;
-  --agente: #E39150;
+  --agente: #38BDF8;
 }
