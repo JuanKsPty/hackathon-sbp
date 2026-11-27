@@ -19,7 +19,9 @@ async function levantar(opcionesIA) {
   const servidor = crearApp({ almacen, obtenerMovimientos, opcionesIA }).listen(0);
   servidores.push(servidor);
   await once(servidor, 'listening');
-  return `http://127.0.0.1:${servidor.address().port}/api`;
+  const base = `http://127.0.0.1:${servidor.address().port}/api`;
+  process.env.API_INTERNA = base; // en el despliegue es http://127.0.0.1:$PORT/api (#89)
+  return base;
 }
 
 async function preguntar(base, cuerpo, perfil = 'analista') {
@@ -273,4 +275,49 @@ test('si la IA falla, la respuesta trae guia: null', async () => {
   const base = await levantar({ cliente });
   const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo los rankings?' });
   assert.equal(cuerpo.guia, null);
+});
+
+test('#89: un Host falso no desvía las consultas de las herramientas (SSRF)', async () => {
+  const { request } = await import('node:http');
+  // Servidor espía: si el agente le consultara, devolvería cifras falsas.
+  const { createServer } = await import('node:http');
+  let consultasAlEspia = 0;
+  const espia = createServer((req, res) => {
+    consultasAlEspia++;
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ rankings: [{ Ranking: 'HIPOTECARIO', bancos: [{ Banco: 'Banco Falso', Saldo_Actividad: 999 }] }] }));
+  }).listen(0);
+  servidores.push(espia);
+  await once(espia, 'listening');
+
+  const cliente = clienteGuionado([
+    usarHerramienta('consultar_rankings', { periodo: '20260930', ranking: 'HIPOTECARIO' }),
+    (params) => {
+      const datos = ultimoResultado(params);
+      return responder(`Lidera ${datos.rankings[0].bancos[0].Banco}.`)();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const { port } = new URL(base);
+  const cuerpo = await new Promise((resolver, rechazar) => {
+    const req = request(
+      {
+        host: '127.0.0.1',
+        port,
+        path: '/api/ia/preguntar',
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'X-Perfil': 'analista', Host: `127.0.0.1:${espia.address().port}` },
+      },
+      (res) => {
+        let texto = '';
+        res.on('data', (c) => (texto += c));
+        res.on('end', () => resolver(JSON.parse(texto)));
+      },
+    );
+    req.on('error', rechazar);
+    req.end(JSON.stringify({ pregunta: '¿Quién lidera HIPOTECARIO?' }));
+  });
+  assert.equal(consultasAlEspia, 0);
+  assert.equal(cuerpo.consultas[0].ok, true);
+  assert.doesNotMatch(cuerpo.respuesta, /Banco Falso/);
 });
