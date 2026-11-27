@@ -32,9 +32,13 @@ export function historialDe(mensajes) {
   return turnos.slice(-MAX_HISTORIAL)
 }
 
+// Evento de cada pregunta nueva: la pantalla quita lo que el agente dejó resaltado.
+export const NUEVA_PREGUNTA = 'agente:nueva-pregunta'
+
 export async function enviarPregunta(pregunta, perfil) {
   const limpia = String(pregunta ?? '').trim()
   if (!limpia || estado.pendiente) return
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(NUEVA_PREGUNTA))
   const historial = historialDe(estado.mensajes)
   agregar({ rol: 'usuario', texto: limpia })
   publicar({ ...estado, pendiente: true })

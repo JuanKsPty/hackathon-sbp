@@ -3,10 +3,11 @@
 // lista. Solo lee resultados del motor y los ordena, como lo hace la tabla: no calcula nada nuevo.
 import { normalizar, nombrePeriodo, periodosMencionados, rankingMencionado, bancoMencionado } from './intencion.js';
 import { contextoPantalla, validarPantalla } from './pantalla.js';
+import { elementoGuia, perfilVeElemento } from './guia.js';
 
-/** "¿Cómo veo…?" o "¿Dónde está…?" → demostrar; cualquier otra pregunta → ejecutar. */
+/** "¿Cómo veo…?", "¿Dónde está…?", "Muéstrame cómo…", "Enséñame…" → demostrar; cualquier otra → ejecutar. */
 export function modoDe(pregunta) {
-  return /\b(como|donde)\b/.test(normalizar(pregunta)) ? 'demostrar' : 'ejecutar';
+  return /\b(como|donde|ensena\w*|guiame|paso a paso)\b/.test(normalizar(pregunta)) ? 'demostrar' : 'ejecutar';
 }
 
 // Palabras de cada columna de la tabla de rankings (sin tildes).
@@ -107,5 +108,46 @@ export function pantallaPorReglas(pregunta, almacen, perfil = 'publico') {
     { tipo: 'resaltar', control: 'rankings.tabla', fila: banco, texto: `Aquí está ${contexto.bancos.get(banco)}.` },
   ];
   const validacion = validarPantalla({ modo: modoDe(pregunta), acciones }, { contexto, perfil });
+  return validacion.ok ? validacion.pantalla : null;
+}
+
+// "Cómo hago X" sobre la app (#121): palabras → elemento de la guía, de lo más específico a lo general.
+const ELEMENTO_POR_PALABRAS = [
+  [/\b(reporte\w* personalizad\w*|personaliz\w*)\b/, 'reportes.personalizado'],
+  [/\bcompar\w*\b.*\b(bancos|entidades)\b/, 'comparar.bancos'],
+  [/\b(compar\w*|evolucion|entre periodos|entre meses|mes anterior)\b/, 'comparar.selector-desde'],
+  [/\b(reporte\w*|entregable\w*)\b/, 'reportes.descarga-rankings'],
+  [/\b(descarg\w*|export\w*|csv|bajar)\b/, 'rankings.descargar'],
+  [/\b(excluid\w*|exclusion\w*|descartad\w*)\b/, 'calidad.excluidas'],
+  [/\b(reconcilia\w*|unicidad)\b/, 'calidad.reconciliaciones'],
+  [/\balerta\w*\b/, 'calidad.alertas'],
+  [/\b(calidad|e1|e2|e3|e4)\b/, 'calidad.cascada'],
+  [/\b(subir|cargar|carga|archivo|at03)\b/, 'admin.subir-archivo'],
+  [/\b(subactividad\w*|tarjeta\w*|desglose)\b/, 'rankings.desglose-subactividades'],
+  [/\b(filtr\w*|busc\w*)\b.*\bbanco\w*\b|\bbanco\w*\b.*\bfiltr\w*\b/, 'rankings.filtro-banco'],
+  [/\bgrafic\w*\b/, 'rankings.grafico'],
+  [/\b(movimiento\w*|subio|bajo|subieron|bajaron)\b/, 'panel.movimientos'],
+  [/\b(lider\w*|indicador\w*|resumen)\b/, 'panel.lideres'],
+  [/\b(periodo|mes|fecha|corte)\b/, 'global.selector-periodo'],
+  [/\b(ranking\w*|actividad\w*)\b/, 'rankings.selector-ranking'],
+  [/\b(tema|oscuro|claro)\b/, 'global.selector-tema'],
+];
+
+const NOMBRE_PAGINA = { '/': 'Panel', '/rankings': 'Rankings', '/comparar': 'Comparar', '/reportes': 'Reportes', '/calidad': 'Calidad de datos', '/admin': 'Administración' };
+
+/**
+ * Demostración por reglas para "¿cómo hago X?" en la app: entra a la página del elemento y lo señala.
+ * Solo en modo demostrar y con un elemento que el perfil ve; si no, null.
+ */
+export function demostracionPorReglas(pregunta, almacen, perfil = 'publico') {
+  if (modoDe(pregunta) !== 'demostrar') return null;
+  const texto = normalizar(pregunta);
+  const id = ELEMENTO_POR_PALABRAS.find(([patron, guia]) => patron.test(texto) && perfilVeElemento(guia, perfil))?.[1];
+  if (!id) return null;
+  const elemento = elementoGuia(id);
+  const acciones = [];
+  if (elemento.ruta) acciones.push({ tipo: 'ir', ruta: elemento.ruta, texto: `Entra a ${NOMBRE_PAGINA[elemento.ruta] ?? 'la página'} desde el menú.` });
+  acciones.push({ tipo: 'señalar', control: id, texto: `Aquí: ${elemento.descripcion}.` });
+  const validacion = validarPantalla({ modo: 'demostrar', acciones }, { contexto: contextoPantalla(almacen), perfil });
   return validacion.ok ? validacion.pantalla : null;
 }
