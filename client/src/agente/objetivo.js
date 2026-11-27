@@ -30,11 +30,12 @@ export function objetivosDe(accion) {
 }
 
 /**
- * Si el cursor hace clic de verdad en el objetivo: el enlace del menú, la pestaña o la columna. No en
- * el control general (el selector de período abriría su lista) ni en la fila resaltada.
+ * Si el cursor hace clic de verdad en el objetivo: el enlace del menú o la pestaña. No en el control
+ * general (el selector de período abriría su lista), ni en la fila resaltada, ni en la columna: un
+ * clic en una columna nueva ordena de menor a mayor y la tabla parpadearía antes del orden pedido.
  */
 export function seTocaDeVerdad(accion, indice) {
-  if (accion?.tipo === 'ir' || accion?.tipo === 'ordenar') return true
+  if (accion?.tipo === 'ir') return true
   return accion?.tipo === 'elegir' && indice === 0
 }
 
