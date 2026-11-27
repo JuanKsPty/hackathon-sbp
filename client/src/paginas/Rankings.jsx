@@ -66,7 +66,15 @@ export default function Rankings() {
         return
       }
     }
-    if (periodo && parametros.get('periodo') !== periodo) actualizar({ periodo })
+    // Solo el período, partiendo de la URL más reciente: así no pisa un filtro que se acaba de
+    // cambiar en el mismo instante (por ejemplo, el ranking que eligió el agente, #125).
+    if (periodo && parametros.get('periodo') !== periodo) {
+      setParametros((previos) => {
+        const nuevos = new URLSearchParams(previos)
+        nuevos.set('periodo', periodo)
+        return nuevos
+      }, { replace: true })
+    }
     // Solo reacciona a que el catálogo esté listo y al período del encabezado.
   }, [listoCatalogo, periodo]) // eslint-disable-line react-hooks/exhaustive-deps
 
