@@ -29,6 +29,7 @@ import {
   SearchIcon,
   ServerIcon,
   ShieldCheckIcon,
+  SmartphoneIcon,
   SparklesIcon,
   TagsIcon,
   TriangleAlertIcon,
@@ -317,21 +318,19 @@ export function Diferencia() {
           </li>
         ))}
       </ul>
-      <BloqueOscuro className="flex items-center gap-6 px-8 py-5 sm:px-8 sm:py-5">
+      <BloqueOscuro className="flex items-center gap-5 px-8 py-6 sm:px-8 sm:py-6">
         <CheckCircle2Icon aria-hidden="true" className="size-8 shrink-0 text-brillo" />
         <p className="flex-1 text-[24px] leading-snug text-bloque-foreground">
           Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida.
         </p>
-        {/* QR fijo (public/marca/qr-sbp.svg) que lleva al sitio público. */}
-        <a href="https://sbp.juank.tech" target="_blank" rel="noreferrer" className="flex shrink-0 items-center gap-5">
-          <span className="flex flex-col items-end gap-1">
-            <span className="text-base text-bloque-muted">Escanea y pruébalo</span>
-            <span className="flex items-center gap-2 text-[24px] font-medium text-brillo">
-              <GlobeIcon aria-hidden="true" className="size-6" />
-              sbp.juank.tech
-            </span>
-          </span>
-          <img src="/marca/qr-sbp.svg" alt="Código QR a sbp.juank.tech" className="size-[132px] rounded-xl bg-white p-1.5" />
+        <a
+          href="https://sbp.juank.tech"
+          target="_blank"
+          rel="noreferrer"
+          className="flex shrink-0 items-center gap-2 text-[24px] font-medium text-brillo underline-offset-4 hover:underline"
+        >
+          <GlobeIcon aria-hidden="true" className="size-6" />
+          sbp.juank.tech
         </a>
       </BloqueOscuro>
     </Lamina>
@@ -693,7 +692,36 @@ export function Decisiones() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 7. Cierre
+// 7. Pruébalo: el QR en grande para que el jurado entre al sitio público desde el celular
+// ---------------------------------------------------------------------------------------------
+export function Qr() {
+  return (
+    <div className="h-full p-6 pb-0">
+      <BloqueOscuro className="grid h-full grid-cols-[1fr_auto] items-center gap-16 p-16 sm:p-16">
+        <div className="flex h-full flex-col justify-between">
+          <Etiqueta icono={SmartphoneIcon} className="h-8 w-fit px-4 text-sm">
+            Pruébalo ahora
+          </Etiqueta>
+          <div className="flex flex-col gap-8">
+            <h2 className="text-[76px] leading-[1.02] font-medium tracking-tight text-balance text-bloque-foreground">
+              Escanea y entra desde tu celular.
+            </h2>
+            <p className="text-[28px] leading-snug text-bloque-muted">Sin cuenta y sin instalar nada.</p>
+          </div>
+          <a href="https://sbp.juank.tech" target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[44px] font-medium text-brillo">
+            <GlobeIcon aria-hidden="true" className="size-10" />
+            sbp.juank.tech
+          </a>
+        </div>
+        {/* QR fijo (public/marca/qr-sbp.svg) que lleva a https://sbp.juank.tech. */}
+        <img src="/marca/qr-sbp.svg" alt="Código QR a sbp.juank.tech" className="size-[640px] rounded-3xl bg-white p-4" />
+      </BloqueOscuro>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// 8. Cierre
 // ---------------------------------------------------------------------------------------------
 export function Cierre() {
   return (
