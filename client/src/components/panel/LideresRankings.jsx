@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
-import { formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
+import { alPeriodo, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
 import { EstadoBloque } from './EstadoBloque.jsx'
 
 // Líder (posición 1) de cada uno de los 6 rankings del período elegido. Sin `ranking`, GET /api/rankings
@@ -23,7 +23,7 @@ export function LideresRankings() {
     <Card data-guia="panel.lideres">
       <CardHeader>
         <CardTitle>Líder de cada ranking</CardTitle>
-        <CardDescription>{periodo ? `Primer lugar por saldo al ${formatearPeriodo(periodo)}` : 'Período elegido junto al título'}</CardDescription>
+        <CardDescription>{periodo ? `Primer lugar por saldo ${alPeriodo(periodo)}` : 'Período elegido junto al título'}</CardDescription>
         <CardAction>
           <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
             Ver rankings

@@ -9,7 +9,7 @@ import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { useConsulta } from '@/hooks/useConsulta.js'
-import { formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
+import { alPeriodo, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
 import { saldoPorSubactividad } from './datosLanding.js'
 import { montoCompacto } from './formatoLanding.js'
 import { TarjetaGrafico } from './TarjetaGrafico.jsx'
@@ -69,7 +69,7 @@ export function GraficoPrincipal({ datos }) {
           </div>
 
           <div className="grid min-w-0 gap-4 xl:grid-cols-[1.4fr_1fr]">
-            <TarjetaGrafico id="titulo-grafico" fuerte={`Saldo por banco en ${ranking}`} suave={`al ${formatearPeriodo(periodo)}`} pie="En el orden del ranking. La ponderación es el saldo de la actividad sobre la cartera local válida del banco.">
+            <TarjetaGrafico id="titulo-grafico" fuerte={`Saldo por banco en ${ranking}`} suave={alPeriodo(periodo)} pie="En el orden del ranking. La ponderación es el saldo de la actividad sobre la cartera local válida del banco.">
               <ChartContainer config={config} className="aspect-auto h-[420px] w-full">
                 <BarChart data={filas} layout="vertical" margin={{ left: 0, right: 12 }} barCategoryGap={6}>
                   <Degradado id={idBancos} />

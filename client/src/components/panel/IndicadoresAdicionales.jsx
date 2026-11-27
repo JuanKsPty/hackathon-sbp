@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
-import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
+import { alPeriodo, formatearEntero, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
 import { tramosParaGrafico } from '@/lib/tramos.js'
 import { EstadoBloque } from './EstadoBloque.jsx'
 
@@ -31,7 +31,7 @@ export function IndicadoresAdicionales() {
       <CardHeader>
         <CardTitle>Indicadores adicionales</CardTitle>
         <CardDescription>
-          {periodo ? `Morosidad, vencimientos y concentración al ${formatearPeriodo(periodo)}` : 'Período elegido junto al título'}
+          {periodo ? `Morosidad, vencimientos y concentración ${alPeriodo(periodo)}` : 'Período elegido junto al título'}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
