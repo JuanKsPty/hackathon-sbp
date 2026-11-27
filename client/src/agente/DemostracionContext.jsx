@@ -83,7 +83,8 @@ export function DemostracionProvider({ children }) {
           indice = i
           if (el || signal.aborted) break
         }
-        if (!el || signal.aborted) return
+        // false: el elemento no apareció (el ejecutor lo deja en fallidas).
+        if (!el || signal.aborted) return Boolean(el)
         const texto = accion.texto ?? ''
         // Menú cerrado (pantalla angosta): abre el menú y luego toca la sección.
         if (accion.tipo === 'ir' && el.matches(BOTON_MENU)) {

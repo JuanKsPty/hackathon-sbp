@@ -47,9 +47,11 @@ export async function ejecutarAcciones(acciones, { registro, navegar, rutaActual
     // Señalar no cambia nada en el control: no necesita que esté registrado (solo 5 lo están). La
     // demostración busca el elemento por su data-guia y lleva el cursor; al ejecutar no hace nada.
     if (accion.tipo === 'señalar') {
-      await antesDe?.(accion, null)
+      // antesDe devuelve false si el elemento nunca apareció en pantalla.
+      const encontrado = await antesDe?.(accion, null)
       if (signal?.aborted) break
-      aplicadas.push(accion)
+      if (encontrado === false) fallidas.push({ accion, motivo: 'no-encontrado' })
+      else aplicadas.push(accion)
       continue
     }
 
