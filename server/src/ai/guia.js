@@ -66,6 +66,8 @@ export const ELEMENTOS_GUIA = [
   el('admin.resultado-carga', '/admin', 'Resultado de la carga: E1–E4, universo y cambios de ranking', 'cargar_periodo'),
   el('admin.regla-significativo', '/admin', 'Regla de movimiento significativo', 'administrar_parametros'),
   el('admin.catalogos', '/admin', 'Estado de los catálogos', 'administrar_catalogos'),
+  el('admin.usuarios', '/admin', 'Usuarios: crear, cambiar perfil, contraseña, activar o desactivar', 'gestionar_usuarios'),
+  el('admin.permisos', '/admin', 'Perfiles y permisos: qué perfil puede usar cada opción', 'configurar_permisos'),
   el('admin.bitacora', '/admin', 'Registro de operaciones', 'ver_bitacora'),
   // Asistente IA (panel lateral, en cualquier página)
   el('asistente.pregunta', null, 'Campo para escribir la pregunta al asistente'),
