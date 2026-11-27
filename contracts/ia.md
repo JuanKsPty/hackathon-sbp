@@ -112,3 +112,42 @@ Cuando la pregunta pide ver datos (un informe, un ranking, comparar períodos, c
 Gráficos por tipo: `informe` → rankings, movimientos contra el período anterior y calidad; `ranking` → rankings y subactividades; `comparar` y `movimientos` → movimientos; `banco` → posiciones del banco por período y sus movimientos; `calidad` → calidad.
 
 Ejemplos (perfil Analista): "dame el informe de septiembre" → `informe` de `20260930` contra `20260831`; "ranking de construcción de agosto" → `ranking` CONSTRUCCION de `20260831`; "compara julio y septiembre" → `comparar` de `20260731` a `20260930`; "cómo va el banco 108" → `banco` 108.
+
+## Acciones de pantalla: `pantalla` en `POST /api/ia/preguntar` (#121)
+
+Además de responder, la IA puede dejar el dashboard listo para lo que se preguntó. `pantalla` es `null` o:
+
+```json
+{
+  "modo": "ejecutar",
+  "acciones": [
+    { "tipo": "ir", "ruta": "/rankings", "texto": "Entra a Rankings desde el menú." },
+    { "tipo": "elegir", "control": "global.selector-periodo", "ruta": null, "valor": "20260831", "texto": "Elige agosto." },
+    { "tipo": "elegir", "control": "rankings.selector-ranking", "ruta": "/rankings", "valor": "COMERCIO", "texto": "Elige COMERCIO." },
+    { "tipo": "ordenar", "control": "rankings.tabla", "ruta": "/rankings", "columna": "Operaciones_Validas", "orden": "desc", "texto": "Ordena por Operaciones de mayor a menor." },
+    { "tipo": "resaltar", "control": "rankings.tabla", "ruta": "/rankings", "fila": "104", "texto": "Aquí está Banco Pacifico." }
+  ]
+}
+```
+
+- **`modo`:**
+  - `ejecutar` ("¿cuál es…?", "¿quién…?"): el front aplica las acciones al instante, con el chat abierto y sin cursor, y ofrece **"Muéstrame cómo"**.
+  - `demostrar` ("¿cómo veo…?", "¿dónde está…?"): un cursor recorre las acciones en orden y muestra el `texto` de cada una.
+- **Tipos de acción:** `ir` (ruta), `elegir` (control + valor), `ordenar` (control + columna + `asc`/`desc`), `resaltar` (control + fila = código de banco) y `señalar` (control).
+- **Controles que se pueden manejar** (`server/src/ai/pantalla.js`):
+
+  | Control | Acciones |
+  | :--- | :--- |
+  | `global.selector-periodo` | `elegir` (período AAAAMMDD) |
+  | `rankings.selector-ranking` | `elegir` (ranking) |
+  | `rankings.filtro-banco` | `elegir` (código o `todos`) |
+  | `rankings.filtro-subactividad` | `elegir` (subactividad o `todas`) |
+  | `rankings.tabla` | `ordenar` (columnas de `/api/rankings`) y `resaltar` (banco) |
+
+  Cualquier elemento de [guia.md](guia.md) se puede `señalar`.
+- **Validación en el backend:**
+  - el control existe y el perfil lo ve;
+  - el período está cargado, y el ranking, la subactividad, la columna y el banco existen;
+  - `ruta` la pone el catálogo, no la IA;
+  - en `demostrar`, cada acción trae su `texto`, que pasa por el verificador de números.
+- **Sin IA,** o si la IA no propone nada, las reglas (`server/src/ai/pantallaReglas.js`) arman la pantalla para preguntas sobre la tabla de rankings: el más o el menos de una columna, o un banco nombrado.
