@@ -1,0 +1,12 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "bancos": [
+    { "Codigo_Banco": "101", "Banco": "Banco Istmo" },
+    { "Codigo_Banco": "102", "Banco": "Banco Horizonte" }
+  ],
+  "rankings": [
+    { "Ranking": "HIPOTECARIO", "Subactividades": ["Vivienda propia", "Local comercial"] },
+    { "Ranking": "CONSUMO", "Subactividades": ["Credito personal", "Automovil", "Tarjeta"] }
+  ]
+}

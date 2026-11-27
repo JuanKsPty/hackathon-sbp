@@ -1,0 +1,11 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo": "20260930",
+  "archivo": "AT03_sintetico_202609.csv",
+  "total": 2,
+  "excluidas": [
+    { "Fila_Archivo": 37, "Numero_Prestamo": "103-CR-000000001", "Codigo_Banco": "103", "Motivo": "E3", "Detalle": "Saldo no positivo: Saldo <= 0" },
+    { "Fila_Archivo": 49, "Numero_Prestamo": "107-CR-000000002", "Codigo_Banco": "107", "Motivo": "E2", "Detalle": "Destino extranjero: Destino distinto de L" }
+  ]
+}

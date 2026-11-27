@@ -1,0 +1,11 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo": "20260930",
+  "archivo": "AT03_sintetico_202609.csv",
+  "subactividades": [
+    { "Ranking": "CONSUMO", "Subactividad": "Credito personal", "Codigo_Banco": "101", "Banco": "Banco Istmo", "Saldo": 500000.1 },
+    { "Ranking": "CONSUMO", "Subactividad": "Automovil", "Codigo_Banco": "101", "Banco": "Banco Istmo", "Saldo": 300000.0 },
+    { "Ranking": "CONSUMO", "Subactividad": "Tarjeta", "Codigo_Banco": "101", "Banco": "Banco Istmo", "Saldo": 200000.9 }
+  ]
+}

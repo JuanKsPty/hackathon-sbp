@@ -7,12 +7,28 @@ Calcula los rankings de crédito desde los CSV del reto. Todo sale de los archiv
 ```bash
 cd server
 npm install
-npm test            # 45 pruebas: cascada, SB21, rankings, reconciliaciones y exportaciones
+npm test            # pruebas: cascada, SB21, rankings, reconciliaciones, exportaciones y API
+npm start           # API en http://localhost:3001/api (procesa ../data al arrancar)
+npm run dev         # igual, reiniciando al guardar cambios
 npm run procesar    # procesa ../data y escribe server/salidas/*.csv
 npm run procesar -- --datos ../data --salida salidas
 ```
 
+Variables de entorno opcionales: `PORT` (por defecto `3001`) y `DATA_DIR` (por defecto `../data`).
+
 Salidas del script: `rankings.csv` (entregable 2), `desglose_subactividades.csv` (3), `calidad.csv` (4), `excluidas.csv` (exclusión auditable) y `alertas.csv`.
+
+## API
+
+Endpoints de consulta y formatos JSON en [`contracts/consulta.md`](../contracts/consulta.md).
+
+- **`src/app.js`:** arma la app de Express con `crearApp({ almacen })`. Las rutas nuevas se montan ahí, antes de los manejadores de errores.
+- **`src/datos/almacen.js`:** guarda en memoria los períodos procesados. La carga de un período nuevo solo llama a `almacen.guardar(procesarPeriodo(filas, catalogos))`.
+- **`src/routes/`:**
+  - `consulta.js`: los endpoints.
+  - `parametros.js`: validación de filtros.
+  - `formato.js`: conversión al formato de los contratos.
+  - `errores.js`: formato común de errores.
 
 ## Estructura
 

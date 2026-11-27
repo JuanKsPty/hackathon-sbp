@@ -1,0 +1,52 @@
+// Validación de los parámetros de consulta (?periodo=&ranking=&banco=...).
+// Los valores válidos salen de los catálogos y de los períodos cargados, nunca de listas fijas.
+import { ErrorApi } from './errores.js';
+import { MOTIVOS } from '../engine/cascada.js';
+
+const invalido = (mensaje) => new ErrorApi(400, 'PARAMETRO_INVALIDO', mensaje);
+
+// Período pedido o, si no se indica, el último cargado.
+export function periodoPedido(almacen, valor) {
+  if (valor !== undefined && !/^\d{8}$/.test(valor)) {
+    throw invalido(`periodo debe tener el formato AAAAMMDD (llegó "${valor}").`);
+  }
+  const fecha = valor ?? almacen.ultimaFecha();
+  if (!fecha) throw new ErrorApi(404, 'PERIODO_SIN_DATOS', 'Todavía no hay períodos cargados.');
+  const periodo = almacen.obtener(fecha);
+  if (!periodo) throw new ErrorApi(404, 'PERIODO_SIN_DATOS', `No hay datos cargados para ${fecha}.`);
+  return periodo;
+}
+
+// Todos los períodos, o solo el pedido.
+export function periodosPedidos(almacen, valor) {
+  if (valor !== undefined) return [periodoPedido(almacen, valor)];
+  const todos = almacen.todos();
+  if (todos.length === 0) throw new ErrorApi(404, 'PERIODO_SIN_DATOS', 'Todavía no hay períodos cargados.');
+  return todos;
+}
+
+export function rankingPedido(almacen, valor) {
+  if (valor === undefined) return null;
+  const validos = almacen.catalogos.macroactividades;
+  if (!validos.includes(valor)) throw invalido(`ranking "${valor}" no existe. Valores: ${validos.join(', ')}.`);
+  return valor;
+}
+
+export function bancoPedido(almacen, valor) {
+  if (valor === undefined) return null;
+  if (!almacen.catalogos.bancos.has(valor)) throw invalido(`banco "${valor}" no existe en el catálogo de bancos.`);
+  return valor;
+}
+
+export function subactividadPedida(almacen, valor) {
+  if (valor === undefined) return null;
+  const todas = [...almacen.catalogos.subactividadesPorMacro.values()].flat();
+  if (!todas.includes(valor)) throw invalido(`subactividad "${valor}" no existe en el catálogo CINU.`);
+  return valor;
+}
+
+export function motivoPedido(valor) {
+  if (valor === undefined) return null;
+  if (!(valor in MOTIVOS)) throw invalido(`motivo debe ser uno de ${Object.keys(MOTIVOS).join(', ')}.`);
+  return valor;
+}
