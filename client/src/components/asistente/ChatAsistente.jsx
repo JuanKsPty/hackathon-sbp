@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { BotIcon, LoaderCircleIcon, SendHorizontalIcon, Trash2Icon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { MAX_PREGUNTA } from '@/api/ia.js'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
@@ -12,7 +12,6 @@ import { sugerenciasDeGraficos } from './accion.js'
 import { AvisoIA } from './AvisoIA.jsx'
 import { borrarConversacion, enviarPregunta, reintentarUltima, useConversacion } from './conversacion.js'
 import { MensajeAsistente, MensajeError } from './MensajeAsistente.jsx'
-import { PieFuente } from './PieFuente.jsx'
 import { useEstadoIA } from './useEstadoIA.js'
 
 // Preguntas de ejemplo. Primero las que muestran gráficos (#108), con los períodos cargados; Público no
@@ -196,7 +195,6 @@ export function ChatAsistente({ className, enPanel = false }) {
         <AvisoIA estado={estado} />
         {conversacion}
         {formulario}
-        <PieFuente />
       </div>
     )
   }
@@ -220,10 +218,6 @@ export function ChatAsistente({ className, enPanel = false }) {
         {conversacion}
         {formulario}
       </CardContent>
-
-      <CardFooter>
-        <PieFuente />
-      </CardFooter>
     </Card>
   )
 }
