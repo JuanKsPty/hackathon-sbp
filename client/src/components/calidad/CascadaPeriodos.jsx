@@ -1,3 +1,4 @@
+import { TerminoGlosario } from '@/components/glosario/TerminoGlosario.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
@@ -12,7 +13,9 @@ export function CascadaPeriodos({ periodos, periodoElegido }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cascada de exclusiones por período</CardTitle>
+        <CardTitle>
+          <TerminoGlosario termino="cascada">Cascada de exclusiones por período</TerminoGlosario>
+        </CardTitle>
         <CardDescription>
           Reporte oficial: cada fila excluida cuenta solo en el primer filtro que incumple (E1, luego E2, E3 y E4).
         </CardDescription>
@@ -26,10 +29,14 @@ export function CascadaPeriodos({ periodos, periodoElegido }) {
               <TableHead className="text-right">Filas leídas</TableHead>
               {MOTIVOS.map((m) => (
                 <TableHead key={m.codigo} className="text-right" title={m.nombre}>
-                  {m.codigo} · {m.nombre}
+                  <TerminoGlosario termino={m.codigo.toLowerCase()}>
+                    {m.codigo} · {m.nombre}
+                  </TerminoGlosario>
                 </TableHead>
               ))}
-              <TableHead className="text-right">Universo local válido</TableHead>
+              <TableHead className="text-right">
+                <TerminoGlosario termino="universo">Universo local válido</TerminoGlosario>
+              </TableHead>
               <TableHead className="text-right">Saldo total válido</TableHead>
               <TableHead>Cuadre</TableHead>
             </TableRow>
