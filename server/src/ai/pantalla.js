@@ -123,3 +123,26 @@ export function validarAccion(accion, { contexto, perfil = 'publico' }) {
   // señalar: solo apunta al elemento (no cambia nada en la pantalla).
   return { ok: true, accion: { tipo, control, ruta, texto } };
 }
+
+/**
+ * Valida la propuesta completa de la IA: { modo, acciones }.
+ * En "demostrar" cada acción necesita un texto (es lo que dice el globo junto al cursor).
+ * @returns {{ ok: true, pantalla: { modo, acciones } } | { ok: false, errores: string[] }}
+ */
+export function validarPantalla(propuesta, { contexto, perfil = 'publico' }) {
+  const modo = propuesta?.modo;
+  if (!MODOS.includes(modo)) return { ok: false, errores: [`modo debe ser ${MODOS.join(' o ')}.`] };
+  const lista = propuesta?.acciones;
+  if (!Array.isArray(lista) || lista.length === 0 || lista.length > MAX_ACCIONES) {
+    return { ok: false, errores: [`acciones debe ser una lista de 1 a ${MAX_ACCIONES} acciones.`] };
+  }
+  const errores = [];
+  const acciones = [];
+  lista.forEach((propuestaAccion, i) => {
+    const resultado = validarAccion(propuestaAccion, { contexto, perfil });
+    if (!resultado.ok) return errores.push(`Acción ${i + 1}: ${resultado.error}`);
+    if (modo === 'demostrar' && !resultado.accion.texto) return errores.push(`Acción ${i + 1}: en una demostración cada paso necesita un texto.`);
+    acciones.push(resultado.accion);
+  });
+  return errores.length ? { ok: false, errores } : { ok: true, pantalla: { modo, acciones } };
+}

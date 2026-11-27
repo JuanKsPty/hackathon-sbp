@@ -1,7 +1,7 @@
 // Acciones de pantalla del agente (#121).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CONTROLES, COLUMNAS_RANKING, contextoPantalla, errorDeValor, validarAccion } from '../../src/ai/pantalla.js';
+import { CONTROLES, COLUMNAS_RANKING, contextoPantalla, errorDeValor, validarAccion, validarPantalla } from '../../src/ai/pantalla.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { paqueteReal } from '../ayuda.js';
 import { elementoGuia } from '../../src/ai/guia.js';
@@ -100,4 +100,29 @@ test('señalar: cualquier elemento de la guía visible para el perfil', () => {
   assert.equal(validarAccion({ tipo: 'señalar', control: 'global.selector-perfil' }, { contexto: c }).accion.ruta, null);
   assert.match(validarAccion({ tipo: 'señalar', control: 'admin.bitacora' }, { contexto: c, perfil: 'publico' }).error, /perfil publico/);
   assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.grafico', columna: 'Banco' }, { contexto: c }).error, /no admite "ordenar"/);
+});
+
+test('validarPantalla: modo, cantidad de acciones y texto obligatorio al demostrar', () => {
+  const c = contexto();
+  const acciones = [
+    { tipo: 'ir', ruta: '/rankings', texto: 'Ve a Rankings.' },
+    { tipo: 'ordenar', control: 'rankings.tabla', columna: 'Operaciones_Validas', texto: 'Ordena por operaciones.' },
+    { tipo: 'resaltar', control: 'rankings.tabla', fila: '104', texto: 'Banco Pacifico es el primero.' },
+  ];
+  const ok = validarPantalla({ modo: 'ejecutar', acciones }, { contexto: c });
+  assert.equal(ok.ok, true);
+  assert.deepEqual(ok.pantalla.acciones.map((a) => a.tipo), ['ir', 'ordenar', 'resaltar']);
+  assert.equal(validarPantalla({ modo: 'demostrar', acciones }, { contexto: c }).ok, true);
+
+  // Sin texto: vale para ejecutar, no para demostrar.
+  const sinTexto = [{ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Banco' }];
+  assert.equal(validarPantalla({ modo: 'ejecutar', acciones: sinTexto }, { contexto: c }).ok, true);
+  assert.match(validarPantalla({ modo: 'demostrar', acciones: sinTexto }, { contexto: c }).errores[0], /necesita un texto/);
+
+  assert.match(validarPantalla({ modo: 'adivinar', acciones }, { contexto: c }).errores[0], /modo/);
+  assert.match(validarPantalla({ modo: 'ejecutar', acciones: [] }, { contexto: c }).errores[0], /1 a 8/);
+  assert.match(validarPantalla({ modo: 'ejecutar', acciones: Array(9).fill(acciones[0]) }, { contexto: c }).errores[0], /1 a 8/);
+  // Junta todos los errores, con el número de acción.
+  const mal = validarPantalla({ modo: 'ejecutar', acciones: [acciones[0], { tipo: 'resaltar', control: 'rankings.tabla', fila: '999' }, { tipo: 'volar' }] }, { contexto: c });
+  assert.deepEqual(mal.errores.map((e) => e.slice(0, 9)), ['Acción 2:', 'Acción 3:']);
 });
