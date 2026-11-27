@@ -11,7 +11,7 @@ export function rutasDeIndicadores(almacen) {
   const rutas = Router();
 
   rutas.get('/indicadores', (req, res) => {
-    const periodo = periodoPedido(almacen, req.query.periodo);
+    const periodo = periodoPedido(almacen, req.query.periodo, { permitirTodos: true });
     const ranking = rankingPedido(almacen, req.query.ranking);
     const indicadores = calcularIndicadores(periodo, almacen.catalogos, { ranking });
     res.json({

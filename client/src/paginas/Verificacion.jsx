@@ -18,11 +18,14 @@ import { PUNTOS } from '@/components/verificacion/puntos.js'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { Pagina } from './Pagina.jsx'
+import { TODOS_LOS_PERIODOS } from '@/lib/periodos.js'
 
 // Modo verificación (#63): un dato de cada uno de los 6 puntos de la sección 11.1, con sus chequeos
 // de la sección 12, para mostrarlo en vivo al jurado. Todo viene de GET /api/verificacion (R2).
 export default function Verificacion() {
-  const { periodo, periodos, cambiarPeriodo, cargando: cargandoPeriodos, error: errorPeriodos, reintentar: reintentarPeriodos } = usePeriodo()
+  const { periodo: periodoGlobal, periodos, cambiarPeriodo, cargando: cargandoPeriodos, error: errorPeriodos, reintentar: reintentarPeriodos } = usePeriodo()
+  // La verificación es de un corte: con "Todos los períodos" se muestra el más reciente.
+  const periodo = periodoGlobal === TODOS_LOS_PERIODOS ? (periodos.at(-1)?.Fecha ?? null) : periodoGlobal
   const catalogo = useConsulta(pedirCatalogos)
   const [banco, setBanco] = useState(TODOS)
   const bancoFiltrado = banco === TODOS ? null : banco

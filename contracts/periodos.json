@@ -19,5 +19,13 @@
       "Saldo_Total_Valido": 131000000.25,
       "Reconciliaciones_OK": true
     }
-  ]
+  ],
+  "acumulado": {
+    "Fecha": "todos",
+    "Archivo": "AT03_sintetico_202608.csv, AT03_sintetico_202609.csv",
+    "Filas_Leidas": 2100,
+    "Universo_Local_Valido": 1990,
+    "Saldo_Total_Valido": 256000000.75,
+    "Reconciliaciones_OK": true
+  }
 }

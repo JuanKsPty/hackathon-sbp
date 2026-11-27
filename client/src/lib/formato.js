@@ -4,6 +4,7 @@ const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'o
 
 // '20260930' -> '30 sep 2026'. Si no es una fecha AAAAMMDD, devuelve el texto tal cual.
 export function formatearPeriodo(fecha) {
+  if (fecha === 'todos') return 'Todos los períodos'
   const partes = /^(\d{4})(\d{2})(\d{2})$/.exec(String(fecha ?? ''))
   if (!partes) return fecha ?? ''
   const [, anio, mes, dia] = partes
@@ -18,6 +19,7 @@ const MESES_LARGOS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Ju
 // Cada período es un corte mensual; en los textos donde importa la fecha de corte se sigue usando
 // formatearPeriodo. Si no es una fecha AAAAMMDD, devuelve el texto tal cual.
 export function formatearMes(fecha) {
+  if (fecha === 'todos') return 'Todos los períodos'
   const partes = /^(\d{4})(\d{2})(\d{2})$/.exec(String(fecha ?? ''))
   if (!partes) return fecha ?? ''
   const [, anio, mes] = partes
@@ -28,6 +30,7 @@ export function formatearMes(fecha) {
 
 // Fecha de corte del período, corta: '20260930' -> 'corte al 30 sep'.
 export function formatearCorte(fecha) {
+  if (fecha === 'todos') return 'acumulado de los cortes cargados'
   const partes = /^(\d{4})(\d{2})(\d{2})$/.exec(String(fecha ?? ''))
   if (!partes) return ''
   const [, , mes, dia] = partes

@@ -13,6 +13,8 @@ Todas las respuestas traen `fuente` y `aviso` ("Datos ficticios · Uso informati
 
 **Si no se indica `periodo`**, se usa el último período cargado. La excepción es `/api/calidad`, que devuelve todos.
 
+**`periodo=todos` ("Todos los períodos")** devuelve el **acumulado** de los cortes cargados en `/api/rankings`, `/api/subactividades`, `/api/calidad`, `/api/excluidas`, `/api/indicadores` y el dashboard HTML. El motor junta las operaciones válidas de todos los cortes y recalcula saldos, posiciones, ponderación y desglose con las mismas reglas (`server/src/engine/acumulado.js`). La respuesta trae `periodo: "todos"`. La unicidad se controla dentro de cada corte, porque un préstamo sigue vivo de un corte al siguiente. No vale en `/api/movimientos` ni en `/api/descomposicion` (comparan dos cortes); en las descargas CSV equivale a no indicar `periodo` (cada corte por separado, con su Fecha).
+
 | Endpoint | Parámetros (query, opcionales) | Ejemplo |
 | :--- | :--- | :--- |
 | `GET /api/periodos` | — | [periodos.json](periodos.json) |
@@ -28,6 +30,8 @@ Devuelve los períodos cargados, del más antiguo al más reciente, y en `ultimo
 - `Fecha` y `Archivo`;
 - `Filas_Leidas`, `Universo_Local_Valido` y `Saldo_Total_Valido`;
 - `Reconciliaciones_OK`: es `true` si R1, R2, R3 y la unicidad cuadran.
+
+`acumulado` trae los mismos campos para "Todos los períodos" (`Fecha: "todos"`), o `null` si no hay períodos cargados.
 
 ## `GET /api/catalogos`
 Datos para llenar los filtros:
