@@ -79,7 +79,7 @@ test('el script de consola procesa data/ y escribe las exportaciones', () => {
 // Levanta la API con los tres períodos reales, ejecuta `prueba(base)` y la apaga.
 async function conServidor(prueba) {
   const { catalogos, periodos } = paqueteReal();
-  const servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos), opcionesIA: { apiKey: '' } }).listen(0);
+  const servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos), opcionesIA: { apiKey: '' } }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   try {
     await prueba(`http://127.0.0.1:${servidor.address().port}/api`);

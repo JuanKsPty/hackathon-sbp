@@ -42,7 +42,7 @@ function obtenerMovimientosDePrueba(query) {
 async function arrancar(opciones = {}) {
   const { catalogos, periodos } = paqueteReal();
   const julioYAgosto = periodos.filter((p) => p.fecha !== '20260930');
-  const servidor = crearApp({ almacen: crearAlmacen(catalogos, julioYAgosto), ...opciones }).listen(0);
+  const servidor = crearApp({ almacen: crearAlmacen(catalogos, julioYAgosto), ...opciones }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   servidores.push(servidor);
   return `http://127.0.0.1:${servidor.address().port}/api`;
@@ -174,7 +174,7 @@ test('sin X-Nombre-Archivo responde 400 y con otro Content-Type responde 415', a
 
 test('con el cálculo real de movimientos, Comparacion es lo mismo que GET /api/movimientos', async () => {
   const almacen = crearAlmacen(paqueteReal().catalogos, paqueteReal().periodos.filter((p) => p.fecha !== '20260930'));
-  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0);
+  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   servidores.push(servidor);
   const real = `http://127.0.0.1:${servidor.address().port}/api`;

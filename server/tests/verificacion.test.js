@@ -87,7 +87,7 @@ test('los chequeos detectan datos que no cuadran', () => {
 test('GET /api/verificacion: último período por defecto, filtros y errores', async () => {
   const { crearApp } = await import('../src/app.js');
   const { once } = await import('node:events');
-  const servidor = crearApp({ almacen: almacenReal(), opcionesIA: { apiKey: '' } }).listen(0);
+  const servidor = crearApp({ almacen: almacenReal(), opcionesIA: { apiKey: '' } }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   const base = `http://127.0.0.1:${servidor.address().port}/api`;
   try {

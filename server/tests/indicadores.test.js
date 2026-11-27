@@ -110,7 +110,7 @@ let base;
 
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
-  servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0);
+  servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
 });

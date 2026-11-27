@@ -188,7 +188,7 @@ after(() => servidores.forEach((s) => s.close()));
 async function levantar(opcionesIA) {
   const almacen = almacenReal();
   const obtenerMovimientos = crearObtenerMovimientos(almacen, { obtenerRegla: () => REGLA });
-  const servidor = crearApp({ almacen, obtenerMovimientos, opcionesIA, limiteIA: { maximo: 1000 } }).listen(0);
+  const servidor = crearApp({ almacen, obtenerMovimientos, opcionesIA, limiteIA: { maximo: 1000 } }).listen(0, '127.0.0.1');
   servidores.push(servidor);
   await once(servidor, 'listening');
   const base = `http://127.0.0.1:${servidor.address().port}/api`;

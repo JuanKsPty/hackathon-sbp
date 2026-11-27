@@ -42,9 +42,16 @@ async function levantarApi() {
   const { crearObtenerMovimientos } = await import('../../src/routes/movimientos.js');
   const carpeta = path.resolve(process.env.DATA_DIR ?? fileURLToPath(new URL('../../../data', import.meta.url)));
   const almacen = almacenDesdeCarpeta(carpeta);
-  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0);
+  // Sin el límite de pedidos de IA (#84): la evaluación hace 18 preguntas seguidas desde la misma IP y,
+  // si la IA responde rápido, pasaría de 10 por minuto y los últimos casos fallarían con 429.
+  const sinLimite = { maximo: Number.POSITIVE_INFINITY, maximoGlobal: Number.POSITIVE_INFINITY };
+  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), limiteIA: sinLimite }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
-  return { base: `http://127.0.0.1:${servidor.address().port}/api`, cerrar: () => servidor.close() };
+  const base = `http://127.0.0.1:${servidor.address().port}/api`;
+  // Las herramientas de la IA consultan esta misma API en memoria. Sin esto irían a 127.0.0.1:3001
+  // (el valor por defecto) y evaluarían lo que haya corriendo ahí, o fallarían si no hay nada.
+  process.env.API_INTERNA = base;
+  return { base, cerrar: () => servidor.close() };
 }
 
 const { base, cerrar } = await levantarApi();
@@ -70,6 +77,9 @@ try {
     } else {
       console.log(`Evaluando ${casos.length} casos × ${repeticiones} con ${estado.modelo} en ${base}\n`);
       const resultados = [];
+      // La API desplegada limita a 10 preguntas por minuto por IP (#84): contra ella se deja al menos
+      // 6.5 s entre preguntas para no recibir 429. La API en memoria no tiene límite.
+      const esperaMinimaMs = process.env.EVAL_API_URL ? 6500 : 0;
       for (const caso of casos) {
         const esperado = await caso.esperado(api);
         for (let i = 0; i < repeticiones; i++) {
@@ -84,6 +94,7 @@ try {
           const { ok, fallas } = calificar(respuesta, esperado);
           resultados.push({ id: caso.id, categoria: caso.categoria, perfil: caso.perfil, pregunta: caso.pregunta, ok, fallas, ms, respuesta });
           console.log(`${ok ? '✔' : '✖'} ${caso.id} (${(ms / 1000).toFixed(1)} s)${ok ? '' : `\n    ${fallas.join('\n    ')}`}`);
+          if (ms < esperaMinimaMs) await new Promise((listo) => setTimeout(listo, esperaMinimaMs - ms));
         }
       }
       imprimirResumen(resultados);

@@ -43,7 +43,7 @@ async function arrancar({ limite } = {}) {
   app.use('/api', rutasDeSuscripciones(crearAlmacen(catalogos, periodos), opciones));
   app.use(rutaNoEncontrada);
   app.use(manejarErrores);
-  const servidor = app.listen(0);
+  const servidor = app.listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   servidores.push(servidor);
   return `http://127.0.0.1:${servidor.address().port}/api`;
@@ -164,7 +164,7 @@ test('el enlace de baja desactiva la suscripción y avisa a Zapier', async () =>
 
 test('la app completa monta las rutas de suscripción', async () => {
   const { catalogos, periodos } = paqueteReal();
-  const servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0);
+  const servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   servidores.push(servidor);
   const respuesta = await fetch(`http://127.0.0.1:${servidor.address().port}/api/suscripciones/confirmar?token=x`);

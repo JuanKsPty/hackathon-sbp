@@ -63,7 +63,7 @@ let respuestaDeCarga;
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos.filter((p) => p.fecha !== '20260930'));
-  servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0);
+  servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
 

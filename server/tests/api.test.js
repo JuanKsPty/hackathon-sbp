@@ -18,7 +18,7 @@ let base;
 
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
-  servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0);
+  servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos) }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
 });
@@ -126,7 +126,7 @@ test('errores con el formato común', async () => {
 });
 
 test('sin períodos cargados responde PERIODO_SIN_DATOS', async () => {
-  const vacio = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, []) }).listen(0);
+  const vacio = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, []) }).listen(0, '127.0.0.1');
   await once(vacio, 'listening');
   try {
     const respuesta = await fetch(`http://127.0.0.1:${vacio.address().port}/api/rankings`);
