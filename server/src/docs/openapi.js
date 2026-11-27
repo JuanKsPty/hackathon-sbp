@@ -312,6 +312,21 @@ export function crearDocumentoOpenApi(catalogos) {
           responses: { ...csvOk('CSV con las columnas del entregable 2'), ...errores(400, 403, 404) },
         },
       },
+      '/exportar/personalizado.html': {
+        get: {
+          tags: ['Descargas'],
+          summary: 'Reporte personalizado como dashboard HTML autocontenido (Analista y Admin)',
+          parameters: [
+            { name: 'periodos', in: 'query', required: false, description: 'Períodos AAAAMMDD, lista separada por comas (vacío = todos)', schema: { type: 'string' } },
+            { name: 'rankings', in: 'query', required: false, description: 'Rankings, lista separada por comas (vacío = todos)', schema: { type: 'string' } },
+            { name: 'bancos', in: 'query', required: false, description: 'Códigos de banco, lista separada por comas (vacío = todos)', schema: { type: 'string' } },
+          ],
+          responses: {
+            200: { description: 'HTML descargable (Content-Disposition: attachment)', content: { 'text/html': { schema: { type: 'string' } } } },
+            ...errores(400, 403, 404),
+          },
+        },
+      },
       '/ia/estado': { get: { tags: ['IA'], summary: 'Si la IA está disponible y con qué modelo', responses: jsonOk('Estado de la IA') } },
       '/ia/guia': {
         get: { tags: ['IA'], summary: 'Elementos que el agente guía puede señalar para el perfil (data-guia)', responses: jsonOk('Elementos de la guía') },

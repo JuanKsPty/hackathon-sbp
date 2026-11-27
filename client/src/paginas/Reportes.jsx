@@ -271,6 +271,15 @@ function ReportePersonalizado({ periodos, rankings, bancos }) {
         parametrosPersonalizado({ periodos: periodosElegidos, rankings: rankingsElegidos, bancos: bancosElegidos }),
       ),
     )
+  // Mismo filtro, como dashboard HTML autocontenido.
+  const descargaDashboard = useDescarga()
+  const descargarDashboard = () =>
+    descargaDashboard.ejecutar(() =>
+      descargarArchivo(
+        '/exportar/personalizado.html',
+        parametrosPersonalizado({ periodos: periodosElegidos, rankings: rankingsElegidos, bancos: bancosElegidos }),
+      ),
+    )
 
   return (
     <Card data-guia="reportes.personalizado">
@@ -278,7 +287,10 @@ function ReportePersonalizado({ periodos, rankings, bancos }) {
         <CardTitle>Reporte personalizado</CardTitle>
         <CardDescription>Mismas columnas que el entregable 2. Una lista sin marcas incluye todo.</CardDescription>
         <CardAction>
-          <BotonDescarga descarga={descarga} alDescargar={descargar}>personalizado.csv</BotonDescarga>
+          <div className="flex flex-wrap gap-2">
+            <BotonDescarga descarga={descarga} alDescargar={descargar}>personalizado.csv</BotonDescarga>
+            <BotonDescarga descarga={descargaDashboard} alDescargar={descargarDashboard}>Descargar dashboard</BotonDescarga>
+          </div>
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

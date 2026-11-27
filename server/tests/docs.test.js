@@ -67,7 +67,7 @@ test('las respuestas de error documentadas usan el formato común', async () => 
 
 test('las rutas que documentan 403 responden 403 al perfil Público', async () => {
   const restringidas = Object.entries(documento.paths).filter(([, op]) => op.get?.responses[403]).map(([ruta]) => ruta);
-  assert.deepEqual(restringidas.sort(), ['/admin/catalogos', '/admin/catalogos/{clave}', '/admin/permisos', '/admin/usuarios', '/bitacora', '/explicaciones', '/exportar/movimientos.csv', '/exportar/personalizado.csv', '/movimientos', '/movimientos/descomposicion', '/suscripciones']);
+  assert.deepEqual(restringidas.sort(), ['/admin/catalogos', '/admin/catalogos/{clave}', '/admin/permisos', '/admin/usuarios', '/bitacora', '/explicaciones', '/exportar/movimientos.csv', '/exportar/personalizado.csv', '/exportar/personalizado.html', '/movimientos', '/movimientos/descomposicion', '/suscripciones']);
   for (const ruta of restringidas) {
     const respuesta = await fetch(base + ruta, { headers: { 'X-Perfil': 'publico' } });
     assert.equal(respuesta.status, 403, ruta);

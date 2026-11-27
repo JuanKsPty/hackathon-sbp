@@ -84,6 +84,55 @@ th{background:#eef2f7}.n{text-align:right;font-variant-numeric:tabular-nums}
 @media print{body{background:#fff}section{break-inside:avoid}}
 `;
 
+// Reporte personalizado (Analista y Administrador): una sección por período elegido, solo con los
+// rankings y las filas de los bancos elegidos. Sets vacíos = todos. Con bancos elegidos, además,
+// una tabla por banco con sus posiciones en los rankings elegidos.
+export function dashboardPersonalizadoHtml({ periodos, rankings = new Set(), bancos = new Set(), catalogos }) {
+  const nombre = (codigo) => catalogos?.bancos?.get(codigo) ?? codigo;
+  const filtros = [
+    `Períodos: ${periodos.map((p) => fechaLegible(p.fecha)).join(', ')}`,
+    rankings.size > 0 ? `Rankings: ${[...rankings].join(', ')}` : 'Todos los rankings',
+    bancos.size > 0 ? `Bancos: ${[...bancos].map((b) => `${nombre(b)} (${b})`).join(', ')}` : 'Todos los bancos',
+  ];
+  const encabezado = `Fuente: ${FUENTE} · Archivos: ${periodos.map((p) => p.nombreArchivo ?? 'AT03').join(', ')}`;
+
+  const cuerpo = periodos
+    .map((periodo) => {
+      const c = periodo.calidad;
+      const elegidos = periodo.rankings
+        .filter((r) => rankings.size === 0 || rankings.has(r.ranking))
+        .map((r) => ({ ...r, filas: r.filas.filter((f) => bancos.size === 0 || bancos.has(f.codigoBanco)) }));
+      const tarjetas = [
+        ['Cartera local válida', monto(c.saldoTotalValido)],
+        ['Universo local válido', `${c.universoValido} operaciones`],
+        ['Filas leídas', String(c.filasLeidas)],
+      ]
+        .map(([t, v]) => `<div class="tarjeta"><span>${escapar(t)}</span><b>${escapar(v)}</b></div>`)
+        .join('');
+      const porBanco = [...bancos]
+        .map((codigo) => seccionBanco({ ...periodo, rankings: periodo.rankings.filter((r) => rankings.size === 0 || rankings.has(r.ranking)) }, codigo, nombre(codigo)))
+        .join('');
+      const secciones = elegidos
+        .map(({ ranking: r, filas }) => `<section><h2>Ranking ${escapar(r)} · ${escapar(fechaLegible(periodo.fecha))}</h2>${filas.length > 0 ? barras(filas) : ''}${tablaRanking(filas)}</section>`)
+        .join('');
+      return `<h2 class="periodo">Período ${escapar(fechaLegible(periodo.fecha))}</h2><div class="tarjetas">${tarjetas}</div>${porBanco}${secciones}${seccionCalidad(c)}`;
+    })
+    .join('');
+
+  return `<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporte personalizado</title><style>${ESTILOS}.periodo{margin:28px 0 0;font-size:19px}</style></head>
+<body><main>
+<header><h1>Reporte personalizado · Dashboard</h1>
+<p class="meta">${escapar(encabezado)}</p>
+<p class="meta">Filtros: ${escapar(filtros.join(' · '))}</p>
+<span class="aviso">${escapar(AVISO)}</span></header>
+${cuerpo}
+<footer>${escapar(encabezado)}<br>${escapar(AVISO)}. Montos en balboas con 2 decimales; ponderación en % con 4 decimales. Mismos datos que personalizado.csv.</footer>
+</main></body></html>
+`;
+}
+
 // periodo: período procesado del almacén. ranking (opcional): un nombre de macroactividad.
 // banco (opcional): código del catálogo. catalogos: para el nombre del banco.
 export function dashboardHtml({ periodo, ranking = null, banco = null, catalogos }) {
