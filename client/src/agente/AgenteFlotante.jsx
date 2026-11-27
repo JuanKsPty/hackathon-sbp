@@ -1,6 +1,6 @@
 // Chat del agente (#119) encima de la pantalla, sin cambiar de página y sin bloquearla (se puede
-// seguir usando el dashboard). Se abre y se minimiza con el botón del encabezado (BotonAgente) y
-// aparece justo debajo de él, arriba a la derecha.
+// seguir usando el dashboard). Se abre y se minimiza con el botón flotante (BotonAgente) y
+// aparece justo encima de él, abajo a la derecha.
 // Es la misma conversación que la página /asistente (conversacion.js). Debajo del chat van los
 // gráficos de la última pregunta (#108).
 import { useState } from 'react'
@@ -32,7 +32,7 @@ export function AgenteFlotante() {
       onKeyDown={(e) => {
         if (e.key === 'Escape') cerrar()
       }}
-      className="fixed top-[5.75rem] right-4 z-40 flex h-[min(680px,calc(100svh-6.75rem))] w-[min(440px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
+      className="fixed right-4 bottom-[7.25rem] z-40 flex h-[min(520px,calc(100svh-8.5rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
     >
       <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-2">
         <p className="text-sm font-semibold">Asistente IA</p>

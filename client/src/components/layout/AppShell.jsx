@@ -4,6 +4,7 @@ import { Encabezado } from './Encabezado.jsx'
 import { Navegacion } from './Navegacion.jsx'
 import { useControlPeriodo } from './SelectorPeriodo.jsx'
 import { AgenteFlotante } from '@/agente/AgenteFlotante.jsx'
+import { BotonAgente } from '@/agente/BotonAgente.jsx'
 
 // Estructura de todas las páginas: barra lateral (>= 1024 px), encabezado fijo arriba y, al pie, la
 // fuente, el período y el aviso (BarraFuente).
@@ -26,8 +27,9 @@ export function AppShell() {
         </main>
         <BarraFuente />
       </div>
-      {/* Chat del agente (#119) encima de la pantalla actual; se abre desde el encabezado. */}
+      {/* Chat del agente (#119) encima de la pantalla actual; se abre con el botón flotante. */}
       <AgenteFlotante />
+      <BotonAgente />
     </div>
   )
 }
