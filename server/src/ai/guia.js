@@ -72,7 +72,6 @@ export const ELEMENTOS_GUIA = [
   el('admin.bitacora', '/admin', 'Registro de operaciones', 'ver_bitacora'),
   // Asistente IA (panel lateral, en cualquier página)
   el('asistente.pregunta', null, 'Campo para escribir la pregunta al asistente'),
-  el('asistente.fuentes', null, 'Consultas que usó la IA para responder'),
 ];
 
 const POR_GUIA = new Map(ELEMENTOS_GUIA.map((e) => [e.guia, e]));

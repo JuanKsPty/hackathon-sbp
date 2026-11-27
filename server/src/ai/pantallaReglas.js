@@ -97,6 +97,8 @@ export function pantallaPorReglas(pregunta, almacen, perfil = 'publico') {
     { tipo: 'ir', ruta: '/rankings', texto: 'Entra a Rankings desde el menú.' },
     { tipo: 'elegir', control: 'global.selector-periodo', valor: periodo, texto: `Elige el período de ${nombrePeriodo(periodo)}.` },
     { tipo: 'elegir', control: 'rankings.selector-ranking', valor: ranking, texto: `Elige el ranking ${ranking}.` },
+    // Siempre se indica el orden (la tabla puede venir ordenada por otra columna de una pregunta
+    // anterior); si ya está así, el front se salta el paso.
     { tipo: 'ordenar', control: 'rankings.tabla', columna, orden, texto: `Ordena la columna ${NOMBRE_COLUMNA[columna]} ${mayorMenor}.` },
     { tipo: 'resaltar', control: 'rankings.tabla', fila: banco, texto: `Aquí está ${contexto.bancos.get(banco)}.` },
   ];

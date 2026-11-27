@@ -17,7 +17,7 @@ import { DesgloseSubactividades } from '@/components/rankings/DesgloseSubactivid
 import { FiltrosRanking, TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { GraficoRanking } from '@/components/rankings/GraficoRanking.jsx'
 import { SelectorRanking } from '@/components/rankings/SelectorRanking.jsx'
-import { TablaRanking } from '@/components/rankings/TablaRanking.jsx'
+import { ORDEN_INICIAL, TablaRanking } from '@/components/rankings/TablaRanking.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
@@ -72,7 +72,15 @@ export default function Rankings() {
     })
     periodoGlobalAnterior.current = periodoGlobal
     if (accion?.tipo === 'encabezado') cambiarPeriodo(accion.periodo)
-    else if (accion?.tipo === 'url') actualizar({ periodo: accion.periodo })
+    // Solo el período, partiendo de la URL más reciente: así no pisa un filtro que se acaba de
+    // cambiar en el mismo instante (por ejemplo, el ranking que eligió el agente, #125).
+    else if (accion?.tipo === 'url') {
+      setParametros((previos) => {
+        const nuevos = new URLSearchParams(previos)
+        nuevos.set('periodo', accion.periodo)
+        return nuevos
+      }, { replace: true })
+    }
     // Reacciona a que el catálogo esté listo y a cualquier cambio del período en la URL o el encabezado.
   }, [listoCatalogo, periodoGlobal, filtros.periodo]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -104,16 +112,33 @@ export default function Rankings() {
   const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' || valor === TODOS ? null : valor)
   useControlGuia('rankings.selector-ranking', {
     elegir: (valor) => cambiarEnUrl({ ranking: valor, subactividad: null }),
+    actual: () => ranking,
     estado: () => ({ ranking: filtros.ranking, subactividad: filtros.subactividad }),
     restaurar: (anterior) => cambiarEnUrl({ ranking: anterior?.ranking, subactividad: anterior?.subactividad }),
   })
+  // La tabla: su orden y la fila del agente viven aquí, así sobreviven a que la tabla se vuelva a
+  // montar cuando cambian los datos (por ejemplo, justo después de elegir otro ranking).
+  const [ordenTabla, setOrdenTabla] = useState(ORDEN_INICIAL)
+  const [delAgente, setDelAgente] = useState(null)
+  useControlGuia('rankings.tabla', {
+    ordenar: (columna, sentido) => setOrdenTabla({ clave: columna, ascendente: sentido === 'asc' }),
+    resaltar: (codigo) => setDelAgente(codigo),
+    ordenActual: () => ({ columna: ordenTabla.clave, orden: ordenTabla.ascendente ? 'asc' : 'desc' }),
+    estado: () => ({ orden: ordenTabla, delAgente }),
+    restaurar: (anterior) => {
+      setOrdenTabla(anterior?.orden ?? ORDEN_INICIAL)
+      setDelAgente(anterior?.delAgente ?? null)
+    },
+  })
   useControlGuia('rankings.filtro-banco', {
     elegir: (valor) => cambiarEnUrl({ banco: sinFiltro(valor) }),
+    actual: () => filtros.banco ?? 'todos',
     estado: () => filtros.banco,
     restaurar: (anterior) => cambiarEnUrl({ banco: anterior }),
   })
   useControlGuia('rankings.filtro-subactividad', {
     elegir: (valor) => cambiarEnUrl({ subactividad: sinFiltro(valor) }),
+    actual: () => filtros.subactividad ?? 'todas',
     estado: () => filtros.subactividad,
     restaurar: (anterior) => cambiarEnUrl({ subactividad: anterior }),
   })
@@ -174,7 +199,13 @@ export default function Rankings() {
         </CardHeader>
         <CardContent>
           <Estado consulta={consultaRanking} vacio={bancosVisibles.length === 0}>
-            <TablaRanking bancos={bancosVisibles} bancoResaltado={bancoFiltrado} />
+            <TablaRanking
+              bancos={bancosVisibles}
+              bancoResaltado={bancoFiltrado}
+              orden={ordenTabla}
+              alOrdenar={setOrdenTabla}
+              delAgente={delAgente}
+            />
           </Estado>
         </CardContent>
       </Card>

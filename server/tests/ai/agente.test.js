@@ -611,3 +611,11 @@ test('#121: las instrucciones explican cuándo ejecutar y cuándo demostrar', as
   assert.match(cliente.llamadas[0].system, /usar_pantalla en modo "ejecutar"/);
   assert.match(cliente.llamadas[0].system, /usar_pantalla en modo "demostrar"/);
 });
+
+test('respuestas directas: effort low y la instrucción de responder en una o dos frases', async () => {
+  const cliente = clienteGuionado([responder('Hola.')])
+  const base = await levantar({ cliente })
+  await preguntar(base, { pregunta: 'Hola' })
+  assert.equal(cliente.llamadas[0].output_config.effort, 'low')
+  assert.match(cliente.llamadas[0].system, /Responde directo, en una o dos frases/)
+})

@@ -11,6 +11,7 @@ export function SelectorPeriodo() {
   // Acciones de pantalla del agente (#125): elegir el período y deshacerlo.
   useControlGuia('global.selector-periodo', {
     elegir: (valor) => cambiarPeriodo(valor),
+    actual: () => periodo,
     estado: () => periodo,
     restaurar: (anterior) => anterior && cambiarPeriodo(anterior),
   })

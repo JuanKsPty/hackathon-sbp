@@ -55,6 +55,17 @@ export async function ejecutarAcciones(acciones, { registro, navegar, rutaActual
       guardados.add(accion.control)
       deshacer.estados.push({ control: accion.control, estado: handlers.estado() })
     }
+    // Elegir un valor que ya está elegido no hace nada: ni se aplica ni el cursor va hasta ahí.
+    if (accion.tipo === 'elegir' && handlers.actual && String(handlers.actual() ?? '') === String(accion.valor)) {
+      aplicadas.push(accion)
+      continue
+    }
+    // Lo mismo al ordenar por el orden que ya tiene.
+    const ordenActual = accion.tipo === 'ordenar' ? handlers.ordenActual?.() : null
+    if (ordenActual && ordenActual.columna === accion.columna && ordenActual.orden === accion.orden) {
+      aplicadas.push(accion)
+      continue
+    }
     await antesDe?.(accion, handlers)
     if (signal?.aborted) break
     HANDLER_POR_TIPO[accion.tipo]?.(handlers, accion)

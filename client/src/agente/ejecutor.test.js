@@ -111,3 +111,33 @@ test('no navega dos veces si el router todavía no informó la ruta nueva', asyn
   })
   assert.deepEqual(navegaciones, ['/rankings'])
 })
+
+test('elegir un valor que ya está elegido se salta (sin antesDe ni handler)', async () => {
+  const registro = crearRegistro()
+  const llamadas = []
+  registro.registrar('global.selector-periodo', { actual: () => '20260930', elegir: (v) => llamadas.push(`elegir ${v}`) })
+  const vistos = []
+  await ejecutarAcciones(
+    [{ tipo: 'elegir', control: 'global.selector-periodo', ruta: null, valor: '20260930' }, { tipo: 'elegir', control: 'global.selector-periodo', ruta: null, valor: '20260831' }],
+    { registro, navegar: () => {}, rutaActual: () => '/', antesDe: async (a) => vistos.push(a.valor) },
+  )
+  assert.deepEqual(vistos, ['20260831'])
+  assert.deepEqual(llamadas, ['elegir 20260831'])
+})
+
+test('ordenar por el orden que ya tiene se salta', async () => {
+  const registro = crearRegistro()
+  const llamadas = []
+  registro.registrar('rankings.tabla', {
+    ordenActual: () => ({ columna: 'Posicion', orden: 'asc' }),
+    ordenar: (c, o) => llamadas.push(`${c} ${o}`),
+  })
+  await ejecutarAcciones(
+    [
+      { tipo: 'ordenar', control: 'rankings.tabla', ruta: null, columna: 'Posicion', orden: 'asc' },
+      { tipo: 'ordenar', control: 'rankings.tabla', ruta: null, columna: 'Ponderacion_Pct', orden: 'desc' },
+    ],
+    { registro, navegar: () => {}, rutaActual: () => '/' },
+  )
+  assert.deepEqual(llamadas, ['Ponderacion_Pct desc'])
+})

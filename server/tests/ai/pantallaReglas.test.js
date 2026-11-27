@@ -64,3 +64,11 @@ test('pantallaPorReglas arma y valida la pantalla de una pregunta típica', () =
 
   assert.equal(pantallaPorReglas('Hola, ¿qué tal?', almacen), null);
 });
+
+test('quién lidera: ordena por posición (el front se salta el paso si ya está así)', () => {
+  const { catalogos, periodos } = paqueteReal();
+  const almacen = crearAlmacen(catalogos, periodos);
+  const p = pantallaPorReglas('¿Quién lidera COMERCIO?', almacen);
+  assert.deepEqual(p.acciones.map((a) => a.tipo), ['ir', 'elegir', 'elegir', 'ordenar', 'resaltar']);
+  assert.deepEqual([p.acciones[3].columna, p.acciones[3].orden], ['Posicion', 'asc']);
+});

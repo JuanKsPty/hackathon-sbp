@@ -116,7 +116,6 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `data-guia` | Elemento | Perfil |
 | :--- | :--- | :--- |
 | `asistente.pregunta` | Campo para escribir la pregunta | todos |
-| `asistente.fuentes` | Consultas que usó la IA | todos |
 
 ## Cómo los usa el agente
 

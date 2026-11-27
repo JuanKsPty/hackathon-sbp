@@ -19,3 +19,13 @@ test('objetivoDe: menú, columna, fila y control', () => {
   assert.equal(objetivoDe({ tipo: 'señalar', control: 'rankings.grafico' }), '[data-guia="rankings.grafico"]')
   assert.equal(objetivoDe({ tipo: 'volar' }), null)
 })
+
+test('objetivosDe: al elegir, primero la opción y después el control', async () => {
+  const { objetivosDe } = await import('./objetivo.js')
+  assert.deepEqual(objetivosDe({ tipo: 'elegir', control: 'rankings.selector-ranking', valor: 'COMERCIO' }), [
+    '[data-guia="rankings.selector-ranking"] [data-guia-opcion="COMERCIO"]',
+    '[data-guia="rankings.selector-ranking"]',
+  ])
+  assert.deepEqual(objetivosDe({ tipo: 'ordenar', control: 'rankings.tabla', columna: 'Banco' }), ['[data-guia="rankings.tabla"] [data-guia-columna="Banco"]'])
+  assert.deepEqual(objetivosDe({ tipo: 'ir', ruta: '/otra' }), [])
+})

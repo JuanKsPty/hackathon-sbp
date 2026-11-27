@@ -8,7 +8,7 @@ export function SelectorRanking({ rankings, valor, alCambiar }) {
       <div className="-mx-1 overflow-x-auto px-1 pb-1">
         <TabsList aria-label="Ranking" data-guia="rankings.selector-ranking">
           {rankings.map(({ Ranking }) => (
-            <TabsTrigger key={Ranking} value={Ranking} className="px-3">
+            <TabsTrigger key={Ranking} value={Ranking} className="px-3" data-guia-opcion={Ranking}>
               {Ranking}
             </TabsTrigger>
           ))}

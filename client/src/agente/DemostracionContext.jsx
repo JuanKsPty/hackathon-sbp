@@ -4,7 +4,7 @@
 // La parte visual está en CapaDemostracion.jsx; aquí solo el recorrido y su estado.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useAgente } from './AgenteContext.jsx'
-import { objetivoDe } from './objetivo.js'
+import { objetivosDe } from './objetivo.js'
 import { esperarElemento, llevarALaVista, prefiereMenosMovimiento, rectDe } from '../guia/dom.js'
 
 const DemostracionContext = createContext(null)
@@ -48,8 +48,12 @@ export function DemostracionProvider({ children }) {
 
       // 2. Cada acción: buscar, llevar a la vista, moverse, explicar y tocar.
       const antesDe = async (accion) => {
-        const selector = objetivoDe(accion)
-        const el = selector ? await esperarElemento(selector, { signal, timeout: 4000 }) : null
+        // Del objetivo más preciso al más general: la opción (pestaña COMERCIO) y, si no está, el control.
+        let el = null
+        for (const [i, selector] of objetivosDe(accion).entries()) {
+          el = await esperarElemento(selector, { signal, timeout: i === 0 ? 2500 : 1500 })
+          if (el || signal.aborted) break
+        }
         if (!el || signal.aborted) return
         llevarALaVista(el)
         await esperar(tiempo('scroll'), signal)
