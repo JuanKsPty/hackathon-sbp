@@ -7,7 +7,7 @@ import { camposDeTramos, hhiE4 } from '../src/engine/indicadores.js';
 import { aCentavos } from '../src/engine/montos.js';
 import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
-import { catalogosReales, filaSintetica, comoFilas, paqueteReal } from './ayuda.js';
+import { catalogosReales, filaSintetica, comoFilas, paqueteReal, leerReferencia } from './ayuda.js';
 
 const HIPOTECARIO = 'L.68.681.6810.00000'; // Vivienda propia
 const COMERCIO = 'G.47.471.4719.47191'; // Minorista
@@ -130,7 +130,9 @@ test('GET /api/indicadores devuelve el último período rotulado como análisis 
   assert.equal(cuerpo.ranking, null);
   assert.equal(cuerpo.morosidad.bancos.length, 12);
   assert.equal(cuerpo.concentracion.length, 6);
-  assert.equal(cuerpo.morosidad.total.Saldo, 5152103850.27); // saldo total válido de septiembre (referencia de pruebas)
+  // Saldo total válido de septiembre: del cálculo de control de tests/referencia, no escrito a mano (R2).
+  const control = leerReferencia('referencia_calidad.csv').find((f) => f.Fecha === '20260930');
+  assert.equal(cuerpo.morosidad.total.Saldo, Number(control.Saldo_Total_Valido));
 });
 
 test('GET /api/indicadores?ranking= limita al ranking pedido', async () => {

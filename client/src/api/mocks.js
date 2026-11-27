@@ -29,12 +29,76 @@ const ARCHIVOS = {
   '/calidad': 'calidad',
   '/excluidas': 'excluidas',
   '/movimientos': 'movimientos',
+  '/indicadores': 'indicadores',
   '/perfil': 'perfil',
+  '/verificacion': 'verificacion',
 }
 
-export async function responderConMock(ruta) {
+// /api/movimientos/descomposicion no tiene JSON propio en contracts/: se arma con el ejemplo de
+// /api/movimientos. Valores ilustrativos de modo mock, no son resultados del motor (R2); las tres
+// piezas suman el Var_Saldo del ejemplo.
+function mockDescomposicion({ ranking, banco } = {}) {
+  const ejemplo = contrato('movimientos')
+  if (!ejemplo) return null
+  const elegido = ejemplo.rankings.find((r) => r.Ranking === ranking) ?? ejemplo.rankings[0]
+  const fila = elegido.movimientos.find((m) => m.Codigo_Banco === banco) ?? elegido.movimientos[0]
+  const salen = -100000
+  const amortizacion = -50000
+  return {
+    fuente: ejemplo.fuente,
+    aviso: ejemplo.aviso,
+    periodo_anterior: ejemplo.periodo_anterior,
+    periodo_actual: ejemplo.periodo_actual,
+    Continuidad: { Continuan: 20, Entran: 6, Salen: 4 },
+    descomposicion: [
+      {
+        Ranking: elegido.Ranking,
+        Codigo_Banco: fila.Codigo_Banco,
+        Banco: fila.Banco,
+        Saldo_anterior: fila.Saldo_anterior,
+        Saldo_actual: fila.Saldo_actual,
+        Var_Saldo: fila.Var_Saldo,
+        Nuevos: { Saldo: fila.Var_Saldo - salen - amortizacion, Operaciones: 5 },
+        Salen: { Saldo: salen, Operaciones: 2 },
+        Amortizacion: { Saldo: amortizacion, Operaciones: 9 },
+      },
+    ],
+  }
+}
+
+// Perfil mínimo que pide cada opción (contracts/perfiles.md). perfil.json es la respuesta de
+// Administrador: para los demás perfiles se filtra con esta tabla. Una opción que no esté aquí
+// se trata como de Administrador.
+const ORDEN_PERFILES = ['publico', 'analista', 'admin']
+const PERFIL_MINIMO = {
+  consultar_rankings: 'publico',
+  descargar: 'publico',
+  comparar_periodos: 'analista',
+  comparar_entidades: 'analista',
+  reportes_personalizados: 'analista',
+}
+
+// GET /api/perfil respeta el perfil elegido (header X-Perfil), como el API real.
+function mockPerfil(ejemplo, perfil) {
+  const elegido = ORDEN_PERFILES.includes(perfil) ? perfil : 'publico'
+  const nivel = ORDEN_PERFILES.indexOf(elegido)
+  return {
+    ...ejemplo,
+    perfil: elegido,
+    nombre: ejemplo.perfiles.find((p) => p.perfil === elegido)?.nombre ?? elegido,
+    opciones: ejemplo.opciones.filter(({ opcion }) => ORDEN_PERFILES.indexOf(PERFIL_MINIMO[opcion] ?? 'admin') <= nivel),
+  }
+}
+
+export async function responderConMock(ruta, parametros, perfil) {
   // Una pequeña espera para ver los estados de carga.
   await new Promise((listo) => setTimeout(listo, 250))
+
+  if (ruta === '/movimientos/descomposicion') {
+    const ejemplo = mockDescomposicion(parametros)
+    if (!ejemplo) throw sinMock(ruta)
+    return ejemplo
+  }
 
   if (ruta === '/salud') {
     // /api/salud no tiene archivo propio: se arma con los períodos del ejemplo.
@@ -46,5 +110,5 @@ export async function responderConMock(ruta) {
   const nombre = ARCHIVOS[ruta]
   const ejemplo = nombre ? contrato(nombre) : null
   if (!ejemplo) throw sinMock(ruta)
-  return ejemplo
+  return ruta === '/perfil' ? mockPerfil(ejemplo, perfil) : ejemplo
 }

@@ -87,7 +87,7 @@ try {
         }
       }
       imprimirResumen(resultados);
-      guardarReporte({ fecha: new Date().toISOString(), base, modelo: estado.modelo, repeticiones, resultados });
+      await guardarReporte({ fecha: new Date().toISOString(), base, modelo: estado.modelo, repeticiones, resultados });
     }
   }
 } finally {

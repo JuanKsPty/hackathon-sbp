@@ -12,7 +12,7 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { NOMBRES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { NOMBRES_PERFIL, UBICACION_SELECTOR_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearPeriodo } from '@/lib/formato.js'
@@ -167,8 +167,13 @@ function DescargaMovimientos({ periodos, rankings }) {
     <Card data-guia="reportes.descarga-movimientos">
       <CardHeader>
         <CardTitle>Movimientos de posición</CardTitle>
-        <CardDescription>Entregable 5 · cambios de posición y saldo entre dos períodos</CardDescription>
-        <CardAction>
+        {/* CardHeader es una grilla de 2 columnas con la acción a la derecha; en un encabezado angosto
+            (móvil) dejaba el título en una columna estrecha. Ahí la descripción se queda en la
+            columna 1 y el botón baja a su propia fila. */}
+        <CardDescription className="@max-md/card-header:col-start-1">
+          Entregable 5 · cambios de posición y saldo entre dos períodos
+        </CardDescription>
+        <CardAction className="@max-md/card-header:col-start-1 @max-md/card-header:row-span-1 @max-md/card-header:row-start-3 @max-md/card-header:mt-2 @max-md/card-header:justify-self-start">
           <BotonDescarga descarga={descarga} alDescargar={descargar}>movimientos.csv</BotonDescarga>
         </CardAction>
       </CardHeader>
@@ -339,7 +344,7 @@ function SoloAnalista({ perfil, que }) {
     <Vacio
       icono={LockIcon}
       titulo="Solo para los perfiles Analista y Administrador"
-      descripcion={`${que} es del Analista y del Administrador. Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. Cambia de perfil en el encabezado para usarlo.`}
+      descripcion={`${que} es del Analista y del Administrador. Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. Para usarlo, elige Analista o Administrador en ${UBICACION_SELECTOR_PERFIL}.`}
     />
   )
 }

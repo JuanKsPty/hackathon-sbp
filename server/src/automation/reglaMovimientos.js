@@ -11,7 +11,7 @@ import { carpetaStorage } from '../datos/storage.js';
 export const POR_DEFECTO = fileURLToPath(new URL('../../config/parametros.json', import.meta.url));
 
 // Archivo donde el Administrador guarda la regla.
-export function archivoDelAdministrador() {
+function archivoDelAdministrador() {
   return process.env.PARAMETROS_FILE || path.join(carpetaStorage(), 'parametros.json');
 }
 

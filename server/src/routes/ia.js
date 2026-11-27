@@ -2,6 +2,7 @@
 // igual, con la explicación por reglas o avisando que la IA no está disponible.
 // #108: /api/ia/preguntar trae además `accion`, los gráficos que el front muestra en pantalla. La
 // propone la IA (mostrar_graficos) o, sin IA, el intérprete por reglas (ai/intencion.js).
+import { createHash } from 'node:crypto';
 import { Router } from 'express';
 import { explicarMovimientos } from '../ai/explicaciones.js';
 import { preguntarAlAgente } from '../ai/agente.js';
@@ -15,6 +16,10 @@ import { ErrorApi } from './errores.js';
 
 const MAX_PREGUNTA = 500;
 const MAX_HISTORIAL = 6;
+// Explicaciones ya redactadas por la IA: mismos movimientos, mismo texto. Así volver al Panel o
+// cambiar de perfil no vuelve a gastar la llave. La clave es el contenido de los movimientos (que
+// ya refleja el período, el ranking y la regla vigente), así que un período recargado no reusa nada.
+const MAX_EXPLICACIONES_EN_CACHE = 50;
 
 function validarPregunta(cuerpo) {
   const { pregunta, historial = [] } = cuerpo ?? {};
@@ -35,12 +40,13 @@ function validarPregunta(cuerpo) {
  * @param {object} [deps.almacen] períodos cargados y catálogos: con él, las preguntas traen `accion` (#108)
  * @param {Function} [deps.obtenerMovimientos] cálculo de /api/movimientos (#32)
  * @param {object} [deps.opcionesIA] { cliente, apiKey, modelo } (para tests; por defecto el .env)
+ * @param {object} [deps.almacen] almacén de períodos: de su catálogo salen los rankings y bancos que nombran las herramientas de la IA
  */
 export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {}) {
   const rutas = Router();
   const apiKey = () => opcionesIA.apiKey ?? process.env.ANTHROPIC_API_KEY;
+  const explicacionesEnCache = new Map(); // clave -> explicación (orden de inserción: la más vieja sale primero)
 
-  // Para que la UI sepa si mostrar el chat o el aviso "IA no disponible".
   // #72: elementos que el agente guía puede señalar para este perfil (contracts/guia.md).
   // El front lo usa para comprobar que cada uno tiene su data-guia en pantalla.
   rutas.get('/ia/guia', (req, res) => {
@@ -50,6 +56,7 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
     });
   });
 
+  // Para que la UI sepa si mostrar el chat o el aviso "IA no disponible".
   rutas.get('/ia/estado', (req, res) => {
     const disponible = Boolean(apiKey() || opcionesIA.cliente);
     res.json({
@@ -64,7 +71,18 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
       throw new ErrorApi(501, 'NO_DISPONIBLE', 'La comparación entre períodos (/api/movimientos) no está conectada.');
     }
     const datos = obtenerMovimientos(req.query);
-    const explicacion = await explicarMovimientos(datos, opcionesIA);
+    const clave = createHash('sha256').update(JSON.stringify(datos)).digest('hex');
+    let explicacion = explicacionesEnCache.get(clave);
+    if (!explicacion) {
+      explicacion = await explicarMovimientos(datos, opcionesIA);
+      // Solo se guarda lo que redactó la IA sin errores: un respaldo por reglas se vuelve a intentar.
+      if (explicacion.motivo === null && explicacion.items.some((item) => item.fuente === 'ia')) {
+        if (explicacionesEnCache.size >= MAX_EXPLICACIONES_EN_CACHE) {
+          explicacionesEnCache.delete(explicacionesEnCache.keys().next().value);
+        }
+        explicacionesEnCache.set(clave, explicacion);
+      }
+    }
     res.json({
       ...encabezado(),
       periodo_anterior: datos.periodo_anterior,
@@ -88,6 +106,7 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
         historial,
         perfil: req.perfil,
         contexto,
+        catalogos: almacen?.catalogos,
         ejecutar: crearEjecutor(baseUrl, { perfil: req.perfil }),
       });
       // Si la IA respondió con una guía (#72), la pregunta era de cómo usar la app: sin gráficos.

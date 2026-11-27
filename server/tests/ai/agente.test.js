@@ -6,6 +6,7 @@ import { crearApp } from '../../src/app.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../../src/routes/movimientos.js';
 import { crearEjecutor, DEFINICIONES } from '../../src/ai/herramientas.js';
+import { OPCIONES, NOMBRES_PERFIL } from '../../src/middleware/perfiles.js';
 import { paqueteReal } from '../ayuda.js';
 
 const REGLA = { min_cambio_posicion_abs: 2, cambio_lider: true, min_var_saldo_pct_abs: 10 };
@@ -347,4 +348,179 @@ test('#90: si una herramienta falla, el agente sigue y responde', async () => {
   assert.equal(cuerpo.ia_disponible, true);
   assert.equal(cuerpo.verificada, true);
   assert.equal(cuerpo.consultas[0].ok, false);
+});
+
+test('#86: una guía con números del catálogo ("entregable 4", "E1–E4") se acepta sin consultar datos', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('guiar_usuario', {
+      pasos: [
+        { guia: 'global.menu-reportes', texto: 'Entra a Reportes desde el menú.' },
+        { guia: 'reportes.descarga-calidad', texto: 'Descarga el entregable 4: la calidad E1–E4.' },
+      ],
+    }),
+    responder('Te muestro dónde descargar el entregable 4, el reporte de calidad de los datos.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Dónde descargo el reporte de calidad de los datos?' }, 'analista');
+  assert.equal(cuerpo.verificada, true);
+  assert.match(cuerpo.respuesta, /entregable 4/);
+  assert.deepEqual(cuerpo.guia.pasos.map((p) => p.guia), ['global.menu-reportes', 'reportes.descarga-calidad']);
+  assert.deepEqual(cuerpo.consultas, []); // no consultó datos: los números salen solo del catálogo
+});
+
+test('#86: un número suelto de la descripción del catálogo se acepta solo en el elemento que lo trae', async () => {
+  // "Selector de los 6 rankings": el 6 es del catálogo de rankings.selector-ranking, no un dato del motor.
+  const conSuElemento = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'rankings.selector-ranking', texto: 'Elige uno de los 6 rankings.' }] }),
+    responder('Te muestro dónde elegir el ranking.'),
+  ]);
+  const { cuerpo: aceptada } = await preguntar(await levantar({ cliente: conSuElemento }), { pregunta: '¿Dónde cambio de ranking?' }, 'publico');
+  assert.equal(aceptada.verificada, true);
+  assert.equal(aceptada.guia.pasos[0].guia, 'rankings.selector-ranking');
+
+  // El mismo 6 en un paso que señala otro elemento (rankings.tabla no lo trae): se descarta.
+  const conOtroElemento = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'rankings.tabla', texto: 'Elige uno de los 6 rankings.' }] }),
+    responder('Listo.'),
+    responder('Listo.'),
+  ]);
+  const { cuerpo: descartada } = await preguntar(await levantar({ cliente: conOtroElemento }), { pregunta: '¿Dónde veo la tabla?' }, 'publico');
+  assert.equal(descartada.verificada, false);
+  assert.equal(descartada.guia, null);
+});
+
+test('#86 (B2): un número que escribe el usuario no cuenta como verificado', async () => {
+  const cliente = clienteGuionado([
+    responder('Sí, el saldo es 999,999.99.'),
+    responder('Sí, el saldo es 999,999.99.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Es cierto que el saldo es 999,999.99?' });
+  assert.equal(cuerpo.verificada, false);
+  assert.equal(cuerpo.respuesta, null);
+  assert.match(cuerpo.motivo, /números verificados/);
+  // Se le pidió corregir citando solo lo que está en los resultados.
+  assert.match(cliente.llamadas[1].messages.at(-1).content, /999,999\.99/);
+});
+
+test('#86 (B2): el número del usuario sí se puede citar si el motor también lo trae', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('listar_periodos', {}),
+    (params) => {
+      const total = ultimoResultado(params).periodos[0].Universo_Local_Valido;
+      return responder(`El universo local válido es de ${total} filas.`)();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const periodos = await (await fetch(`${base}/periodos`)).json();
+  const valor = periodos.periodos[0].Universo_Local_Valido;
+  const { cuerpo } = await preguntar(base, { pregunta: `¿Es cierto que el universo local válido es de ${valor} filas?` });
+  assert.equal(cuerpo.verificada, true);
+});
+
+test('#86 (B5): un rechazo de la IA no es "IA no disponible"', async () => {
+  const cliente = clienteGuionado([() => ({ stop_reason: 'refusal', content: [] })]);
+  const base = await levantar({ cliente });
+  const { status, cuerpo } = await preguntar(base, { pregunta: 'Pregunta que la IA no contesta' });
+  assert.equal(status, 200);
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.respuesta, null);
+  assert.equal(cuerpo.verificada, false);
+  assert.equal(cuerpo.guia, null);
+  assert.match(cuerpo.motivo, /^La IA no responde ese tipo de preguntas/);
+  assert.doesNotMatch(cuerpo.motivo, /no disponible/);
+});
+
+test('#86 (B5): un rechazo después de consultar conserva las consultas hechas', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('listar_periodos', {}),
+    () => ({ stop_reason: 'refusal', content: [] }),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Qué períodos hay?' });
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.respuesta, null);
+  assert.deepEqual(cuerpo.consultas.map((c) => c.herramienta), ['listar_periodos']);
+});
+
+test('#86 (B5): si la respuesta se corta por max_tokens, la IA sigue disponible', async () => {
+  const cliente = clienteGuionado([() => ({ stop_reason: 'max_tokens', content: [{ type: 'text', text: 'El ranking' }] })]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: 'Cuéntame todo' });
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.respuesta, null);
+  assert.match(cuerpo.motivo, /demasiado larga/);
+});
+
+test('#86 (B5): un stop_reason desconocido sigue siendo un fallo de la IA', async () => {
+  const cliente = clienteGuionado([() => ({ stop_reason: 'pause_turn', content: [] })]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: 'Hola' });
+  assert.equal(cuerpo.ia_disponible, false);
+});
+
+test('#86 (C4): el modelo recibe las herramientas con los rankings y bancos del catálogo cargado', async () => {
+  const cliente = clienteGuionado([responder('Puedo consultar los rankings.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: '¿Qué puedes consultar?' });
+  const catalogos = await (await fetch(`${base}/catalogos`)).json();
+  const rankings = cliente.llamadas[0].tools.find((t) => t.name === 'consultar_rankings').input_schema.properties.ranking.description;
+  for (const { Ranking } of catalogos.rankings) assert.ok(rankings.includes(Ranking), Ranking);
+});
+
+test('#86: los códigos (E1, SB21, AT03) en la respuesta no hacen que se descarte', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('consultar_calidad', { periodo: '20260731' }),
+    (params) => {
+      const periodo = ultimoResultado(params).periodos[0];
+      return responder(`En julio (20260731) se excluyeron ${periodo.E1_Duplicados} préstamos duplicados (E1) del AT03; la regla SB21 no cambia ese conteo. Ver el entregable 4.`)();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuántos préstamos duplicados se excluyeron en julio?' }, 'publico');
+  assert.equal(cuerpo.verificada, true);
+  assert.match(cuerpo.respuesta, /\(E1\)/);
+  assert.equal(cliente.llamadas.length, 2); // sin pedir corrección
+});
+
+// El prompt le dice a la IA qué opciones tiene el perfil de quien pregunta y cuáles son de otros (#86, #72).
+async function promptPara(perfil) {
+  const cliente = clienteGuionado([responder('Listo.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: '¿Qué puedo hacer en la app?' }, perfil);
+  return cliente.llamadas[0].system;
+}
+
+test('prompt de Público: menciona al Analista y al Administrador para lo que no tiene', async () => {
+  const sistema = await promptPara('publico');
+  assert.match(sistema, /el perfil Público y lo cambia con el selector de perfil del encabezado/);
+  const ajenas = sistema.split('Opciones que su perfil no tiene: ')[1].split('\n')[0];
+  // Comparar períodos es del Analista (y del Administrador); cargar un período, solo del Administrador.
+  assert.match(ajenas, /Comparar períodos \(solo Analista o Administrador\)/);
+  assert.match(ajenas, /Cargar o actualizar un período \(solo Administrador\)/);
+  // Y la instrucción: decir qué perfil la tiene, no armar un sustituto ni decir que la app no lo tiene.
+  assert.match(sistema, /dile qué perfil tiene esa opción y que se cambia con el selector de perfil/);
+  assert.match(sistema, /no digas que la app no lo tiene/);
+  assert.match(sistema, /Nunca armes una comparación por tu cuenta/);
+});
+
+test('el prompt sale de OPCIONES: cada opción aparece en el de cada perfil, como propia o ajena', async () => {
+  for (const perfil of Object.keys(NOMBRES_PERFIL)) {
+    const sistema = await promptPara(perfil);
+    const [propias, ajenas = ''] = sistema.split('Opciones que su perfil no tiene: ');
+    for (const { nombre, perfiles } of OPCIONES) {
+      const donde = perfiles.includes(perfil) ? propias : ajenas;
+      assert.ok(donde.includes(nombre), `${nombre} (${perfil})`);
+    }
+  }
+});
+
+test('prompt de Analista: lo del Administrador es ajeno y comparar períodos es propio; el Administrador no tiene opciones ajenas', async () => {
+  const analista = await promptPara('analista');
+  const ajenas = analista.split('Opciones que su perfil no tiene: ')[1].split('\n')[0];
+  assert.match(ajenas, /Cargar o actualizar un período \(solo Administrador\)/);
+  assert.doesNotMatch(ajenas, /Comparar períodos/);
+  const admin = await promptPara('admin');
+  assert.doesNotMatch(admin, /Opciones que su perfil no tiene/);
+  assert.match(admin, /el perfil Administrador/);
 });

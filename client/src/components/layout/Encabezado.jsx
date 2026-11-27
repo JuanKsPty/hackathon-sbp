@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { MenuIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { IndicadorPerfil } from './IndicadorPerfil.jsx'
 import { Navegacion } from './Navegacion.jsx'
 import { NOMBRE_APP } from './navegacion.js'
 import { PanelAsistente } from './PanelAsistente.jsx'
 import { SelectorPeriodo } from './SelectorPeriodo.jsx'
+import { SelectorPerfil } from './SelectorPerfil.jsx'
 import { SelectorTema } from './SelectorTema.jsx'
 
 export function Encabezado() {
@@ -14,7 +14,8 @@ export function Encabezado() {
 
   return (
     <div className="flex h-14 items-center gap-3 border-b bg-background px-4 lg:px-6">
-      {/* Menú en móvil: el mismo de la barra lateral dentro de un Sheet. */}
+      {/* Menú en móvil: el mismo de la barra lateral dentro de un Sheet. Por debajo de 640 px el
+          encabezado no tiene sitio para el selector de perfil y va dentro del menú. */}
       <Sheet open={menuAbierto} onOpenChange={setMenuAbierto}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Abrir menú">
@@ -24,7 +25,7 @@ export function Encabezado() {
         <SheetContent side="left" className="w-72 border-sidebar-border bg-sidebar p-0">
           <SheetTitle className="sr-only">Menú</SheetTitle>
           <SheetDescription className="sr-only">Secciones de la app</SheetDescription>
-          <Navegacion alNavegar={() => setMenuAbierto(false)} />
+          <Navegacion alNavegar={() => setMenuAbierto(false)} conSelectorPerfil />
         </SheetContent>
       </Sheet>
 
@@ -33,7 +34,7 @@ export function Encabezado() {
 
       <div className="ml-auto flex items-center gap-2">
         <PanelAsistente />
-        <IndicadorPerfil />
+        <SelectorPerfil className="hidden sm:inline-flex" />
         <SelectorPeriodo />
         <SelectorTema />
       </div>

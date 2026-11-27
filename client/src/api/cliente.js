@@ -15,7 +15,7 @@ const BASE = '/api'
 
 let perfilActual = 'publico'
 
-// Lo llama PerfilContext cada vez que cambia el perfil.
+// Lo llama PerfilContext al cambiar de perfil, antes de que las páginas vuelvan a pedir datos.
 export function fijarPerfilDePeticiones(perfil) {
   perfilActual = perfil || 'publico'
 }
@@ -65,7 +65,7 @@ function errorDeRespuesta(respuesta, cuerpo) {
 async function pedir(ruta, parametros, { signal } = {}) {
   if (import.meta.env.DEV && import.meta.env.VITE_USAR_MOCKS === 'true') {
     const { responderConMock } = await import('./mocks.js')
-    const cuerpo = await responderConMock(ruta, parametros)
+    const cuerpo = await responderConMock(ruta, parametros, perfilActual)
     registrarFuente(cuerpo)
     return cuerpo
   }
@@ -118,7 +118,23 @@ export const excluidas = ({ periodo, motivo, banco } = {}, opciones) =>
 export const movimientos = ({ desde, hasta, ranking, solo_significativos } = {}, opciones) =>
   pedir('/movimientos', { desde, hasta, ranking, solo_significativos }, opciones)
 
-// Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usará el selector (#4).
+// contracts/indicadores.md (#35): morosidad, vencimientos y concentración. Análisis adicional: no forma
+// parte de los 6 rankings oficiales. Abierto a los 3 perfiles.
+export const indicadores = ({ periodo, ranking } = {}, opciones) =>
+  pedir('/indicadores', { periodo, ranking }, opciones)
+
+// Por qué se movió el saldo de cada banco entre dos períodos: préstamos nuevos, que salen y
+// amortización (contracts/consulta.md, #61). Como /movimientos, es de Analista y Administrador.
+// evidencia=true exige ranking y banco.
+export const movimientosDescomposicion = ({ desde, hasta, ranking, banco, evidencia } = {}, opciones) =>
+  pedir('/movimientos/descomposicion', { desde, hasta, ranking, banco, evidencia: evidencia ? 'true' : undefined }, opciones)
+
+// contracts/verificacion.json (#63): un dato de cada punto de la sección 11.1 con sus chequeos.
+// periodo (puntos 2 a 5; por defecto el último) y banco acotan los datos; los chequeos usan todos los bancos.
+export const verificacion = ({ periodo, banco } = {}, opciones) => pedir('/verificacion', { periodo, banco }, opciones)
+
+// Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
+// para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)
 
 // ---- Descargas CSV (contracts/exportaciones.md) ----

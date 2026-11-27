@@ -14,7 +14,8 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 - **Un identificador por elemento y por página** (no se repite).
 - Va en el elemento que el usuario toca o mira: el botón, el selector o el contenedor de la tabla o el gráfico. No en un `div` externo que ocupe media pantalla.
 - Si el elemento solo existe para un perfil, igual lleva su `data-guia`. El agente no señala lo que el perfil no puede ver (la columna *Perfil* de abajo).
-- Los identificadores son para la guía: no se usan como estilos ni en los tests.
+- Los identificadores son para la guía: no se usan como estilos ni como selectores en pruebas de UI.
+- Todo identificador de esta lista tiene que existir en `client/src`: lo comprueba `server/tests/ai/guia-client.test.js`. Si la IA eligiera uno que no está en la pantalla, el cursor no encontraría nada.
 
 ## Global (layout, todas las páginas)
 
@@ -25,6 +26,7 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `global.menu-comparar` | Enlace a Comparar períodos | analista, admin |
 | `global.menu-reportes` | Enlace a Reportes | todos |
 | `global.menu-calidad` | Enlace a Calidad de datos | todos |
+| `global.menu-verificacion` | Enlace a Verificación del jurado | todos |
 | `global.menu-admin` | Enlace a Administración | admin |
 | `global.selector-perfil` | Selector de perfil | todos |
 | `global.selector-periodo` | Selector de período | todos |
@@ -40,6 +42,7 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `panel.lideres` | Líder de cada ranking | todos |
 | `panel.movimientos` | Movimientos significativos del último período | analista, admin |
 | `panel.explicaciones` | Explicación de los movimientos (IA o reglas) | analista, admin |
+| `panel.indicadores-adicionales` | Indicadores adicionales (morosidad, vencimientos y concentración; análisis fuera de los 6 rankings) | todos |
 
 ## Rankings (`/rankings`)
 
@@ -83,6 +86,18 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `calidad.reconciliaciones` | Reconciliaciones 1, 2, 3 y unicidad | todos |
 | `calidad.alertas` | Alertas por tipo | todos |
 | `calidad.excluidas` | Filas excluidas con su motivo | todos |
+
+## Verificación (`/verificacion`)
+
+| `data-guia` | Elemento | Perfil |
+| :--- | :--- | :--- |
+| `verificacion.filtros` | Filtros de período y banco | todos |
+| `verificacion.punto-1` | Punto 1: calidad E1–E4 y universo local válido | todos |
+| `verificacion.punto-2` | Punto 2: rankings obligatorios, posiciones y saldos | todos |
+| `verificacion.punto-3` | Punto 3: COMERCIO y CONSUMO | todos |
+| `verificacion.punto-4` | Punto 4: total de cartera y ponderación | todos |
+| `verificacion.punto-5` | Punto 5: desglose por subactividad con la reclasificación a Tarjeta | todos |
+| `verificacion.punto-6` | Punto 6: los 3 períodos y las reconciliaciones 1 y 2 | todos |
 
 ## Administración (`/admin`)
 

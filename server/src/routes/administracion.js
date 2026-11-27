@@ -12,7 +12,7 @@ import {
   leerReglaMovimientos,
   guardarReglaMovimientos,
   validarRegla,
-} from '../automation/parametros.js';
+} from '../automation/reglaMovimientos.js';
 import { ErrorApi } from './errores.js';
 
 const FUENTE_CATALOGOS = 'Paquete del reto (SBP), copia en data/';

@@ -8,7 +8,7 @@ import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
 import { leerOperaciones } from '../src/datos/bitacora.js';
-import { POR_DEFECTO, leerReglaMovimientos } from '../src/automation/parametros.js';
+import { POR_DEFECTO, leerReglaMovimientos } from '../src/automation/reglaMovimientos.js';
 import { paqueteReal } from './ayuda.js';
 
 // Parámetros y bitácora de estas pruebas van a una carpeta temporal propia.

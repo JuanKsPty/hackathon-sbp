@@ -33,7 +33,7 @@ export function PanelAsistente() {
       <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
         <SheetHeader className="border-b pr-12">
           <SheetTitle>Asistente IA</SheetTitle>
-          <SheetDescription>Pregunta por los rankings en lenguaje natural.</SheetDescription>
+          <SheetDescription>Pregunta por los rankings en lenguaje natural. No calcula: cada cifra sale del motor.</SheetDescription>
           <Link
             to="/asistente"
             onClick={() => setAbierto(false)}
@@ -43,8 +43,10 @@ export function PanelAsistente() {
             <ExternalLinkIcon className="size-3" aria-hidden="true" />
           </Link>
         </SheetHeader>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-          <ChatAsistente />
+        {/* El chat llena el alto del panel (sin tarjeta). Si la última pregunta trae gráficos (#108), van
+            debajo: el chat conserva un alto mínimo y el panel se desplaza hasta ellos. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+          <ChatAsistente enPanel className="min-h-[28rem]" />
           <GraficosAsistente />
         </div>
       </SheetContent>

@@ -42,6 +42,7 @@ const PROTEGIDAS = [
   ['GET', '/movimientos', ['publico']],
   ['GET', '/movimientos/descomposicion', ['publico']],
   ['GET', '/exportar/movimientos.csv', ['publico']],
+  ['GET', '/exportar/personalizado.csv', ['publico']],
   ['GET', '/explicaciones', ['publico']],
   ['POST', '/periodos', ['publico', 'analista']],
   ['PUT', '/parametros', ['publico', 'analista']],
