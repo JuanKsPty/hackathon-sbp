@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export const TODOS = 'todos'
 
 // Filtros de la página (lám. 5): banco (los 12 del catálogo) y subactividad (las del ranking elegido).
-// El período va junto al título de la página (PeriodoDePagina), para que haya un solo selector.
+// Van en la línea del título, a la izquierda del período (PeriodoDePagina).
 export function FiltrosRanking({ bancos, subactividades, banco, subactividad, alCambiarBanco, alCambiarSubactividad }) {
   return (
     <div className="flex flex-wrap items-end gap-3">
@@ -31,10 +31,10 @@ export function FiltrosRanking({ bancos, subactividades, banco, subactividad, al
 // `guia`: identificador data-guia para el agente guía (contracts/guia.md).
 function Filtro({ etiqueta, guia, valor, alCambiar, children }) {
   return (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+    <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
       {etiqueta}
       <Select value={valor} onValueChange={alCambiar}>
-        <SelectTrigger aria-label={etiqueta} data-guia={guia} className="min-w-56 text-foreground">
+        <SelectTrigger aria-label={etiqueta} data-guia={guia} className="w-full min-w-44 text-foreground sm:w-auto">
           <SelectValue />
         </SelectTrigger>
         <SelectContent position="popper">{children}</SelectContent>
