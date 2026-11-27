@@ -143,3 +143,25 @@ test('un permisos.json dañado no tumba la API: valen los permisos por defecto',
   assert.equal(cuerpo.origen, 'por_defecto');
   assert.equal((await pedir('/movimientos')).status, 403);
 });
+
+test('la IA usa los permisos vigentes: guía, herramientas y prompt; la sesión es solo del sitio interno', async () => {
+  const { perfilVeElemento } = await import('../src/ai/guia.js');
+  const { definicionesPara } = await import('../src/ai/herramientas.js');
+  const nombres = (perfil) => definicionesPara(perfil).map((h) => h.name);
+
+  assert.equal(perfilVeElemento('comparar.tabla-movimientos', 'publico'), false);
+  assert.ok(!nombres('publico').includes('consultar_movimientos'));
+  // El Administrador le da Comparar períodos al Público; después se lo quita al Público y al Analista.
+  await guardar({ comparar_periodos: ['publico', 'analista'] });
+  assert.equal(perfilVeElemento('comparar.tabla-movimientos', 'publico'), true);
+  assert.ok(nombres('publico').includes('consultar_movimientos'));
+  await guardar({ comparar_periodos: [] });
+  assert.equal(perfilVeElemento('comparar.tabla-movimientos', 'analista'), false);
+  assert.ok(!nombres('analista').includes('consultar_movimientos'));
+  assert.ok(nombres('admin').includes('consultar_movimientos'));
+
+  // La sesión (SesionUsuario) no depende de comparar_periodos: el Analista la ve y el Público nunca.
+  assert.equal(perfilVeElemento('global.selector-perfil', 'analista'), true);
+  await guardar({ comparar_periodos: ['publico', 'analista'] });
+  assert.equal(perfilVeElemento('global.selector-perfil', 'publico'), false);
+});

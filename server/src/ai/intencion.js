@@ -9,7 +9,7 @@
 //   - con IA: el agente llama a la herramienta `mostrar_graficos` y validarAccion() revisa su entrada;
 //   - sin IA (sin ANTHROPIC_API_KEY o si la IA falla): interpretarPregunta(), por palabras clave.
 // Las dos terminan en construirAccion(), así que producen exactamente lo mismo.
-import { NOMBRES_PERFIL, OPCIONES } from '../middleware/perfiles.js';
+import { NOMBRES_PERFIL, perfilesConOpcion } from '../middleware/perfiles.js';
 
 export const NOMBRE_HERRAMIENTA_GRAFICOS = 'mostrar_graficos';
 
@@ -100,11 +100,11 @@ export function contextoDe(almacen) {
   };
 }
 
-const puede = (perfil, opcion) => OPCIONES.find((o) => o.opcion === opcion)?.perfiles.includes(perfil) ?? false;
+// Permisos vigentes (por defecto más lo que guardó el Administrador, #145).
+const puede = (perfil, opcion) => perfilesConOpcion(opcion).includes(perfil);
 
 function quienesPueden(opcion) {
-  const fila = OPCIONES.find((o) => o.opcion === opcion);
-  return (fila?.perfiles ?? []).map((p) => NOMBRES_PERFIL[p]).join(' y ');
+  return perfilesConOpcion(opcion).map((p) => NOMBRES_PERFIL[p]).join(' y ');
 }
 
 const anteriorA = (fechas, fecha) => fechas.filter((f) => f < fecha).at(-1) ?? null;

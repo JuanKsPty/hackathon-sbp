@@ -11,7 +11,7 @@ Tres perfiles (`publico`, `analista`, `admin`), cada uno con opciones distintas 
 ## `perfiles.js`
 
 - `leerPerfil`: middleware global (montado en `app.js` antes de todas las rutas). Deja `req.perfil` y `req.sitio` según el header `X-Sitio` que pone cada nginx (#120). Con `publico` es siempre Público. Con `interno` el perfil sale de la cookie de sesión o del token MCP; sin ellos responde 401 `SESION_REQUERIDA`. Sin `X-Sitio` es una llamada directa: solo desde la misma máquina (`esLoopback`) vale `X-Perfil`, y desde otra IP es Público. Un `X-Perfil` desconocido responde 400 `PARAMETRO_INVALIDO`.
-- `OPCIONES`: la única tabla de qué puede hacer cada perfil. `GET /api/perfil` la entrega a la UI.
+- `OPCIONES`: la tabla **por defecto** de qué puede hacer cada perfil. El Administrador ajusta las opciones configurables (`descargar`, `comparar_periodos`, `reportes_personalizados`) en Perfiles y permisos (#145, `storage/permisos.json`). `permisosVigentes()` y `perfilesConOpcion()` dan la tabla vigente: la usan `GET /api/perfil` (el menú), `requiereOpcion()` (los 403) y la IA (prompt, guía, herramientas y reglas).
 - `requierePerfil('admin')` y `requiereOpcion('cargar_periodo')`: se ponen en una ruta; a los demás perfiles les responden 403 `PERFIL_NO_AUTORIZADO`.
 
 Contrato y ejemplos: [`contracts/perfiles.md`](../../../contracts/perfiles.md).
