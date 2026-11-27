@@ -6,6 +6,7 @@ import { crearApp } from '../../src/app.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../../src/routes/movimientos.js';
 import { crearEjecutor, DEFINICIONES } from '../../src/ai/herramientas.js';
+import { OPCIONES, NOMBRES_PERFIL } from '../../src/middleware/perfiles.js';
 import { paqueteReal } from '../ayuda.js';
 
 const REGLA = { min_cambio_posicion_abs: 2, cambio_lider: true, min_var_saldo_pct_abs: 10 };
@@ -480,4 +481,46 @@ test('#86: los códigos (E1, SB21, AT03) en la respuesta no hacen que se descart
   assert.equal(cuerpo.verificada, true);
   assert.match(cuerpo.respuesta, /\(E1\)/);
   assert.equal(cliente.llamadas.length, 2); // sin pedir corrección
+});
+
+// El prompt le dice a la IA qué opciones tiene el perfil de quien pregunta y cuáles son de otros (#86, #72).
+async function promptPara(perfil) {
+  const cliente = clienteGuionado([responder('Listo.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: '¿Qué puedo hacer en la app?' }, perfil);
+  return cliente.llamadas[0].system;
+}
+
+test('prompt de Público: menciona al Analista y al Administrador para lo que no tiene', async () => {
+  const sistema = await promptPara('publico');
+  assert.match(sistema, /el perfil Público y lo cambia con el selector de perfil del encabezado/);
+  const ajenas = sistema.split('Opciones que su perfil no tiene: ')[1].split('\n')[0];
+  // Comparar períodos es del Analista (y del Administrador); cargar un período, solo del Administrador.
+  assert.match(ajenas, /Comparar períodos \(solo Analista o Administrador\)/);
+  assert.match(ajenas, /Cargar o actualizar un período \(solo Administrador\)/);
+  // Y la instrucción: decir qué perfil la tiene, no armar un sustituto ni decir que la app no lo tiene.
+  assert.match(sistema, /dile qué perfil tiene esa opción y que se cambia con el selector de perfil/);
+  assert.match(sistema, /no digas que la app no lo tiene/);
+  assert.match(sistema, /Nunca armes una comparación por tu cuenta/);
+});
+
+test('el prompt sale de OPCIONES: cada opción aparece en el de cada perfil, como propia o ajena', async () => {
+  for (const perfil of Object.keys(NOMBRES_PERFIL)) {
+    const sistema = await promptPara(perfil);
+    const [propias, ajenas = ''] = sistema.split('Opciones que su perfil no tiene: ');
+    for (const { nombre, perfiles } of OPCIONES) {
+      const donde = perfiles.includes(perfil) ? propias : ajenas;
+      assert.ok(donde.includes(nombre), `${nombre} (${perfil})`);
+    }
+  }
+});
+
+test('prompt de Analista: lo del Administrador es ajeno y comparar períodos es propio; el Administrador no tiene opciones ajenas', async () => {
+  const analista = await promptPara('analista');
+  const ajenas = analista.split('Opciones que su perfil no tiene: ')[1].split('\n')[0];
+  assert.match(ajenas, /Cargar o actualizar un período \(solo Administrador\)/);
+  assert.doesNotMatch(ajenas, /Comparar períodos/);
+  const admin = await promptPara('admin');
+  assert.doesNotMatch(admin, /Opciones que su perfil no tiene/);
+  assert.match(admin, /el perfil Administrador/);
 });
