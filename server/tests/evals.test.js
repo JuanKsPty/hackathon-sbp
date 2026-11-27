@@ -77,3 +77,29 @@ test('el calificador revisa la guía y lo que no se debe decir', () => {
   const { fallas } = calificar(r, { noContiene: ['te recomiendo'], sinGuia: ['admin.subir-archivo'], guia: ['reportes.descarga-calidad'] });
   assert.equal(fallas.length, 3);
 });
+
+test('#91: el calificador compara números como números y no toma dígitos de fechas', () => {
+  const base = { ia_disponible: true, verificada: true, consultas: [], guia: null };
+  // Se espera 20 (E1 de julio): '18 duplicados (20260731)' no debe aprobar por el '20' de la fecha.
+  assert.equal(calificar({ ...base, respuesta: 'Se excluyeron 18 duplicados (20260731).' }, { contiene: [['20']] }).ok, false);
+  assert.equal(calificar({ ...base, respuesta: 'Se excluyeron 20 duplicados en 20260731.' }, { contiene: [['20']] }).ok, true);
+  // 120 no contiene "20" como número.
+  assert.equal(calificar({ ...base, respuesta: 'Quedaron 120 filas.' }, { contiene: [['20']] }).ok, false);
+  // Con separador de miles y redondeo.
+  assert.equal(calificar({ ...base, respuesta: 'Saldo: 1,234,567.89.' }, { contiene: [['1234567.89', '1,234,567.89']] }).ok, true);
+  // Una fecha se puede buscar explícitamente.
+  assert.equal(calificar({ ...base, respuesta: 'Período 20260930.' }, { contiene: [['20260930']] }).ok, true);
+  // noContiene también compara números: el promedio 1500.5 no está en '11500.50'.
+  assert.equal(calificar({ ...base, respuesta: 'Saldo 11500.50.' }, { noContiene: ['1500.5'] }).ok, true);
+});
+
+test('#91: "subió N posiciones" no aprueba con el ordinal de otro número', async () => {
+  const caso = CASOS.find((c) => c.id === 'movimientos-subida');
+  const esperado = await caso.esperado(api);
+  const d = await api('/movimientos?desde=20260831&hasta=20260930&ranking=COMERCIO', 'analista');
+  const n = Math.abs(d.rankings[0].movimientos.find((m) => m.Codigo_Banco === '108').Cambio_Posicion);
+  const base = { ia_disponible: true, verificada: true, consultas: [], guia: null };
+  const otro = Number(n) - 1;
+  assert.equal(calificar({ ...base, respuesta: `Banco Capital subió ${otro} posiciones y quedó en el ${n}.º lugar.` }, esperado).ok, false);
+  assert.equal(calificar({ ...base, respuesta: `Banco Capital subió ${n} posiciones en COMERCIO.` }, esperado).ok, true);
+});
