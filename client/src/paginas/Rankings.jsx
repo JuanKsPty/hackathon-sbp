@@ -1,3 +1,4 @@
+import { useControlGuia } from '@/agente/useControlGuia.js'
 import { useState } from 'react'
 import { DownloadIcon, InfoIcon } from 'lucide-react'
 import {
@@ -49,6 +50,13 @@ export default function Rankings() {
     setElegido(nuevo)
     setSubactividad(TODOS) // las subactividades cambian con el ranking
   }
+
+  // Acciones de pantalla del agente (#125). Van antes de los returns tempranos (reglas de los hooks).
+  useControlGuia('rankings.selector-ranking', {
+    elegir: (valor) => cambiarRanking(valor),
+    estado: () => elegido,
+    restaurar: (anterior) => setElegido(anterior),
+  })
 
   if (catalogo.cargando || cargandoPeriodos) {
     return <Contenedor><Cargando filas={6} /></Contenedor>
