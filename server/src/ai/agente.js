@@ -6,6 +6,7 @@
 import { definicionesPara } from './herramientas.js';
 import { definicionGuia, validarPasos, numerosDelCatalogo, NOMBRE_HERRAMIENTA_GUIA } from './guia.js';
 import { definicionGraficos, validarAccion, NOMBRE_HERRAMIENTA_GRAFICOS } from './intencion.js';
+import { definicionPantalla, validarPantalla, NOMBRE_HERRAMIENTA_PANTALLA } from './pantalla.js';
 import { verificarNumeros } from './verificador.js';
 import { crearCliente, MODELO_POR_DEFECTO } from './redaccionIA.js';
 import { OPCIONES, NOMBRES_PERFIL } from '../middleware/perfiles.js';
@@ -79,6 +80,7 @@ export async function preguntarAlAgente(pregunta, opciones) {
     apiKey = process.env.ANTHROPIC_API_KEY,
     modelo = process.env.AI_MODEL || MODELO_POR_DEFECTO,
     contexto = null,
+    contextoPantalla = null,
   } = opciones;
 
   if (!apiKey && !opciones.cliente) {
@@ -90,6 +92,7 @@ export async function preguntarAlAgente(pregunta, opciones) {
       consultas: [],
       guia: null,
       accion: null,
+      pantalla: null,
     };
   }
   const cliente = opciones.cliente ?? crearCliente(apiKey);
@@ -110,6 +113,8 @@ export async function preguntarAlAgente(pregunta, opciones) {
     guia: null,
     // Los gráficos sí se muestran: su acción ya se validó y sus datos salen de la API, no de la IA.
     accion,
+    // La pantalla no: sin respuesta verificada no se toca el dashboard (sus textos tampoco se verificaron).
+    pantalla: null,
   });
   // Lo que el modelo puede citar: resultados de herramientas y, si propone una guía, los números
   // del catálogo de esos elementos. Los números que escribe el usuario no cuentan (#86, B2).
@@ -118,6 +123,9 @@ export async function preguntarAlAgente(pregunta, opciones) {
   let guia = null; // pasos del cursor guía (#72), ya validados contra el catálogo
   const herramientas = [...definicionesPara(perfil, catalogos), definicionGuia(perfil)];
   if (contexto?.fechas?.length) herramientas.push(definicionGraficos(contexto));
+  // Acciones de pantalla (#121): ejecutar en el dashboard o demostrar con el cursor.
+  let pantalla = null;
+  if (contextoPantalla?.fechas?.length) herramientas.push(definicionPantalla(perfil));
 
   for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {
     const respuesta = await cliente.beta.messages.create({
@@ -147,6 +155,20 @@ export async function preguntarAlAgente(pregunta, opciones) {
             type: 'tool_result',
             tool_use_id: bloque.id,
             content: validacion.ok ? 'Guía lista: se mostrará al usuario con el cursor.' : validacion.errores.join('\n'),
+            ...(validacion.ok ? {} : { is_error: true }),
+          });
+          continue;
+        }
+        if (bloque.name === NOMBRE_HERRAMIENTA_PANTALLA && contextoPantalla) {
+          // No consulta la API: las acciones se validan contra el catálogo, el perfil y los datos cargados.
+          const validacion = validarPantalla(bloque.input, { contexto: contextoPantalla, perfil });
+          if (validacion.ok) pantalla = validacion.pantalla;
+          resultados.push({
+            type: 'tool_result',
+            tool_use_id: bloque.id,
+            content: validacion.ok
+              ? `Pantalla lista (${validacion.pantalla.modo}, ${validacion.pantalla.acciones.length} acciones). Responde ahora en el chat.`
+              : validacion.errores.join('\n'),
             ...(validacion.ok ? {} : { is_error: true }),
           });
           continue;
@@ -196,7 +218,7 @@ export async function preguntarAlAgente(pregunta, opciones) {
     const textoGuia = (guia?.pasos ?? []).map((p) => p.texto).join('\n');
     const { ok, noEncontrados } = verificarNumeros(`${texto}\n${textoGuia}`, fuentes);
     if (ok) {
-      return { ia_disponible: true, motivo: null, etiqueta: ETIQUETA_AGENTE, respuesta: texto, verificada: true, consultas, guia, accion };
+      return { ia_disponible: true, motivo: null, etiqueta: ETIQUETA_AGENTE, respuesta: texto, verificada: true, consultas, guia, accion, pantalla };
     }
     if (reintento) break;
     reintento = true;
