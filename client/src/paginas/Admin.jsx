@@ -76,10 +76,10 @@ export default function Admin() {
       </Tarea>
 
       <Tarea id="parametros" titulo="Parámetros y catálogos" descripcion="La regla que decide qué movimiento es significativo y los catálogos con los que se clasifica.">
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="max-w-2xl">
           <ReglaSignificativo alCambiar={avisarCambio} />
-          <EstadoCatalogos />
         </div>
+        <EstadoCatalogos />
       </Tarea>
 
       <Tarea id="usuarios" titulo="Usuarios y permisos" descripcion="Quién entra al sitio interno, con qué perfil, y qué puede hacer cada perfil.">

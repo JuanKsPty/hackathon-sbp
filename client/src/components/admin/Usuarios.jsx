@@ -154,7 +154,7 @@ export function Usuarios({ alCambiar }) {
       <CardHeader>
         <CardTitle>Usuarios</CardTitle>
         <CardDescription>
-          Cuentas de Analista y Administrador del sitio interno. {datos ? FUENTES[datos.fuente] : ''} No se borran: se desactivan.
+          Cuentas de Analista y Administrador del sitio interno. {datos ? FUENTES[datos.guardados_en] : ''} No se borran: se desactivan.
         </CardDescription>
         <CardAction className="flex gap-2">
           <Button size="sm" variant="ghost" onClick={consulta.reintentar} disabled={consulta.cargando} aria-label="Actualizar usuarios">
