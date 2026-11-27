@@ -317,19 +317,21 @@ export function Diferencia() {
           </li>
         ))}
       </ul>
-      <BloqueOscuro className="flex items-center gap-5 px-8 py-6 sm:px-8 sm:py-6">
+      <BloqueOscuro className="flex items-center gap-6 px-8 py-5 sm:px-8 sm:py-5">
         <CheckCircle2Icon aria-hidden="true" className="size-8 shrink-0 text-brillo" />
         <p className="flex-1 text-[24px] leading-snug text-bloque-foreground">
           Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida.
         </p>
-        <a
-          href="https://sbp.juank.tech"
-          target="_blank"
-          rel="noreferrer"
-          className="flex shrink-0 items-center gap-2 text-[24px] font-medium text-brillo underline-offset-4 hover:underline"
-        >
-          <GlobeIcon aria-hidden="true" className="size-6" />
-          sbp.juank.tech
+        {/* QR fijo (public/marca/qr-sbp.svg) que lleva al sitio público. */}
+        <a href="https://sbp.juank.tech" target="_blank" rel="noreferrer" className="flex shrink-0 items-center gap-5">
+          <span className="flex flex-col items-end gap-1">
+            <span className="text-base text-bloque-muted">Escanea y pruébalo</span>
+            <span className="flex items-center gap-2 text-[24px] font-medium text-brillo">
+              <GlobeIcon aria-hidden="true" className="size-6" />
+              sbp.juank.tech
+            </span>
+          </span>
+          <img src="/marca/qr-sbp.svg" alt="Código QR a sbp.juank.tech" className="size-[132px] rounded-xl bg-white p-1.5" />
         </a>
       </BloqueOscuro>
     </Lamina>
