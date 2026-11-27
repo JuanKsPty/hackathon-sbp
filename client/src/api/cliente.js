@@ -3,6 +3,8 @@
 //
 // - El perfil sale de la sesión (cookie HttpOnly del sitio interno); el sitio público siempre es Público.
 // - Cada petición manda X-Sbp: 1 (el server lo exige en POST, PUT y DELETE contra CSRF).
+// - Aquí casi todo son GET; el único POST es suscribirse() (alertas por correo, abierto a los 3 perfiles).
+//   Los demás POST viven en admin.js, sesion.js e ia.js.
 // - Los errores llegan como ApiError (status, codigo, mensaje, detalles).
 // - Si no hay conexión con el API: codigo 'API_NO_DISPONIBLE'.
 // - Modo mock (solo en `npm run dev` con VITE_USAR_MOCKS=true): responde con los ejemplos de
@@ -10,6 +12,7 @@
 import { ApiError, MENSAJE_API_NO_DISPONIBLE } from './errores.js'
 import { registrarFuente } from './fuente.js'
 import { HEADERS_BASE, siSesionVencida } from './sesion.js'
+import { conEspera, cuerpoSuscripcion } from '../lib/suscripcion.js'
 
 export { ApiError } from './errores.js'
 
@@ -142,6 +145,51 @@ export const verificacion = ({ periodo, banco } = {}, opciones) => pedir('/verif
 // Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
 // para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)
+
+// POST /api/suscripciones (contracts/eventos-zapier.md, #7): pide suscribirse a las alertas por correo.
+// Abierto a los 3 perfiles, en los dos sitios. bancos y rankings vacíos significan "todos". Doble
+// confirmación: el server manda un correo con el enlace para confirmar y responde
+// { fuente, aviso, confirmacion_enviada, mensaje, suscripcion }. Errores: 400 PARAMETRO_INVALIDO
+// (correo o filtros) y 429 DEMASIADOS_PEDIDOS (con sus segundos de espera), como ApiError.
+export async function suscribirse({ correo, bancos = [], rankings = [] }, { signal } = {}) {
+  const cuerpo = cuerpoSuscripcion({ correo, bancos, rankings })
+
+  if (import.meta.env.DEV && import.meta.env.VITE_USAR_MOCKS === 'true') {
+    const { responderConMock } = await import('./mocks.js')
+    const respuesta = await responderConMock('/suscripciones', cuerpo, perfilActual)
+    registrarFuente(respuesta)
+    return respuesta
+  }
+
+  let respuesta
+  try {
+    respuesta = await fetch(`${BASE}/suscripciones`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...HEADERS_BASE },
+      body: JSON.stringify(cuerpo),
+      signal,
+    })
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error
+    throw new ApiError({ status: 0, codigo: 'API_NO_DISPONIBLE', mensaje: MENSAJE_API_NO_DISPONIBLE })
+  }
+
+  const datos = await leerCuerpo(respuesta)
+  if (!respuesta.ok) {
+    const error = conEspera(errorDeRespuesta(respuesta, datos), respuesta.headers.get('Retry-After'))
+    siSesionVencida(error)
+    throw error
+  }
+  if (datos === null) {
+    throw new ApiError({
+      status: respuesta.status,
+      codigo: 'RESPUESTA_INESPERADA',
+      mensaje: 'El API respondió sin un JSON válido.',
+    })
+  }
+  registrarFuente(datos)
+  return datos
+}
 
 // ---- Descargas CSV (contracts/exportaciones.md) ----
 
