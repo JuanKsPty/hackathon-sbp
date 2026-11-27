@@ -25,7 +25,7 @@ export function ComposicionCartera({ indicadores }) {
 
   return (
     <TarjetaGrafico id="titulo-composicion" fuerte="Composición de la cartera" suave="por macroactividad" pie="Saldo de cada ranking sobre la suma de los rankings del corte.">
-      <EstadoBloque consulta={indicadores} filas={4} vacio={filas.length === 0} tituloVacio="Sin datos de composición">
+      <EstadoBloque consulta={indicadores} alto={170} vacio={filas.length === 0} tituloVacio="Sin datos de composición">
         <div className="grid items-center gap-4 sm:grid-cols-[170px_1fr]">
           <ChartContainer config={config} className="mx-auto aspect-square w-full max-w-[170px]">
             <PieChart>
@@ -85,7 +85,7 @@ export function CalidadCorte({ calidad }) {
         </Link>
       }
     >
-      <EstadoBloque consulta={calidad} filas={4} vacio={!c} tituloVacio="Sin datos de calidad para este período">
+      <EstadoBloque consulta={calidad} alto={280} vacio={!c} tituloVacio="Sin datos de calidad para este período">
         {c && (
           <div className="flex flex-col gap-4">
             <p className="text-sm text-muted-foreground">
@@ -136,7 +136,7 @@ export function Concentracion({ indicadores }) {
 
   return (
     <TarjetaGrafico id="titulo-concentracion" fuerte="Concentración" suave="participación de los 3 primeros" pie="HHI: índice Herfindahl-Hirschman del ranking (0 a 10 000; más alto, más concentrado).">
-      <EstadoBloque consulta={indicadores} filas={4} vacio={filas.length === 0} tituloVacio="Sin datos de concentración">
+      <EstadoBloque consulta={indicadores} alto={260} vacio={filas.length === 0} tituloVacio="Sin datos de concentración">
         <ChartContainer config={config} className="aspect-auto h-[260px] w-full">
           <BarChart data={filas} layout="vertical" margin={{ left: 0, right: 64 }} barCategoryGap={8}>
             <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />
@@ -191,7 +191,8 @@ export function Morosidad({ indicadores }) {
           : 'Análisis adicional, fuera de los 6 rankings.'
       }
     >
-      <EstadoBloque consulta={indicadores} filas={5} vacio={filas.length === 0} tituloVacio="Sin datos de morosidad">
+      {/* 12 bancos: 12 × 30 + 40 px de gráfico, más la leyenda. */}
+      <EstadoBloque consulta={indicadores} alto={420} vacio={filas.length === 0} tituloVacio="Sin datos de morosidad">
         <ChartContainer config={config} className="aspect-auto w-full" style={{ height: Math.max(200, filas.length * 30 + 40) }}>
           <BarChart data={filas} layout="vertical" margin={{ left: 0, right: 12 }} barCategoryGap={5} barGap={1}>
             <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />

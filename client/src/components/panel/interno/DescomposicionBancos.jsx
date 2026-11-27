@@ -60,6 +60,7 @@ export function DescomposicionBancos({ desde, hasta, consulta }) {
             : 'Necesita un corte anterior para comparar.'
         }
         consulta={desde ? consulta : undefined}
+        alto={12 * 34 + 60}
         vacio={!desde || datos.length === 0}
         mensajeVacio={desde ? 'El API no devolvió la descomposición para este ranking.' : 'Elige en el encabezado un período que tenga uno anterior.'}
       >

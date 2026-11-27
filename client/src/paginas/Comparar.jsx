@@ -285,7 +285,7 @@ function Comparacion({ periodos, rankings, bancos }) {
           <CardDescription>{ranking} · todos los períodos cargados · un clic en una línea resalta ese banco</CardDescription>
         </CardHeader>
         <CardContent>
-          <Estado consulta={consultaPosiciones} activa={Boolean(ranking)} vacio={(consultaPosiciones.datos ?? []).length === 0}>
+          <Estado consulta={consultaPosiciones} activa={Boolean(ranking)} alto={380} vacio={(consultaPosiciones.datos ?? []).length === 0}>
             <GraficoPosiciones
               respuestas={consultaPosiciones.datos ?? []}
               ranking={ranking}

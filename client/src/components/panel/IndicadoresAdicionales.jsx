@@ -37,7 +37,7 @@ export function IndicadoresAdicionales() {
       <CardContent className="flex flex-col gap-4">
         <EstadoBloque
           consulta={consulta}
-          filas={5}
+          alto={440}
           vacio={!datos?.morosidad || datos.morosidad.total?.Operaciones === 0}
           tituloVacio="Sin cartera en este período"
           mensajeVacio="El período elegido no tiene préstamos válidos para calcular estos indicadores."
