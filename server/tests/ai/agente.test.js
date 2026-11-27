@@ -584,3 +584,11 @@ test('#121: sin IA la respuesta trae pantalla: null', async () => {
   const { cuerpo } = await preguntar(base, { pregunta: '¿Cuál es el banco con más operaciones?' });
   assert.equal(cuerpo.pantalla, null);
 });
+
+test('#121: las instrucciones explican cuándo ejecutar y cuándo demostrar', async () => {
+  const cliente = clienteGuionado([responder('Hola.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: 'Hola' });
+  assert.match(cliente.llamadas[0].system, /usar_pantalla en modo "ejecutar"/);
+  assert.match(cliente.llamadas[0].system, /usar_pantalla en modo "demostrar"/);
+});
