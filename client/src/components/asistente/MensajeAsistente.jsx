@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import {
   ArrowDownIcon,
@@ -11,6 +12,7 @@ import {
   SearchXIcon,
 } from 'lucide-react'
 import { useGuia } from '@/guia/GuiaContext.jsx'
+import { useAgente } from '@/agente/AgenteContext.jsx'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ETIQUETA_RESPUESTA } from '@/api/ia.js'
@@ -97,6 +99,7 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
       </div>
       <ResumenAccion accion={datos.accion} />
       <BotonGuia pasos={datos.guia?.pasos} />
+      <PantallaDelMensaje datos={datos} />
       <FuentesConsultadas consultas={datos.consultas} guia={guiaFuentes} />
     </Burbuja>
   )
@@ -160,6 +163,21 @@ function BotonVerGraficos() {
 }
 
 // Cursor guía (#72): si la IA respondió con pasos (`guia`), los muestra sobre la pantalla.
+// Acciones de pantalla (#124). Cada respuesta se aplica una sola vez, aunque el mensaje se vuelva a
+// dibujar o esté a la vez en el panel y en /asistente (la conversación es una sola).
+const pantallasAplicadas = new WeakSet()
+
+function PantallaDelMensaje({ datos }) {
+  const { ejecutarPantalla } = useAgente()
+  const pantalla = datos?.pantalla
+  useEffect(() => {
+    if (pantalla?.modo !== 'ejecutar' || pantallasAplicadas.has(pantalla)) return
+    pantallasAplicadas.add(pantalla)
+    ejecutarPantalla(pantalla)
+  }, [pantalla, ejecutarPantalla])
+  return null
+}
+
 function BotonGuia({ pasos }) {
   const { iniciar } = useGuia()
   if (!pasos?.length) return null
