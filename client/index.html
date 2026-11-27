@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Rankings de crédito por banco y actividad económica a partir de datos AT03 sintéticos." />
+    <title>Rankings de Crédito</title>
+    <script>
+      // Aplica el tema guardado antes de pintar, para evitar un destello claro en modo oscuro.
+      try {
+        var tema = localStorage.getItem('rankings.tema') || 'sistema'
+        var oscuro = tema === 'oscuro' || (tema === 'sistema' && matchMedia('(prefers-color-scheme: dark)').matches)
+        if (oscuro) document.documentElement.classList.add('dark')
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
