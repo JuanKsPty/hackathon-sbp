@@ -120,7 +120,7 @@ test('responde consultando el motor y verifica los números', async () => {
     ruta: '/rankings?periodo=20260930&ranking=HIPOTECARIO',
   }]);
   // El modelo recibe las 7 herramientas y la instrucción de no calcular.
-  assert.equal(cliente.llamadas[0].tools.length, 7);
+  assert.equal(cliente.llamadas[0].tools.length, 8); // 7 de consulta + guiar_usuario
   assert.match(cliente.llamadas[0].system, /No calcules nada/);
 });
 
@@ -178,7 +178,7 @@ test('perfil Público: sin herramienta de movimientos y sin explicaciones (403)'
   const { cuerpo } = await preguntar(base, { pregunta: '¿Qué puedes consultar?' }, 'publico');
   assert.equal(cuerpo.verificada, true);
   const nombres = cliente.llamadas[0].tools.map((t) => t.name);
-  assert.equal(nombres.length, 6);
+  assert.equal(nombres.length, 7); // 6 de consulta + guiar_usuario
   assert.ok(!nombres.includes('consultar_movimientos'));
 
   const explicacion = await fetch(`${base}/explicaciones`);
@@ -203,4 +203,74 @@ test('las excluidas se recortan a una muestra y conservan el total', async () =>
   assert.equal(salida.datos.excluidas.length, 20);
   assert.equal(salida.datos.excluidas_mostradas, 20);
   assert.ok(salida.datos.total > 20);
+});
+
+test('guía: devuelve los pasos validados con la ruta del catálogo', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('guiar_usuario', {
+      pasos: [
+        { guia: 'global.menu-rankings', texto: 'Entra a Rankings desde el menú.' },
+        { guia: 'rankings.selector-ranking', texto: 'Elige COMERCIO.' },
+        { guia: 'rankings.tabla', texto: 'Aquí ves la posición de cada banco.' },
+      ],
+    }),
+    responder('Te muestro cómo ver el ranking de COMERCIO en tres pasos.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo el ranking de comercio?' }, 'publico');
+  assert.equal(cuerpo.verificada, true);
+  assert.deepEqual(cuerpo.guia.pasos.map((p) => [p.ruta, p.guia]), [
+    [null, 'global.menu-rankings'],
+    ['/rankings', 'rankings.selector-ranking'],
+    ['/rankings', 'rankings.tabla'],
+  ]);
+  assert.deepEqual(cuerpo.consultas, []); // la guía no consulta la API
+  const guiar = cliente.llamadas[0].tools.find((t) => t.name === 'guiar_usuario');
+  assert.ok(!guiar.input_schema.properties.pasos.items.properties.guia.enum.includes('admin.subir-archivo'));
+});
+
+test('guía: si señala algo que el perfil no ve, vuelve como error y corrige', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'admin.subir-archivo', texto: 'Sube el archivo.' }] }),
+    (params) => {
+      const resultado = params.messages.at(-1).content[0];
+      assert.equal(resultado.is_error, true);
+      assert.match(resultado.content, /no está disponible para el perfil publico/);
+      return usarHerramienta('guiar_usuario', { pasos: [{ guia: 'global.selector-perfil', texto: 'Cambia al perfil Administrador.' }] })();
+    },
+    responder('Cargar un período es una opción del perfil Administrador.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo cargo un período?' }, 'publico');
+  assert.deepEqual(cuerpo.guia.pasos, [{ ruta: null, guia: 'global.selector-perfil', texto: 'Cambia al perfil Administrador.' }]);
+});
+
+test('guía: un número inventado en los pasos invalida la respuesta', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'rankings.tabla', texto: 'El líder tiene 987654321 de saldo.' }] }),
+    responder('Listo.'),
+    responder('Listo.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Dónde veo el saldo?' });
+  assert.equal(cuerpo.verificada, false);
+  assert.equal(cuerpo.guia, null);
+});
+
+test('GET /api/ia/guia lista los elementos del perfil', async () => {
+  const base = await levantar({ apiKey: '' });
+  const publico = await (await fetch(`${base}/ia/guia`)).json();
+  const admin = await (await fetch(`${base}/ia/guia`, { headers: { 'X-Perfil': 'admin' } })).json();
+  assert.equal(publico.perfil, 'publico');
+  assert.ok(publico.elementos.some((e) => e.guia === 'rankings.tabla' && e.ruta === '/rankings'));
+  assert.ok(!publico.elementos.some((e) => e.guia.startsWith('admin.')));
+  assert.ok(admin.elementos.some((e) => e.guia === 'admin.bitacora'));
+  assert.deepEqual(Object.keys(admin.elementos[0]), ['guia', 'ruta', 'descripcion']);
+});
+
+test('si la IA falla, la respuesta trae guia: null', async () => {
+  const cliente = { beta: { messages: { create: async () => { throw new Error('sin red'); } } } };
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo los rankings?' });
+  assert.equal(cuerpo.guia, null);
 });

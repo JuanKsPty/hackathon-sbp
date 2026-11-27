@@ -184,6 +184,9 @@ export function crearDocumentoOpenApi(catalogos) {
         },
       },
       '/ia/estado': { get: { tags: ['IA'], summary: 'Si la IA está disponible y con qué modelo', responses: jsonOk('Estado de la IA') } },
+      '/ia/guia': {
+        get: { tags: ['IA'], summary: 'Elementos que el agente guía puede señalar para el perfil (data-guia)', responses: jsonOk('Elementos de la guía') },
+      },
       '/mcp': {
         post: {
           tags: ['IA'],
