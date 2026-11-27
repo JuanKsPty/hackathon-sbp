@@ -1,7 +1,7 @@
 // GET /api/movimientos: comparación entre dos períodos (contracts/movimientos.json, issues #1 y #32).
 import { Router } from 'express';
 import { compararPeriodos } from '../automation/movimientos.js';
-import { leerReglaMovimientos } from '../automation/parametros.js';
+import { leerReglaMovimientos } from '../automation/reglaMovimientos.js';
 import { encabezado, monto, porcentaje } from './formato.js';
 import { periodoPedido, rankingPedido } from './parametros.js';
 import { ErrorApi } from './errores.js';

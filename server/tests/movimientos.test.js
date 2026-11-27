@@ -6,7 +6,7 @@ import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
 import { variacionPctE4 } from '../src/automation/movimientos.js';
-import { leerReglaMovimientos, validarRegla } from '../src/automation/parametros.js';
+import { leerReglaMovimientos, validarRegla } from '../src/automation/reglaMovimientos.js';
 import { paqueteReal } from './ayuda.js';
 
 const REGLA = { min_cambio_posicion_abs: 2, cambio_lider: true, min_var_saldo_pct_abs: 10 };

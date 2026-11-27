@@ -115,14 +115,14 @@ src/datos/             disco y memoria
   storage.js           carpeta de persistencia (STORAGE_DIR; temporal durante npm test)
 src/automation/        sobre resultados del motor, sin releer los AT03
   movimientos.js       comparación entre períodos (Cambio_Posicion, Var_Saldo, Var_Saldo_Pct)
-  parametros.js        regla de movimiento significativo (config/parametros.json o la del Administrador)
+  reglaMovimientos.js  regla de movimiento significativo (config/parametros.json o la del Administrador)
   descomposicion.js    Var_Saldo partido en nuevos + salen + amortización (suma exacta)
   verificacion.js      datos y chequeos para el modo verificación del jurado
   publicacion.js       gancho tras cada carga (alertas por correo, #7)
 src/ai/                IA que explica y consulta; nunca calcula (ver src/ai/README.md)
 src/mcp/               servidor MCP con las mismas herramientas de solo lectura del agente
 src/middleware/        perfiles.js (X-Perfil y control de acceso) y limitePedidos.js (429 de la IA)
-src/routes/            endpoints; parametros.js valida filtros, formato.js da el formato de los contratos, errores.js el formato común de errores
+src/routes/            endpoints; parametros.js valida los filtros de la consulta (periodo, ranking, banco), formato.js da el formato de los contratos, errores.js el formato común de errores
 src/docs/openapi.js    documento OpenAPI que sirve /api/docs
 src/app.js             crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp, limiteIA }); las rutas nuevas van antes de los manejadores de errores
 src/servidor.js        arranque: procesa data/, recarga storage/, registra la carga inicial y levanta la API
