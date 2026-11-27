@@ -7,7 +7,14 @@
 export function esperarElemento(selector, { timeout = 4000, signal, raiz = document } = {}) {
   return new Promise((resolver) => {
     // El primero visible: un mismo data-guia puede repetirse (por ejemplo, el menú de escritorio y el de móvil).
-    const buscar = () => [...raiz.querySelectorAll(selector)].find(esVisible) ?? null
+    // Si está en el DOM pero oculto (por ejemplo, en una pestaña cerrada de /admin), se le avisa con
+    // 'guia:revelar' para que quien lo oculta lo muestre; el observador o el sondeo lo encuentran después.
+    const buscar = () => {
+      const todos = [...raiz.querySelectorAll(selector)]
+      const visible = todos.find(esVisible)
+      if (!visible) todos[0]?.dispatchEvent(new CustomEvent('guia:revelar', { bubbles: true }))
+      return visible ?? null
+    }
     const inmediato = buscar()
     if (inmediato) return resolver(inmediato)
 
