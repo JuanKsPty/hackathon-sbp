@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import {
   ArrowDownIcon,
-  BadgeCheckIcon,
   BotIcon,
   BotOffIcon,
   ChartColumnIcon,
@@ -14,12 +13,7 @@ import {
 import { useGuia } from '@/guia/GuiaContext.jsx'
 import { useAgente } from '@/agente/AgenteContext.jsx'
 import { useDemostracion } from '@/agente/DemostracionContext.jsx'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ETIQUETA_RESPUESTA } from '@/api/ia.js'
-import { EtiquetaIA } from './EtiquetaIA.jsx'
-import { FuentesConsultadas } from './FuentesConsultadas.jsx'
-import { Avisos } from './GraficosAsistente.jsx'
 
 // Negritas (**texto**) y viñetas simples: la IA a veces responde con algo de Markdown.
 function conNegritas(linea) {
@@ -56,98 +50,44 @@ function Burbuja({ icono: Icono = BotIcon, children }) {
 }
 
 // Respuesta de POST /api/ia/preguntar. `guia` va solo en la última respuesta (un data-guia por página).
-export function MensajeAsistente({ datos, guiaFuentes }) {
-  const etiqueta = datos?.etiqueta || ETIQUETA_RESPUESTA
-
-  if (datos?.ia_disponible === false) {
-    // Sin IA, la pregunta se interpreta por reglas (#108): si pidió datos, se muestran sus gráficos.
-    // Las reglas también pueden dejar la pantalla lista (#121): se aplica igual que con IA.
-    if (datos.accion) return <RespuestaPorReglas accion={datos.accion} pantalla={<PantallaDelMensaje datos={datos} />} />
-    return (
-      <Burbuja icono={BotOffIcon}>
-        <p className="font-medium">La IA no está disponible</p>
-        <p className="text-muted-foreground">{datos.motivo ?? 'El servidor no tiene la IA configurada.'}</p>
-        <p className="text-muted-foreground">
-          Igual puedo mostrarte gráficos: pide un informe, un ranking, una comparación de períodos o cómo va un banco.
-        </p>
-        <PantallaDelMensaje datos={datos} />
-      </Burbuja>
-    )
+// Solo la respuesta y los botones (pedido de @atraverso06): sin etiquetas, fuentes ni resúmenes.
+export function MensajeAsistente({ datos }) {
+  // Texto: la respuesta de la IA; sin IA, la frase de las reglas; si no hay, un aviso corto.
+  let texto = datos?.respuesta
+  let icono = BotIcon
+  if (!texto && datos?.ia_disponible === false) {
+    texto = datos.accion?.resumen ?? 'La IA no está disponible. Igual puedo mostrarte un ranking, un informe o cómo va un banco.'
+    icono = datos.accion ? ChartColumnIcon : BotOffIcon
+  } else if (!texto) {
+    texto = datos?.pantalla ? 'Te lo muestro en la pantalla.' : 'No encontré una respuesta con cifras del motor. Prueba con una pregunta más concreta.'
+    icono = datos?.pantalla ? BotIcon : SearchXIcon
   }
-
-  if (!datos?.respuesta) {
-    return (
-      <Burbuja icono={SearchXIcon}>
-        <p className="font-medium">No pude responder solo con cifras del motor</p>
-        <p className="text-muted-foreground">
-          {datos?.motivo ?? 'Prueba con una pregunta más concreta (un ranking, un banco o un período).'}
-        </p>
-        <ResumenAccion accion={datos?.accion} />
-        <PantallaDelMensaje datos={datos} />
-        <FuentesConsultadas consultas={datos?.consultas} guia={guiaFuentes} />
-      </Burbuja>
-    )
-  }
-
   return (
-    <Burbuja>
-      <TextoRespuesta texto={datos.respuesta} />
-      <div className="flex flex-wrap items-center gap-2">
-        <EtiquetaIA texto={etiqueta} />
-        {datos.verificada && (
-          <Badge variant="outline" className="text-sube" title="Cada número de la respuesta está en las respuestas del motor">
-            <BadgeCheckIcon aria-hidden="true" />
-            Cifras verificadas
-          </Badge>
-        )}
-      </div>
-      <ResumenAccion accion={datos.accion} />
-      <BotonGuia pasos={datos.guia?.pasos} />
-      <PantallaDelMensaje datos={datos} />
-      <FuentesConsultadas consultas={datos.consultas} guia={guiaFuentes} />
+    <Burbuja icono={icono}>
+      <TextoRespuesta texto={texto} />
+      <BotonesRespuesta datos={datos} />
     </Burbuja>
   )
 }
 
-// Sin IA: la frase fija que arma el server con lo que se muestra (no trae cifras del motor).
-function RespuestaPorReglas({ accion, pantalla }) {
+// Botones de la respuesta: "Ver gráficos" y "Muéstrame cómo" (o la guía, si no hay pantalla).
+function BotonesRespuesta({ datos }) {
+  const conGraficos = datos?.accion?.graficos?.length > 0
+  const conPantalla = datos?.pantalla?.acciones?.length > 0
+  const conGuia = !conPantalla && datos?.guia?.pasos?.length > 0
+  // La pantalla se aplica al llegar la respuesta ("ejecutar" al instante, "demostrar" con el cursor).
+  useAplicarPantalla(datos?.pantalla)
+  if (!conGraficos && !conPantalla && !conGuia) return null
   return (
-    <Burbuja icono={ChartColumnIcon}>
-      <p>{accion.resumen}</p>
-      <Avisos avisos={accion.avisos} />
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge
-          variant="outline"
-          className="h-auto text-left whitespace-normal"
-          title="Sin IA: la pregunta se interpretó por palabras clave (mes, ranking, banco e informe)"
-        >
-          Interpretado por reglas · cifras del motor
-        </Badge>
-        {accion.graficos?.length > 0 && <BotonVerGraficos />}
-      </div>
-      {pantalla}
-    </Burbuja>
-  )
-}
-
-// Con IA: qué gráficos se mostraron junto a la respuesta.
-function ResumenAccion({ accion }) {
-  if (!accion) return null
-  return (
-    <div className="flex flex-col gap-2 border-t pt-2">
-      <p className="flex items-center gap-1.5 text-xs font-medium">
-        <ChartColumnIcon className="size-3.5" aria-hidden="true" />
-        {accion.graficos?.length > 0 ? `Gráficos en pantalla: ${accion.titulo}` : accion.titulo}
-      </p>
-      <Avisos avisos={accion.avisos} />
-      {accion.graficos?.length > 0 && (
-        <div>
-          <BotonVerGraficos />
-        </div>
-      )}
+    <div className="flex flex-wrap items-center gap-2">
+      {conGraficos && <BotonVerGraficos />}
+      {conPantalla && <BotonMostrarComo pantalla={datos.pantalla} />}
+      {conGuia && <BotonGuia pasos={datos.guia.pasos} />}
     </div>
   )
 }
+
+
 
 // Lleva a los gráficos: el último panel en pantalla (el del panel lateral, si está abierto) o la
 // página /asistente si el chat está en otro lugar.
@@ -172,31 +112,31 @@ function BotonVerGraficos() {
 // dibujar o esté a la vez en el panel y en /asistente (la conversación es una sola).
 const pantallasAplicadas = new WeakSet()
 
-function PantallaDelMensaje({ datos }) {
-  const { ejecutarPantalla, deshacerUltima } = useAgente()
-  const { demostrar, demostrando } = useDemostracion()
-  const pantalla = datos?.pantalla
-  // Al llegar la respuesta: "ejecutar" se aplica al instante; "demostrar" arranca el cursor.
+// Al llegar la respuesta: "ejecutar" se aplica al instante; "demostrar" arranca el cursor.
+function useAplicarPantalla(pantalla) {
+  const { ejecutarPantalla } = useAgente()
+  const { demostrar } = useDemostracion()
   useEffect(() => {
-    if (!pantalla || pantallasAplicadas.has(pantalla)) return
+    if (!pantalla?.acciones?.length || pantallasAplicadas.has(pantalla)) return
     pantallasAplicadas.add(pantalla)
     if (pantalla.modo === 'ejecutar') ejecutarPantalla(pantalla)
     else if (pantalla.modo === 'demostrar') demostrar(pantalla)
   }, [pantalla, ejecutarPantalla, demostrar])
+}
 
-  if (!pantalla?.acciones?.length) return null
-  // "Muéstrame cómo": deshace lo aplicado y lo demuestra paso a paso desde donde estaba el usuario.
+// "Muéstrame cómo": deshace lo aplicado y lo demuestra paso a paso desde donde estaba el usuario.
+function BotonMostrarComo({ pantalla }) {
+  const { deshacerUltima } = useAgente()
+  const { demostrar, demostrando } = useDemostracion()
   const mostrarComo = () => {
     if (pantalla.modo === 'ejecutar') deshacerUltima()
     demostrar(pantalla)
   }
   return (
-    <div>
-      <Button variant="outline" size="sm" onClick={mostrarComo} disabled={demostrando}>
-        <MousePointer2Icon aria-hidden="true" />
-        {pantalla.modo === 'ejecutar' ? 'Muéstrame cómo' : 'Ver de nuevo'}
-      </Button>
-    </div>
+    <Button variant="outline" size="sm" onClick={mostrarComo} disabled={demostrando}>
+      <MousePointer2Icon aria-hidden="true" />
+      {pantalla.modo === 'ejecutar' ? 'Muéstrame cómo' : 'Ver de nuevo'}
+    </Button>
   )
 }
 

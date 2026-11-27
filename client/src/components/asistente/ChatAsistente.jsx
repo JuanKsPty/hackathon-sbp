@@ -45,7 +45,6 @@ export function ChatAsistente({ className, enPanel = false }) {
   const sinIA = estado.iaDisponible === false
   const largo = texto.length
   const puedeEnviar = !pendiente && texto.trim() !== '' && largo <= MAX_PREGUNTA
-  const ultimaRespuesta = mensajes.findLast((m) => m.rol === 'asistente')?.id
 
   // Baja al último mensaje dentro de la lista (sin mover la página). Sin conversación se queda
   // arriba: en un panel bajo, bajar taparía la introducción y las preguntas de ejemplo.
@@ -142,11 +141,7 @@ export function ChatAsistente({ className, enPanel = false }) {
           )
         }
         return (
-          <MensajeAsistente
-            key={mensaje.id}
-            datos={mensaje.datos}
-            guiaFuentes={mensaje.id === ultimaRespuesta ? 'asistente.fuentes' : undefined}
-          />
+          <MensajeAsistente key={mensaje.id} datos={mensaje.datos} />
         )
       })}
 
