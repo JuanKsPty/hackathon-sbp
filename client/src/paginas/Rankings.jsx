@@ -1,7 +1,7 @@
 import { useControlGuia } from '@/agente/useControlGuia.js'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { CheckIcon, DownloadIcon, InfoIcon, LinkIcon } from 'lucide-react'
+import { DownloadIcon, InfoIcon } from 'lucide-react'
 import {
   calidad as pedirCalidad,
   catalogos as pedirCatalogos,
@@ -18,7 +18,7 @@ import { FiltrosRanking, TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { GraficoRanking } from '@/components/rankings/GraficoRanking.jsx'
 import { SelectorRanking } from '@/components/rankings/SelectorRanking.jsx'
 import { ORDEN_INICIAL, TablaRanking } from '@/components/rankings/TablaRanking.jsx'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
@@ -34,8 +34,8 @@ const RESALTADO_MS = 3000
 // La regla SB21 (sección 6) solo mueve saldo dentro de este ranking: Crédito personal con facilidad 07 → Tarjeta.
 const RANKING_CON_REGLA_SB21 = 'CONSUMO'
 
-// Página Rankings (#64): período (junto al título), los 6 rankings, tabla ordenable, gráfico,
-// filtros por banco y subactividad, y desglose por subactividad. Todas las cifras vienen del API (R2).
+// Página Rankings (#64): filtros por banco y subactividad y período (en la línea del título), los 6
+// rankings, tabla ordenable, gráfico y desglose por subactividad. Todas las cifras vienen del API (R2).
 // Los filtros viven en la URL (#129): la vista se recarga igual y se puede compartir.
 export default function Rankings() {
   const { periodos, periodo: periodoGlobal, cambiarPeriodo, cargando: cargandoPeriodos, error: errorPeriodos } = usePeriodo()
@@ -184,25 +184,24 @@ export default function Rankings() {
   const contexto = `${ranking} · ${formatearPeriodo(periodo)}`
 
   return (
-    <Contenedor>
+    <Contenedor
+      filtros={
+        <FiltrosRanking
+          bancos={listaBancos}
+          subactividades={subactividadesDelRanking}
+          banco={banco}
+          subactividad={subactividad}
+          alCambiarBanco={setBanco}
+          alCambiarSubactividad={setSubactividad}
+        />
+      }
+    >
       <Card>
         <CardHeader>
-          <CardTitle>Ranking y filtros</CardTitle>
-          <CardDescription>Elige el ranking y, si quieres, un banco o una subactividad. El período está junto al título. La dirección de la página guarda esta vista.</CardDescription>
-          <CardAction>
-            <CopiarEnlace />
-          </CardAction>
+          <CardTitle>Ranking</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent>
           <SelectorRanking rankings={listaRankings} valor={ranking} alCambiar={cambiarRanking} />
-          <FiltrosRanking
-            bancos={listaBancos}
-            subactividades={subactividadesDelRanking}
-            banco={banco}
-            subactividad={subactividad}
-            alCambiarBanco={setBanco}
-            alCambiarSubactividad={setSubactividad}
-          />
         </CardContent>
       </Card>
 
@@ -281,9 +280,19 @@ export default function Rankings() {
   )
 }
 
-function Contenedor({ children }) {
+// `filtros` (banco y subactividad) van en la línea del título, a la izquierda del período.
+function Contenedor({ filtros, children }) {
   return (
-    <Pagina titulo="Rankings" descripcion="Posición de cada banco en las actividades de crédito, con su saldo, ponderación y desglose." acciones={<PeriodoDePagina />}>
+    <Pagina
+      titulo="Rankings"
+      descripcion="Posición de cada banco en las actividades de crédito, con su saldo, ponderación y desglose."
+      acciones={
+        <>
+          {filtros}
+          <PeriodoDePagina />
+        </>
+      }
+    >
       {children}
     </Pagina>
   )
@@ -295,49 +304,6 @@ function Estado({ consulta, vacio, children }) {
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   if (vacio) return <Vacio titulo="Sin datos" descripcion="No hay datos para los filtros elegidos." />
   return children
-}
-
-// Copia la dirección de la vista actual (con sus filtros) para compartirla (#129).
-function CopiarEnlace() {
-  const [estado, setEstado] = useState('listo') // listo | copiado | error
-
-  const copiar = async () => {
-    setEstado((await copiarTexto(window.location.href)) ? 'copiado' : 'error')
-    setTimeout(() => setEstado('listo'), 2500)
-  }
-
-  if (estado === 'error') {
-    return <span className="text-xs text-muted-foreground">No se pudo copiar: usa la dirección del navegador.</span>
-  }
-  return (
-    <Button variant="outline" size="sm" onClick={copiar} aria-live="polite">
-      {estado === 'copiado' ? <CheckIcon aria-hidden="true" /> : <LinkIcon aria-hidden="true" />}
-      {estado === 'copiado' ? 'Enlace copiado' : 'Copiar enlace'}
-    </Button>
-  )
-}
-
-// El portapapeles moderno solo existe en https o localhost; si no está (por ejemplo, al abrir la app
-// por la IP de la red local), se usa una caja de texto oculta.
-async function copiarTexto(texto) {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(texto)
-      return true
-    }
-  } catch {
-    // sigue con el método de respaldo
-  }
-  const caja = document.createElement('textarea')
-  caja.value = texto
-  caja.setAttribute('readonly', '')
-  caja.style.position = 'fixed'
-  caja.style.opacity = '0'
-  document.body.appendChild(caja)
-  caja.select()
-  const copiado = document.execCommand('copy')
-  caja.remove()
-  return copiado
 }
 
 // `guia`: identificador data-guia para el agente guía (contracts/guia.md), si el contrato lo define.
