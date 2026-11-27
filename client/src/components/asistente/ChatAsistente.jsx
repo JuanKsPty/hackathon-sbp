@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { sugerenciasDeGraficos } from './accion.js'
 import { AvisoIA } from './AvisoIA.jsx'
 import { borrarConversacion, enviarPregunta, reintentarUltima, useConversacion } from './conversacion.js'
-import { MensajeAsistente, MensajeError } from './MensajeAsistente.jsx'
+import { Burbuja, MensajeAsistente, MensajeError } from './MensajeAsistente.jsx'
 import { useEstadoIA } from './useEstadoIA.js'
 
 // Preguntas de ejemplo. Primero las que muestran gráficos (#108), con los períodos cargados; Público no
@@ -48,7 +48,7 @@ export function ChatAsistente({ className, enPanel = false, pie = null }) {
   const puedeEnviar = !pendiente && texto.trim() !== '' && largo <= MAX_PREGUNTA
 
   // Baja al último mensaje dentro de la lista (sin mover la página). Sin conversación se queda
-  // arriba: en un panel bajo, bajar taparía la introducción y las preguntas de ejemplo.
+  // arriba, en el saludo.
   useEffect(() => {
     const lista = listaRef.current
     if (lista && (mensajes.length > 0 || pendiente)) lista.scrollTop = lista.scrollHeight
@@ -95,23 +95,10 @@ export function ChatAsistente({ className, enPanel = false, pie = null }) {
       data-desplazable={enPanel ? '' : undefined}
       className={cn('flex flex-col gap-4 overflow-y-auto overscroll-contain pr-1', enPanel ? 'min-h-0 flex-1' : 'max-h-[60vh] min-h-48')}
     >
-      {mensajes.length === 0 && !pendiente && (
-        <div className="flex flex-col gap-3 py-2">
-          <div className="flex flex-wrap gap-2">
-            {sugerencias(perfil, periodo, periodos).map((sugerencia) => (
-              <Button
-                key={sugerencia}
-                variant="outline"
-                size="sm"
-                className="h-auto max-w-full shrink py-1.5 text-left whitespace-normal"
-                onClick={() => enviar(sugerencia)}
-              >
-                {sugerencia}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Saludo del agente: siempre es el primer mensaje de la conversación. */}
+      <Burbuja>
+        <p>¡Hola! ¿En qué puedo ayudarte? Pregúntame por los rankings, un banco o la calidad de los datos.</p>
+      </Burbuja>
 
       {mensajes.map((mensaje) => {
         if (mensaje.rol === 'usuario') {
@@ -148,8 +135,26 @@ export function ChatAsistente({ className, enPanel = false, pie = null }) {
     </div>
   )
 
+  // Preguntas de ejemplo justo encima del campo, mientras la conversación está vacía.
+  const ejemplos = mensajes.length === 0 && !pendiente && (
+    <div className="flex flex-wrap gap-2">
+      {sugerencias(perfil, periodo, periodos).map((sugerencia) => (
+        <Button
+          key={sugerencia}
+          variant="outline"
+          size="sm"
+          className="h-auto max-w-full shrink py-1.5 text-left whitespace-normal"
+          onClick={() => enviar(sugerencia)}
+        >
+          {sugerencia}
+        </Button>
+      ))}
+    </div>
+  )
+
   const formulario = (
-    <form onSubmit={alEnviar} className="flex flex-col gap-1.5">
+    <form onSubmit={alEnviar} className="flex flex-col gap-2">
+      {ejemplos}
       <label htmlFor="asistente-pregunta" className="sr-only">
         Pregunta para el asistente
       </label>
