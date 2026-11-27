@@ -1,11 +1,12 @@
 // Motor del reto: JavaScript puro, sin Express ni acceso a disco. Recibe textos CSV y devuelve resultados.
-// Flujo por período: leer -> validar -> cascada E1-E4 -> clasificar (CINU + SB21) -> agregar -> rankings
+// Flujo por período: leer -> validar -> cascada E1-E4 -> clasificar (CINU + SB21) -> agregar -> rankings -> reconciliar
 import { leerCsv, ErrorDeDatos } from './csv.js';
 import { validarEsquema, validarTipos, revisarIntegridad } from './validacion.js';
 import { aplicarCascada, conteosIndependientes } from './cascada.js';
 import { clasificarOperaciones } from './clasificacion.js';
 import { agregar } from './agregacion.js';
 import { construirRankings, construirDesglose } from './rankings.js';
+import { reconciliar } from './reconciliaciones.js';
 
 export { cargarCatalogos } from './catalogos.js';
 export { ErrorDeDatos } from './csv.js';
@@ -57,6 +58,7 @@ export function procesarPeriodo(filas, catalogos, opciones = {}) {
     fecha,
     nombreArchivo,
     calidad: resumenDeCalidad(filas, cascada, operaciones, agregado, alertas, catalogos),
+    reconciliaciones: reconciliar({ operaciones, rankings, desglose }), // { r1, r2, r3, unicidad } con ok: true/false
     rankings,
     desglose,
     operaciones, // universo local válido ya clasificado (un registro por préstamo)
