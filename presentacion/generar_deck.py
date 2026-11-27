@@ -37,10 +37,10 @@ SALIDA = AQUI / "deck.pptx"
 # y `cd server && npm run test:cobertura`. Si cambian, se actualizan aquí y se vuelve a generar.
 # ---------------------------------------------------------------------------------------------
 CIFRAS = {
-    "pruebas_server": "253",
-    "pruebas_client": "6",
+    "pruebas_server": "331",
+    "pruebas_client": "43",
     "cobertura_lineas": "99 %",
-    "cobertura_ramas": "92 %",
+    "cobertura_ramas": "91 %",
     "cobertura_funciones": "98 %",
     "casos_eval_agente": "18",
 }
@@ -900,7 +900,7 @@ def lamina_calidad(prs, d):
     L.texto(0.6, 2.25, 3.6, 0.8, "pruebas del server con node:test", size=15, color=BLANCO, align="c", nombre="Etiqueta server")
     L.caja(0.6, 3.4, 3.6, 1.35, relleno=LAVANDA, nombre="Cifra client")
     L.texto(0.6, 3.5, 3.6, 0.65, CIFRAS["pruebas_client"], size=34, bold=True, color=INDIGO, align="c", anchor="m", nombre="Pruebas client")
-    L.texto(0.6, 4.15, 3.6, 0.5, "pruebas del client (cursor guía)", size=14, color=APAGADO, align="c", nombre="Etiqueta client")
+    L.texto(0.6, 4.15, 3.6, 0.5, "pruebas del client (lógica de la UI)", size=14, color=APAGADO, align="c", nombre="Etiqueta client")
     L.caja(0.6, 4.95, 3.6, 1.9, relleno=LAVANDA, nombre="Cobertura")
     L.texto(0.75, 5.0, 3.3, 0.4, "Cobertura del server", size=14, bold=True, color=INDIGO, align="c", nombre="Cobertura título")
     L.texto(0.75, 5.45, 3.3, 0.7, f"{CIFRAS['cobertura_lineas']} · {CIFRAS['cobertura_ramas']} · {CIFRAS['cobertura_funciones']}",
@@ -942,7 +942,7 @@ def lamina_innovacion(prs, d):
     tarjetas = [
         ("Indicadores extra", "Morosidad, concentración (HHI y top 3) y vencimientos. Rotulados como análisis adicional."),
         ("Descomposición", "De dónde sale cada variación de saldo: préstamos nuevos, los que salen y la amortización."),
-        ("Cursor guía", "La IA mueve un cursor por la app y señala cada paso con un globo de texto."),
+        ("Cursor guía y gráficos", "La IA señala cada paso con un cursor, y el chat dibuja los gráficos de lo que se pregunta."),
         ("MCP remoto", f"Conecta Claude por URL: {URL_PUBLICA}/api/mcp"),
         ("App instalable (PWA)", "Manifest y service worker: se instala en el celular."),
         ("API documentada", "Swagger UI en /api/docs y el documento OpenAPI en /api/openapi.json."),

@@ -64,7 +64,7 @@ Reparto por tema (R6: **todos** deben poder explicar el código, no solo su part
 - Pestaña 1: `http://localhost:5173` (la demo). Pestaña 2: `https://sbp.juank.tech` (plan B). Pestaña 3: `http://localhost:3001/api/docs` (Swagger).
 - El deck abierto en la lámina 6 y una copia en PDF a mano.
 - El selector de archivos del sistema ya sabe dónde está `AT03_sintetico_202609.csv` (la ruta que imprimió el script).
-- Zapier (opcional, issue #7): solo si la rama de alertas ya está mezclada y hay `ZAPIER_WEBHOOK_URL` en el `.env`. Si no, se omite sin avisar.
+- Zapier (opcional, issue #7): solo si hay `ZAPIER_WEBHOOK_URL` en el `.env` de la máquina de la demo. Si no, se omite sin avisar.
 
 ## Guion minuto a minuto
 
@@ -86,7 +86,7 @@ Reparto por tema (R6: **todos** deben poder explicar el código, no solo su part
 
    Debe responder `403` con `PERFIL_NO_AUTORIZADO` ("Esta opción es solo para el perfil Administrador. Tu perfil es Público."). "La tabla de opciones por perfil está en un solo lugar: `server/src/middleware/perfiles.js`."
 4. **Agustín.** En el encabezado, abre el **selector de perfil** y elige **Administrador**. Ahora el menú tiene "Comparar períodos" y "Administración".
-- **Si el selector aún no está:** hacer solo los pasos 2 y 3 y decir que el selector llega con el issue #4.
+- **En el celular** (por debajo de 640 px de ancho) el selector de perfil está dentro del menú, no en el encabezado.
 
 ### 3. Cargar septiembre (1:40–3:10) · Jesús
 
@@ -141,7 +141,7 @@ Es el **entregable 7**: procesar un período nuevo sin tocar código.
 
 ### 8. Modo verificación (7:00–7:50) · Jesús
 
-- **Clic:** abre `/verificacion` (menú **Verificación**, o la barra de direcciones).
+- **Clic:** menú → **Verificación del jurado** (o `/verificacion` en la barra de direcciones). Está para los 3 perfiles.
 - **Mostrar los 6 puntos de la sección 11.1**, cada uno con su chequeo (✓):
   1. **Calidad:** E1–E4 y universo válido por período.
   2. **Rankings obligatorios:** HIPOTECARIO, CONSTRUCCION, INDUSTRIA y AGROPECUARIO, con posición y saldo.
@@ -161,7 +161,7 @@ Es el **entregable 7**: procesar un período nuevo sin tocar código.
 3. **Pregunta de límites** (opcional, 15 s): `¿Cuál es el saldo promedio de los 12 bancos en HIPOTECARIO en septiembre?` La IA no debe calcularlo (sección 9).
 4. **Cursor guía** (con el perfil Administrador): pregunta `¿Cómo cargo un nuevo período?` y clic en **"Mostrarme en la pantalla"**. El cursor lleva a Administración y señala el campo para subir el archivo, con un globo de texto. Se puede avanzar con las flechas del teclado y cerrar con Esc.
    - **Decir:** "Solo señala lo que el perfil puede ver: con el perfil Público, la misma pregunta no señala nada y explica que la carga es del Administrador." (Es el caso `guia-carga-publico` de la evaluación del agente.)
-5. **Sin IA:** si no hay llave o falla la red, la app muestra "IA no disponible" y las explicaciones por reglas siguen funcionando en Panel y Comparar. Ver el plan B.
+5. **Sin IA:** si no hay llave o falla la red, la app muestra "IA no disponible" y las explicaciones por reglas siguen funcionando en el Panel y en la página del Asistente. Ver el plan B.
 
 ### 10. Reportes (9:00–9:40) · Jesús
 

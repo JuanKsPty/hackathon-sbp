@@ -59,12 +59,12 @@ El deck **no tiene cifras de resultados** (saldos, posiciones ni ganadores): esa
 
 | Cifra | Cómo se mide |
 | :--- | :--- |
-| 253 pruebas del server | `cd server && npm test` |
-| 6 pruebas del client | `cd client && npm test` |
-| Cobertura del server: 99 % de líneas, 92 % de ramas y 98 % de funciones | `cd server && npm run test:cobertura` |
+| 331 pruebas del server | `cd server && npm test` |
+| 43 pruebas del client | `cd client && npm test` |
+| Cobertura del server: 99 % de líneas, 91 % de ramas y 98 % de funciones | `cd server && npm run test:cobertura` |
 | 18 casos de evaluación del agente | `server/evals/agente/casos.js` |
 
-Si cambian (por ejemplo, al mezclar los módulos del front o las alertas de Zapier), se actualiza el bloque `CIFRAS` y se vuelve a generar. La URL pública y la del repositorio están en `URL_PUBLICA` y `URL_REPO`.
+Si cambian, se actualiza el bloque `CIFRAS` y se vuelve a generar. La URL pública y la del repositorio están en `URL_PUBLICA` y `URL_REPO`.
 
 ## Revisar cómo se ve
 
@@ -92,6 +92,6 @@ node presentacion/preparar-demo.mjs --sin-arrancar   # solo prepara las carpetas
 
 ## Pendiente antes de presentar
 
-- **Ensayar con la app final:** los pasos de Perfiles, Panel, Comparar períodos y Modo verificación del guion se escribieron con los issues #4, #60, #61 y #63 y con `contracts/guia.md`. Al mezclar esos módulos, confirmar las etiquetas exactas y corregir el guion.
-- **Alertas por correo (#7):** la lámina 9 las presenta como parte de la automatización. Confirmar que estén mezcladas y con el webhook configurado antes de mostrarlas en vivo.
+- **Ensayar con la app final:** las etiquetas del guion se revisaron contra el código del selector de perfil (#4), el Panel (#60), Comparar períodos (#61) y la Verificación del jurado (#63). En el ensayo, confirmar que todo se ve igual en la máquina de la demo.
+- **Alertas por correo (#7):** ya están en `main`. Mostrarlas en vivo solo si la máquina de la demo tiene `ZAPIER_WEBHOOK_URL` en el `.env`.
 - **Cifras de pruebas:** volver a medirlas (tabla de arriba) el día de la presentación.
