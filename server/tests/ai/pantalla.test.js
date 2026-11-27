@@ -1,7 +1,9 @@
 // Acciones de pantalla del agente (#121).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CONTROLES, COLUMNAS_RANKING } from '../../src/ai/pantalla.js';
+import { CONTROLES, COLUMNAS_RANKING, contextoPantalla, errorDeValor, validarAccion } from '../../src/ai/pantalla.js';
+import { crearAlmacen } from '../../src/datos/almacen.js';
+import { paqueteReal } from '../ayuda.js';
 import { elementoGuia } from '../../src/ai/guia.js';
 
 test('cada control del catálogo existe en la guía (data-guia) y admite al menos una acción', () => {
@@ -17,9 +19,6 @@ test('las columnas ordenables de la tabla de rankings son las del contrato /api/
   ]);
 });
 
-import { crearAlmacen } from '../../src/datos/almacen.js';
-import { contextoPantalla, errorDeValor } from '../../src/ai/pantalla.js';
-import { paqueteReal } from '../ayuda.js';
 
 const contexto = () => {
   const { catalogos, periodos } = paqueteReal();
@@ -47,4 +46,16 @@ test('errorDeValor acepta valores del catálogo y rechaza inventados', () => {
   assert.equal(errorDeValor('subactividad', 'todas', c), null);
   assert.match(errorDeValor('subactividad', 'Hipotecas', c), /no existe/);
   assert.match(errorDeValor('periodo', '', c), /falta el valor/);
+});
+
+test('ir: solo a páginas que existen y que el perfil puede ver', () => {
+  const c = contexto();
+  assert.deepEqual(validarAccion({ tipo: 'ir', ruta: '/rankings', texto: 'Vamos a Rankings.' }, { contexto: c }), {
+    ok: true, accion: { tipo: 'ir', ruta: '/rankings', texto: 'Vamos a Rankings.' },
+  });
+  assert.match(validarAccion({ tipo: 'ir', ruta: '/comparar' }, { contexto: c, perfil: 'publico' }).error, /perfil publico/);
+  assert.equal(validarAccion({ tipo: 'ir', ruta: '/comparar' }, { contexto: c, perfil: 'analista' }).ok, true);
+  assert.equal(validarAccion({ tipo: 'ir', ruta: '/admin' }, { contexto: c, perfil: 'analista' }).ok, false);
+  assert.equal(validarAccion({ tipo: 'ir', ruta: 'https://evil.example' }, { contexto: c, perfil: 'admin' }).ok, false);
+  assert.match(validarAccion({ tipo: 'volar' }, { contexto: c }).error, /desconocido/);
 });

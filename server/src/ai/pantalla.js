@@ -63,3 +63,29 @@ export function errorDeValor(tipo, valor, contexto) {
       return `tipo de valor desconocido: ${tipo}.`;
   }
 }
+
+import { ELEMENTOS_GUIA, elementoGuia, perfilVeElemento } from './guia.js';
+
+// Páginas a las que el perfil puede ir: las rutas de los elementos de la guía que ve.
+function rutasPara(perfil) {
+  return [...new Set(ELEMENTOS_GUIA.filter((e) => e.ruta && perfilVeElemento(e.guia, perfil)).map((e) => e.ruta))];
+}
+
+const textoDe = (accion) => (typeof accion?.texto === 'string' ? accion.texto.trim() : '');
+
+/**
+ * Valida una acción propuesta por la IA y la normaliza.
+ * @returns {{ ok: true, accion } | { ok: false, error }}
+ */
+export function validarAccion(accion, { contexto, perfil = 'publico' }) {
+  const tipo = accion?.tipo;
+  if (!TIPOS_ACCION.includes(tipo)) return { ok: false, error: `tipo de acción desconocido: "${tipo}" (${TIPOS_ACCION.join(', ')}).` };
+  const texto = textoDe(accion);
+
+  if (tipo === 'ir') {
+    const rutas = rutasPara(perfil);
+    if (!rutas.includes(accion.ruta)) return { ok: false, error: `no se puede ir a "${accion.ruta}" con el perfil ${perfil} (${rutas.join(', ')}).` };
+    return { ok: true, accion: { tipo, ruta: accion.ruta, texto } };
+  }
+  return { ok: false, error: `acción "${tipo}" todavía no soportada.` };
+}
