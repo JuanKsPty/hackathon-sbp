@@ -157,13 +157,21 @@ export function armarVerificacion(almacen, periodo, banco = null) {
     ],
   };
 
-  const puntos = [punto1, punto2, punto3, punto4, punto5, punto6];
+  // Un objeto con una clave por punto (cada punto tiene datos de forma distinta).
+  const puntos = {
+    calidad: punto1,
+    rankings_obligatorios: punto2,
+    rankings_adicionales: punto3,
+    ponderacion: punto4,
+    subactividades: punto5,
+    periodos: punto6,
+  };
   return {
     periodo: periodo.fecha,
     archivo: periodo.nombreArchivo,
     periodos: todos.map((p) => p.fecha),
     banco: banco ? { Codigo_Banco: banco, Banco: catalogos.bancos.get(banco) ?? banco } : null,
-    todo_ok: puntos.every((p) => p.chequeos.every((c) => c.ok)),
+    todo_ok: Object.values(puntos).every((p) => p.chequeos.every((c) => c.ok)),
     puntos,
   };
 }

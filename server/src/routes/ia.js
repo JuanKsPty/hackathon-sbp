@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { explicarMovimientos } from '../ai/explicaciones.js';
 import { preguntarAlAgente } from '../ai/agente.js';
 import { crearEjecutor } from '../ai/herramientas.js';
+import { urlApiInterna } from '../ai/apiInterna.js';
 import { elementosPara } from '../ai/guia.js';
 import { MODELO_POR_DEFECTO } from '../ai/redaccionIA.js';
 import { encabezado } from './formato.js';
@@ -71,7 +72,8 @@ export function rutasDeIA({ obtenerMovimientos, opcionesIA = {} } = {}) {
   // #3: pregunta en lenguaje natural. La IA consulta la misma API con herramientas de solo lectura.
   rutas.post('/ia/preguntar', async (req, res) => {
     const { pregunta, historial } = validarPregunta(req.body);
-    const baseUrl = `${req.protocol}://${req.get('host')}/api`;
+    // API interna, no el Host de la petición (#89).
+    const baseUrl = urlApiInterna();
     try {
       const resultado = await preguntarAlAgente(pregunta, {
         ...opcionesIA,
