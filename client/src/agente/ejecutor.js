@@ -44,6 +44,14 @@ export async function ejecutarAcciones(acciones, { registro, navegar, rutaActual
       aplicadas.push(accion)
       continue
     }
+    // Señalar no cambia nada en el control: no necesita que esté registrado (solo 5 lo están). La
+    // demostración busca el elemento por su data-guia y lleva el cursor; al ejecutar no hace nada.
+    if (accion.tipo === 'señalar') {
+      await antesDe?.(accion, null)
+      if (signal?.aborted) break
+      aplicadas.push(accion)
+      continue
+    }
 
     const handlers = await registro.esperar(accion.control, { signal, timeout })
     if (!handlers) {

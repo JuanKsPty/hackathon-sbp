@@ -141,3 +141,15 @@ test('ordenar por el orden que ya tiene se salta', async () => {
   )
   assert.deepEqual(llamadas, ['Ponderacion_Pct desc'])
 })
+
+test('señalar no necesita un control registrado: lleva el cursor y no falla', async () => {
+  const e = escenario()
+  const vistos = []
+  const r = await ejecutarAcciones(
+    [{ tipo: 'ir', ruta: '/admin', texto: 'Entra a Administración.' }, { tipo: 'señalar', control: 'admin.subir-archivo', ruta: '/admin', texto: 'Aquí.' }],
+    { ...e, timeout: 30, antesDe: async (accion) => vistos.push(`${accion.tipo}:${accion.control ?? accion.ruta}`) },
+  )
+  assert.deepEqual(r.fallidas, [])
+  assert.deepEqual(r.aplicadas.map((a) => a.tipo), ['ir', 'señalar'])
+  assert.deepEqual(vistos, ['ir:/admin', 'señalar:admin.subir-archivo'])
+})
