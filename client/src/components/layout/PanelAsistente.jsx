@@ -30,7 +30,7 @@ export function PanelAsistente() {
           <span className="hidden sm:inline">Asistente</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full gap-0 sm:max-w-xl">
+      <SheetContent side="right" className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="border-b pr-12">
           <SheetTitle>Asistente IA</SheetTitle>
           <SheetDescription>Pregunta por los rankings en lenguaje natural. No calcula: cada cifra sale del motor.</SheetDescription>

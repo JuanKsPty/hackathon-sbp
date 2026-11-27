@@ -44,13 +44,13 @@ export function ResumenPeriodo() {
     <Card data-guia="panel.indicadores">
       <CardHeader>
         <CardTitle>Resumen del período</CardTitle>
-        <CardDescription>
+        <CardDescription className="@max-md/card-header:col-start-1">
           {detallePeriodo
             ? `${formatearPeriodo(detallePeriodo.Fecha)} · ${detallePeriodo.Archivo}`
             : 'Período seleccionado en el encabezado'}
         </CardDescription>
         {detallePeriodo && typeof reconciliado === 'boolean' && (
-          <CardAction>
+          <CardAction className="@max-md/card-header:col-start-1 @max-md/card-header:row-span-1 @max-md/card-header:row-start-3 @max-md/card-header:mt-2 @max-md/card-header:justify-self-start">
             {reconciliado ? (
               <Badge className="bg-sube-fondo text-sube">
                 <CheckCircle2Icon aria-hidden="true" />

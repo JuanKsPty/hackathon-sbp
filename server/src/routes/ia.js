@@ -39,10 +39,10 @@ function validarPregunta(cuerpo) {
 
 /**
  * @param {object} deps
- * @param {object} [deps.almacen] períodos cargados y catálogos: con él, las preguntas traen `accion` (#108)
+ * @param {object} [deps.almacen] períodos cargados y catálogos: con él, las preguntas traen `accion` (#108) y las
+ *   herramientas de la IA nombran sus rankings y bancos
  * @param {Function} [deps.obtenerMovimientos] cálculo de /api/movimientos (#32)
  * @param {object} [deps.opcionesIA] { cliente, apiKey, modelo } (para tests; por defecto el .env)
- * @param {object} [deps.almacen] almacén de períodos: de su catálogo salen los rankings y bancos que nombran las herramientas de la IA
  */
 export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {}) {
   const rutas = Router();

@@ -30,7 +30,7 @@ export function Encabezado() {
       </Sheet>
 
       <img src="/marca/logo.svg" alt="" className="size-7 shrink-0 lg:hidden" />
-      <p className="truncate font-semibold lg:hidden">{NOMBRE_APP}</p>
+      <p className="hidden truncate font-semibold sm:block lg:hidden">{NOMBRE_APP}</p>
 
       <div className="ml-auto flex items-center gap-2">
         <PanelAsistente />
