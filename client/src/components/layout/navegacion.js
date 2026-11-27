@@ -1,5 +1,6 @@
 import {
   ArrowLeftRightIcon,
+  ClipboardCheckIcon,
   FileDownIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
@@ -16,6 +17,7 @@ export const SECCIONES = [
   { ruta: '/comparar', nombre: 'Comparar períodos', icono: ArrowLeftRightIcon, guia: 'global.menu-comparar', opcion: 'comparar_periodos' },
   { ruta: '/reportes', nombre: 'Reportes', icono: FileDownIcon, guia: 'global.menu-reportes' },
   { ruta: '/calidad', nombre: 'Calidad de datos', icono: ShieldCheckIcon, guia: 'global.menu-calidad' },
+  { ruta: '/verificacion', nombre: 'Verificación del jurado', icono: ClipboardCheckIcon, guia: 'global.menu-verificacion' },
   { ruta: '/admin', nombre: 'Administración', icono: SettingsIcon, guia: 'global.menu-admin', opcion: 'cargar_periodo' },
 ]
 

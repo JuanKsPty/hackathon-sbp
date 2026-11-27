@@ -14,6 +14,7 @@ import NoEncontrada from '@/paginas/NoEncontrada.jsx'
 import Panel from '@/paginas/Panel.jsx'
 import Rankings from '@/paginas/Rankings.jsx'
 import Reportes from '@/paginas/Reportes.jsx'
+import Verificacion from '@/paginas/Verificacion.jsx'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
                   <Route path="comparar" element={<Comparar />} />
                   <Route path="reportes" element={<Reportes />} />
                   <Route path="calidad" element={<Calidad />} />
+                  <Route path="verificacion" element={<Verificacion />} />
                   <Route path="admin" element={<Admin />} />
                   <Route path="asistente" element={<Asistente />} />
                   <Route path="*" element={<NoEncontrada />} />

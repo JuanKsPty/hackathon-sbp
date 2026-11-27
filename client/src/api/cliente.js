@@ -129,6 +129,10 @@ export const indicadores = ({ periodo, ranking } = {}, opciones) =>
 export const movimientosDescomposicion = ({ desde, hasta, ranking, banco, evidencia } = {}, opciones) =>
   pedir('/movimientos/descomposicion', { desde, hasta, ranking, banco, evidencia: evidencia ? 'true' : undefined }, opciones)
 
+// contracts/verificacion.json (#63): un dato de cada punto de la sección 11.1 con sus chequeos.
+// periodo (puntos 2 a 5; por defecto el último) y banco acotan los datos; los chequeos usan todos los bancos.
+export const verificacion = ({ periodo, banco } = {}, opciones) => pedir('/verificacion', { periodo, banco }, opciones)
+
 // Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
 // para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)
