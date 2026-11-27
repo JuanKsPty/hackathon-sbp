@@ -1,0 +1,91 @@
+// Catálogo del agente guía (#72): elementos de la app que la IA puede señalar con el cursor.
+// Es la misma lista de contracts/guia.md (un test verifica que coincidan). Cada elemento sabe en qué
+// ruta está y, si es de un perfil en particular, qué opción de perfil necesita (middleware/perfiles.js).
+import { OPCIONES } from '../middleware/perfiles.js';
+
+const el = (guia, ruta, descripcion, opcion = null) => ({ guia, ruta, descripcion, opcion });
+
+export const ELEMENTOS_GUIA = [
+  // Global (layout): la ruta null significa "en cualquier página".
+  el('global.menu-panel', null, 'Enlace del menú a Panel'),
+  el('global.menu-rankings', null, 'Enlace del menú a Rankings'),
+  el('global.menu-comparar', null, 'Enlace del menú a Comparar períodos', 'comparar_periodos'),
+  el('global.menu-reportes', null, 'Enlace del menú a Reportes'),
+  el('global.menu-calidad', null, 'Enlace del menú a Calidad de datos'),
+  el('global.menu-admin', null, 'Enlace del menú a Administración', 'cargar_periodo'),
+  el('global.selector-perfil', null, 'Selector de perfil'),
+  el('global.selector-periodo', null, 'Selector de período'),
+  el('global.selector-tema', null, 'Tema claro, oscuro o sistema'),
+  el('global.barra-fuente', null, 'Fuente, período y aviso de datos ficticios'),
+  el('global.abrir-asistente', null, 'Botón que abre el asistente IA'),
+  // Panel
+  el('panel.indicadores', '/', 'Indicadores del período: universo válido, saldo total y reconciliaciones'),
+  el('panel.lideres', '/', 'Líder de cada ranking'),
+  el('panel.movimientos', '/', 'Movimientos significativos del último período', 'comparar_periodos'),
+  el('panel.explicaciones', '/', 'Explicación de los movimientos', 'comparar_periodos'),
+  // Rankings
+  el('rankings.selector-ranking', '/rankings', 'Selector de los 6 rankings'),
+  el('rankings.filtro-banco', '/rankings', 'Filtro por banco'),
+  el('rankings.filtro-subactividad', '/rankings', 'Filtro por subactividad'),
+  el('rankings.tabla', '/rankings', 'Tabla del ranking: posición, saldo, total de cartera y ponderación'),
+  el('rankings.grafico', '/rankings', 'Gráfico de saldos por banco'),
+  el('rankings.desglose-subactividades', '/rankings', 'Desglose por subactividad, incluida Tarjeta en CONSUMO'),
+  el('rankings.descargar', '/rankings', 'Descargar el ranking en CSV'),
+  // Comparar períodos
+  el('comparar.selector-desde', '/comparar', 'Período inicial', 'comparar_periodos'),
+  el('comparar.selector-hasta', '/comparar', 'Período final', 'comparar_periodos'),
+  el('comparar.selector-ranking', '/comparar', 'Ranking a comparar', 'comparar_periodos'),
+  el('comparar.tabla-movimientos', '/comparar', 'Tabla de movimientos: cambio de posición y de saldo', 'comparar_periodos'),
+  el('comparar.grafico-posiciones', '/comparar', 'Evolución de posiciones entre períodos', 'comparar_periodos'),
+  el('comparar.descomposicion', '/comparar', 'Por qué se movió el saldo: préstamos nuevos, que salen y amortización', 'comparar_periodos'),
+  el('comparar.bancos', '/comparar', 'Comparar 2 bancos lado a lado', 'comparar_entidades'),
+  // Reportes
+  el('reportes.descarga-rankings', '/reportes', 'Descarga del entregable 2: rankings'),
+  el('reportes.descarga-subactividades', '/reportes', 'Descarga del entregable 3: subactividades'),
+  el('reportes.descarga-calidad', '/reportes', 'Descarga del entregable 4: calidad E1–E4'),
+  el('reportes.descarga-movimientos', '/reportes', 'Descarga del entregable 5: movimientos', 'comparar_periodos'),
+  el('reportes.personalizado', '/reportes', 'Reporte personalizado', 'reportes_personalizados'),
+  // Calidad de datos
+  el('calidad.cascada', '/calidad', 'Exclusiones E1–E4 y universo local válido'),
+  el('calidad.reconciliaciones', '/calidad', 'Reconciliaciones 1, 2, 3 y unicidad'),
+  el('calidad.alertas', '/calidad', 'Alertas por tipo'),
+  el('calidad.excluidas', '/calidad', 'Filas excluidas con su motivo'),
+  // Administración
+  el('admin.subir-archivo', '/admin', 'Subir un AT03', 'cargar_periodo'),
+  el('admin.resultado-carga', '/admin', 'Resultado de la carga: E1–E4, universo y cambios de ranking', 'cargar_periodo'),
+  el('admin.regla-significativo', '/admin', 'Regla de movimiento significativo', 'administrar_parametros'),
+  el('admin.catalogos', '/admin', 'Estado de los catálogos', 'administrar_catalogos'),
+  el('admin.bitacora', '/admin', 'Registro de operaciones', 'ver_bitacora'),
+  // Asistente IA (panel lateral, en cualquier página)
+  el('asistente.pregunta', null, 'Campo para escribir la pregunta al asistente'),
+  el('asistente.fuentes', null, 'Consultas que usó la IA para responder'),
+];
+
+const POR_GUIA = new Map(ELEMENTOS_GUIA.map((e) => [e.guia, e]));
+
+function puedeVer(elemento, perfil) {
+  if (!elemento.opcion) return true;
+  return OPCIONES.find((o) => o.opcion === elemento.opcion)?.perfiles.includes(perfil) ?? false;
+}
+
+/** Elementos que el perfil puede ver (la IA solo puede señalar estos). */
+export function elementosPara(perfil = 'publico') {
+  return ELEMENTOS_GUIA.filter((e) => puedeVer(e, perfil));
+}
+
+/**
+ * Valida los pasos que propone la IA y les agrega la ruta desde el catálogo (la IA no elige rutas).
+ * @returns {{ ok: true, pasos } | { ok: false, errores: string[] }}
+ */
+export function validarPasos(pasos, perfil = 'publico') {
+  if (!Array.isArray(pasos) || pasos.length === 0) return { ok: false, errores: ['pasos debe ser una lista con al menos un paso.'] };
+  const errores = [];
+  const validos = pasos.map((paso, i) => {
+    const elemento = POR_GUIA.get(paso?.guia);
+    if (!elemento) errores.push(`Paso ${i + 1}: "${paso?.guia}" no existe en el catálogo de la guía.`);
+    else if (!puedeVer(elemento, perfil)) errores.push(`Paso ${i + 1}: "${paso.guia}" no está disponible para el perfil ${perfil}.`);
+    if (typeof paso?.texto !== 'string' || paso.texto.trim() === '') errores.push(`Paso ${i + 1}: falta el texto.`);
+    return elemento ? { ruta: elemento.ruta, guia: elemento.guia, texto: String(paso.texto ?? '').trim() } : null;
+  });
+  return errores.length ? { ok: false, errores } : { ok: true, pasos: validos };
+}
