@@ -37,8 +37,8 @@ SALIDA = AQUI / "deck.pptx"
 # y `cd server && npm run test:cobertura`. Si cambian, se actualizan aquí y se vuelve a generar.
 # ---------------------------------------------------------------------------------------------
 CIFRAS = {
-    "pruebas_server": "366",
-    "pruebas_client": "73",
+    "pruebas_server": "374",
+    "pruebas_client": "103",
     "cobertura_lineas": "93 %",
     "cobertura_ramas": "90 %",
     "cobertura_funciones": "93 %",
@@ -49,7 +49,8 @@ URL_INTERNA = "https://interno.sbp.juank.tech"
 URL_REPO = "github.com/JuanKsPty/hackathon-sbp"
 AVISO = "Datos ficticios · Uso informativo, no opinión formal de la SBP"
 
-# Paleta D (la misma de la app y de los fondos de Higgsfield).
+# Paleta D (índigo y dorado), la de los fondos de Higgsfield. La app pasó a la paleta E+ (azul claro) y al
+# logo de la SBP (#154); el deck conserva la suya.
 INDIGO = "211E75"
 INDIGO2 = "2E2B86"
 ORO = "D2B26A"
@@ -488,7 +489,7 @@ def lamina_propuesta(prs, d):
         ("1", "Calcular", "Un motor determinista arma los rankings desde los archivos, sin cifras escritas a mano."),
         ("2", "Comparar", "Movimientos de posición entre períodos, con una regla configurable."),
         ("3", "Explicar", "La IA consulta y redacta, con un verificador de números. Nunca calcula."),
-        ("4", "Verificar", "Un modo del jurado muestra los 6 puntos de la sección 11.1 con un clic."),
+        ("4", "Verificar", "Una pantalla del jurado muestra los 6 puntos de la sección 11.1 con sus chequeos."),
     ]
     ancho, hueco = 2.85, 0.25
     for i, (n, titulo, texto) in enumerate(columnas):
@@ -515,7 +516,7 @@ La propuesta se resume en cuatro verbos.
 Calcular: el motor lee los archivos y arma los 6 rankings de los 12 bancos. No hay saldos ni posiciones escritos en el código (R2).
 Comparar: entre períodos consecutivos, con una regla de movimiento significativo que se configura.
 Explicar: la IA consulta y redacta, pero un verificador comprueba que cada número exista en la respuesta del motor.
-Verificar: un Modo verificación pensado para el jurado, con los seis puntos de la sección 11.1.
+Verificar: una pantalla de Verificación del jurado, con los seis puntos de la sección 11.1 y sus chequeos.
 
 Las cifras de abajo son las del reto: 12 bancos, 6 rankings, 22 subactividades; y 3 perfiles. Corre en local, como pide la lámina 7 del reto, y además la publicamos en {URL_PUBLICA}.
 """)
@@ -525,12 +526,12 @@ Las cifras de abajo son las del reto: 12 bancos, 6 rankings, 22 subactividades; 
 def lamina_criterios(prs, d):
     L = Lamina(prs, d["contenido"], 4, "Cómo cumplimos cada criterio de la sección 11", "criterios")
     filas = [
-        ("1. Exactitud de datos y rankings", "25", "Calidad E1–E4, rankings, regla SB21 y reconciliaciones; Modo verificación"),
+        ("1. Exactitud de datos y rankings", "25", "Calidad E1–E4, rankings, regla SB21 y reconciliaciones; Verificación del jurado"),
         ("2. Funcionalidad de la plataforma", "15", "Panel, Rankings, Comparar, Reportes y 3 perfiles con menú propio"),
         ("3. Automatización y comparación", "15", "Cargar un período y recalcular, regla configurable, explicación y correo con Zapier"),
         ("4. Usabilidad y experiencia", "15", "Fuente, período y aviso de datos ficticios siempre visibles; errores claros"),
         ("5. Calidad técnica", "10", "React + Node.js, login y 403 por perfil, pruebas con node:test, CI y README"),
-        ("6. Innovación", "10", "Morosidad, concentración y vencimientos; cursor guía; MCP remoto; PWA"),
+        ("6. Innovación", "10", "Morosidad, concentración y vencimientos; cursor guía; MCP remoto; PWA (sitio público)"),
         ("7. Presentación y demostración", "10", "Demo en vivo, guion de la demo y todos explican el código"),
     ]
     y, alto, hueco = 1.15, 0.6, 0.07
@@ -553,7 +554,7 @@ def lamina_criterios(prs, d):
 [Juan · 40 s]
 Esta lámina es nuestro mapa contra la planilla del jurado: los mismos siete criterios y sus puntos, y dónde se ve cada uno.
 
-Lo más pesado es la exactitud, 25 puntos: por eso hicimos una página de Calidad con E1 a E4 y las reconciliaciones, y un Modo verificación que muestra un dato de cada uno de los seis puntos de la sección 11.1.
+Lo más pesado es la exactitud, 25 puntos: por eso hicimos una página de Calidad con E1 a E4 y las reconciliaciones, y una pantalla de Verificación del jurado que muestra un dato de cada uno de los seis puntos de la sección 11.1.
 
 En funcionalidad están los módulos de la lámina 5 del reto y los tres perfiles. En automatización, la carga de un período nuevo y la comparación. En calidad técnica, pruebas, CI, el login del sitio interno y el control de acceso por perfil en el servidor.
 
@@ -572,7 +573,7 @@ def lamina_arquitectura(prs, d):
             align="r", nombre="Etiqueta código")
     # Navegador
     L.caja_texto(0.6, 2.2, 1.45, 2.55, [P("Navegador", bold=True, size=15, align="c", after=2),
-                                         P("PWA instalable", size=13, align="c")],
+                                         P("PWA en el sitio público", size=13, align="c")],
                  relleno=INDIGO2, borde=None, color=BLANCO, anchor="m", margen=0.1, nombre="Navegador")
     L.flecha(2.05, 2.5, 2.4, 2.5, nombre="Navegador a sitio público")
     L.flecha(2.05, 4.45, 2.4, 4.45, nombre="Navegador a sitio interno")
@@ -652,14 +653,14 @@ def lamina_demo(prs, d):
     L.slide.placeholders[1].text = "Local (R1), con julio y agosto cargados. Septiembre se carga en vivo."
     L.slide.placeholders[1].name = "Subtítulo"
     pasos = [
-        ("Perfiles y login", "Sitio público y sitio interno"),
+        ("Perfiles y login", "Dashboard público e inicio de sesión"),
         ("Cargar septiembre", "De julio y agosto a tres períodos"),
-        ("Panel", "Líderes, movimientos e indicadores"),
+        ("Panel", "Dashboard del interno: gráficas y movimientos"),
         ("Rankings", "Filtros, gráfico y regla SB21"),
         ("Calidad", "E1–E4 y reconciliaciones"),
         ("Comparar", "Posiciones, descomposición y 2 bancos"),
-        ("Modo verificación", "Los 6 puntos de la sección 11.1"),
-        ("Asistente IA", "Una pregunta y el cursor guía"),
+        ("Verificación del jurado", "Los 6 puntos de la sección 11.1"),
+        ("Asistente IA", "Una pregunta y el cursor que hace clic"),
         ("Reportes", "Descargas de los entregables"),
     ]
     ancho, alto, hx, hy = 3.85, 1.15, 0.3, 0.15
@@ -675,7 +676,9 @@ def lamina_demo(prs, d):
 [Todos · 10 min. El guion con los clics exactos está en presentacion/guion.md]
 Aquí pasamos al navegador. Antes de esta lámina, la app ya está corriendo en local con solo julio y agosto cargados (R1).
 
-Orden: perfiles, con el sitio público y el sitio interno con login; cargar septiembre en el interno y ver cómo cambian los rankings; Panel; Rankings con filtros y gráfico; Calidad; Comparar; Modo verificación; Asistente IA con el cursor guía; y Reportes con las descargas.
+Orden: perfiles, con el dashboard del sitio público y el sitio interno con login; cargar septiembre en el interno y ver cómo cambian los rankings; el Panel del interno, que es un dashboard de gráficas según el perfil; Rankings con período, filtros y gráfico; Calidad; Comparar; Verificación del jurado; Asistente IA, el botón de arriba a la derecha, con el cursor que hace clic en la pantalla; y Reportes con las descargas y los correos.
+
+Alternativa sin PowerPoint: la presentación web, en /presentacion del sitio público, con las cifras en vivo (guion, sección Presentación web).
 
 Plan B si falla la red o la IA: seguimos en local y usamos las exportaciones CSV (guion, sección Plan B).
 """)
@@ -863,7 +866,7 @@ def lamina_ia(prs, d):
         ("Agente", "7 herramientas de solo lectura", LAVANDA, INDIGO),
         ("API del motor", "la única fuente de cifras", INDIGO, BLANCO),
         ("Verificador", "cada número debe existir", LAVANDA, INDIGO),
-        ("Respuesta", "con las consultas que usó", LAVANDA, INDIGO),
+        ("Respuesta", "corta, con su gráfico", LAVANDA, INDIGO),
     ]
     ancho, hueco = 2.1, 0.4125
     for i, (titulo, sub, relleno, color) in enumerate(cadena):
@@ -876,11 +879,11 @@ def lamina_ia(prs, d):
             L.flecha(x + ancho + 0.03, 1.85, x + ancho + hueco - 0.03, 1.85, nombre="Flecha cadena")
     tarjetas = [
         ("Consulta", "Pregunta por rankings, calidad o movimientos. El agente consulta los endpoints del motor "
-                     "como herramientas y muestra qué consultó."),
+                     "como herramientas y responde en una frase, con su gráfico."),
         ("Explicación", "Cada movimiento significativo tiene su frase por reglas. Claude la redacta mejor; "
                         "si un número no existe en el motor, se usa la frase por reglas."),
-        ("Cursor guía", "Si preguntas cómo o dónde, un cursor recorre la app y señala cada elemento. "
-                        "Solo puede señalar lo que tu perfil ve."),
+        ("Cursor guía", "Si preguntas cómo o dónde, un cursor recorre la app y hace clic en el menú, la pestaña "
+                        "y la columna. Solo toca lo que tu perfil ve."),
     ]
     ancho_t = 3.95
     for i, (titulo, texto) in enumerate(tarjetas):
@@ -896,11 +899,11 @@ def lamina_ia(prs, d):
 [Agustín · 50 s]
 La sección 9 del reto dice que la IA puede apoyar la consulta, la explicación o la exploración, pero no sustituye el cálculo. Así la usamos.
 
-Consulta: el usuario pregunta en lenguaje natural y el agente responde llamando a siete herramientas, que son simples GET a la API del motor. Muestra qué consultó, como fuentes.
+Consulta: el usuario pregunta en lenguaje natural y el agente responde llamando a siete herramientas, que son simples GET a la API del motor. La respuesta es una frase corta con solo lo que se preguntó, y un botón lleva a los gráficos. Las consultas que hizo viajan en la respuesta del API, no se listan en el chat.
 
 Explicación: cada movimiento significativo tiene una frase armada por plantillas, siempre disponible. Si hay llave, Claude la redacta mejor, pero un verificador comprueba que cada número del texto exista en la respuesta del motor; si no existe, esa frase se reemplaza por la de reglas.
 
-Cursor guía: si el usuario pregunta cómo o dónde hacer algo, el agente devuelve pasos y el front mueve un cursor por la pantalla señalando cada elemento. Solo puede señalar identificadores del perfil, y el backend los valida; la ruta la pone el catálogo, no la IA.
+Cursor guía y acciones de pantalla: el agente puede proponer acciones de una lista cerrada (ir, elegir, ordenar, resaltar y señalar) y el backend las valida contra el catálogo, los datos y el perfil; la ruta la pone el catálogo, no la IA. El front las ejecuta de dos maneras: en modo ejecutar deja la pantalla lista al instante, con un botón «Muéstrame cómo» que deshace y lo demuestra; en modo demostrar, cuando el usuario pregunta cómo o dónde, un cursor sale del botón Asistente IA y hace clic de verdad en el menú, la pestaña y la columna. Solo toca lo que el perfil ve.
 
 Y si no hay llave de IA o falla, la app sigue: explicaciones por reglas y un aviso. Hay un límite de pedidos para no gastar la llave y una evaluación del agente con casos del jurado (siguiente lámina).
 
@@ -957,11 +960,11 @@ La evaluación del agente tiene {CIFRAS['casos_eval_agente']} casos con pregunta
 def lamina_innovacion(prs, d):
     L = Lamina(prs, d["contenido"], 13, "Innovación: más allá de los 6 rankings", "innovación")
     tarjetas = [
-        ("Indicadores extra", "Morosidad, concentración (HHI y top 3) y vencimientos. Rotulados como análisis adicional."),
+        ("Dashboards por perfil", "Gráficas del corte en cada perfil, con morosidad, concentración (HHI y top 3) y vencimientos como análisis adicional."),
         ("Descomposición", "De dónde sale cada variación de saldo: préstamos nuevos, los que salen y la amortización."),
-        ("Cursor guía y gráficos", "El chat flota sobre la pantalla. Un cursor señala cada paso y el chat dibuja los gráficos de lo preguntado."),
+        ("Cursor guía y gráficos", "El chat flota bajo el botón Asistente IA. El cursor hace clic en la pantalla y el chat muestra gráficos."),
         ("MCP remoto", "Conecta Claude por URL, de solo lectura. Público sin clave; interno con token Bearer."),
-        ("App instalable (PWA)", "Manifest y service worker: se instala en el celular."),
+        ("App instalable (PWA)", "El sitio público trae manifest y service worker: se instala desde el navegador."),
         ("API documentada", "Swagger UI en /api/docs y el documento OpenAPI en /api/openapi.json."),
     ]
     ancho, alto = 3.95, 2.55
@@ -978,15 +981,15 @@ def lamina_innovacion(prs, d):
 [Agustín · 50 s]
 Además de los 6 rankings oficiales agregamos cosas útiles, siempre rotuladas como análisis adicional para no mezclarlas con la clave.
 
-Indicadores: morosidad, concentración con el índice HHI y la participación de los tres mayores, y vencimientos. Salen del universo válido, con los tramos que trae el diccionario del AT03.
+Dashboards e indicadores: el sitio público abre en un dashboard del corte vigente con gráficas, y el interno, en un panel según el perfil. Ahí van la morosidad, la concentración con el índice HHI y la participación de los tres mayores, y los vencimientos. Salen del universo válido, con los tramos que trae el diccionario del AT03.
 
 Descomposición: para cada variación de saldo entre períodos, de dónde viene: préstamos nuevos, préstamos que salen y amortización. Suma exacta.
 
-Cursor guía y chat flotante: el asistente es un botón abajo a la derecha que abre el chat encima de la pantalla, sin cambiar de página, y el cursor guía y los gráficos salen de ahí.
+Cursor guía y chat flotante: el asistente es el botón Asistente IA, arriba a la derecha, que abre el chat debajo de él, encima de la pantalla y sin cambiar de página; el cursor y los gráficos salen de ahí.
 
 MCP remoto: se pega la URL {URL_PUBLICA}/api/mcp en Claude, como conector, y se hacen las mismas consultas de solo lectura; el sitio público siempre responde como Público, por URL, sin clave. El del sitio interno, {URL_INTERNA}/api/mcp, exige un token Bearer y responde como Analista. No hace falta instalar nada.
 
-PWA: la app se puede instalar en el celular. Y la API está documentada con Swagger en /api/docs.
+PWA: el sitio público se puede instalar desde el navegador (ya no hay botón propio). Y la API está documentada con Swagger en /api/docs.
 
 (Acciones de pantalla, #131 y #137: ir, elegir, ordenar, resaltar y señalar, cada una validada por el server contra el catálogo y el perfil. El front las ejecuta en dos modos: ejecutar, que deja la pantalla lista con "Muéstrame cómo", y demostrar, que mueve el cursor paso a paso.)
 """)
