@@ -61,7 +61,8 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
 
   if (datos?.ia_disponible === false) {
     // Sin IA, la pregunta se interpreta por reglas (#108): si pidió datos, se muestran sus gráficos.
-    if (datos.accion) return <RespuestaPorReglas accion={datos.accion} />
+    // Las reglas también pueden dejar la pantalla lista (#121): se aplica igual que con IA.
+    if (datos.accion) return <RespuestaPorReglas accion={datos.accion} pantalla={<PantallaDelMensaje datos={datos} />} />
     return (
       <Burbuja icono={BotOffIcon}>
         <p className="font-medium">La IA no está disponible</p>
@@ -69,6 +70,7 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
         <p className="text-muted-foreground">
           Igual puedo mostrarte gráficos: pide un informe, un ranking, una comparación de períodos o cómo va un banco.
         </p>
+        <PantallaDelMensaje datos={datos} />
       </Burbuja>
     )
   }
@@ -81,6 +83,7 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
           {datos?.motivo ?? 'Prueba con una pregunta más concreta (un ranking, un banco o un período).'}
         </p>
         <ResumenAccion accion={datos?.accion} />
+        <PantallaDelMensaje datos={datos} />
         <FuentesConsultadas consultas={datos?.consultas} guia={guiaFuentes} />
       </Burbuja>
     )
@@ -107,7 +110,7 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
 }
 
 // Sin IA: la frase fija que arma el server con lo que se muestra (no trae cifras del motor).
-function RespuestaPorReglas({ accion }) {
+function RespuestaPorReglas({ accion, pantalla }) {
   return (
     <Burbuja icono={ChartColumnIcon}>
       <p>{accion.resumen}</p>
@@ -122,6 +125,7 @@ function RespuestaPorReglas({ accion }) {
         </Badge>
         {accion.graficos?.length > 0 && <BotonVerGraficos />}
       </div>
+      {pantalla}
     </Burbuja>
   )
 }
