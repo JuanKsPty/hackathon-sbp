@@ -97,7 +97,10 @@ test('señalar: cualquier elemento de la guía visible para el perfil', () => {
   assert.deepEqual(validarAccion({ tipo: 'señalar', control: 'rankings.grafico', texto: 'Aquí ves los saldos.' }, { contexto: c }), {
     ok: true, accion: { tipo: 'señalar', control: 'rankings.grafico', ruta: '/rankings', texto: 'Aquí ves los saldos.' },
   });
-  assert.equal(validarAccion({ tipo: 'señalar', control: 'global.selector-perfil' }, { contexto: c }).accion.ruta, null);
+  assert.equal(validarAccion({ tipo: 'señalar', control: 'global.selector-tema' }, { contexto: c }).accion.ruta, null);
+  // La sesión (SesionUsuario) solo existe en el sitio interno: Público no la puede señalar.
+  assert.match(validarAccion({ tipo: 'señalar', control: 'global.selector-perfil' }, { contexto: c, perfil: 'publico' }).error, /perfil publico/);
+  assert.equal(validarAccion({ tipo: 'señalar', control: 'global.selector-perfil' }, { contexto: c, perfil: 'analista' }).accion.ruta, null);
   assert.match(validarAccion({ tipo: 'señalar', control: 'admin.bitacora' }, { contexto: c, perfil: 'publico' }).error, /perfil publico/);
   assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.grafico', columna: 'Banco' }, { contexto: c }).error, /no admite "ordenar"/);
 });

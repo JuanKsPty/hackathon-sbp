@@ -309,7 +309,7 @@ export function crearDocumentoOpenApi(catalogos) {
         post: {
           tags: ['IA'],
           summary: 'MCP remoto (Streamable HTTP, sin estado): conectar Claude u otro cliente MCP por URL',
-          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. Perfil con `?perfil=` (por defecto publico). Solo acepta POST: GET y DELETE responden 405 (modo sin estado). Instrucciones en `server/src/mcp/README.md`.',
+          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. En el sitio público el perfil es siempre publico; en el interno exige `Authorization: Bearer <MCP_TOKEN>` (perfil analista). `?perfil=` solo vale en llamadas directas al API desde la misma máquina. Solo acepta POST: GET y DELETE responden 405 (modo sin estado). Instrucciones en `server/src/mcp/README.md`.',
           parameters: [{ name: 'perfil', in: 'query', required: false, schema: { type: 'string', enum: PERFILES } }],
           requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' }, example: { jsonrpc: '2.0', id: 1, method: 'tools/list' } } } },
           responses: { ...jsonOk('Respuesta JSON-RPC'), ...errores(400) },

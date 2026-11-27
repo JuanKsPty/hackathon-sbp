@@ -1,5 +1,5 @@
 // GET /api/perfil: el perfil actual, sus opciones y la lista de perfiles,
-// para que la UI arme el selector de perfil y el menú (#4).
+// para que la UI arme el menú y la sesión del sitio interno (#4, #120).
 import express from 'express';
 import { NOMBRES_PERFIL, PERFILES, opcionesDe } from '../middleware/perfiles.js';
 
