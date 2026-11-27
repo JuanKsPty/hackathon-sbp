@@ -138,8 +138,8 @@ Es el **entregable 7**: procesar un período nuevo sin tocar código. **Solo en 
 
 Sigue en la pestaña 2 (5174). Rankings es igual en los dos sitios; Calidad y Verificación son solo del sitio interno (en el público dan 404).
 
-1. Menú → **Rankings**. El **período** se elige a la derecha del título. En la tarjeta "Ranking y filtros", elige la pestaña **CONSUMO**.
-2. **Filtros:** en el filtro de banco elige uno. Después clic en otra barra del gráfico **"Saldos por banco"** (un clic en una barra filtra ese banco; otro clic lo quita). El gráfico alterna entre "Saldo de la actividad" y "Ponderación". El botón "Copiar enlace" guarda la vista: el período, el ranking y los filtros van en la dirección de la página.
+1. Menú → **Rankings**. Arriba de la página, junto al título, están el **período** y los filtros de banco y subactividad. En la tarjeta **"Ranking"**, elige la pestaña **CONSUMO** (las pestañas van en la misma línea del título).
+2. **Filtros:** en el filtro de banco (arriba, junto al período) elige uno. Después clic en otra barra del gráfico **"Saldos por banco"** (un clic en una barra filtra ese banco; otro clic lo quita). El gráfico alterna entre "Saldo de la actividad" y "Ponderación". La dirección de la página guarda la vista (#129): el período, el ranking y los filtros van en la URL, así que se puede copiar y compartir.
 3. **Tabla "Posición de los bancos":** clic en el encabezado de una columna para ordenarla.
 4. **Jesús.** Baja a **"Desglose por subactividad"**. Lee el aviso de la regla SB21: "los créditos personales con facilidad 07 cuentan en Tarjeta… El total de la actividad no cambia." Aparece cuántas operaciones se reclasificaron, tomado de Calidad.
 5. Clic en **"CSV de rankings"**: baja el entregable 2.
