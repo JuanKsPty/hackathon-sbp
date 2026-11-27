@@ -3,6 +3,7 @@
 // También tiene el registro de controles y el ejecutor de acciones de pantalla (#122).
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { rutaEnElSitio } from '@/components/layout/navegacion.js'
 import { crearRegistro } from './registro.js'
 import { deshacerAcciones, ejecutarAcciones } from './ejecutor.js'
 
@@ -39,7 +40,11 @@ export function AgenteProvider({ children }) {
       const resultado = await ejecutarAcciones(pantalla?.acciones ?? [], {
         registro,
         // Si el clic del cursor ya llevó a esa página, no se navega otra vez (evita una entrada repetida).
-        navegar: (destino) => window.location.pathname !== destino && navegar(destino),
+        // En el público, el Panel del catálogo (/) está en /panel (rutaEnElSitio).
+        navegar: (destino) => {
+          const ruta = rutaEnElSitio(destino)
+          if (window.location.pathname !== ruta) navegar(ruta)
+        },
         rutaActual: () => ruta.current,
         antesDe,
         signal,
@@ -53,7 +58,7 @@ export function AgenteProvider({ children }) {
 
   /** Deshace la última ejecución: restaura los controles y vuelve a la página de antes. */
   const deshacerUltima = useCallback(() => {
-    deshacerAcciones(ultima.current, { registro, navegar: (destino) => navegar(destino), rutaActual: () => ruta.current })
+    deshacerAcciones(ultima.current, { registro, navegar: (destino) => navegar(rutaEnElSitio(destino)), rutaActual: () => ruta.current })
     ultima.current = null
     setHayParaDeshacer(false)
   }, [registro, navegar])

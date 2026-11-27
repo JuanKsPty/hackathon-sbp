@@ -2,7 +2,6 @@ import {
   ArrowLeftRightIcon,
   ClipboardCheckIcon,
   FileDownIcon,
-  HouseIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
   SettingsIcon,
@@ -22,10 +21,12 @@ export const SECCIONES = [
   { ruta: '/admin', nombre: 'Administración', icono: SettingsIcon, guia: 'global.menu-admin', opcion: 'cargar_periodo' },
 ]
 
-// Menú del sitio público (#139): la ruta / es la landing (Inicio) y no hay secciones de Analista ni
-// de Administrador. Mantiene los mismos data-guia que SECCIONES.
+// Menú del sitio público: la ruta / es la landing (paginas/Inicio.jsx, a pantalla completa y fuera
+// del menú) y el Panel con los datos está en /panel. No hay secciones de Analista ni de
+// Administrador. Mantiene los mismos data-guia que SECCIONES.
+export const RUTA_PANEL_PUBLICO = '/panel'
 export const SECCIONES_PUBLICO = [
-  { ruta: '/', nombre: 'Inicio', icono: HouseIcon, guia: 'global.menu-panel' },
+  { ruta: RUTA_PANEL_PUBLICO, nombre: 'Panel', icono: LayoutDashboardIcon, guia: 'global.menu-panel' },
   ...SECCIONES.filter((s) => s.ruta !== '/' && !s.opcion),
 ]
 
@@ -38,6 +39,14 @@ const ES_INTERNO = typeof __INTERNO__ !== 'undefined' && __INTERNO__
 export function seccionesVisibles(puede, { interno = ES_INTERNO } = {}) {
   if (!interno) return SECCIONES_PUBLICO
   return SECCIONES.filter(({ opcion }) => !opcion || puede(opcion))
+}
+
+// Ruta real de una página en el sitio que se construye. El catálogo del agente guía (server) dice que
+// el Panel está en /; en el sitio público el Panel está en /panel (/ es la landing). La guía y las
+// acciones de pantalla navegan con esta función.
+export function rutaEnElSitio(ruta, { interno = ES_INTERNO } = {}) {
+  if (interno || typeof ruta !== 'string') return ruta
+  return ruta === '/' ? RUTA_PANEL_PUBLICO : ruta
 }
 
 export const NOMBRE_APP = 'Rankings de Crédito'
