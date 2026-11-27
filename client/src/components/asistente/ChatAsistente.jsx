@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { BotIcon, LoaderCircleIcon, SendHorizontalIcon, Trash2Icon } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MAX_PREGUNTA } from '@/api/ia.js'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
@@ -17,6 +16,10 @@ import { useEstadoIA } from './useEstadoIA.js'
 // Preguntas de ejemplo. Primero las que muestran gráficos (#108), con los períodos cargados; Público no
 // compara períodos ni tiene la herramienta de movimientos (contracts/ia.md).
 function sugerencias(perfil, periodo, periodos) {
+  return todasLasSugerencias(perfil, periodo, periodos).slice(0, 3)
+}
+
+function todasLasSugerencias(perfil, periodo, periodos) {
   const graficos = sugerenciasDeGraficos(perfil, periodos)
   if (graficos.length) {
     return perfil === 'publico'
@@ -40,8 +43,6 @@ export function ChatAsistente({ className, enPanel = false }) {
   const listaRef = useRef(null)
   const campoRef = useRef(null)
 
-  // Sin IA el chat sigue abierto: el server interpreta la pregunta por reglas y muestra gráficos (#108).
-  const sinIA = estado.iaDisponible === false
   const largo = texto.length
   const puedeEnviar = !pendiente && texto.trim() !== '' && largo <= MAX_PREGUNTA
 
@@ -76,12 +77,6 @@ export function ChatAsistente({ className, enPanel = false }) {
 
   const acciones = (
     <>
-      {estado.iaDisponible === true && (
-        <Badge variant="secondary" title={estado.modelo ? `Modelo: ${estado.modelo}` : undefined}>
-          IA activa
-        </Badge>
-      )}
-      {estado.iaDisponible === false && <Badge variant="outline">IA no disponible</Badge>}
       {mensajes.length > 0 && (
         <Button variant="ghost" size="icon-sm" onClick={borrarConversacion} aria-label="Borrar la conversación" title="Borrar la conversación">
           <Trash2Icon aria-hidden="true" />
@@ -96,13 +91,10 @@ export function ChatAsistente({ className, enPanel = false }) {
       role="log"
       aria-live="polite"
       aria-label="Conversación con el asistente"
-      className={cn('flex flex-col gap-4 overflow-y-auto pr-1', enPanel ? 'min-h-32 flex-1' : 'max-h-[60vh] min-h-48')}
+      className={cn('flex flex-col gap-4 overflow-y-auto pr-1', enPanel ? 'min-h-0 flex-1' : 'max-h-[60vh] min-h-48')}
     >
       {mensajes.length === 0 && !pendiente && (
         <div className="flex flex-col gap-3 py-2">
-          <p className="text-sm text-muted-foreground">
-            Pregunta por un ranking, un banco o un período. Por ejemplo:
-          </p>
           <div className="flex flex-wrap gap-2">
             {sugerencias(perfil, periodo, periodos).map((sugerencia) => (
               <Button
@@ -168,7 +160,6 @@ export function ChatAsistente({ className, enPanel = false }) {
           value={texto}
           onChange={(evento) => setTexto(evento.target.value)}
           onKeyDown={alTeclear}
-          placeholder={sinIA ? 'Sin IA: pide un informe, un ranking, una comparación o cómo va un banco.' : '¿Quién lidera COMERCIO en el último período?'}
           className="min-h-16 w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
         />
         <Button type="submit" size="icon-lg" disabled={!puedeEnviar} aria-label="Enviar pregunta" title="Enviar pregunta">
@@ -179,12 +170,12 @@ export function ChatAsistente({ className, enPanel = false }) {
           )}
         </Button>
       </div>
-      <p className="flex justify-between gap-2 text-xs text-muted-foreground">
-        <span>Enter para enviar · Shift+Enter para otra línea</span>
-        <span className={cn('cifra', largo > MAX_PREGUNTA * 0.9 && 'text-baja')}>
+      {/* El contador solo aparece cerca del límite. */}
+      {largo > MAX_PREGUNTA * 0.8 && (
+        <p className={cn('cifra text-right text-xs text-muted-foreground', largo > MAX_PREGUNTA * 0.9 && 'text-baja')}>
           {largo}/{MAX_PREGUNTA}
-        </span>
-      </p>
+        </p>
+      )}
     </form>
   )
 
@@ -204,12 +195,8 @@ export function ChatAsistente({ className, enPanel = false }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BotIcon className="size-4" aria-hidden="true" />
-          Pregúntale a los datos
+          Asistente IA
         </CardTitle>
-        <CardDescription>
-          La IA consulta la API del motor, te explica el resultado y muestra sus gráficos. No calcula: cada cifra sale
-          del motor y se verifica.
-        </CardDescription>
         <CardAction className="flex items-center gap-1">{acciones}</CardAction>
       </CardHeader>
 
