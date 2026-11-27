@@ -1,0 +1,103 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo": "20260930",
+  "archivo": "AT03_sintetico_202609.csv",
+  "analisis": "Análisis adicional: no forma parte de los 6 rankings oficiales ni de su cálculo",
+  "ranking": null,
+  "morosidad": {
+    "total": {
+      "Operaciones": 1000,
+      "Saldo": 800000.0,
+      "Monto_Vencido": 40000.0,
+      "Pct_Vencido": 5.0,
+      "Operaciones_En_Mora": 50,
+      "Saldo_En_Mora": 120000.5,
+      "Pct_Saldo_En_Mora": 15.0001,
+      "Dias_Mora_Promedio": 45.25,
+      "Tramos_Vencido": {
+        "Monto_Vencido_30_dias": 20000.0,
+        "Monto_Vencido_60_dias": 10000.0,
+        "Monto_Vencido_90_dias": 5000.0,
+        "Monto_Vencido_120_dias": 2000.0,
+        "Monto_Vencido_180_dias": 1500.0,
+        "Monto_Vencido_1_ano": 1000.0,
+        "Monto_Vencido_mas_1_ano": 500.0
+      }
+    },
+    "bancos": [
+      {
+        "Codigo_Banco": "101",
+        "Banco": "Banco Istmo",
+        "Operaciones": 80,
+        "Saldo": 60000.0,
+        "Monto_Vencido": 3000.0,
+        "Pct_Vencido": 5.0,
+        "Operaciones_En_Mora": 4,
+        "Saldo_En_Mora": 9000.0,
+        "Pct_Saldo_En_Mora": 15.0,
+        "Dias_Mora_Promedio": 30.5,
+        "Tramos_Vencido": {
+          "Monto_Vencido_30_dias": 1500.0,
+          "Monto_Vencido_60_dias": 750.0,
+          "Monto_Vencido_90_dias": 375.0,
+          "Monto_Vencido_120_dias": 150.0,
+          "Monto_Vencido_180_dias": 112.5,
+          "Monto_Vencido_1_ano": 75.0,
+          "Monto_Vencido_mas_1_ano": 37.5
+        }
+      }
+    ]
+  },
+  "vencimientos": {
+    "total": {
+      "Saldo": 800000.0,
+      "Monto_Por_Vencer": 760000.0,
+      "Monto_Vencido": 40000.0,
+      "Tramos_Por_Vencer": {
+        "Monto_por_Vencer_30_dias": 50000.0,
+        "Monto_por_Vencer_60_dias": 40000.0,
+        "Monto_por_Vencer_90_dias": 40000.0,
+        "Monto_por_Vencer_120_dias": 30000.0,
+        "Monto_por_Vencer_180_dias": 60000.0,
+        "Monto_por_Vencer_1_ano": 140000.0,
+        "Monto_por_Vencer_1_a_5_anos": 250000.0,
+        "Monto_por_Vencer_5_a_10_anos": 100000.0,
+        "Monto_por_Vencer_mas_10_anos": 50000.0
+      }
+    },
+    "bancos": [
+      {
+        "Codigo_Banco": "101",
+        "Banco": "Banco Istmo",
+        "Saldo": 60000.0,
+        "Monto_Por_Vencer": 57000.0,
+        "Monto_Vencido": 3000.0,
+        "Tramos_Por_Vencer": {
+          "Monto_por_Vencer_30_dias": 4000.0,
+          "Monto_por_Vencer_60_dias": 3000.0,
+          "Monto_por_Vencer_90_dias": 3000.0,
+          "Monto_por_Vencer_120_dias": 2000.0,
+          "Monto_por_Vencer_180_dias": 5000.0,
+          "Monto_por_Vencer_1_ano": 10000.0,
+          "Monto_por_Vencer_1_a_5_anos": 20000.0,
+          "Monto_por_Vencer_5_a_10_anos": 7000.0,
+          "Monto_por_Vencer_mas_10_anos": 3000.0
+        }
+      }
+    ]
+  },
+  "concentracion": [
+    {
+      "Ranking": "HIPOTECARIO",
+      "Total_Ranking": 500000.0,
+      "Participacion_Top3_Pct": 40.0001,
+      "HHI": 900.5,
+      "Top3": [
+        { "Posicion": 1, "Codigo_Banco": "104", "Banco": "Banco Pacifico", "Saldo_Actividad": 80000.0, "Participacion_Pct": 16.0 },
+        { "Posicion": 2, "Codigo_Banco": "101", "Banco": "Banco Istmo", "Saldo_Actividad": 65000.0, "Participacion_Pct": 13.0 },
+        { "Posicion": 3, "Codigo_Banco": "112", "Banco": "Banco Solidez", "Saldo_Actividad": 55000.5, "Participacion_Pct": 11.0001 }
+      ]
+    }
+  ]
+}
