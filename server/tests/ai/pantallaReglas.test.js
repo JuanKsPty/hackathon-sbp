@@ -1,7 +1,7 @@
 // Acciones de pantalla por reglas (#121).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { modoDe, columnaDe, ordenDe, bancoArriba, pantallaPorReglas, demostracionPorReglas } from '../../src/ai/pantallaReglas.js';
+import { modoDe, columnaDe, ordenDe, bancoArriba, pantallaPorReglas, demostracionPorReglas, comparacionPorReglas } from '../../src/ai/pantallaReglas.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { paqueteReal } from '../ayuda.js';
 
@@ -118,4 +118,22 @@ test('"¿cómo hago X?" en la app: entra a la página y señala el elemento', ()
   assert.equal(demostracionPorReglas('¿Cómo descargo el archivo de rankings?', almacen, 'publico')?.acciones.at(-1).control, 'rankings.descargar');
   // "Cargaron" no es la intención de cargar un período.
   assert.equal(demostracionPorReglas('¿Cómo veo los bancos que se cargaron en el ranking?', almacen, 'analista')?.acciones.at(-1).control, 'rankings.selector-ranking');
+});
+
+test('comparar períodos (#126): elige desde, hasta, ranking y resalta el banco; solo Analista o Administrador', () => {
+  const { catalogos, periodos } = paqueteReal();
+  const almacen = crearAlmacen(catalogos, periodos);
+  const fechas = almacen.fechas();
+  const p = comparacionPorReglas('compara agosto y septiembre en comercio para el banco 104', almacen, 'analista');
+  assert.deepEqual(p.acciones.map((a) => a.tipo), ['ir', 'elegir', 'elegir', 'elegir', 'resaltar']);
+  assert.equal(p.acciones[0].ruta, '/comparar');
+  assert.deepEqual(p.acciones.slice(1, 4).map((a) => a.valor), ['20260831', '20260930', 'COMERCIO']);
+  assert.equal(p.acciones[4].control, 'comparar.tabla-movimientos');
+  // Sin períodos: el último contra el anterior.
+  const q = comparacionPorReglas('¿cómo veo qué bancos subieron respecto al mes anterior?', almacen, 'analista');
+  assert.equal(q.modo, 'demostrar');
+  assert.deepEqual(q.acciones.slice(1, 3).map((a) => a.valor), [fechas.at(-2), fechas.at(-1)]);
+  // Público no compara períodos.
+  assert.equal(comparacionPorReglas('compara agosto y septiembre', almacen, 'publico'), null);
+  assert.equal(comparacionPorReglas('¿quién lidera comercio?', almacen, 'analista'), null);
 });

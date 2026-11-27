@@ -159,3 +159,31 @@ export function demostracionPorReglas(pregunta, almacen, perfil = 'publico') {
   const validacion = validarPantalla({ modo: 'demostrar', acciones }, { contexto: contextoPantalla(almacen), perfil });
   return validacion.ok ? validacion.pantalla : null;
 }
+
+/**
+ * Comparar períodos por reglas (#126): "compara agosto y septiembre en COMERCIO", "¿cómo se movió el
+ * banco 104 respecto al mes anterior?". Entra a Comparar, elige desde/hasta y ranking y, si nombra un
+ * banco, lo resalta. Solo para perfiles con comparar períodos (lo valida validarPantalla); si no, null.
+ */
+export function comparacionPorReglas(pregunta, almacen, perfil = 'publico') {
+  const texto = normalizar(pregunta);
+  if (!/\b(compar\w*|movimiento\w*|se movio|subio|bajo|subieron|bajaron|mes anterior|periodo anterior|entre)\b/.test(texto)) return null;
+  const contexto = contextoPantalla(almacen);
+  if (contexto.fechas.length < 2) return null;
+  const mencionados = periodosMencionados(texto, contexto.fechas, []).sort();
+  const hasta = mencionados.at(-1) ?? contexto.fechas.at(-1);
+  const desde = mencionados.length >= 2 ? mencionados[0] : contexto.fechas[contexto.fechas.indexOf(hasta) - 1];
+  if (!desde || desde >= hasta) return null;
+  const ranking = rankingMencionado(texto, contexto.rankings);
+  const banco = bancoMencionado(texto, contexto.bancos);
+
+  const acciones = [
+    { tipo: 'ir', ruta: '/comparar', texto: 'Entra a Comparar desde el menú.' },
+    { tipo: 'elegir', control: 'comparar.selector-desde', valor: desde, texto: `Elige desde ${nombrePeriodo(desde)}.` },
+    { tipo: 'elegir', control: 'comparar.selector-hasta', valor: hasta, texto: `Elige hasta ${nombrePeriodo(hasta)}.` },
+    ...(ranking ? [{ tipo: 'elegir', control: 'comparar.selector-ranking', valor: ranking, texto: `Elige el ranking ${ranking}.` }] : []),
+    ...(banco ? [{ tipo: 'resaltar', control: 'comparar.tabla-movimientos', fila: banco, texto: `Aquí está ${contexto.bancos.get(banco)}.` }] : []),
+  ];
+  const validacion = validarPantalla({ modo: modoDe(pregunta), acciones }, { contexto, perfil });
+  return validacion.ok ? validacion.pantalla : null;
+}
