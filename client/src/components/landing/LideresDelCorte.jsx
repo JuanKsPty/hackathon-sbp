@@ -1,7 +1,7 @@
 import { CrownIcon } from 'lucide-react'
 import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
 import { Badge } from '@/components/ui/badge'
-import { formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
+import { alPeriodo, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
 import { lideresDelCorte } from './datosLanding.js'
 import { TarjetaGrafico } from './TarjetaGrafico.jsx'
 
@@ -11,7 +11,7 @@ export function LideresDelCorte({ datos }) {
   const lista = rankings.datos ? lideresDelCorte(rankings.datos.rankings) : []
 
   return (
-    <TarjetaGrafico id="titulo-lideres" fuerte="Líder de cada ranking" suave={periodo ? `al ${formatearPeriodo(periodo)}` : undefined}>
+    <TarjetaGrafico id="titulo-lideres" fuerte="Líder de cada ranking" suave={periodo ? alPeriodo(periodo) : undefined}>
       <div data-guia="panel.lideres">
         <EstadoBloque
           consulta={rankings}

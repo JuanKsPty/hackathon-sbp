@@ -5,12 +5,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useAgente } from './AgenteContext.jsx'
 import { BOTON_MENU, objetivoDe, objetivosDe, seTocaDeVerdad } from './objetivo.js'
-import { esperarElemento, llevarALaVista, prefiereMenosMovimiento, rectDe } from '../guia/dom.js'
+import { centrarCursorEn, esperarElemento, prefiereMenosMovimiento, puntoDeCursor, rectDe } from '../guia/dom.js'
 
 const DemostracionContext = createContext(null)
 
 // Tiempos de cada momento (ms). Con prefers-reduced-motion, casi sin espera.
-const TIEMPOS = { entrar: 450, scroll: 380, mover: 750, tocar: 380, leer: 700, salir: 550 }
+const TIEMPOS = { entrar: 450, mover: 750, tocar: 380, leer: 700, salir: 550 }
 const tiempo = (clave) => (prefiereMenosMovimiento() ? Math.min(TIEMPOS[clave], 120) : TIEMPOS[clave])
 
 function esperar(ms, signal) {
@@ -35,9 +35,6 @@ function clicReal(el) {
   el.click()
 }
 
-// Punto donde se apoya la punta del cursor: el centro, o un poco adentro si el elemento es ancho.
-const puntoDe = (rect) => ({ top: rect.top + rect.height / 2, left: rect.left + Math.min(rect.width / 2, 40) })
-
 const INICIAL = { visible: false, fase: 'oculto', pos: null, texto: '' }
 
 export function DemostracionProvider({ children }) {
@@ -60,10 +57,11 @@ export function DemostracionProvider({ children }) {
 
       // 2. Cada acción: buscar, llevar a la vista, moverse, explicar y tocar.
       // Mueve el cursor hasta el elemento, lo "toca" y, si corresponde, le hace clic de verdad.
+      // Primero la página se desplaza para dejar el cursor en el centro de la pantalla y, ya quieta,
+      // se mide dónde quedó el elemento.
       const irYTocar = async (el, texto, clic) => {
-        llevarALaVista(el)
-        await esperar(tiempo('scroll'), signal)
-        actualizar({ fase: 'moviendo', pos: puntoDe(rectDe(el)), texto })
+        await centrarCursorEn(el, signal)
+        actualizar({ fase: 'moviendo', pos: puntoDeCursor(rectDe(el)), texto })
         await esperar(tiempo('mover'), signal)
         if (signal.aborted) return
         actualizar({ fase: 'tocando' })

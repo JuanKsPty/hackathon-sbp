@@ -28,6 +28,11 @@ export function formatearMes(fecha) {
   return `${nombreMes} ${anio}`
 }
 
+// Período en una frase: 'al 30 sep 2026', o 'en todos los períodos' para el acumulado.
+export function alPeriodo(fecha) {
+  return fecha === 'todos' ? 'en todos los períodos' : `al ${formatearPeriodo(fecha)}`
+}
+
 // Fecha de corte del período, corta: '20260930' -> 'corte al 30 sep'.
 export function formatearCorte(fecha) {
   if (fecha === 'todos') return 'acumulado de los cortes cargados'

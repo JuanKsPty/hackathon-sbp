@@ -77,7 +77,7 @@ export function EncabezadoCorte({ datos }) {
             </Link>
           </div>
           <Etiqueta icono={RadarIcon}>
-            {periodo ? `Corte vigente · ${formatearPeriodo(periodo)}` : cargando ? 'Cargando el período…' : 'Sin períodos cargados'}
+            {periodo === 'todos' ? 'Acumulado · Todos los períodos' : periodo ? `Corte vigente · ${formatearPeriodo(periodo)}` : cargando ? 'Cargando el período…' : 'Sin períodos cargados'}
           </Etiqueta>
         </div>
       </div>

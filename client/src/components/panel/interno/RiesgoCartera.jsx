@@ -1,7 +1,7 @@
 import { InfoIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '@/components/ui/chart'
-import { formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
+import { alPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { EJE } from './graficos.js'
 import { MarcoGrafico } from './MarcoGrafico.jsx'
 import { Seccion } from './Seccion.jsx'
@@ -35,7 +35,7 @@ export function RiesgoCartera({ consulta }) {
     <Seccion
       id="titulo-riesgo"
       data-guia="panel.indicadores-adicionales"
-      titulo={datos ? `Concentración y morosidad al ${formatearPeriodo(datos.periodo)}` : 'Concentración y morosidad'}
+      titulo={datos ? `Concentración y morosidad ${alPeriodo(datos.periodo)}` : 'Concentración y morosidad'}
     >
       <p className="-mt-2 flex items-start gap-2 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
         <InfoIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
