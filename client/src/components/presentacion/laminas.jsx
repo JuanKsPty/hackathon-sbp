@@ -1,7 +1,7 @@
 // Láminas de la presentación web (/presentacion). La historia va por roles y con poco lenguaje
 // técnico: el problema de cada persona (Público, Analista, Administrador), lo que la app le da a
-// cada una y por qué confiar en los números. Lo técnico queda en un anexo, para las preguntas del
-// jurado. Ninguna cifra se escribe aquí (R2): todas llegan en `datos` (useDatosPresentacion), y
+// cada una y lo que nos diferencia. Después del cierre, la arquitectura y el QR al sitio público.
+// Ninguna cifra se escribe aquí (R2): todas llegan en `datos` (useDatosPresentacion), y
 // mientras no llegan se ve "—".
 import { Link } from 'react-router'
 import {
@@ -41,7 +41,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { BloqueOscuro, Etiqueta, SeccionGris } from '@/components/marca'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { EncabezadoLamina, IconoCirculo, Lamina, SinDatos, Tarjeta } from './piezas.jsx'
+import { EncabezadoLamina, IconoCirculo, Lamina, Tarjeta } from './piezas.jsx'
 
 // '20260930' -> 'sep 2026' (sin el día: en la lámina se habla del mes).
 const mesDe = (fecha) => formatearPeriodo(fecha).replace(/^\d+\s/, '')
@@ -338,256 +338,7 @@ export function Diferencia() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 6. Por qué confiar en los números (lo técnico, en palabras simples)
-// ---------------------------------------------------------------------------------------------
-const MOTIVOS = [
-  { campo: 'E1_Duplicados', nombre: 'Repetidas', color: 'bg-chart-3' },
-  { campo: 'E2_Destino_Extranjero', nombre: 'Del extranjero', color: 'bg-chart-2' },
-  { campo: 'E3_Saldo_No_Positivo', nombre: 'Saldo en cero o negativo', color: 'bg-chart-4' },
-  { campo: 'E4_Actividad_No_Catalogada', nombre: 'Sector que no existe', color: 'bg-chart-5' },
-]
-
-export function Confianza({ datos }) {
-  const { periodos } = datos
-  const c = datos.calidadUltimo
-  const leidas = c?.Filas_Leidas
-  const reconciliado = periodos.length > 0 && periodos.every((p) => p.Reconciliaciones_OK === true)
-  const razones = [
-    'Ningún número está escrito a mano: todo sale del archivo del mes.',
-    'Cada fila que se quita tiene su motivo, y se puede revisar.',
-    reconciliado
-      ? `Todo cuadra al centavo, en los ${formatearEntero(periodos.length)} meses cargados.`
-      : 'Todo se cuadra al centavo, mes por mes.',
-    'La IA ayuda a preguntar y a explicar. Nunca calcula un ranking.',
-    'Un botón, “Verificación del jurado”, reúne todo en una pantalla.',
-  ]
-
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={ShieldCheckIcon}
-        etiqueta="Confianza"
-        fuerte="¿Por qué confiar en los números?"
-        suave="Porque cualquiera los puede comprobar."
-      />
-      <div className="grid flex-1 grid-cols-[1fr_620px] gap-6">
-        <SeccionGris className="flex flex-col gap-6 p-8 sm:p-8">
-          {!c ? (
-            <SinDatos cargando={datos.cargando && !datos.sinApi} />
-          ) : (
-            <>
-              <div className="flex flex-col gap-1">
-                <span className="text-lg text-muted-foreground">Archivo de {formatearPeriodo(c.Fecha)}</span>
-                <span className="cifra text-[44px] leading-none font-medium tracking-tight">
-                  {formatearEntero(leidas)} <span className="text-2xl font-normal text-muted-foreground">filas</span>
-                </span>
-              </div>
-              <div className="flex h-10 w-full overflow-hidden rounded-full bg-muted" role="img" aria-label="Filas válidas y filas quitadas por cada motivo">
-                <div className="h-full bg-chart-1" style={{ width: `${(c.Universo_Local_Valido / leidas) * 100}%` }} />
-                {MOTIVOS.map(({ campo, color }) => (
-                  <div key={campo} className={cn('h-full', color)} style={{ width: `${(c[campo] / leidas) * 100}%`, minWidth: c[campo] > 0 ? 6 : 0 }} />
-                ))}
-              </div>
-              <ul className="flex flex-col gap-3">
-                <li className="flex items-center justify-between gap-4 rounded-tarjeta bg-accent px-5 py-3">
-                  <span className="flex items-center gap-3 text-[21px] font-medium">
-                    <span aria-hidden="true" className="size-3 rounded-full bg-chart-1" />
-                    Válidas: entran al ranking
-                  </span>
-                  <span className="cifra text-[24px] font-medium">{formatearEntero(c.Universo_Local_Valido)}</span>
-                </li>
-                {MOTIVOS.map(({ campo, nombre, color }) => (
-                  <li key={campo} className="flex items-center justify-between gap-4 rounded-tarjeta bg-card px-5 py-3 shadow-tarjeta dark:shadow-none">
-                    <span className="flex items-center gap-3 text-[20px]">
-                      <span aria-hidden="true" className={cn('size-3 rounded-full', color)} />
-                      Quitadas · {nombre}
-                    </span>
-                    <span className="cifra text-[22px] font-medium">{formatearEntero(c[campo])}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </SeccionGris>
-        <ul className="flex flex-col justify-center gap-4">
-          {razones.map((texto) => (
-            <li key={texto} className="flex items-start gap-4 text-[24px] leading-snug">
-              <CheckCircle2Icon aria-hidden="true" className="mt-1 size-7 shrink-0 text-sube" />
-              {texto}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// Anexo técnico: separador. Lo que sigue se muestra solo si el jurado pregunta.
-// ---------------------------------------------------------------------------------------------
-export function Anexo() {
-  const temas = ['Del archivo al ranking', 'Cómo se limpia el archivo', 'Arquitectura', 'Decisiones técnicas']
-  return (
-    <div className="h-full p-6 pb-0">
-      <BloqueOscuro className="flex h-full flex-col justify-between p-16 sm:p-16">
-        <Etiqueta icono={CalculatorIcon} className="h-8 self-start px-4 text-sm">
-          Anexo técnico
-        </Etiqueta>
-        <div className="flex flex-col gap-10">
-          <h2 className="text-[84px] leading-[1.02] font-medium tracking-tight text-bloque-foreground">Cómo funciona por dentro</h2>
-          <ol className="grid grid-cols-2 gap-x-12 gap-y-4 text-[28px] text-bloque-muted">
-            {temas.map((t, i) => (
-              <li key={t} className="flex items-baseline gap-4">
-                <span className="cifra text-xl text-brillo">0{i + 1}</span>
-                {t}
-              </li>
-            ))}
-          </ol>
-        </div>
-        <p className="text-xl text-bloque-muted">Para las preguntas del jurado.</p>
-      </BloqueOscuro>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// Anexo 2. Cascada E1 a E4
-// ---------------------------------------------------------------------------------------------
-const ETAPAS = [
-  { clave: 'E1', campo: 'E1_Duplicados', nombre: 'Duplicados', regla: 'Se conserva la primera ocurrencia', color: 'bg-chart-3' },
-  { clave: 'E2', campo: 'E2_Destino_Extranjero', nombre: 'Extranjero', regla: 'Destino distinto de L', color: 'bg-chart-2' },
-  { clave: 'E3', campo: 'E3_Saldo_No_Positivo', nombre: 'Saldo', regla: 'Saldo menor o igual a 0', color: 'bg-chart-4' },
-  { clave: 'E4', campo: 'E4_Actividad_No_Catalogada', nombre: 'Actividad', regla: 'Fuera del catálogo CINU', color: 'bg-chart-5' },
-]
-
-export function Cascada({ datos }) {
-  const c = datos.calidadUltimo
-  const leidas = c?.Filas_Leidas
-  const pct = (n) => (leidas ? `${((n / leidas) * 100).toFixed(2)} %` : '—')
-  const r = c?.Reconciliaciones ?? {}
-
-  return (
-    <Lamina className="gap-9">
-      <EncabezadoLamina
-        icono={FilterIcon}
-        etiqueta="Anexo · cascada E1 a E4"
-        fuerte="Cada fila excluida cuenta una sola vez,"
-        suave="en el primer filtro que incumple."
-      />
-      {!c ? (
-        <SinDatos cargando={datos.cargando && !datos.sinApi} />
-      ) : (
-        <>
-          {/* Barra de las filas leídas: universo válido y cada exclusión, en proporción real. */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-baseline justify-between text-lg">
-              <span className="font-medium">
-                {formatearEntero(leidas)} filas leídas · corte {formatearPeriodo(c.Fecha)}
-              </span>
-              <span className="text-muted-foreground">{c.Archivo}</span>
-            </div>
-            <div className="flex h-12 w-full overflow-hidden rounded-full bg-muted" role="img" aria-label="Reparto de las filas leídas">
-              <div className="h-full bg-chart-1" style={{ width: `${(c.Universo_Local_Valido / leidas) * 100}%` }} />
-              {ETAPAS.map(({ campo, color }) => (
-                <div key={campo} className={cn('h-full', color)} style={{ width: `${(c[campo] / leidas) * 100}%`, minWidth: c[campo] > 0 ? 6 : 0 }} />
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-5 gap-4">
-            {ETAPAS.map(({ clave, campo, nombre, regla, color }) => (
-              <Tarjeta key={clave} className="gap-2 p-6">
-                <span className="flex items-center gap-2 text-base font-medium text-muted-foreground">
-                  <span aria-hidden="true" className={cn('size-3 rounded-full', color)} />
-                  {clave} · {nombre}
-                </span>
-                <span className="cifra text-[40px] leading-none font-medium tracking-tight">{formatearEntero(c[campo])}</span>
-                <span className="text-base text-muted-foreground">{regla}</span>
-                <span className="cifra text-sm text-muted-foreground">{pct(c[campo])} de las leídas</span>
-              </Tarjeta>
-            ))}
-            <Tarjeta className="gap-2 bg-accent p-6 ring-0">
-              <span className="flex items-center gap-2 text-base font-medium text-accent-foreground">
-                <span aria-hidden="true" className="size-3 rounded-full bg-chart-1" />
-                Universo local válido
-              </span>
-              <span className="cifra text-[40px] leading-none font-medium tracking-tight">{formatearEntero(c.Universo_Local_Valido)}</span>
-              <span className="text-base text-muted-foreground">Entra a los rankings</span>
-              <span className="cifra text-sm text-muted-foreground">{pct(c.Universo_Local_Valido)} de las leídas</span>
-            </Tarjeta>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge variant={c.Cascada_Cuadra ? 'sube' : 'baja'} size="pildora" className="h-9 px-4 text-base">
-              {c.Cascada_Cuadra ? <CheckCircle2Icon aria-hidden="true" /> : <TriangleAlertIcon aria-hidden="true" />}
-              leídas = E1 + E2 + E3 + E4 + universo
-            </Badge>
-            {[
-              ['R1', 'subactividades = actividad'],
-              ['R2', 'actividades = total del banco'],
-              ['R3', 'bancos = universo'],
-              ['Unicidad', 'Numero_Prestamo único'],
-            ].map(([clave, texto]) => (
-              <Badge key={clave} variant={r[clave]?.ok ? 'sube' : 'igual'} size="pildora" className="h-9 px-4 text-base">
-                {r[clave]?.ok && <CheckCircle2Icon aria-hidden="true" />}
-                {clave}: {texto}
-              </Badge>
-            ))}
-          </div>
-        </>
-      )}
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// Anexo 1. Del archivo al ranking
-// ---------------------------------------------------------------------------------------------
-export function Flujo({ datos }) {
-  const reclasificadas = datos.calidadUltimo?.Reclasificadas_Tarjeta
-  const pasos = [
-    { icono: FileSpreadsheetIcon, titulo: 'Leer y validar', texto: '61 columnas en orden. Los códigos como texto: 07 no pasa a 7.' },
-    { icono: FilterIcon, titulo: 'Excluir', texto: 'Cascada E1 a E4 por período, según el campo Fecha.' },
-    { icono: TagsIcon, titulo: 'Clasificar', texto: 'Tipo_Actividad = Codigo_CINU. Nunca datos del cliente (R3).' },
-    {
-      icono: CreditCardIcon,
-      titulo: 'Regla SB21',
-      texto:
-        typeof reclasificadas === 'number'
-          ? `Crédito personal con facilidad 07 pasa a Tarjeta: ${formatearEntero(reclasificadas)} en el último corte.`
-          : 'Crédito personal con facilidad 07 pasa a Tarjeta.',
-    },
-    { icono: ScaleIcon, titulo: 'Sumar y ponderar', texto: 'Centavos enteros y BigInt. El denominador es toda la cartera del banco.' },
-    { icono: ListOrderedIcon, titulo: 'Ordenar', texto: 'Mayor saldo primero; en empate, por Codigo_Banco. Siempre los 12 bancos.' },
-  ]
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={CalculatorIcon}
-        etiqueta="Anexo · del archivo al ranking"
-        fuerte="Seis pasos deterministas y reproducibles."
-        suave="La IA no participa en ninguno."
-      />
-      <ol className="grid flex-1 grid-cols-3 grid-rows-2 gap-5">
-        {pasos.map(({ icono, titulo, texto }, i) => (
-          <li key={titulo}>
-            <Tarjeta className="h-full gap-4 p-7">
-              <div className="flex items-center gap-4">
-                <IconoCirculo icono={icono} />
-                <span className="cifra text-base text-muted-foreground">Paso {i + 1}</span>
-              </div>
-              <h3 className="text-[28px] font-medium tracking-tight">{titulo}</h3>
-              <p className="text-[20px] leading-snug text-muted-foreground">{texto}</p>
-            </Tarjeta>
-          </li>
-        ))}
-      </ol>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// Anexo 3. Arquitectura
+// 7. Arquitectura
 // ---------------------------------------------------------------------------------------------
 function Caja({ icono: Icono, titulo, texto, className }) {
   return (
@@ -608,7 +359,7 @@ export function Arquitectura() {
     <Lamina>
       <EncabezadoLamina
         icono={ServerIcon}
-        etiqueta="Anexo · arquitectura"
+        etiqueta="Arquitectura"
         fuerte="Un client, un server y un motor puro."
         suave="Todo corre en local con Docker."
       />
@@ -657,42 +408,7 @@ export function Arquitectura() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Anexo 4. Decisiones y calidad técnica
-// ---------------------------------------------------------------------------------------------
-export function Decisiones() {
-  const filas = [
-    { icono: CalculatorIcon, titulo: 'Motor puro, sin Express ni disco', texto: 'Determinista: los mismos CSV dan siempre el mismo ranking.' },
-    { icono: ScaleIcon, titulo: 'Centavos enteros y BigInt', texto: 'Sumas exactas al centavo y ponderación sin errores de punto flotante.' },
-    { icono: FlaskConicalIcon, titulo: 'Pruebas con node:test', texto: 'Con los CSV reales, incluida la autoverificación de la sección 12.' },
-    { icono: CheckCircle2Icon, titulo: 'CI en cada PR', texto: 'Pruebas del server y del client, y el build en cada cambio.' },
-    { icono: FileSpreadsheetIcon, titulo: 'Contratos del API', texto: 'Cada ejemplo de /contracts se compara con la respuesta real.' },
-    { icono: KeyRoundIcon, titulo: 'Sin secretos en el repo', texto: 'Llaves y usuarios en el .env; el repo solo trae .env.example (R5).' },
-  ]
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={FlaskConicalIcon}
-        etiqueta="Anexo · decisiones técnicas"
-        fuerte="Resultados reproducibles"
-        suave="y cálculos que se pueden verificar."
-      />
-      <div className="grid flex-1 grid-cols-2 grid-rows-3 gap-4">
-        {filas.map(({ icono, titulo, texto }) => (
-          <Tarjeta key={titulo} className="flex-row items-center gap-5 p-6">
-            <IconoCirculo icono={icono} />
-            <div className="flex flex-col gap-1">
-              <h3 className="text-[24px] font-medium tracking-tight">{titulo}</h3>
-              <p className="text-[19px] leading-snug text-muted-foreground">{texto}</p>
-            </div>
-          </Tarjeta>
-        ))}
-      </div>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 7. Pruébalo: el QR en grande para que el jurado entre al sitio público desde el celular
+// 8. Pruébalo: el QR en grande para que el jurado entre al sitio público desde el celular
 // ---------------------------------------------------------------------------------------------
 export function Qr() {
   return (
@@ -721,7 +437,7 @@ export function Qr() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 8. Cierre
+// 6. Cierre
 // ---------------------------------------------------------------------------------------------
 export function Cierre() {
   return (
