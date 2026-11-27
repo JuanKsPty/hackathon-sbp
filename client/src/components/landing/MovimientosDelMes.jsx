@@ -3,9 +3,13 @@ import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
 import { Badge } from '@/components/ui/badge'
 import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
+import { parametros as pedirParametros, rankings as pedirRankings } from '@/api/cliente.js'
+import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
+import { useConsulta } from '@/hooks/useConsulta.js'
+import { periodoAnterior } from '@/lib/periodos.js'
 import { cn } from '@/lib/utils'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
-import { contarSignificativos, movimientosPrincipales } from './datosLanding.js'
+import { compararRankings, contarSignificativos, movimientosPrincipales } from './datosLanding.js'
 import { ordinal, tono, variacionCorta } from './formatoLanding.js'
 
 const MOTIVOS = {
@@ -19,10 +23,47 @@ const LIMITE = 6
 
 const numero = new Intl.NumberFormat('es-PA')
 
+// Junta las consultas en una con la forma de useConsulta, para EstadoBloque.
+function combinar(consultas, armar) {
+  const activas = consultas.filter((c) => c.activa)
+  const cargando = activas.some((c) => c.cargando || (!c.datos && !c.error))
+  const error = activas.find((c) => c.error)?.error ?? null
+  return {
+    cargando,
+    error,
+    datos: cargando || error ? null : armar(),
+    reintentar: () => activas.filter((c) => c.error).forEach((c) => c.reintentar()),
+  }
+}
+
+// Comparación con el corte anterior, aislada aquí para poder quitarla con una línea en Inicio.jsx.
+// GET /api/movimientos es solo de Analista y Administrador, así que se arma con datos públicos:
+// los rankings de los dos cortes (GET /api/rankings) y la regla vigente (GET /api/parametros),
+// con las mismas fórmulas que el server (datosLanding.js).
+function useMovimientosPublicos() {
+  const { periodos, periodo } = usePeriodo()
+  const anterior = periodo ? periodoAnterior(periodos, periodo) : null
+  const actual = useConsulta((o) => pedirRankings({ periodo }, o), [periodo], { activa: Boolean(periodo) })
+  const previo = useConsulta((o) => pedirRankings({ periodo: anterior }, o), [anterior], { activa: Boolean(anterior) })
+  const regla = useConsulta(pedirParametros, [], { activa: Boolean(anterior) })
+  const movimientos = combinar(
+    [
+      { ...actual, activa: Boolean(periodo) },
+      { ...previo, activa: Boolean(anterior) },
+      { ...regla, activa: Boolean(anterior) },
+    ],
+    () => ({
+      comparacion: anterior ? compararRankings(actual.datos?.rankings, previo.datos?.rankings, regla.datos?.regla_significativo) : null,
+      regla: anterior ? (regla.datos?.regla_significativo ?? null) : null,
+    }),
+  )
+  return { periodo, anterior, movimientos }
+}
+
 // Movimientos del mes: los significativos más grandes frente al corte anterior, según la regla vigente
-// del Administrador (GET /api/parametros). Se calculan con los rankings públicos de los dos períodos.
-export function MovimientosDelMes({ datos }) {
-  const { periodo, anterior, movimientos } = datos
+// del Administrador. Es la única parte del dashboard público que compara dos períodos.
+export function MovimientosDelMes() {
+  const { periodo, anterior, movimientos } = useMovimientosPublicos()
   const comparacion = movimientos.datos?.comparacion ?? null
   const principales = comparacion ? movimientosPrincipales(comparacion, LIMITE) : []
   const total = comparacion ? contarSignificativos(comparacion) : 0

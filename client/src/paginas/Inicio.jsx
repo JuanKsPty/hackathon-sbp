@@ -1,31 +1,37 @@
-import { CierreLanding } from '@/components/landing/CierreLanding.jsx'
-import { ConfianzaDatos } from '@/components/landing/ConfianzaDatos.jsx'
+import { EncabezadoCorte } from '@/components/landing/EncabezadoCorte.jsx'
+import { CalidadCorte, ComposicionCartera, Concentracion, Morosidad } from '@/components/landing/GraficasDelCorte.jsx'
 import { GraficoPrincipal } from '@/components/landing/GraficoPrincipal.jsx'
-import { HeroPeriodo } from '@/components/landing/HeroPeriodo.jsx'
 import { LideresDelCorte } from '@/components/landing/LideresDelCorte.jsx'
 import { MovimientosDelMes } from '@/components/landing/MovimientosDelMes.jsx'
 import { useDatosLanding } from '@/components/landing/useDatosLanding.js'
 import { SeccionGris } from '@/components/marca'
-import { IndicadoresAdicionales } from '@/components/panel/IndicadoresAdicionales.jsx'
 
-// Landing del sitio público (#139): dashboard del período elegido en el encabezado, en orden de
-// importancia. Toda cifra sale del API (R2). Conserva los data-guia de la ruta / (contracts/guia.md):
-// panel.indicadores (hero), panel.lideres, panel.movimientos y panel.indicadores-adicionales.
+// Dashboard del sitio público (#139): el corte vigente elegido en el encabezado, con gráficas de
+// datos del API (R2). Conserva los data-guia de la ruta / (contracts/guia.md): panel.indicadores
+// (encabezado), panel.lideres, panel.movimientos y panel.indicadores-adicionales.
 export default function Inicio() {
   const datos = useDatosLanding()
 
   return (
-    <div className="flex flex-col gap-6 sm:gap-8">
-      <HeroPeriodo datos={datos} />
-      <LideresDelCorte datos={datos} />
-      <GraficoPrincipal datos={datos} />
-      <MovimientosDelMes datos={datos} />
-      <ConfianzaDatos datos={datos} />
-      {/* Análisis adicional (morosidad, vencimientos y concentración), fuera de los 6 rankings. */}
-      <SeccionGris role="region" aria-label="Indicadores adicionales" className="min-w-0 sm:p-8">
-        <IndicadoresAdicionales />
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <EncabezadoCorte datos={datos} />
+
+      <SeccionGris className="flex min-w-0 flex-col gap-4">
+        <GraficoPrincipal datos={datos} />
+        <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+          <ComposicionCartera indicadores={datos.indicadores} />
+          <CalidadCorte calidad={datos.calidad} />
+        </div>
+        {/* Análisis adicional (concentración y morosidad), fuera de los 6 rankings oficiales. */}
+        <div data-guia="panel.indicadores-adicionales" className="grid min-w-0 gap-4 lg:grid-cols-2">
+          <Concentracion indicadores={datos.indicadores} />
+          <Morosidad indicadores={datos.indicadores} />
+        </div>
+        <LideresDelCorte datos={datos} />
       </SeccionGris>
-      <CierreLanding datos={datos} />
+
+      {/* Única sección que compara con el corte anterior: pendiente de decisión, se quita con esta línea. */}
+      <MovimientosDelMes />
     </div>
   )
 }

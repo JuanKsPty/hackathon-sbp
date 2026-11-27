@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   compararRankings,
+  composicionCartera,
   contarBancos,
   contarSignificativos,
   lideresDelCorte,
   movimientosPrincipales,
+  saldoPorSubactividad,
   urlSitioInterno,
   variacionPct,
 } from './datosLanding.js'
@@ -81,4 +83,28 @@ test('urlSitioInterno: subdominio en producción y puerto vecino en local', () =
   assert.equal(urlSitioInterno({ protocol: 'http:', hostname: 'localhost', port: '8080' }), 'http://localhost:8081/')
   assert.equal(urlSitioInterno({ protocol: 'http:', hostname: 'localhost', port: '4173' }), 'http://localhost:4174/')
   assert.equal(urlSitioInterno({ hostname: 'sbp.juank.tech' }, 'https://otro.example/'), 'https://otro.example/')
+})
+
+test('composicionCartera ordena las macroactividades por saldo y da su participación', () => {
+  const filas = composicionCartera([
+    { Ranking: 'CONSUMO', Total_Ranking: 25 },
+    { Ranking: 'HIPOTECARIO', Total_Ranking: 75 },
+  ])
+  assert.deepEqual(filas, [
+    { ranking: 'HIPOTECARIO', saldo: 75, pct: 75 },
+    { ranking: 'CONSUMO', saldo: 25, pct: 25 },
+  ])
+  assert.deepEqual(composicionCartera(undefined), [])
+})
+
+test('saldoPorSubactividad suma los bancos de cada subactividad', () => {
+  const filas = saldoPorSubactividad([
+    { Subactividad: 'Tarjeta', Saldo: 200.1 },
+    { Subactividad: 'Automovil', Saldo: 300 },
+    { Subactividad: 'Tarjeta', Saldo: 200.2 },
+  ])
+  assert.deepEqual(filas, [
+    { subactividad: 'Tarjeta', saldo: 400.3 },
+    { subactividad: 'Automovil', saldo: 300 },
+  ])
 })

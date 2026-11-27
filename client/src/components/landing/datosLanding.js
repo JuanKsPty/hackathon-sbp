@@ -146,3 +146,22 @@ export function urlSitioInterno({ protocol = 'https:', hostname = '', port = '' 
   if (!host || host.startsWith('interno.')) return `${protocol}//${host}/`
   return `${protocol}//interno.${host}${port ? `:${port}` : ''}/`
 }
+
+// ---- Gráficas del corte vigente (solo datos del período elegido) ----
+
+// Composición de la cartera válida por macroactividad, con Total_Ranking de GET /api/indicadores
+// (concentracion[]). La participación es sobre la suma de los rankings que devuelve el API.
+export function composicionCartera(concentracion) {
+  const filas = (concentracion ?? []).map((c) => ({ ranking: c.Ranking, saldo: c.Total_Ranking ?? 0 }))
+  const total = filas.reduce((suma, f) => suma + f.saldo, 0)
+  return filas
+    .map((f) => ({ ...f, pct: total > 0 ? (f.saldo / total) * 100 : null }))
+    .sort((a, b) => b.saldo - a.saldo)
+}
+
+// Saldo por subactividad de un ranking (GET /api/subactividades trae una fila por subactividad y banco).
+export function saldoPorSubactividad(filas) {
+  const totales = new Map()
+  for (const f of filas ?? []) totales.set(f.Subactividad, (totales.get(f.Subactividad) ?? 0) + (Number(f.Saldo) || 0))
+  return [...totales].map(([subactividad, saldo]) => ({ subactividad, saldo: Math.round(saldo * 100) / 100 })).sort((a, b) => b.saldo - a.saldo)
+}
