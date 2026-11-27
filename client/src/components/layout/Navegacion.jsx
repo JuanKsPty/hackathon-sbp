@@ -1,9 +1,14 @@
+import { DownloadIcon } from 'lucide-react'
 import { NavLink } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { useInstalarApp } from '@/hooks/useInstalarApp'
 import { cn } from '@/lib/utils'
 import { NOMBRE_APP, SECCIONES } from './navegacion.js'
 
 // Menú de secciones. Se usa en la barra lateral (escritorio) y dentro del Sheet (móvil).
+// Abajo muestra "Instalar app" cuando el navegador permite instalarla (#8).
 export function Navegacion({ alNavegar }) {
+  const { disponible, instalar } = useInstalarApp()
   return (
     <div className="flex h-full flex-col gap-6 bg-sidebar px-3 py-5 text-sidebar-foreground">
       <div className="flex items-center gap-3 px-2">
@@ -38,6 +43,18 @@ export function Navegacion({ alNavegar }) {
           ))}
         </ul>
       </nav>
+      {disponible && (
+        <div className="mt-auto">
+          <Button
+            variant="ghost"
+            onClick={instalar}
+            className="w-full justify-start gap-3 px-2 font-normal hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <DownloadIcon className="size-4 shrink-0" aria-hidden="true" />
+            Instalar app
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
