@@ -117,6 +117,7 @@ export default function Rankings() {
   useControlGuia('rankings.tabla', {
     ordenar: (columna, sentido) => setOrdenTabla({ clave: columna, ascendente: sentido === 'asc' }),
     resaltar: (codigo) => setDelAgente(codigo),
+    ordenActual: () => ({ columna: ordenTabla.clave, orden: ordenTabla.ascendente ? 'asc' : 'desc' }),
     estado: () => ({ orden: ordenTabla, delAgente }),
     restaurar: (anterior) => {
       setOrdenTabla(anterior?.orden ?? ORDEN_INICIAL)

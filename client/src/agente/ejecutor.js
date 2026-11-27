@@ -60,6 +60,12 @@ export async function ejecutarAcciones(acciones, { registro, navegar, rutaActual
       aplicadas.push(accion)
       continue
     }
+    // Lo mismo al ordenar por el orden que ya tiene.
+    const ordenActual = accion.tipo === 'ordenar' ? handlers.ordenActual?.() : null
+    if (ordenActual && ordenActual.columna === accion.columna && ordenActual.orden === accion.orden) {
+      aplicadas.push(accion)
+      continue
+    }
     await antesDe?.(accion, handlers)
     if (signal?.aborted) break
     HANDLER_POR_TIPO[accion.tipo]?.(handlers, accion)

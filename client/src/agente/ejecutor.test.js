@@ -124,3 +124,20 @@ test('elegir un valor que ya está elegido se salta (sin antesDe ni handler)', a
   assert.deepEqual(vistos, ['20260831'])
   assert.deepEqual(llamadas, ['elegir 20260831'])
 })
+
+test('ordenar por el orden que ya tiene se salta', async () => {
+  const registro = crearRegistro()
+  const llamadas = []
+  registro.registrar('rankings.tabla', {
+    ordenActual: () => ({ columna: 'Posicion', orden: 'asc' }),
+    ordenar: (c, o) => llamadas.push(`${c} ${o}`),
+  })
+  await ejecutarAcciones(
+    [
+      { tipo: 'ordenar', control: 'rankings.tabla', ruta: null, columna: 'Posicion', orden: 'asc' },
+      { tipo: 'ordenar', control: 'rankings.tabla', ruta: null, columna: 'Ponderacion_Pct', orden: 'desc' },
+    ],
+    { registro, navegar: () => {}, rutaActual: () => '/' },
+  )
+  assert.deepEqual(llamadas, ['Ponderacion_Pct desc'])
+})
