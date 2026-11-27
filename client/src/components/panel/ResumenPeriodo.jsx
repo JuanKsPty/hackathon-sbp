@@ -15,7 +15,7 @@ export function ResumenPeriodo() {
   if (cargando) contenido = <Cargando filas={3} />
   else if (error) contenido = <ErrorApi error={error} alReintentar={reintentar} />
   else if (!detallePeriodo)
-    contenido = <Vacio titulo="No hay períodos cargados" descripcion="Cuando el API cargue un archivo AT03 aparecerá aquí su resumen." />
+    contenido = <Vacio imagen="/marca/vacio-periodo.webp" titulo="No hay períodos cargados" descripcion="Cuando el API cargue un archivo AT03 aparecerá aquí su resumen." />
   else {
     const p = detallePeriodo
     const cifras = [

@@ -6,9 +6,12 @@ import { NOMBRE_APP, SECCIONES } from './navegacion.js'
 export function Navegacion({ alNavegar }) {
   return (
     <div className="flex h-full flex-col gap-6 bg-sidebar px-3 py-5 text-sidebar-foreground">
-      <div className="px-2">
-        <p className="text-base font-semibold text-sidebar-primary">{NOMBRE_APP}</p>
-        <p className="text-xs">AT03 sintético · 12 bancos</p>
+      <div className="flex items-center gap-3 px-2">
+        <img src="/marca/logo.svg" alt="" className="size-9 shrink-0" />
+        <div className="min-w-0">
+          <p className="text-base font-semibold text-sidebar-primary">{NOMBRE_APP}</p>
+          <p className="text-xs">AT03 sintético · 12 bancos</p>
+        </div>
       </div>
       <nav aria-label="Secciones">
         <ul className="flex flex-col gap-1">

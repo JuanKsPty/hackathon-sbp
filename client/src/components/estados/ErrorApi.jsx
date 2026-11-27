@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 export function ErrorApi({ error, alReintentar, titulo = 'No se pudieron cargar los datos' }) {
   const codigo = error?.codigo ?? 'ERROR_DESCONOCIDO'
   const mensaje = error?.mensaje ?? error?.message ?? 'Ocurrió un error inesperado.'
-  return (
+  const alerta = (
     <Alert variant="destructive" role="alert">
       <AlertCircleIcon aria-hidden="true" />
       <AlertTitle>{titulo}</AlertTitle>
@@ -23,5 +23,13 @@ export function ErrorApi({ error, alReintentar, titulo = 'No se pudieron cargar 
         )}
       </AlertDescription>
     </Alert>
+  )
+  // Si el API no responde, una ilustración acompaña el aviso.
+  if (codigo !== 'API_NO_DISPONIBLE') return alerta
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <img src="/marca/error-api.webp" alt="" className="w-48 max-w-full" />
+      <div className="w-full">{alerta}</div>
+    </div>
   )
 }
