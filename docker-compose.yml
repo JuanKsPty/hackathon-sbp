@@ -1,0 +1,48 @@
+# Mismo archivo para local y para Dokploy (issue #27).
+# - No publica puertos: en Dokploy el dominio apunta a sbp-client, puerto 80.
+#   En local, docker-compose.override.yml publica el client en CLIENT_PORT (8080 por defecto).
+# - El client (nginx) pasa /api/ a sbp-server:3001 por la red interna.
+# - Variables opcionales: vacías si no se definen; el server usa entonces su valor por defecto.
+#   PORT, DATA_DIR, STORAGE_DIR y PARAMETROS_FILE ya vienen fijadas en server/Dockerfile.
+
+services:
+  sbp-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    volumes:
+      - sbp-storage:/app/storage
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/api/salud"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  sbp-client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      sbp-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  # Períodos cargados, bitácora y parámetros: sobreviven a los redeploys.
+  sbp-storage:

@@ -1,0 +1,14 @@
+# Lo que no entra al contexto de build de las imágenes (contexto = raíz del repo).
+node_modules
+**/node_modules
+.git
+info
+storage
+.env
+.env.*
+client/dist
+server/salidas
+*.log
+**/*.log
+.DS_Store
+**/.DS_Store

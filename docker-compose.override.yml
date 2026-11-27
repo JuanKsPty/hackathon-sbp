@@ -1,0 +1,6 @@
+# Solo para local: `docker compose up` lo combina con docker-compose.yml.
+# Dokploy usa solo docker-compose.yml, así que ahí no se publica ningún puerto.
+services:
+  sbp-client:
+    ports:
+      - "${CLIENT_PORT:-8080}:80"
