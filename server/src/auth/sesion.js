@@ -1,5 +1,7 @@
 // Sesión del sitio interno: cookie HttpOnly con un token firmado (HMAC-SHA256), sin estado en el server.
-// Token: <payload base64url>.<firma base64url>, payload = { u, n, p, exp }.
+// Token: <payload base64url>.<firma base64url>, payload = { u, n, p, exp, iat }.
+// iat (milisegundos) sirve para cortar las sesiones emitidas antes de un cambio del usuario
+// (auth/revocaciones.js).
 // La llave es SESION_SECRETO (.env o Dokploy). Si falta, se genera una al arrancar: funciona, pero las
 // sesiones se pierden al reiniciar el server.
 import crypto from 'node:crypto';
@@ -23,11 +25,12 @@ const firmar = (texto) => crypto.createHmac('sha256', llave()).update(texto).dig
 
 export function crearToken({ usuario, nombre, perfil }, ahora = Date.now()) {
   const exp = Math.floor(ahora / 1000) + HORAS * 3600;
-  const payload = Buffer.from(JSON.stringify({ u: usuario, n: nombre, p: perfil, exp })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ u: usuario, n: nombre, p: perfil, exp, iat: ahora })).toString('base64url');
   return `${payload}.${firmar(payload)}`;
 }
 
-// Devuelve { usuario, nombre, perfil } o null si el token no es válido o venció.
+// Devuelve { usuario, nombre, perfil, emitido } o null si el token no es válido o venció.
+// emitido es 0 en los tokens de antes de que existiera iat.
 export function leerToken(token, ahora = Date.now()) {
   if (typeof token !== 'string') return null;
   const [payload, firma] = token.split('.');
@@ -39,7 +42,7 @@ export function leerToken(token, ahora = Date.now()) {
     const datos = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     if (!datos.exp || datos.exp * 1000 < ahora) return null;
     if (!['analista', 'admin'].includes(datos.p)) return null;
-    return { usuario: datos.u, nombre: datos.n, perfil: datos.p };
+    return { usuario: datos.u, nombre: datos.n, perfil: datos.p, emitido: Number(datos.iat) || 0 };
   } catch {
     return null;
   }

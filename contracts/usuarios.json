@@ -1,0 +1,8 @@
+{
+  "fuente": "archivo",
+  "usuarios": [
+    { "usuario": "admin.demo", "nombre": "Administración (demo)", "perfil": "admin", "activo": true, "creado_en": "2026-11-27T15:10:02.118Z", "ultimo_acceso": "2026-11-27T15:42:10.512Z", "origen": "archivo", "editable": true },
+    { "usuario": "ana.analista", "nombre": "Ana Analista", "perfil": "analista", "activo": true, "creado_en": "2026-11-27T15:12:40.903Z", "ultimo_acceso": null, "origen": "archivo", "editable": true },
+    { "usuario": "respaldo", "nombre": "respaldo", "perfil": "admin", "activo": true, "creado_en": null, "ultimo_acceso": null, "origen": "env", "editable": false }
+  ]
+}
