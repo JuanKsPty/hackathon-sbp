@@ -4,9 +4,9 @@
 // una vez y, si vuelve a fallar, no se muestra.
 
 import { definicionesPara } from './herramientas.js';
-import { definicionGuia, validarPasos, NOMBRE_HERRAMIENTA_GUIA } from './guia.js';
+import { definicionGuia, validarPasos, numerosDelCatalogo, NOMBRE_HERRAMIENTA_GUIA } from './guia.js';
 import { definicionGraficos, validarAccion, NOMBRE_HERRAMIENTA_GRAFICOS } from './intencion.js';
-import { extraerNumeros, verificarNumeros } from './verificador.js';
+import { verificarNumeros } from './verificador.js';
 import { crearCliente, MODELO_POR_DEFECTO } from './redaccionIA.js';
 
 export const ETIQUETA_AGENTE =
@@ -67,8 +67,9 @@ export async function preguntarAlAgente(pregunta, opciones) {
     { role: 'user', content: pregunta },
   ];
   const consultas = [];
-  // Lo que el modelo vio: resultados de herramientas y los números que escribió el usuario.
-  const fuentes = { resultados: [], pregunta: extraerNumeros(pregunta).map((n) => n.valor) };
+  // Lo que el modelo puede citar: resultados de herramientas y, si propone una guía, los números
+  // del catálogo de esos elementos. Los números que escribe el usuario no cuentan (#86, B2).
+  const fuentes = { resultados: [], catalogo: [] };
   let reintento = false;
   let guia = null; // pasos del cursor guía (#72), ya validados contra el catálogo
   let accion = null; // gráficos que se muestran en pantalla (#108), ya validados
@@ -94,7 +95,11 @@ export async function preguntarAlAgente(pregunta, opciones) {
         if (bloque.name === NOMBRE_HERRAMIENTA_GUIA) {
           // La guía no consulta la API: se valida contra el catálogo y el perfil, y se guarda.
           const validacion = validarPasos(bloque.input?.pasos, perfil);
-          if (validacion.ok) guia = { pasos: validacion.pasos };
+          if (validacion.ok) {
+            guia = { pasos: validacion.pasos };
+            // Sus descripciones ("entregable 4", "E1–E4") son citables aunque no se haya consultado nada (#86).
+            fuentes.catalogo = numerosDelCatalogo(validacion.pasos);
+          }
           resultados.push({
             type: 'tool_result',
             tool_use_id: bloque.id,

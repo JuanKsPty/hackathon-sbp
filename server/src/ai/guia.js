@@ -2,6 +2,7 @@
 // Es la misma lista de contracts/guia.md (un test verifica que coincidan). Cada elemento sabe en qué
 // ruta está y, si es de un perfil en particular, qué opción de perfil necesita (middleware/perfiles.js).
 import { OPCIONES } from '../middleware/perfiles.js';
+import { extraerNumeros } from './verificador.js';
 
 const el = (guia, ruta, descripcion, opcion = null) => ({ guia, ruta, descripcion, opcion });
 
@@ -124,4 +125,15 @@ export function validarPasos(pasos, perfil = 'publico') {
     return elemento ? { ruta: elemento.ruta, guia: elemento.guia, texto: String(paso.texto ?? '').trim() } : null;
   });
   return errores.length ? { ok: false, errores } : { ok: true, pasos: validos };
+}
+
+/**
+ * Números de las descripciones del catálogo de los elementos que señalan los pasos ("entregable 4",
+ * "E1–E4"). Son texto fijo de la app, no cifras del motor: en una pregunta solo de guía la IA no
+ * consulta datos, y sin esto el verificador descartaría una guía correcta (#86).
+ * @param {Array<{ guia: string }>} pasos pasos ya validados
+ * @returns {number[]}
+ */
+export function numerosDelCatalogo(pasos) {
+  return pasos.flatMap(({ guia }) => extraerNumeros(POR_GUIA.get(guia)?.descripcion ?? '').map((n) => n.valor));
 }

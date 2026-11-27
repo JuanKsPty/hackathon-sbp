@@ -348,3 +348,63 @@ test('#90: si una herramienta falla, el agente sigue y responde', async () => {
   assert.equal(cuerpo.verificada, true);
   assert.equal(cuerpo.consultas[0].ok, false);
 });
+
+test('#86: una guía con números del catálogo ("entregable 4", "E1–E4") se acepta sin consultar datos', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('guiar_usuario', {
+      pasos: [
+        { guia: 'global.menu-reportes', texto: 'Entra a Reportes desde el menú.' },
+        { guia: 'reportes.descarga-calidad', texto: 'Descarga el entregable 4: la calidad E1–E4.' },
+      ],
+    }),
+    responder('Te muestro dónde descargar el entregable 4, el reporte de calidad de los datos.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Dónde descargo el reporte de calidad de los datos?' }, 'analista');
+  assert.equal(cuerpo.verificada, true);
+  assert.match(cuerpo.respuesta, /entregable 4/);
+  assert.deepEqual(cuerpo.guia.pasos.map((p) => p.guia), ['global.menu-reportes', 'reportes.descarga-calidad']);
+  assert.deepEqual(cuerpo.consultas, []); // no consultó datos: los números salen solo del catálogo
+});
+
+test('#86: los números del catálogo valen solo para los elementos de la guía', async () => {
+  // "entregable 3" no está en la descripción de reportes.descarga-calidad ("entregable 4"): se descarta.
+  const cliente = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'reportes.descarga-calidad', texto: 'Descarga el entregable 3.' }] }),
+    responder('Listo.'),
+    responder('Listo.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Dónde descargo la calidad?' }, 'analista');
+  assert.equal(cuerpo.verificada, false);
+  assert.equal(cuerpo.guia, null);
+});
+
+test('#86 (B2): un número que escribe el usuario no cuenta como verificado', async () => {
+  const cliente = clienteGuionado([
+    responder('Sí, el saldo es 999,999.99.'),
+    responder('Sí, el saldo es 999,999.99.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Es cierto que el saldo es 999,999.99?' });
+  assert.equal(cuerpo.verificada, false);
+  assert.equal(cuerpo.respuesta, null);
+  assert.match(cuerpo.motivo, /números verificados/);
+  // Se le pidió corregir citando solo lo que está en los resultados.
+  assert.match(cliente.llamadas[1].messages.at(-1).content, /999,999\.99/);
+});
+
+test('#86 (B2): el número del usuario sí se puede citar si el motor también lo trae', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('listar_periodos', {}),
+    (params) => {
+      const total = ultimoResultado(params).periodos[0].Universo_Local_Valido;
+      return responder(`El universo local válido es de ${total} filas.`)();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const periodos = await (await fetch(`${base}/periodos`)).json();
+  const valor = periodos.periodos[0].Universo_Local_Valido;
+  const { cuerpo } = await preguntar(base, { pregunta: `¿Es cierto que el universo local válido es de ${valor} filas?` });
+  assert.equal(cuerpo.verificada, true);
+});
