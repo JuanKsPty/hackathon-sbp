@@ -11,6 +11,7 @@ import { rutasDeCarga } from './routes/carga.js';
 import { rutasDeIA } from './routes/ia.js';
 import { rutasDeDocumentacion } from './routes/docs.js';
 import { rutasDeIndicadores } from './routes/indicadores.js';
+import { rutasDeSuscripciones } from './routes/suscripciones.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
 
@@ -43,6 +44,7 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA }) {
   app.use('/api', rutasDeIA({ obtenerMovimientos, opcionesIA }));
   app.use('/api', rutasDeDocumentacion(almacen));
   app.use('/api', rutasDeIndicadores(almacen)); // morosidad, vencimientos y concentración: análisis adicional (#35)
+  app.use('/api', rutasDeSuscripciones(almacen)); // alertas por correo con Zapier (#7)
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.
 
   app.use(rutaNoEncontrada);

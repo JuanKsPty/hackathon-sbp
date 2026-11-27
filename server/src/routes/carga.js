@@ -81,9 +81,17 @@ export function rutasDeCarga(almacen, { obtenerMovimientos } = {}) {
         detalle: `Período ${p.Fecha} (${p.Accion})`,
       });
     }
+    // Alertas por correo y casos de seguimiento vía Zapier (#7): no hace esperar esta respuesta.
     avisarPublicacion({
       archivo: carga.archivo,
-      periodos: periodos.map((p) => ({ fecha: p.Fecha, accion: p.Accion, comparacion: p.Comparacion })),
+      catalogos: almacen.catalogos,
+      periodos: periodos.map((p, i) => ({
+        fecha: p.Fecha,
+        accion: p.Accion,
+        comparacion: p.Comparacion,
+        calidad: p.Calidad,
+        periodo: carga.periodos[i].periodo,
+      })),
     });
     res.json({ ...encabezado(), archivo: carga.archivo, periodos });
   }
