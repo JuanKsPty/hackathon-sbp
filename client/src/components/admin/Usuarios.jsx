@@ -217,7 +217,11 @@ function CampoClave({ id, valor, alCambiar }) {
       <input
         id={id}
         type="text"
-        autoComplete="new-password"
+        // Es la contraseña de OTRA persona: que el gestor de contraseñas del Administrador no la guarde.
+        autoComplete="off"
+        data-1p-ignore=""
+        data-lpignore="true"
+        data-bwignore=""
         spellCheck={false}
         className={`${CAMPO} font-mono`}
         value={valor}
