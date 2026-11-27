@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTema } from '@/contexto/TemaContext.jsx'
+import { cn } from '@/lib/utils'
 
 const OPCIONES = [
   { valor: 'claro', nombre: 'Claro', icono: SunIcon },
@@ -16,18 +17,21 @@ const OPCIONES = [
   { valor: 'sistema', nombre: 'Sistema', icono: MonitorIcon },
 ]
 
-export function SelectorTema() {
+// Tema claro, oscuro o del sistema. Vive en el bloque de perfil al pie del menú lateral, por eso su
+// menú abre hacia arriba.
+export function SelectorTema({ className }) {
   const { tema, cambiarTema } = useTema()
-  const Actual = OPCIONES.find((o) => o.valor === tema)?.icono ?? MonitorIcon
+  const actual = OPCIONES.find((o) => o.valor === tema) ?? OPCIONES[2]
+  const Actual = actual.icono
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Cambiar tema" data-guia="global.selector-tema">
+        <Button variant="ghost" size="icon" aria-label={`Tema: ${actual.nombre}. Cambiar tema`} data-guia="global.selector-tema" className={cn(className)}>
           <Actual aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent side="top" align="end">
         <DropdownMenuLabel>Tema</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={tema} onValueChange={cambiarTema}>
           {OPCIONES.map(({ valor, nombre, icono: Icono }) => (

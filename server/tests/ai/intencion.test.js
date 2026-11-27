@@ -58,7 +58,7 @@ test('"dame el informe de septiembre": rankings, movimientos contra agosto y cal
   assert.equal(accion.origen, 'reglas');
   assert.equal(accion.titulo, 'Informe de septiembre de 2026');
   assert.deepEqual(accion.avisos, []);
-  assert.match(accion.resumen, /^Este es el informe de septiembre de 2026 \(\d{8}\)/);
+  assert.equal(accion.resumen, 'Aquí está el informe de septiembre de 2026.');
 });
 
 test('variantes de la pregunta', () => {
@@ -77,6 +77,24 @@ test('variantes de la pregunta', () => {
   ];
   for (const [pregunta, esperado] of casos) {
     assert.deepEqual(resumen(interpretarPregunta(pregunta, contexto, 'analista')), esperado, pregunta);
+  }
+});
+
+test('la frase de las reglas es corta: una línea que dice qué se muestra', () => {
+  const casos = [
+    ['ranking de construcción de agosto', 'analista', 'Aquí está el ranking CONSTRUCCION de agosto de 2026.'],
+    ['muestra los rankings de agosto', 'analista', 'Aquí están los rankings de agosto de 2026.'],
+    ['compara julio y septiembre', 'analista', 'Aquí están los movimientos de julio a septiembre de 2026.'],
+    ['movimientos de comercio en agosto', 'analista', 'Aquí están los movimientos de COMERCIO de julio a agosto de 2026.'],
+    ['cómo va el banco 108', 'analista', 'Así va Banco Capital (108).'],
+    ['¿Cuántas filas se excluyeron?', 'analista', 'Aquí está la calidad de datos de septiembre de 2026.'],
+    ['dame el informe de septiembre', 'publico', 'Aquí está el informe de septiembre de 2026.'],
+    ['compara julio y septiembre', 'publico', 'Movimientos entre períodos: solo para los perfiles Analista y Administrador.'],
+  ];
+  for (const [pregunta, perfil, frase] of casos) {
+    const { resumen: texto } = interpretarPregunta(pregunta, contexto, perfil);
+    assert.equal(texto, frase, `${perfil}: ${pregunta}`);
+    assert.ok(texto.length <= 80, `${pregunta}: ${texto.length} caracteres`);
   }
 });
 
@@ -99,7 +117,7 @@ test('un mes sin datos no se cambia por otro: solo el aviso', () => {
   assert.deepEqual(accion.graficos, []);
   assert.equal(accion.periodo, null);
   assert.deepEqual(accion.avisos, ['No hay un período cargado de junio.']);
-  assert.match(accion.resumen, /Períodos disponibles/);
+  assert.equal(accion.resumen, 'No hay un período cargado de junio. Prueba con julio, agosto o septiembre.');
 });
 
 test('el primer período no tiene movimientos: se omiten con un aviso', () => {

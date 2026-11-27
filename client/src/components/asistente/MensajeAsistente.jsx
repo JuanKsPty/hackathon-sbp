@@ -14,6 +14,7 @@ import { useGuia } from '@/guia/GuiaContext.jsx'
 import { useAgente } from '@/agente/AgenteContext.jsx'
 import { useDemostracion } from '@/agente/DemostracionContext.jsx'
 import { Button } from '@/components/ui/button'
+import { traerALaVista } from './desplazar.js'
 
 // Negritas (**texto**) y viñetas simples: la IA a veces responde con algo de Markdown.
 function conNegritas(linea) {
@@ -89,14 +90,14 @@ function BotonesRespuesta({ datos }) {
 
 
 
-// Lleva a los gráficos: el último panel en pantalla (el del panel lateral, si está abierto) o la
+// Lleva a los gráficos: el último panel en pantalla (el del chat flotante, si está abierto) o la
 // página /asistente si el chat está en otro lugar.
 function BotonVerGraficos() {
   const navegar = useNavigate()
   function verGraficos() {
     const paneles = document.querySelectorAll('[data-graficos-asistente]')
     const panel = paneles[paneles.length - 1]
-    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (panel) traerALaVista(panel)
     else navegar('/asistente')
   }
   return (

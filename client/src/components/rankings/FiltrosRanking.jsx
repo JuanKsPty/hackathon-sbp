@@ -3,7 +3,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // Radix Select no admite un valor vacío: "todos" significa sin filtro.
 export const TODOS = 'todos'
 
-// Filtros de la página: banco (los 12 del catálogo) y subactividad (las del ranking elegido).
+// Filtros de la página (lám. 5): banco (los 12 del catálogo) y subactividad (las del ranking elegido).
+// El período va junto al título de la página (PeriodoDePagina), para que haya un solo selector.
 export function FiltrosRanking({ bancos, subactividades, banco, subactividad, alCambiarBanco, alCambiarSubactividad }) {
   return (
     <div className="flex flex-wrap items-end gap-3">

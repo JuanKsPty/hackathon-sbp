@@ -34,7 +34,8 @@ function todasLasSugerencias(perfil, periodo, periodos) {
 // panel lateral: trae su propio estado de IA y la conversación es compartida (conversacion.js).
 // `enPanel`: sin tarjeta y llenando el alto del contenedor (el padre debe ser una columna flex con
 // alto definido, como el panel lateral): la lista de mensajes crece y el formulario queda abajo.
-export function ChatAsistente({ className, enPanel = false }) {
+// `pie`: contenido al final de la lista de mensajes (los gráficos en el chat flotante), dentro del mismo scroll.
+export function ChatAsistente({ className, enPanel = false, pie = null }) {
   const { perfil } = usePerfil()
   const { periodo, periodos } = usePeriodo()
   const estado = useEstadoIA()
@@ -91,7 +92,8 @@ export function ChatAsistente({ className, enPanel = false }) {
       role="log"
       aria-live="polite"
       aria-label="Conversación con el asistente"
-      className={cn('flex flex-col gap-4 overflow-y-auto pr-1', enPanel ? 'min-h-0 flex-1' : 'max-h-[60vh] min-h-48')}
+      data-desplazable={enPanel ? '' : undefined}
+      className={cn('flex flex-col gap-4 overflow-y-auto overscroll-contain pr-1', enPanel ? 'min-h-0 flex-1' : 'max-h-[60vh] min-h-48')}
     >
       {mensajes.length === 0 && !pendiente && (
         <div className="flex flex-col gap-3 py-2">
@@ -142,6 +144,7 @@ export function ChatAsistente({ className, enPanel = false }) {
           Consultando el motor…
         </p>
       )}
+      {pie}
     </div>
   )
 

@@ -45,7 +45,9 @@ export default function Entrar() {
     <main className="flex min-h-svh items-center justify-center bg-muted/40 px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
-          <img src="/marca/logo.svg" alt="" className="mx-auto size-12" />
+          {/* Logo completo de la SBP: a color en tema claro y en blanco en tema oscuro. */}
+          <img src="/marca/sbp-logo.png" alt="Superintendencia de Bancos de Panamá" className="mx-auto h-20 w-auto dark:hidden" />
+          <img src="/marca/sbp-logo-blanco.png" alt="Superintendencia de Bancos de Panamá" className="mx-auto hidden h-20 w-auto dark:block" />
           <CardTitle className="text-xl">{NOMBRE_APP}</CardTitle>
           <CardDescription>Sitio interno para Analistas y Administradores. Datos ficticios.</CardDescription>
         </CardHeader>
