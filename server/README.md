@@ -57,7 +57,7 @@ Las pruebas usan `node:test` y corren sin red ni base de datos: procesan los CSV
 
 ## API
 
-**Perfiles:** cada petición lleva el header `X-Perfil` con `publico` (por defecto), `analista` o `admin`. Basta un selector de perfil; no hay contraseñas (R5). Si un perfil pide una opción que no tiene, recibe `403 PERFIL_NO_AUTORIZADO`. La tabla de opciones está en `src/middleware/perfiles.js` y en [`contracts/perfiles.md`](../contracts/perfiles.md).
+**Perfiles (#120):** el perfil lo decide el sitio. Cada nginx marca sus peticiones con `X-Sitio`. El público es siempre `publico`. En el interno, Analista o Administrador entran con su cuenta: el perfil viaja en la cookie de sesión firmada y, para clientes MCP, va un `Authorization: Bearer <MCP_TOKEN>`. El header `X-Perfil` solo vale en llamadas directas al API desde la misma máquina (el agente de IA, el MCP por stdio y las pruebas). Las cuentas están en Supabase o en `USUARIOS` del `.env`, nunca en el repo (R5). Si un perfil pide una opción que no tiene, recibe `403 PERFIL_NO_AUTORIZADO`. La tabla de opciones está en `src/middleware/perfiles.js` y en [`contracts/perfiles.md`](../contracts/perfiles.md).
 
 **Límite de pedidos de IA (#84):** `POST /api/ia/preguntar` y `GET /api/explicaciones` gastan la llave de IA, así que tienen un límite.
 - **Topes:** 10 pedidos por IP por minuto y 300 en total por hora.
@@ -88,7 +88,7 @@ Las pruebas usan `node:test` y corren sin red ni base de datos: procesan los CSV
 | IA | `GET /api/ia/estado`, `GET /api/ia/guia` | todos | [ia.md](../contracts/ia.md), [guia.md](../contracts/guia.md) |
 | | `POST /api/ia/preguntar` (agente; con límite de pedidos) | todos | [ia.md](../contracts/ia.md) |
 | | `GET /api/explicaciones` (explicación de los movimientos; con límite de pedidos) | analista, admin | [ia.md](../contracts/ia.md) |
-| MCP | `POST /api/mcp` (MCP remoto, sin estado; perfil con `?perfil=`) | según `perfil` | [`src/mcp/README.md`](src/mcp/README.md) |
+| MCP | `POST /api/mcp` (MCP remoto, sin estado) | público por URL; interno con `Authorization: Bearer <MCP_TOKEN>` | [`src/mcp/README.md`](src/mcp/README.md) |
 
 Sin `periodo`, las consultas usan el último período cargado. `/api/calidad` y las descargas son la excepción: traen todos los períodos.
 

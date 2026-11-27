@@ -44,7 +44,8 @@ export function opcionesDe(perfil) {
 const LIBRES_SIN_SESION = new Set(['/salud', '/perfil', '/sesion', '/ia/estado']);
 const METODOS_SEGUROS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-const esLoopback = (req) => {
+// También lo usa el MCP (routes/mcp.js) para aceptar ?perfil= solo desde la misma máquina.
+export const esLoopback = (req) => {
   const ip = req.socket?.remoteAddress ?? '';
   return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
 };

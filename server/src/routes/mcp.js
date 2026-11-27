@@ -7,7 +7,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { crearServidorMcp } from '../mcp/servidor.js';
 import { crearEjecutor } from '../ai/herramientas.js';
 import { urlApiInterna } from '../ai/apiInterna.js';
-import { PERFILES } from '../middleware/perfiles.js';
+import { PERFILES, esLoopback } from '../middleware/perfiles.js';
 import { ErrorApi } from './errores.js';
 
 // API que consultan las herramientas: la del propio server (mismo contenedor), no la URL pública.
@@ -16,11 +16,13 @@ const apiInternaPorDefecto = urlApiInterna;
 // En los sitios desplegados el perfil sale del sitio: el público siempre es Público y el interno exige
 // Authorization: Bearer MCP_TOKEN (perfil Analista). ?perfil= solo vale en llamadas directas al API
 // (sin X-Sitio, desde la misma máquina), por ejemplo en pruebas locales.
-function perfilDe(req) {
+export function perfilDe(req) {
   // En los sitios (nginx) el perfil sale de la sesión o del token MCP, nunca de la URL.
   if (req.sitio === 'publico' || req.sitio === 'interno') return req.perfil ?? 'publico';
   const valor = req.query.perfil;
-  if (valor === undefined) return req.perfil ?? 'publico';
+  // Desde otra máquina (por ejemplo, npm run dev escuchando en la red) ?perfil= no vale: queda el
+  // perfil que ya resolvió el middleware (Público, o el de la sesión o el token).
+  if (valor === undefined || !esLoopback(req)) return req.perfil ?? 'publico';
   const perfil = String(valor).trim().toLowerCase();
   if (!PERFILES.includes(perfil)) {
     throw new ErrorApi(400, 'PARAMETRO_INVALIDO', `perfil debe ser ${PERFILES.join(', ')} (llegó "${valor}").`);
