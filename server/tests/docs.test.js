@@ -41,7 +41,9 @@ test('trae los ejemplos de /contracts', () => {
 });
 
 test('cada GET documentado responde 200 con el tipo de contenido documentado', async () => {
-  const rutas = Object.entries(documento.paths).filter(([, operaciones]) => operaciones.get);
+  // Los enlaces de suscripción exigen un token del correo: se prueban en tests/suscripciones.test.js.
+  const conParametroObligatorio = (get) => (get.parameters ?? []).some((p) => p.required === true);
+  const rutas = Object.entries(documento.paths).filter(([, operaciones]) => operaciones.get && !conParametroObligatorio(operaciones.get));
   assert.ok(rutas.length >= 20);
   for (const [ruta, { get }] of rutas) {
     assert.equal(get.parameters[0].$ref, '#/components/parameters/perfil', ruta);
@@ -65,7 +67,7 @@ test('las respuestas de error documentadas usan el formato común', async () => 
 
 test('las rutas que documentan 403 responden 403 al perfil Público', async () => {
   const restringidas = Object.entries(documento.paths).filter(([, op]) => op.get?.responses[403]).map(([ruta]) => ruta);
-  assert.deepEqual(restringidas.sort(), ['/admin/catalogos', '/bitacora', '/explicaciones', '/exportar/movimientos.csv', '/exportar/personalizado.csv', '/movimientos', '/movimientos/descomposicion']);
+  assert.deepEqual(restringidas.sort(), ['/admin/catalogos', '/bitacora', '/explicaciones', '/exportar/movimientos.csv', '/exportar/personalizado.csv', '/movimientos', '/movimientos/descomposicion', '/suscripciones']);
   for (const ruta of restringidas) {
     const respuesta = await fetch(base + ruta, { headers: { 'X-Perfil': 'publico' } });
     assert.equal(respuesta.status, 403, ruta);

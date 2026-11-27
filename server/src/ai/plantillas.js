@@ -19,7 +19,7 @@ function fraseSaldo(mov) {
   return '';
 }
 
-function textoMovimiento(ranking, mov) {
+export function textoMovimiento(ranking, mov) {
   const { Banco, Cambio_Posicion: cambio, Posicion_anterior: antes, Posicion_actual: ahora } = mov;
   const saldo = fraseSaldo(mov);
   if (cambio > 0) {

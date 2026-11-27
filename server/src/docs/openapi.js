@@ -38,6 +38,10 @@ const errores = (...codigos) =>
 
 const ref = (nombre) => ({ $ref: `#/components/parameters/${nombre}` });
 
+// Los enlaces de suscripción (#7) se abren desde el correo: responden HTML, no JSON.
+const paginaHtml = (descripcion) => ({ description: descripcion, content: { 'text/html': { schema: { type: 'string' } } } });
+const tokenSuscripcion = { name: 'token', in: 'query', required: true, description: 'Token del enlace del correo', schema: { type: 'string' } };
+
 // Todas las operaciones aceptan el header X-Perfil (#28).
 function conPerfil(paths) {
   for (const operaciones of Object.values(paths)) {
@@ -76,6 +80,7 @@ export function crearDocumentoOpenApi(catalogos) {
       { name: 'Descargas', description: 'Entregables 2 a 5 en CSV.' },
       { name: 'IA', description: 'Explicación y exploración con IA. La IA nunca calcula: solo cita resultados del motor.' },
       { name: 'Perfiles y administración', description: 'Perfil actual, parámetros, catálogos y registro de operaciones.' },
+      { name: 'Alertas', description: 'Suscripción a las alertas por correo con doble confirmación (#7, contracts/eventos-zapier.md).' },
     ],
     paths: conPerfil({
       '/perfil': {
@@ -268,6 +273,50 @@ export function crearDocumentoOpenApi(catalogos) {
             },
           },
           responses: { ...jsonOk('Respuesta verificada contra el motor, con las consultas usadas'), ...errores(400, 429) },
+        },
+      },
+      '/suscripciones': {
+        get: {
+          tags: ['Alertas'],
+          summary: 'Suscriptores de las alertas, sin sus tokens (solo Administrador: son datos personales)',
+          responses: { ...jsonOk('Suscriptores'), ...errores(403) },
+        },
+        post: {
+          tags: ['Alertas'],
+          summary: 'Pide suscribirse (o cambiar bancos y rankings); Zapier manda el correo para confirmar',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['correo'],
+                  properties: {
+                    correo: { type: 'string', format: 'email' },
+                    bancos: { type: 'array', items: { type: 'string', enum: bancos }, description: 'Vacío: todos' },
+                    rankings: { type: 'array', items: { type: 'string', enum: rankings }, description: 'Vacío: todos' },
+                  },
+                },
+              },
+            },
+          },
+          responses: { ...jsonOk('Solicitud guardada y estado del correo de confirmación'), ...errores(400, 429) },
+        },
+      },
+      '/suscripciones/confirmar': {
+        get: {
+          tags: ['Alertas'],
+          summary: 'Enlace del correo: activa la suscripción y responde una página HTML (vence a las 48 horas)',
+          parameters: [tokenSuscripcion],
+          responses: { 200: paginaHtml('Suscripción confirmada'), 404: paginaHtml('Enlace no válido o vencido') },
+        },
+      },
+      '/suscripciones/baja': {
+        get: {
+          tags: ['Alertas'],
+          summary: 'Enlace de las alertas: da de baja y responde una página HTML',
+          parameters: [tokenSuscripcion],
+          responses: { 200: paginaHtml('Baja confirmada'), 404: paginaHtml('Enlace no válido') },
         },
       },
     }),
