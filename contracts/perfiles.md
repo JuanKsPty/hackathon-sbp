@@ -44,6 +44,7 @@ Los endpoints de Analista y Administrador responden **403** a los demás perfile
 | :--- | :--- | :--- |
 | `GET /api/movimientos` | `comparar_periodos` | Analista, Administrador |
 | `GET /api/exportar/movimientos.csv` (entregable 5) | `comparar_periodos` | Analista, Administrador |
+| `GET /api/exportar/personalizado.csv` | `reportes_personalizados` | Analista, Administrador |
 | `POST /api/periodos` (#29) | `cargar_periodo` | Administrador |
 | `PUT /api/parametros` | `administrar_parametros` | Administrador |
 | `GET /api/admin/catalogos` | `administrar_catalogos` | Administrador |
