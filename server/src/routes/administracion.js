@@ -106,7 +106,7 @@ export function rutasDeAdministracion(almacen) {
       catalogo: NOMBRES_CATALOGO[clave],
       clave,
       archivo,
-      fuente: FUENTE_CATALOGOS,
+      procedencia: FUENTE_CATALOGOS, // no "fuente": ese campo lo lee el client como la fuente de los datos
       congelado: clave === 'cinu',
       columnas: encabezados,
       filas: filas.map(({ datos }) => datos),
