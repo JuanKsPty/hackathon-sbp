@@ -57,6 +57,18 @@ export default function Rankings() {
     estado: () => elegido,
     restaurar: (anterior) => setElegido(anterior),
   })
+  // Filtros: el backend usa "todos"/"todas" para quitar el filtro; aquí ambos son TODOS.
+  const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' ? TODOS : valor)
+  useControlGuia('rankings.filtro-banco', {
+    elegir: (valor) => setBanco(sinFiltro(valor)),
+    estado: () => banco,
+    restaurar: (anterior) => setBanco(anterior),
+  })
+  useControlGuia('rankings.filtro-subactividad', {
+    elegir: (valor) => setSubactividad(sinFiltro(valor)),
+    estado: () => subactividad,
+    restaurar: (anterior) => setSubactividad(anterior),
+  })
 
   if (catalogo.cargando || cargandoPeriodos) {
     return <Contenedor><Cargando filas={6} /></Contenedor>
