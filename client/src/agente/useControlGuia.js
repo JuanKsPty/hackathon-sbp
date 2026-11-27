@@ -11,7 +11,7 @@
 import { useEffect, useRef } from 'react'
 import { useAgente } from './AgenteContext.jsx'
 
-const METODOS = ['elegir', 'ordenar', 'resaltar', 'estado', 'restaurar']
+const METODOS = ['elegir', 'ordenar', 'resaltar', 'estado', 'restaurar', 'actual']
 
 export function useControlGuia(id, handlers) {
   const { registro } = useAgente()

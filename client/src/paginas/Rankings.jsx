@@ -98,16 +98,19 @@ export default function Rankings() {
   const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' || valor === TODOS ? null : valor)
   useControlGuia('rankings.selector-ranking', {
     elegir: (valor) => cambiarEnUrl({ ranking: valor, subactividad: null }),
+    actual: () => ranking,
     estado: () => ({ ranking: filtros.ranking, subactividad: filtros.subactividad }),
     restaurar: (anterior) => cambiarEnUrl({ ranking: anterior?.ranking, subactividad: anterior?.subactividad }),
   })
   useControlGuia('rankings.filtro-banco', {
     elegir: (valor) => cambiarEnUrl({ banco: sinFiltro(valor) }),
+    actual: () => filtros.banco ?? 'todos',
     estado: () => filtros.banco,
     restaurar: (anterior) => cambiarEnUrl({ banco: anterior }),
   })
   useControlGuia('rankings.filtro-subactividad', {
     elegir: (valor) => cambiarEnUrl({ subactividad: sinFiltro(valor) }),
+    actual: () => filtros.subactividad ?? 'todas',
     estado: () => filtros.subactividad,
     restaurar: (anterior) => cambiarEnUrl({ subactividad: anterior }),
   })
