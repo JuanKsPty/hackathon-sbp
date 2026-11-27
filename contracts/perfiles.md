@@ -102,11 +102,11 @@ El Administrador crea los usuarios del sitio interno y cambia su nombre, perfil,
 
 | Método | Ruta | Cuerpo | Respuesta |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/usuarios` | – | `{ fuente, usuarios[] }`, nunca con contraseñas ni hashes |
+| `GET` | `/api/admin/usuarios` | – | `{ guardados_en, usuarios[] }`, nunca con contraseñas ni hashes |
 | `POST` | `/api/admin/usuarios` | `{ usuario, nombre?, perfil, clave }` | 201 el usuario. 400 `PARAMETRO_INVALIDO`, 409 `USUARIO_EXISTE` |
 | `PATCH` | `/api/admin/usuarios/:usuario` | `{ nombre?, perfil?, activo?, clave? }` | el usuario. 404 `USUARIO_NO_ENCONTRADO`, 409 `USUARIO_SOLO_LECTURA` u `OPERACION_NO_PERMITIDA` |
 
-- `fuente`: `supabase` si hay `DATABASE_URL` (tabla `interno.usuarios`; el rol `sbp_api` necesita [`server/db/002_gestion_usuarios.sql`](../server/db/002_gestion_usuarios.sql), si no: 503 `USUARIOS_SOLO_LECTURA`), o `archivo` (`storage/usuarios.json`, para la demo local sin internet). Solo se guarda el hash scrypt de cada contraseña.
+- `guardados_en`: `supabase` si hay `DATABASE_URL` (tabla `interno.usuarios`; el rol `sbp_api` necesita [`server/db/002_gestion_usuarios.sql`](../server/db/002_gestion_usuarios.sql), si no: 503 `USUARIOS_SOLO_LECTURA`), o `archivo` (`storage/usuarios.json`, para la demo local sin internet). Solo se guarda el hash scrypt de cada contraseña.
 - Los usuarios de la variable `USUARIOS` del `.env` salen con `origen: "env"` y `editable: false`: se cambian en el `.env`.
 - `perfil` es `analista` o `admin`; `clave`, de 10 caracteres o más; `usuario`, de 2 a 60 caracteres (letras, números, `.`, `-`, `_`).
 - No se borran usuarios: se desactivan (`activo: false`) y ya no pueden iniciar sesión.

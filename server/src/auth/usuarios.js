@@ -214,12 +214,13 @@ async function filasEditables() {
   }
 }
 
-// { fuente, usuarios[] }: los de la fuente editable y, de solo lectura, los del .env que no están ahí.
+// { guardados_en, usuarios[] }: los de la fuente editable y, de solo lectura, los del .env que no
+// están ahí. (No se llama "fuente": ese campo lo lee el client como la fuente de los datos, lámina 9.)
 export async function listarUsuarios() {
   const editables = await filasEditables();
   const nombres = new Set(editables.map((u) => u.usuario));
   const delEnv = [...usuariosDelEnv().values()].filter((u) => !nombres.has(u.usuario)).map((u) => publico(u, 'env'));
-  return { fuente: fuenteEditable(), usuarios: [...editables, ...delEnv] };
+  return { guardados_en: fuenteEditable(), usuarios: [...editables, ...delEnv] };
 }
 
 function validarNombreUsuario(valor) {
