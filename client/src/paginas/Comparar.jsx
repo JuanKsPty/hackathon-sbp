@@ -196,11 +196,12 @@ function Comparacion({ periodos, rankings, bancos }) {
       <Card>
         <CardHeader>
           <CardTitle>Movimientos de posición</CardTitle>
-          <CardDescription>
+          {/* En una tarjeta angosta el botón baja a su propia fila (igual que en Reportes). */}
+          <CardDescription className="@max-md/card-header:col-start-1">
             {ranking}
             {tramo && ` · ${tramo}`} · ordena con un clic en cada encabezado y haz clic en una fila para ver por qué cambió su saldo
           </CardDescription>
-          <CardAction>
+          <CardAction className="@max-md/card-header:col-start-1 @max-md/card-header:row-span-1 @max-md/card-header:row-start-3 @max-md/card-header:mt-2 @max-md/card-header:justify-self-start">
             <Button variant="outline" size="sm" onClick={descargar} disabled={!rangoValido || descarga.descargando}>
               <DownloadIcon aria-hidden="true" />
               {descarga.descargando ? 'Descargando…' : 'movimientos.csv'}
