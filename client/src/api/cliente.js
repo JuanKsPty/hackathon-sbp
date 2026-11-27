@@ -132,6 +132,10 @@ export const movimientos = ({ desde, hasta, ranking, solo_significativos } = {},
 export const indicadores = ({ periodo, ranking } = {}, opciones) =>
   pedir('/indicadores', { periodo, ranking }, opciones)
 
+// contracts/productos.md (#200): totales de cada producto de crédito (las 22 subactividades) del período,
+// con su detalle por banco, y la cartera válida de cada banco. Los suma el motor. Abierto a los 3 perfiles.
+export const productos = ({ periodo } = {}, opciones) => pedir('/productos', { periodo }, opciones)
+
 // Por qué se movió el saldo de cada banco entre dos períodos: préstamos nuevos, que salen y
 // amortización (contracts/consulta.md, #61). Como /movimientos, es de Analista y Administrador.
 // evidencia=true exige ranking y banco.
@@ -204,7 +208,13 @@ export async function suscribirse({ correo, bancos = [], rankings = [] }, { sign
   return datos
 }
 
-// ---- Descargas CSV (contracts/exportaciones.md) ----
+// ---- Descargas (contracts/exportaciones.md) ----
+
+// Informe del período en PDF (#200), para un <a href download>. Sin periodo, el último cargado.
+// Con la sesión del Analista o del Administrador (cookie) el PDF trae además la evolución por corte.
+export function urlInformePdf(parametros = {}) {
+  return `${BASE}/exportar/informe.pdf${construirQuery(parametros)}`
+}
 
 export const DESCARGAS = ['rankings', 'subactividades', 'calidad', 'excluidas', 'alertas', 'movimientos']
 

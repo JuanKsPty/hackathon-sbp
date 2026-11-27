@@ -13,6 +13,7 @@ Entregables 2 a 5 de la sección 10. Los archivos son UTF-8, separados por coma,
 | `GET /api/exportar/alertas.csv` | alertas de calidad | `Fecha, Fila_Archivo, Numero_Prestamo, Tipo, Detalle` |
 | `GET /api/exportar/movimientos.csv` | 5 | Ver la tabla de abajo |
 | `GET /api/exportar/personalizado.csv` | reporte personalizado | Las mismas de `rankings.csv` (ver abajo) |
+| `GET /api/exportar/informe.pdf` | informe del período | PDF carta de 2 páginas generado con pdfkit (`informe_<periodo>.pdf`; sin `periodo`, el último; acepta `todos`): tarjetas de indicadores, barras por banco y por actividad, líder de cada ranking y los 22 productos ([productos.md](productos.md)). Los 3 perfiles; Analista y Administrador reciben además la evolución por corte. Aviso, fuente y período en el pie de cada página. |
 
 ## Columnas de `calidad.csv`
 | Columnas | Qué traen |

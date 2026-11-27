@@ -5,6 +5,7 @@ import {
   descargarArchivo,
   parametrosPersonalizado,
   urlDescarga,
+  urlInformePdf,
 } from '@/api/cliente.js'
 import { DetallePrestamo } from '@/components/comparar/DetallePrestamo.jsx'
 import { BuscarPrestamo } from '@/components/comparar/EvidenciaPrestamos.jsx'
@@ -213,6 +214,24 @@ function DescargasAbiertas({ periodos }) {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">Gráficos y tablas de los rankings con calidad E1–E4; se abre sin internet.</p>
+            </CardContent>
+          </Card>
+          {/* Informe PDF del período (#200): tarjetas, gráficos de saldo y de tarjetas, líderes y productos.
+              Sin período, usa el último cargado. */}
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>Informe del período</CardTitle>
+              <CardDescription>PDF</CardDescription>
+              <CardAction>
+                <Descarga href={urlInformePdf(periodo === TODOS ? {} : { periodo })} titulo="Descargar informe PDF">
+                  PDF
+                </Descarga>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Saldo total y de cada banco, tarjetas de crédito, automóvil y vivienda, líderes de cada ranking y los 22 productos.
+              </p>
             </CardContent>
           </Card>
         </div>
