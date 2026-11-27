@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { LogInIcon } from 'lucide-react'
+import { ChartAreaIcon, GitCompareArrowsIcon, LockKeyholeIcon, LogInIcon, ServerCogIcon } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { entrar, rutaSegura } from '@/api/sesion.js'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NOMBRE_APP } from '@/components/layout/navegacion.js'
+import { BloqueOscuro, Etiqueta, TituloDosTonos } from '@/components/panel/interno/marca.jsx'
+import { DESCRIPCIONES_PERFIL } from '@/contexto/PerfilContext.jsx'
 
 // Mensaje claro para cada error de POST /api/sesion (criterio 4: mensajes claros ante errores).
 const MENSAJES = {
@@ -16,10 +17,19 @@ const MENSAJES = {
   PARAMETRO_INVALIDO: 'Escribe el usuario y la contraseña.',
 }
 
+// Aviso de los datos (el mismo que manda el API en cada respuesta). Esta pantalla no pide datos.
+const AVISO = 'Datos ficticios · Uso informativo, no opinión formal de la SBP'
+
+const PERFILES = [
+  { nombre: 'Analista', texto: DESCRIPCIONES_PERFIL.analista, icono: GitCompareArrowsIcon },
+  { nombre: 'Administrador', texto: DESCRIPCIONES_PERFIL.admin, icono: ServerCogIcon },
+]
+
 const claseCampo =
-  'h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50'
+  'h-11 w-full rounded-full border border-input bg-background px-4 text-sm outline-none transition-shadow focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50'
 
 // Inicio de sesión del sitio interno (Analista y Administrador). El perfil sale de la cuenta.
+// Bloque oscuro de la guía visual (#140) a la izquierda y el formulario a la derecha; en 360 px, uno debajo del otro.
 export default function Entrar() {
   const [parametros] = useSearchParams()
   const [usuario, setUsuario] = useState('')
@@ -42,14 +52,51 @@ export default function Entrar() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-muted/40 px-4 py-10">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="items-center text-center">
-          <img src="/marca/logo.svg" alt="" className="mx-auto size-12" />
-          <CardTitle className="text-xl">{NOMBRE_APP}</CardTitle>
-          <CardDescription>Sitio interno para Analistas y Administradores. Datos ficticios.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <main className="flex min-h-svh items-center justify-center bg-background px-4 py-6 sm:py-10">
+      <div className="grid w-full max-w-5xl gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-6">
+        <BloqueOscuro className="flex flex-col justify-between gap-8 p-6 sm:p-10">
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+              <img src="/marca/logo.svg" alt="" className="size-7" />
+              {NOMBRE_APP}
+            </div>
+            <Etiqueta icono={LockKeyholeIcon} className="bg-emerald-400/15 text-emerald-300">
+              Sitio interno
+            </Etiqueta>
+            <TituloDosTonos
+              como="h1"
+              fuerte="Qué cambió en cada corte,"
+              suave="y por qué."
+              className="text-3xl text-white sm:text-5xl [&>span:last-child]:text-white/45"
+            />
+            <p className="max-w-md text-sm text-white/60">
+              Rankings de crédito por banco calculados desde los archivos AT03, con sus movimientos explicados.
+            </p>
+          </div>
+          <ul className="hidden flex-col gap-3 sm:flex">
+            {PERFILES.map(({ nombre, texto, icono: Icono }) => (
+              <li key={nombre} className="flex items-start gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
+                  <Icono className="size-4" aria-hidden="true" />
+                </span>
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium">{nombre}</span>
+                  <span className="text-xs text-white/60">{texto}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="flex items-center gap-2 text-xs text-white/50">
+            <ChartAreaIcon className="size-3.5 shrink-0" aria-hidden="true" />
+            {AVISO}
+          </p>
+        </BloqueOscuro>
+
+        <section className="flex flex-col justify-center gap-6 rounded-[28px] bg-muted/60 p-6 sm:p-10 dark:bg-muted/30">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-medium tracking-tight">Inicia sesión</h2>
+            <p className="text-sm text-muted-foreground">Para Analistas y Administradores. El perfil sale de tu cuenta.</p>
+          </div>
           <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
             <label className="flex flex-col gap-1.5 text-sm font-medium">
               Usuario
@@ -82,13 +129,13 @@ export default function Entrar() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" disabled={enviando || !usuario || !clave}>
+            <Button type="submit" size="lg" className="h-11 rounded-full" disabled={enviando || !usuario || !clave}>
               <LogInIcon aria-hidden="true" />
               {enviando ? 'Entrando…' : 'Entrar'}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </section>
+      </div>
     </main>
   )
 }

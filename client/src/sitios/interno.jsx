@@ -9,7 +9,7 @@ import Calidad from '@/paginas/Calidad.jsx'
 import Comparar from '@/paginas/Comparar.jsx'
 import Entrar from '@/paginas/Entrar.jsx'
 import NoEncontrada from '@/paginas/NoEncontrada.jsx'
-import Panel from '@/paginas/Panel.jsx'
+import PanelInterno from '@/paginas/PanelInterno.jsx'
 import Rankings from '@/paginas/Rankings.jsx'
 import Reportes from '@/paginas/Reportes.jsx'
 import Verificacion from '@/paginas/Verificacion.jsx'
@@ -20,7 +20,8 @@ export function RutasDelSitio() {
       <Route path="entrar" element={<Entrar />} />
       <Route element={<RequiereSesion />}>
         <Route element={<AppShell />}>
-          <Route index element={<Panel />} />
+          {/* Dashboard según el perfil: Analista y Administrador (#140). */}
+          <Route index element={<PanelInterno />} />
           <Route path="rankings" element={<Rankings />} />
           <Route path="comparar" element={<Comparar />} />
           <Route path="reportes" element={<Reportes />} />
