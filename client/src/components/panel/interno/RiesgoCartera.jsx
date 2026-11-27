@@ -1,10 +1,10 @@
-import { InfoIcon, ShieldAlertIcon } from 'lucide-react'
+import { InfoIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '@/components/ui/chart'
 import { formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { EJE } from './graficos.js'
 import { MarcoGrafico } from './MarcoGrafico.jsx'
+import { Seccion } from './Seccion.jsx'
 
 const decimales = new Intl.NumberFormat('es-PA', { maximumFractionDigits: 2 })
 const formatearHHI = (v) => (typeof v === 'number' ? decimales.format(v) : '—')
@@ -12,7 +12,7 @@ const corto = (texto, n) => (texto && texto.length > n ? `${texto.slice(0, n - 1
 
 const CONFIG_CONCENTRACION = { top3: { label: 'Top 3', color: 'var(--chart-1)' } }
 const CONFIG_MORA = {
-  mora: { label: '% del saldo en mora', color: 'var(--chart-3)' },
+  mora: { label: '% del saldo en mora', color: 'var(--chart-2)' },
   vencido: { label: '% del saldo vencido', color: 'var(--baja)' },
 }
 
@@ -32,20 +32,15 @@ export function RiesgoCartera({ consulta }) {
     .map((b) => ({ banco: b.Banco, mora: b.Pct_Saldo_En_Mora, vencido: b.Pct_Vencido, dias: b.Dias_Mora_Promedio }))
 
   return (
-    <SeccionGris
-      role="region"
-      aria-labelledby="titulo-riesgo"
+    <Seccion
+      id="titulo-riesgo"
       data-guia="panel.indicadores-adicionales"
-      className="flex animate-aparecer flex-col gap-5"
+      titulo={datos ? `Concentración y morosidad al ${formatearPeriodo(datos.periodo)}` : 'Concentración y morosidad'}
     >
-      <div className="flex flex-col gap-2">
-        <Etiqueta icono={ShieldAlertIcon}>Indicadores adicionales</Etiqueta>
-        <TituloDosTonos fuerte={<span id="titulo-riesgo">Concentración y morosidad</span>} suave={datos ? `al ${formatearPeriodo(datos.periodo)}` : undefined} />
-        <p className="flex items-start gap-2 text-xs text-muted-foreground">
-          <InfoIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-          <span>{datos?.analisis ?? 'Análisis adicional: no forma parte de los 6 rankings oficiales ni de su cálculo'}</span>
-        </p>
-      </div>
+      <p className="-mt-2 flex items-start gap-2 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+        <InfoIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+        <span>{datos?.analisis ?? 'Análisis adicional: no forma parte de los 6 rankings oficiales ni de su cálculo'}</span>
+      </p>
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <MarcoGrafico
           titulo="Concentración por ranking"
@@ -82,7 +77,7 @@ export function RiesgoCartera({ consulta }) {
           </ChartContainer>
         </MarcoGrafico>
       </div>
-    </SeccionGris>
+    </Seccion>
   )
 }
 

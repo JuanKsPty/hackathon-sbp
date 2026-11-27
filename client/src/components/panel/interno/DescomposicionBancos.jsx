@@ -1,19 +1,20 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { ArrowRightIcon, SplitIcon } from 'lucide-react'
+import { ArrowRightIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
-import { Etiqueta, SeccionGris, Segmentado, TituloDosTonos } from '@/components/marca'
 import { buttonVariants } from '@/components/ui/button'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '@/components/ui/chart'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 import { EJE, formatoCompacto } from './graficos.js'
 import { MarcoGrafico } from './MarcoGrafico.jsx'
+import { Seccion } from './Seccion.jsx'
+import { SelectorRanking } from './SelectorRanking.jsx'
 
 // Las tres piezas de GET /api/movimientos/descomposicion. Suman Var_Saldo exacto (lo calcula el API).
 const CONFIG = {
   Nuevos: { label: 'Préstamos nuevos', color: 'var(--sube)' },
   Salen: { label: 'Préstamos que salen', color: 'var(--baja)' },
-  Amortizacion: { label: 'Amortización', color: 'var(--chart-4)' },
+  Amortizacion: { label: 'Amortización', color: 'var(--chart-5)' },
 }
 const conSigno = (v) => (typeof v === 'number' && v > 0 ? `+${formatearMonto(v)}` : formatearMonto(v))
 
@@ -39,20 +40,18 @@ export function DescomposicionBancos({ desde, hasta, consulta }) {
     }))
 
   return (
-    <SeccionGris role="region" aria-labelledby="titulo-descomposicion" className="flex animate-aparecer flex-col gap-5">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-2">
-          <Etiqueta icono={SplitIcon}>Variación del saldo</Etiqueta>
-          <TituloDosTonos fuerte={<span id="titulo-descomposicion">De dónde sale el cambio</span>} suave="de cada banco" />
-        </div>
+    <Seccion
+      id="titulo-descomposicion"
+      titulo="De dónde sale el cambio de cada banco"
+      descripcion="Préstamos nuevos, préstamos que salen y amortización de los que continúan."
+      accion={
         <Link to="/comparar" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit' })}>
           Ver la evidencia en Comparar
           <ArrowRightIcon aria-hidden="true" />
         </Link>
-      </div>
-      {rankings.length > 1 && (
-        <Segmentado ariaLabel="Ranking de la descomposición" opciones={rankings.map((r) => ({ valor: r, etiqueta: r }))} valor={ranking} onCambio={setElegido} />
-      )}
+      }
+    >
+      <SelectorRanking etiqueta="Ranking de la descomposición" rankings={rankings} valor={ranking} onCambio={setElegido} />
       <MarcoGrafico
         titulo={ranking ? `Descomposición en ${ranking}` : 'Descomposición por banco'}
         descripcion={
@@ -78,7 +77,7 @@ export function DescomposicionBancos({ desde, hasta, consulta }) {
           </BarChart>
         </ChartContainer>
       </MarcoGrafico>
-    </SeccionGris>
+    </Seccion>
   )
 }
 

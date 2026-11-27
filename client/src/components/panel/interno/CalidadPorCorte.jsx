@@ -15,7 +15,7 @@ const EXCLUSIONES = [
 ]
 
 // Filas excluidas E1–E4 en cada corte (GET /api/calidad sin período: todos los cortes).
-// El corte elegido va en ámbar y los demás en gris.
+// El corte elegido va en naranja y los demás en gris.
 export function CalidadPorCorte({ consulta }) {
   const { periodo } = usePeriodo()
   const cortes = [...(consulta.datos?.periodos ?? [])].sort((a, b) => a.Fecha.localeCompare(b.Fecha))
@@ -32,7 +32,7 @@ export function CalidadPorCorte({ consulta }) {
           const datos = cortes.map((c) => ({ periodo: c.Fecha, valor: c[e.campo] ?? null }))
           const actual = cortes.find((c) => c.Fecha === periodo) ?? cortes.at(-1)
           return (
-            <div key={e.campo} className="flex min-w-0 flex-col gap-1 rounded-xl bg-seccion p-3">
+            <div key={e.campo} className="flex min-w-0 flex-col gap-1 rounded-lg bg-muted/50 p-3">
               <span className="text-[11px] text-muted-foreground">{e.nombre}</span>
               <span className="cifra text-xl font-medium tracking-tight">{formatearEntero(actual?.[e.campo])}</span>
               <ChartContainer config={{ valor: { label: e.nombre, color: 'var(--chart-4)' } }} className="aspect-auto h-[90px] w-full">
@@ -41,7 +41,7 @@ export function CalidadPorCorte({ consulta }) {
                   <ChartTooltip cursor={{ fillOpacity: 0.2 }} content={<GloboGrafico titulo={(l) => formatearPeriodo(l)} formatear={(v) => formatearEntero(v)} />} />
                   <Bar dataKey="valor" name="Filas" radius={[4, 4, 0, 0]}>
                     {datos.map((d) => (
-                      <Cell key={d.periodo} fill={d.periodo === (actual?.Fecha ?? '') ? 'var(--chart-3)' : 'var(--chart-5)'} />
+                      <Cell key={d.periodo} fill={d.periodo === (actual?.Fecha ?? '') ? 'var(--chart-2)' : 'var(--chart-5)'} />
                     ))}
                   </Bar>
                 </BarChart>

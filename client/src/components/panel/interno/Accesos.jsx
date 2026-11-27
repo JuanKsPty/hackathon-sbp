@@ -28,7 +28,7 @@ export function Accesos() {
           className="group rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <Tarjeta className="h-full flex-row items-start gap-3 transition-shadow group-hover:shadow-md">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-marca">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Icono className="size-4" aria-hidden="true" />
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">

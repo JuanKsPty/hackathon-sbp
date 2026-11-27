@@ -1,15 +1,14 @@
 import { useId } from 'react'
-import { LayersIcon } from 'lucide-react'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '@/components/ui/chart'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 import { EJE, formatoCompacto } from './graficos.js'
 import { GloboGrafico, MarcoGrafico } from './MarcoGrafico.jsx'
+import { Seccion } from './Seccion.jsx'
 
-// Colores de los cortes en el gráfico de composición: el elegido en verde, los anteriores en gris.
-const COLORES_CORTE = ['var(--chart-5)', 'var(--chart-4)', 'var(--chart-1)']
+// Colores de los cortes en el gráfico de composición: el elegido en azul, los anteriores en gris.
+const COLORES_CORTE = ['color-mix(in oklab, var(--chart-5) 45%, transparent)', 'var(--chart-5)', 'var(--chart-1)']
 const MAX_CORTES = 3
 
 // La cartera por corte (#140): evolución del saldo total válido y del universo local válido
@@ -31,17 +30,13 @@ export function CarteraPorCorte({ consultaIndicadores }) {
   const configComposicion = Object.fromEntries(fechas.map((f, i) => [`c${f}`, { label: formatearPeriodo(f), color: colores[i] }]))
 
   return (
-    <SeccionGris role="region" aria-labelledby="titulo-cartera" className="flex animate-aparecer flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <Etiqueta icono={LayersIcon}>Cartera</Etiqueta>
-        <TituloDosTonos fuerte={<span id="titulo-cartera">La cartera</span>} suave="corte a corte" />
-      </div>
+    <Seccion id="titulo-cartera" titulo="La cartera corte a corte" descripcion="Cómo creció el universo válido y cómo se reparte entre las macroactividades.">
       <div className="grid gap-4 md:grid-cols-2">
         <MarcoGrafico titulo="Saldo total válido" descripcion="Universo local válido, en cada corte cargado." vacio={cortes.length === 0}>
           <AreaPorCorte datos={cortes} campo="Saldo_Total_Valido" nombre="Saldo total válido" formatear={formatearMonto} />
         </MarcoGrafico>
         <MarcoGrafico titulo="Préstamos válidos" descripcion="Préstamos del universo local válido en cada corte." vacio={cortes.length === 0}>
-          <AreaPorCorte datos={cortes} campo="Universo_Local_Valido" nombre="Préstamos válidos" formatear={formatearEntero} color="var(--chart-2)" />
+          <AreaPorCorte datos={cortes} campo="Universo_Local_Valido" nombre="Préstamos válidos" formatear={formatearEntero} color="var(--chart-3)" />
         </MarcoGrafico>
       </div>
       <MarcoGrafico
@@ -63,7 +58,7 @@ export function CarteraPorCorte({ consultaIndicadores }) {
           </BarChart>
         </ChartContainer>
       </MarcoGrafico>
-    </SeccionGris>
+    </Seccion>
   )
 }
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { ArrowRightIcon, CheckCircle2Icon, FileUpIcon, ScaleIcon, ScrollTextIcon, ServerCogIcon, TriangleAlertIcon } from 'lucide-react'
+import { ArrowRightIcon, CheckCircle2Icon, FileUpIcon, ScaleIcon, ScrollTextIcon, TriangleAlertIcon } from 'lucide-react'
 import { leerBitacora, leerParametros } from '@/api/admin.js'
 import { calidad as pedirCalidad } from '@/api/cliente.js'
 import {
@@ -19,7 +19,7 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
+import { Seccion } from './Seccion.jsx'
 import { Tarjeta } from './Tarjeta.jsx'
 
 const ULTIMAS = 3
@@ -32,35 +32,37 @@ const OPERACIONES = { inicio_sesion: 'Inicio de sesión', cierre_sesion: 'Cierre
 // de la bitácora. Usa GET /api/calidad, GET /api/parametros y GET /api/bitacora (los dos últimos
 // responden 403 a otro perfil). Solo lectura: los cambios se hacen en Administración.
 export function EstadoOperacion() {
-  const { perfil } = usePerfil()
+  const { perfil, puede } = usePerfil()
   const { periodos } = usePeriodo()
   const ultimo = periodos.map((p) => p.Fecha).filter(Boolean).sort().at(-1) ?? null
-  const esAdmin = perfil === 'admin'
+  // Los permisos los configura el Administrador: se pregunta por cada opción (GET /api/perfil).
+  const verBitacora = puede('ver_bitacora')
+  const esAdmin = perfil === 'admin' || puede('cargar_periodo') || verBitacora
 
   const consultaCalidad = useConsulta((opciones) => pedirCalidad({ periodo: ultimo }, opciones), [ultimo], { activa: esAdmin && Boolean(ultimo) })
   const consultaRegla = useConsulta((opciones) => leerParametros(perfil, opciones), [perfil], { activa: esAdmin })
-  const consultaBitacora = useConsulta((opciones) => leerBitacora(perfil, opciones), [perfil], { activa: esAdmin })
+  const consultaBitacora = useConsulta((opciones) => leerBitacora(perfil, opciones), [perfil], { activa: verBitacora })
 
   if (!esAdmin) return null
 
   return (
-    <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-operacion">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-2">
-          <Etiqueta icono={ServerCogIcon}>Administración</Etiqueta>
-          <TituloDosTonos como="h3" fuerte={<span id="titulo-operacion">Estado de la operación</span>} suave="del último corte" />
-        </div>
-        <Link to="/admin" className={buttonVariants({ size: 'pildora', className: 'w-fit' })}>
+    <Seccion
+      id="titulo-operacion"
+      titulo="Estado de la operación"
+      descripcion="Último corte cargado, regla vigente y últimas operaciones. Solo Administrador."
+      accion={
+        <Link to="/admin" className={buttonVariants({ className: 'w-fit' })}>
           <FileUpIcon aria-hidden="true" />
           Cargar período
         </Link>
-      </div>
+      }
+    >
       <div className="grid items-start gap-4 lg:grid-cols-3">
         <UltimoCorte consulta={consultaCalidad} ultimo={ultimo} />
         <ReglaActual consulta={consultaRegla} />
-        <UltimasOperaciones consulta={consultaBitacora} />
+        {verBitacora && <UltimasOperaciones consulta={consultaBitacora} />}
       </div>
-    </SeccionGris>
+    </Seccion>
   )
 }
 
@@ -108,7 +110,7 @@ function UltimoCorte({ consulta, ultimo }) {
               </dl>
               <dl className="grid grid-cols-2 gap-2">
                 {cascada.map(([nombre, valor]) => (
-                  <div key={nombre} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-seccion px-3 py-2">
+                  <div key={nombre} className="flex min-w-0 flex-col gap-0.5 rounded-md bg-muted/50 px-3 py-2">
                     <dt className="text-[11px] text-muted-foreground">{nombre}</dt>
                     <dd className="cifra text-base font-medium">{formatearEntero(valor)}</dd>
                   </div>

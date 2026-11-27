@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CalendarRangeIcon, CrownIcon, MinusIcon, SparklesIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CalendarRangeIcon, CrownIcon, MinusIcon } from 'lucide-react'
 import { ExplicacionesMovimientos } from '@/components/asistente/ExplicacionesMovimientos.jsx'
 import { ReglaVigente } from '@/components/comparar/ReglaVigente.jsx'
 import { nombreDeMotivo } from '@/components/comparar/movimientos.js'
@@ -9,7 +9,7 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
+import { Seccion } from './Seccion.jsx'
 import { Tarjeta } from './Tarjeta.jsx'
 
 const MAXIMO = 4
@@ -97,25 +97,16 @@ export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consu
   }
 
   return (
-    <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-movimientos">
-      <div className="flex flex-col gap-2">
-        <Etiqueta icono={SparklesIcon}>Movimientos</Etiqueta>
-        <TituloDosTonos
-          fuerte={<span id="titulo-movimientos">Movimientos significativos</span>}
-          suave="y por qué ocurrieron"
-        />
-        {desde && hasta && (
-          <p className="text-sm text-muted-foreground">
-            {formatearPeriodo(desde)} → {formatearPeriodo(hasta)}. Cada saldo se descompone en préstamos nuevos, préstamos que salen y
-            amortización de los que continúan.
-          </p>
-        )}
-      </div>
+    <Seccion
+      id="titulo-movimientos"
+      titulo="Movimientos significativos y por qué ocurrieron"
+      descripcion={desde && hasta ? `${formatearPeriodo(desde)} → ${formatearPeriodo(hasta)}. Los de mayor cambio de posición, con la descomposición de su saldo.` : undefined}
+    >
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <Tarjeta data-guia="panel.movimientos">{contenido}</Tarjeta>
         <ExplicacionesMovimientos guia="panel.explicaciones" />
       </div>
-    </SeccionGris>
+    </Seccion>
   )
 }
 
@@ -160,7 +151,7 @@ function FilaMovimiento({ movimiento: m, piezas, cargandoPiezas }) {
       </div>
       {piezas ? (
         // En pantallas angostas, una pieza por fila para que el monto se lea completo.
-        <dl className="grid gap-1.5 rounded-lg bg-seccion p-2 sm:grid-cols-3 sm:gap-2" aria-label="Descomposición del cambio de saldo">
+        <dl className="grid gap-1.5 rounded-lg bg-muted/50 p-2 sm:grid-cols-3 sm:gap-2" aria-label="Descomposición del cambio de saldo">
           {PIEZAS.map((p) => {
             const pieza = piezas[p.clave]
             return (

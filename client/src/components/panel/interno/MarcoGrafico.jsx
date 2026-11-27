@@ -1,8 +1,8 @@
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Tarjeta } from './Tarjeta.jsx'
 
 // Tarjeta de un gráfico del panel interno: título, una línea de contexto y el gráfico.
 // `consulta` (opcional) cubre la carga y el error; `vacio` muestra un aviso si no hay datos.
@@ -13,16 +13,14 @@ export function MarcoGrafico({ titulo, descripcion, accion, consulta, vacio, men
   else if (vacio) cuerpo = <Vacio titulo="Sin datos para graficar" descripcion={mensajeVacio} />
 
   return (
-    <Tarjeta className={cn('gap-3', className)} {...props}>
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h3 className="font-medium tracking-tight">{titulo}</h3>
-          {descripcion && <p className="text-xs text-muted-foreground">{descripcion}</p>}
-        </div>
-        {accion}
-      </div>
-      {cuerpo}
-    </Tarjeta>
+    <Card className={cn('min-w-0', className)} {...props}>
+      <CardHeader>
+        <CardTitle>{titulo}</CardTitle>
+        {descripcion && <CardDescription>{descripcion}</CardDescription>}
+        {accion && <CardAction>{accion}</CardAction>}
+      </CardHeader>
+      <CardContent>{cuerpo}</CardContent>
+    </Card>
   )
 }
 

@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { Link } from 'react-router'
-import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, ChartAreaIcon, CrownIcon, MinusIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CrownIcon, MinusIcon } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { rankings as pedirRankings } from '@/api/cliente.js'
 import { tendenciaDePosiciones } from '@/components/comparar/series.js'
@@ -13,7 +13,8 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
-import { Etiqueta, SeccionGris, Segmentado, TituloDosTonos } from '@/components/marca'
+import { Seccion } from './Seccion.jsx'
+import { SelectorRanking } from './SelectorRanking.jsx'
 import { Tarjeta } from './Tarjeta.jsx'
 
 // Eje en millones: 87562053.92 -> "87.6 M".
@@ -21,7 +22,7 @@ const compacto = new Intl.NumberFormat('es-PA', { notation: 'compact', maximumFr
 
 const rankingDe = (respuesta, ranking) => respuesta?.rankings?.find((r) => r.Ranking === ranking)
 
-// "Analytics" del panel interno: evolución de posiciones por ranking. Segmentado de rankings, lista
+// Evolución de posiciones por ranking en el panel interno: pestañas de rankings, lista
 // lateral con la posición de cada banco (el líder primero) y gráfico de área del banco elegido.
 // Una petición a GET /api/rankings por período cargado hasta el elegido; no se calcula nada (R2).
 export function EvolucionPosiciones() {
@@ -104,30 +105,27 @@ export function EvolucionPosiciones() {
   }
 
   return (
-    <SeccionGris role="region" className="flex flex-col gap-5 animate-aparecer" aria-labelledby="titulo-evolucion">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-2">
-          <Etiqueta icono={ChartAreaIcon}>Analytics</Etiqueta>
-          <TituloDosTonos fuerte={<span id="titulo-evolucion">Evolución de posiciones</span>} suave="por ranking" />
-        </div>
+    <Seccion
+      id="titulo-evolucion"
+      titulo="Evolución de posiciones por ranking"
+      descripcion="El líder primero; elige un banco para ver su saldo en cada corte."
+      accion={
         <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit' })}>
           Ver rankings
           <ArrowRightIcon aria-hidden="true" />
         </Link>
-      </div>
-      {nombres.length > 0 && (
-        <Segmentado
-          ariaLabel="Ranking"
-          opciones={nombres.map((n) => ({ valor: n, etiqueta: n }))}
-          valor={ranking}
-          onCambio={(valor) => {
-            setRanking(valor)
-            setBanco(null)
-          }}
-        />
-      )}
+      }
+    >
+      <SelectorRanking
+        rankings={nombres}
+        valor={ranking}
+        onCambio={(valor) => {
+          setRanking(valor)
+          setBanco(null)
+        }}
+      />
       {contenido}
-    </SeccionGris>
+    </Seccion>
   )
 }
 
@@ -168,7 +166,7 @@ function FilaBanco({ banco: b, elegido, alElegir }) {
 
 function GraficoArea({ serie }) {
   const id = useId().replace(/:/g, '')
-  const config = { saldo: { label: 'Saldo', color: 'var(--sube)' } }
+  const config = { saldo: { label: 'Saldo', color: 'var(--chart-1)' } }
   if (serie.length < 2) {
     return <p className="text-sm text-muted-foreground">Con un solo período cargado aún no hay evolución que mostrar.</p>
   }

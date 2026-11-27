@@ -4,7 +4,7 @@ import {
   movimientos as pedirMovimientos,
   movimientosDescomposicion as pedirDescomposicion,
 } from '@/api/cliente.js'
-import { SeccionGris, TituloDosTonos } from '@/components/marca'
+import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Accesos } from '@/components/panel/interno/Accesos.jsx'
 import { AlertasCalidad } from '@/components/panel/interno/AlertasCalidad.jsx'
 import { CalidadPorCorte } from '@/components/panel/interno/CalidadPorCorte.jsx'
@@ -15,10 +15,12 @@ import { EvolucionPosiciones } from '@/components/panel/interno/EvolucionPosicio
 import { MovimientosExplicados } from '@/components/panel/interno/MovimientosExplicados.jsx'
 import { ResumenCorte } from '@/components/panel/interno/ResumenCorte.jsx'
 import { RiesgoCartera } from '@/components/panel/interno/RiesgoCartera.jsx'
+import { Seccion } from '@/components/panel/interno/Seccion.jsx'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { periodoAnterior } from '@/lib/periodos.js'
+import { Pagina } from './Pagina.jsx'
 
 // Cortes que entran en los gráficos de composición (el elegido y los anteriores).
 const CORTES_INDICADORES = 3
@@ -31,9 +33,10 @@ const SIN_CONSULTA = { datos: null, error: null, cargando: false, reintentar: ()
 // - Administrador: lo anterior más el estado de la operación, compacto, al final.
 // Toda cifra sale del API (R2). Cada consulta se pide una sola vez aquí y se comparte entre bloques.
 export default function PanelInterno() {
-  const { perfil, nombre } = usePerfil()
+  const { perfil, puede } = usePerfil()
   const { periodos, periodo } = usePeriodo()
-  const analiza = perfil === 'analista' || perfil === 'admin'
+  // Comparar períodos es configurable por el Administrador (perfiles y permisos): se pregunta por la opción.
+  const analiza = puede('comparar_periodos')
   const desde = periodo ? periodoAnterior(periodos, periodo) : null
   const comparar = analiza && Boolean(desde && periodo)
   const fechas = periodos
@@ -67,8 +70,12 @@ export default function PanelInterno() {
   const consultaAlertas = { ...consultaCalidad, datos: consultaCalidad.datos ? { periodos: calidadElegida ? [calidadElegida] : [] } : null }
 
   return (
-    <div className="flex flex-col gap-6">
-      <ResumenCorte nombrePerfil={nombre} desde={desde} movimientos={movimientos} descomposicion={descomposicion} />
+    <Pagina
+      titulo="Panel"
+      descripcion="Qué cambió en el corte y por qué: la cartera, la variación de cada banco, el riesgo y la calidad."
+      acciones={<PeriodoDePagina />}
+    >
+      <ResumenCorte desde={desde} movimientos={movimientos} descomposicion={descomposicion} />
 
       <CarteraPorCorte consultaIndicadores={consultaIndicadores} />
 
@@ -85,18 +92,17 @@ export default function PanelInterno() {
 
       <RiesgoCartera consulta={consultaIndicadores} />
 
-      <SeccionGris role="region" className="flex animate-aparecer flex-col gap-5" aria-labelledby="titulo-control">
-        <TituloDosTonos fuerte={<span id="titulo-control">Calidad de los datos</span>} suave="corte a corte" />
+      <Seccion id="titulo-control" titulo="Calidad de los datos corte a corte" descripcion="Exclusiones de la cascada y alertas del corte elegido.">
         <CalidadPorCorte consulta={consultaCalidad} />
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <AlertasCalidad consulta={consultaAlertas} />
           <Accesos />
         </div>
-      </SeccionGris>
+      </Seccion>
 
       <EvolucionPosiciones />
 
       <EstadoOperacion />
-    </div>
+    </Pagina>
   )
 }
