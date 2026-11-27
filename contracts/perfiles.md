@@ -12,16 +12,24 @@ La tabla completa de opciones está en un solo lugar: `OPCIONES` en `server/src/
 
 ## Cómo se elige el perfil
 
-Basta con un selector de perfil (lo permite la sección 10). No hay contraseñas en el repo (R5).
+Hay dos sitios y el nginx de cada uno manda el header **`X-Sitio`** en cada petición a `/api`:
 
-- La UI manda el perfil elegido en el header **`X-Perfil`** en **todas** las peticiones a `/api`.
-- Sin header, o con el header vacío, el perfil es `publico`.
-- Se aceptan mayúsculas y espacios alrededor (`Admin` = `admin`).
-- Un valor desconocido responde **400** `PARAMETRO_INVALIDO`.
+- **`X-Sitio: publico`** (https://sbp.juank.tech): siempre `publico`. Se ignoran cookies, `X-Perfil` y tokens.
+- **`X-Sitio: interno`** (https://interno.sbp.juank.tech): el perfil sale de la sesión (cookie `sbp_sesion`, HttpOnly, firmada) o, para clientes MCP, de `Authorization: Bearer <MCP_TOKEN>` (perfil `analista`). Sin sesión, todo responde **401** `SESION_REQUERIDA` salvo `/salud`, `/perfil`, `/sesion` e `/ia/estado`. Los POST/PUT/DELETE con sesión llevan el header `X-Sbp: 1` (si falta: **403** `CSRF`).
+- **Sin `X-Sitio`** (llamada directa al API, que nunca se publica): desde la misma máquina vale el header `X-Perfil` (pruebas, agente de IA, MCP por stdio); sin header es `publico`, y un valor desconocido responde **400** `PARAMETRO_INVALIDO`. Desde otra IP es siempre `publico`.
+
+### Inicio de sesión
+
+| Método | Ruta | Cuerpo | Respuesta |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/sesion` | `{ "usuario", "clave" }` | 200 `{ usuario, nombre, perfil, nombre_perfil }` y la cookie. 400 `PARAMETRO_INVALIDO`, 401 `CREDENCIALES_INVALIDAS`, 429 `DEMASIADOS_PEDIDOS` (10 por minuto), 503 `USUARIOS_NO_DISPONIBLES` |
+| `DELETE` | `/api/sesion` | – | 204 y borra la cookie |
+
+En el sitio público estas rutas no existen (404). Los usuarios están en Supabase (`interno.usuarios`) o, de respaldo, en la variable `USUARIOS` del `.env`. No hay contraseñas en el repo (R5).
 
 ## `GET /api/perfil` · [ejemplo](perfil.json)
 
-Devuelve el perfil actual, sus opciones y la lista de perfiles. Con eso la UI arma el selector y el menú (#4).
+Devuelve el perfil actual, sus opciones, la lista de perfiles, el usuario de la sesión (`usuario`: `{ usuario, nombre }` o `null`) y el sitio (`sitio`: `publico`, `interno` o `directo`). Con eso la UI arma el menú (#4).
 
 | Campo | Contenido |
 | :--- | :--- |

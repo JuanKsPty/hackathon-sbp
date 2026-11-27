@@ -1,7 +1,11 @@
 # Mismo archivo para local y para Dokploy (issue #27).
-# - No publica puertos: en Dokploy el dominio apunta a sbp-client, puerto 80.
-#   En local, docker-compose.override.yml publica el client en CLIENT_PORT (8080 por defecto).
-# - El client (nginx) pasa /api/ a sbp-server:3001 por la red interna.
+# - Dos sitios, cada uno con su nginx y su bundle (client/Dockerfile con SITIO):
+#   sbp-publico: sin login; su nginx solo deja pasar las rutas públicas del API (sbp.juank.tech).
+#   sbp-interno: Analista y Administrador con inicio de sesión (interno.sbp.juank.tech).
+# - No publica puertos: en Dokploy cada dominio apunta a su servicio, puerto 80.
+#   En local, docker-compose.override.yml publica el público en CLIENT_PORT (8080) y el interno
+#   en CLIENT_PORT_INTERNO (8081).
+# - Cada nginx pasa /api/ a sbp-server:3001 por la red interna; el API no se publica.
 # - Variables opcionales: vacías si no se definen; el server usa entonces su valor por defecto.
 #   PORT, DATA_DIR, STORAGE_DIR y PARAMETROS_FILE ya vienen fijadas en server/Dockerfile.
 
@@ -16,6 +20,13 @@ services:
       AI_MODEL: ${AI_MODEL:-}
       ZAPIER_WEBHOOK_URL: ${ZAPIER_WEBHOOK_URL:-}
       APP_URL: ${APP_URL:-}
+      # Inicio de sesión del sitio interno: usuarios en Supabase (DATABASE_URL) o, de respaldo, en
+      # USUARIOS; SESION_SECRETO firma la cookie; MCP_TOKEN abre el MCP del sitio interno.
+      DATABASE_URL: ${DATABASE_URL:-}
+      SESION_SECRETO: ${SESION_SECRETO:-}
+      USUARIOS: ${USUARIOS:-}
+      MCP_TOKEN: ${MCP_TOKEN:-}
+      SESION_HORAS: ${SESION_HORAS:-}
     volumes:
       - sbp-storage:/app/storage
     healthcheck:
@@ -25,10 +36,29 @@ services:
       start_period: 20s
       retries: 3
 
-  sbp-client:
+  sbp-publico:
     build:
       context: .
       dockerfile: client/Dockerfile
+      args:
+        SITIO: publico
+    restart: unless-stopped
+    depends_on:
+      sbp-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  sbp-interno:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      args:
+        SITIO: interno
     restart: unless-stopped
     depends_on:
       sbp-server:

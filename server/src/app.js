@@ -14,6 +14,7 @@ import { rutasDeIndicadores } from './routes/indicadores.js';
 import { rutasDeMcp } from './routes/mcp.js';
 import { rutasDeVerificacion } from './routes/verificacion.js';
 import { rutasDeSuscripciones } from './routes/suscripciones.js';
+import { rutasDeSesion } from './routes/sesion.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { limitarPedidos } from './middleware/limitePedidos.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
@@ -43,7 +44,11 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp,
   app.use('/api/ia/preguntar', limitarPedidos(limiteIA));
   app.use('/api/explicaciones', limitarPedidos(limiteIA));
 
+  // Inicio de sesión del sitio interno: 10 intentos por IP por minuto.
+  app.post('/api/sesion', limitarPedidos({ maximo: 10, ventanaMs: 60 * 1000, maximoGlobal: 600, ventanaGlobalMs: 60 * 60 * 1000, mensaje: 'Demasiados intentos de inicio de sesión.' }));
+
   app.get('/api/salud', (req, res) => res.json({ ok: true, periodos: almacen.fechas() }));
+  app.use('/api', rutasDeSesion());
   app.use('/api', rutasDePerfil());
   app.use('/api', rutasDeBitacora());
   app.use('/api', rutasDeAdministracion(almacen));

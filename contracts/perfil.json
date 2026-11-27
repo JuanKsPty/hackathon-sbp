@@ -16,5 +16,7 @@
     { "perfil": "publico", "nombre": "Público" },
     { "perfil": "analista", "nombre": "Analista" },
     { "perfil": "admin", "nombre": "Administrador" }
-  ]
+  ],
+  "usuario": null,
+  "sitio": "directo"
 }

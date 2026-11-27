@@ -12,7 +12,8 @@
     "procesar": "node scripts/procesar.js",
     "humo": "node scripts/humo.js",
     "mcp": "node src/mcp/index.js",
-    "eval:agente": "node evals/agente/correr.js"
+    "eval:agente": "node evals/agente/correr.js",
+    "usuarios": "node scripts/usuarios.js"
   },
   "engines": {
     "node": ">=20"
@@ -22,6 +23,7 @@
     "@modelcontextprotocol/sdk": "^1.32.2",
     "csv-parse": "^7.0.3",
     "express": "^5.3.0",
+    "pg": "^8.23.1",
     "swagger-ui-express": "^5.0.1"
   }
 }

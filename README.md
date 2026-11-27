@@ -48,35 +48,43 @@ Requiere Node.js 22 o superior.
 ```bash
 cp .env.example .env   # opcional: todo vacío usa los valores por defecto
 npm install            # instala la raíz, server/ y client/
-npm run dev            # API en http://localhost:3001 y app en http://localhost:5173
+npm run dev            # API en :3001, sitio público en http://localhost:5173 e interno en http://localhost:5174
 ```
+
+La app son **dos sitios** que salen del mismo código (`SITIO=publico | interno`, ver [`client/README.md`](client/README.md)):
+
+| Sitio | Para | Local (npm) | Local (Docker) | Dokploy |
+| :--- | :--- | :--- | :--- | :--- |
+| Público | Público, sin inicio de sesión | http://localhost:5173 | http://localhost:8080 | https://sbp.juank.tech |
+| Interno | Analista y Administrador, con inicio de sesión | http://localhost:5174 | http://localhost:8081 | https://interno.sbp.juank.tech |
 
 | Script (raíz) | Qué hace |
 | :--- | :--- |
-| `npm run dev` | server y client juntos, recargando al guardar |
+| `npm run dev` | server y los dos sitios juntos, recargando al guardar |
 | `npm start` | solo el server (API) |
 | `npm test` | pruebas del server, incluida la autoverificación de la sección 12 |
-| `npm run build` | build de producción del client |
+| `npm run build` | build de producción de los dos sitios (`client/dist-publico` y `client/dist-interno`) |
 
 ### Con Docker (local)
 
 ```bash
-docker compose up --build   # app en http://localhost:8080
+docker compose up --build   # público en http://localhost:8080 e interno en http://localhost:8081
 ```
 
-- `docker-compose.yml` levanta dos servicios:
-  - `sbp-server`: el API, con su healthcheck en `/api/salud`;
-  - `sbp-client`: nginx, que sirve la app y pasa `/api/` al server.
+- `docker-compose.yml` levanta tres servicios:
+  - `sbp-server`: el API, con su healthcheck en `/api/salud`. No publica puerto;
+  - `sbp-publico`: nginx con el bundle público. Solo pasa al API una lista blanca de rutas públicas, sin cookies ni tokens, y las marca con `X-Sitio: publico`;
+  - `sbp-interno`: nginx con el bundle interno (login, Comparar, Administración). Pasa todo `/api/` con `X-Sitio: interno`.
 - Los períodos cargados, la bitácora y los parámetros se guardan en el volumen `sbp-storage`, montado en `/app/storage`. No se pierden al reiniciar ni al reconstruir.
-- `docker-compose.override.yml` solo publica el puerto local del client. Se cambia con `CLIENT_PORT`.
+- `docker-compose.override.yml` solo publica los puertos locales de los dos sitios. Se cambian con `CLIENT_PORT` (público) y `CLIENT_PORT_INTERNO` (interno).
 
 ### En Dokploy
 
-La app está desplegada en **https://sbp.juank.tech** (proyecto `hackathon-sbp`, servicio Compose `sbp-app`). Usa el mismo `docker-compose.yml`:
+La app está desplegada en **https://sbp.juank.tech** (sitio público) y **https://interno.sbp.juank.tech** (sitio interno), proyecto `hackathon-sbp`, servicio Compose `sbp-app`. Usa el mismo `docker-compose.yml`:
 
 1. Servicio **Compose** desde el repo de GitHub, rama `main` y ruta `./docker-compose.yml`. Cada push a `main` (cada PR que se mezcla) lo vuelve a desplegar solo.
-2. En **Environment** van solo las variables que se usan: `ANTHROPIC_API_KEY` (y si se quiere `AI_MODEL`) para la IA, y para las alertas por correo `ZAPIER_WEBHOOK_URL` y `APP_URL=https://sbp.juank.tech` (la dirección de los enlaces de confirmar y darse de baja). Nunca van en el repo (R5). `docker-compose.yml` le pasa al server cada una; una prueba (`server/tests/despliegue.test.js`) avisa si el código lee una variable que el compose no pasa.
-3. En **Domains**, el dominio apunta al servicio `sbp-client`, puerto `80`, con HTTPS (Let's Encrypt).
+2. En **Environment** van solo las variables que se usan: `ANTHROPIC_API_KEY` (y si se quiere `AI_MODEL`) para la IA, `ZAPIER_WEBHOOK_URL` y `APP_URL=https://sbp.juank.tech` para las alertas por correo, y `DATABASE_URL`, `SESION_SECRETO`, `USUARIOS` y `MCP_TOKEN` para el inicio de sesión del sitio interno. Nunca van en el repo (R5). `docker-compose.yml` le pasa al server cada una; una prueba (`server/tests/despliegue.test.js`) avisa si el código lee una variable que el compose no pasa.
+3. En **Domains**, dos dominios con HTTPS (Let's Encrypt): `sbp.juank.tech` al servicio `sbp-publico`, puerto `80`, e `interno.sbp.juank.tech` al servicio `sbp-interno`, puerto `80`. El DNS ya resuelve `*.sbp.juank.tech` al servidor.
 4. El volumen `sbp-storage` (períodos cargados, bitácora y parámetros) persiste entre redeploys: el servicio no usa nombres aleatorios (`randomize` apagado).
 
 Prueba rápida después de desplegar:
@@ -84,7 +92,8 @@ Prueba rápida después de desplegar:
 ```bash
 curl https://sbp.juank.tech/api/salud                                  # ok y los períodos cargados
 curl https://sbp.juank.tech/api/ia/estado                              # ia_disponible: true si hay llave
-curl -o /dev/null -w '%{http_code}\n' https://sbp.juank.tech/api/exportar/movimientos.csv   # 403 para Público
+curl -o /dev/null -w '%{http_code}\n' https://sbp.juank.tech/api/exportar/movimientos.csv   # 404: no existe en el sitio público
+curl -o /dev/null -w '%{http_code}\n' https://interno.sbp.juank.tech/api/rankings          # 401 sin sesión
 ```
 
 ## Variables de entorno
@@ -94,10 +103,11 @@ Todas están en [`.env.example`](.env.example), vacías y con su valor por defec
 | Grupo | Variables |
 | :--- | :--- |
 | Server | `PORT` (3001), `DATA_DIR` (`data/`), `STORAGE_DIR` (`storage/`), `PARAMETROS_FILE` (regla de movimientos) |
+| Sesión | `DATABASE_URL` (Supabase, tabla `interno.usuarios`), `USUARIOS` (respaldo local), `SESION_SECRETO`, `SESION_HORAS`, `MCP_TOKEN` |
 | IA | `ANTHROPIC_API_KEY`, `AI_MODEL` |
 | Alertas | `ZAPIER_WEBHOOK_URL` (webhook de Zapier, #7) |
 | Client | `VITE_USAR_MOCKS`, `API_URL` (destino del proxy en desarrollo) |
-| Docker | `CLIENT_PORT` (8080) |
+| Docker | `CLIENT_PORT` (8080, sitio público), `CLIENT_PORT_INTERNO` (8081, sitio interno) |
 
 ## Estructura
 
@@ -161,9 +171,20 @@ La regla **no está fija en el código**: vive en `server/config/parametros.json
 | Analista | además comparar entidades y períodos y generar reportes personalizados |
 | Administrador | además cargar o actualizar un período, administrar parámetros y catálogos y ver la bitácora |
 
-- La app usa un selector de perfil y lo envía en el header `X-Perfil`. No hay contraseñas.
-- `GET /api/perfil` le dice a la UI qué opciones mostrar.
-- El backend responde 403 (`PERFIL_NO_AUTORIZADO`) a lo que el perfil no puede hacer. Por ejemplo, como Público no se puede cargar un período.
+La app tiene **dos sitios**, cada uno con su propio nginx:
+
+| Sitio | Dirección | Perfiles | Inicio de sesión |
+| :--- | :--- | :--- | :--- |
+| Público | https://sbp.juank.tech (local: `:8080`) | Público | no hay |
+| Interno | https://interno.sbp.juank.tech (local: `:8081`) | Analista y Administrador | usuario y contraseña |
+
+- El nginx de cada sitio marca cada pedido con el header `X-Sitio`. El público solo deja pasar los endpoints públicos y descarta cookies y tokens.
+- En el sitio interno, el server exige sesión (cookie HttpOnly firmada, 8 horas) y responde 401 `SESION_REQUERIDA` sin ella. Los cambios (POST/PUT/DELETE) llevan además el header `X-Sbp: 1` (defensa CSRF).
+- **Usuarios:** tabla `interno.usuarios` en Supabase (contraseñas con scrypt, [`server/db/001_usuarios.sql`](server/db/001_usuarios.sql)). Si Supabase no está configurada o no responde, el server usa los usuarios de `USUARIOS` en el `.env`, así la demo local funciona sin internet. Ninguna contraseña está en el repo (R5); `npm run usuarios --prefix server -- <usuario> <analista|admin>` genera una.
+- `POST /api/sesion` inicia sesión, `DELETE /api/sesion` la cierra y `GET /api/perfil` le dice a la UI quién es y qué opciones mostrar.
+- El backend responde 403 (`PERFIL_NO_AUTORIZADO`) a lo que el perfil no puede hacer. Como Público no se puede cargar un período; como Administrador, en el sitio interno, sí.
+- MCP: el del sitio público responde siempre como Público. El del interno (`/api/mcp`) pide `Authorization: Bearer <MCP_TOKEN>` y responde como Analista.
+- El header `X-Perfil` solo vale en llamadas directas al API desde la misma máquina (pruebas, el agente de IA y el MCP por stdio). El puerto del API nunca se publica.
 
 ## Uso de IA
 

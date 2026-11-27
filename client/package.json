@@ -4,8 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "concurrently -k -n publico,interno -c magenta,cyan \"npm run dev:publico\" \"npm run dev:interno\"",
+    "dev:publico": "SITIO=publico vite",
+    "dev:interno": "SITIO=interno vite",
+    "build": "npm run build:publico && npm run build:interno",
+    "build:publico": "SITIO=publico vite build",
+    "build:interno": "SITIO=interno vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "node --test \"src/**/*.test.js\""

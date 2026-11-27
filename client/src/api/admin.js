@@ -1,12 +1,13 @@
-// Llamadas de la página de Administración (#66). Todas exigen X-Perfil: admin en el backend.
+// Llamadas de la página de Administración (#66). Todas exigen una sesión de Administrador (sitio interno).
 //   POST /api/periodos        carga de un AT03 (contracts/carga.md, #29)
 //   GET/PUT /api/parametros   regla de movimiento significativo (contracts/administracion.md, #30)
 //   GET /api/admin/catalogos  estado de los catálogos (#30)
 //   GET /api/bitacora         registro de operaciones (contracts/bitacora.md, #31)
-// cliente.js solo hace GET con el perfil global; aquí el perfil se pasa explícito y se permiten
-// POST y PUT. Los errores llegan como ApiError, igual que en cliente.js.
+// cliente.js solo hace GET; aquí se permiten POST y PUT. El primer argumento (perfil) ya no se usa:
+// el perfil sale de la cookie de sesión. Los errores llegan como ApiError, igual que en cliente.js.
 import { ApiError, MENSAJE_API_NO_DISPONIBLE } from './errores.js'
 import { registrarFuente } from './fuente.js'
+import { HEADERS_BASE, siSesionVencida } from './sesion.js'
 
 const BASE = '/api'
 
@@ -36,12 +37,12 @@ function errorDe(respuesta, cuerpo) {
   })
 }
 
-async function pedirComo(perfil, ruta, { metodo = 'GET', headers = {}, cuerpo, signal } = {}) {
+async function pedirComo(_perfil, ruta, { metodo = 'GET', headers = {}, cuerpo, signal } = {}) {
   let respuesta
   try {
     respuesta = await fetch(`${BASE}${ruta}`, {
       method: metodo,
-      headers: { Accept: 'application/json', 'X-Perfil': perfil, ...headers },
+      headers: { Accept: 'application/json', ...HEADERS_BASE, ...headers },
       body: cuerpo,
       signal,
     })
@@ -50,7 +51,11 @@ async function pedirComo(perfil, ruta, { metodo = 'GET', headers = {}, cuerpo, s
     throw new ApiError({ status: 0, codigo: 'API_NO_DISPONIBLE', mensaje: MENSAJE_API_NO_DISPONIBLE })
   }
   const datos = await leerJson(respuesta)
-  if (!respuesta.ok) throw errorDe(respuesta, datos)
+  if (!respuesta.ok) {
+    const error = errorDe(respuesta, datos)
+    siSesionVencida(error)
+    throw error
+  }
   if (datos === null) {
     throw new ApiError({ status: respuesta.status, codigo: 'RESPUESTA_INESPERADA', mensaje: 'El API respondió sin un JSON válido.' })
   }

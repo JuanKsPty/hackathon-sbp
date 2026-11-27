@@ -76,7 +76,7 @@ export function rutasDeCarga(almacen, { obtenerMovimientos } = {}) {
       registrarOperacion({
         operacion: 'carga_periodo',
         archivo: carga.archivo,
-        perfil: req.perfil,
+        perfil: req.perfil, usuario: req.usuario?.usuario,
         resultado: 'exito',
         detalle: `Período ${p.Fecha} (${p.Accion})`,
       });
@@ -103,7 +103,7 @@ export function rutasDeCarga(almacen, { obtenerMovimientos } = {}) {
       registrarOperacion({
         operacion: 'carga_periodo',
         archivo: req.get('X-Nombre-Archivo') || null,
-        perfil: req.perfil,
+        perfil: req.perfil, usuario: req.usuario?.usuario,
         resultado: 'error',
         detalle: error.message,
       });

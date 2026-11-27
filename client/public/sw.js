@@ -1,7 +1,7 @@
 // Service worker de Rankings de Crédito (#8). Hecho a mano, sin librerías.
 // Guarda la "cáscara" de la app para que abra rápido y se pueda instalar en el celular.
 // Al cambiar lo que se guarda, sube la versión: el nombre nuevo borra la caché vieja.
-const CACHE = 'rankings-v1'
+const CACHE = 'rankings-publico-v2'
 
 // Archivos mínimos para abrir la app.
 const CASCARA = [
@@ -37,7 +37,7 @@ self.addEventListener('fetch', (evento) => {
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
 
-  // El API nunca se guarda: las respuestas cambian según el perfil (X-Perfil) y deben estar al día.
+  // El API nunca se guarda: las respuestas cambian según la sesión y deben estar al día.
   // Esto cubre también /api/docs y las descargas CSV.
   if (url.pathname.startsWith('/api/')) return
 

@@ -59,13 +59,13 @@ export function rutasDeAdministracion(almacen) {
     try {
       nueva = validarRegla(req.body?.regla_significativo);
     } catch (error) {
-      registrarOperacion({ operacion: 'cambio_parametros', perfil: req.perfil, resultado: 'error', detalle: error.message });
+      registrarOperacion({ operacion: 'cambio_parametros', perfil: req.perfil, usuario: req.usuario?.usuario, resultado: 'error', detalle: error.message });
       throw new ErrorApi(400, 'PARAMETRO_INVALIDO', error.message);
     }
     guardarReglaMovimientos(nueva);
     registrarOperacion({
       operacion: 'cambio_parametros',
-      perfil: req.perfil,
+      perfil: req.perfil, usuario: req.usuario?.usuario,
       resultado: 'exito',
       detalle: `regla_significativo: ${JSON.stringify(anterior)} -> ${JSON.stringify(nueva)}`,
     });

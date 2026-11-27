@@ -23,7 +23,7 @@ function contar(ventana, ahora, duracion) {
 const segundosQueFaltan = (ventana, ahora, duracion) => Math.max(1, Math.ceil((ventana.inicio + duracion - ahora) / 1000));
 
 export function limitarPedidos(opciones = {}, ahora = Date.now) {
-  const { maximo, ventanaMs, maximoGlobal, ventanaGlobalMs } = { ...LIMITE_IA_POR_DEFECTO, ...opciones };
+  const { maximo, ventanaMs, maximoGlobal, ventanaGlobalMs, mensaje } = { ...LIMITE_IA_POR_DEFECTO, ...opciones };
   const porIp = new Map(); // ip -> { inicio, cuenta }
   let global = null;
 
@@ -39,7 +39,7 @@ export function limitarPedidos(opciones = {}, ahora = Date.now) {
     if (ventanaIp.cuenta > maximo) {
       const espera = segundosQueFaltan(ventanaIp, t, ventanaMs);
       res.set('Retry-After', String(espera));
-      return next(new ErrorApi(429, 'DEMASIADOS_PEDIDOS', `Hiciste muchas consultas a la IA seguidas. Espera ${espera} segundos y vuelve a intentar.`));
+      return next(new ErrorApi(429, 'DEMASIADOS_PEDIDOS', mensaje ? `${mensaje} Espera ${espera} segundos.` : `Hiciste muchas consultas a la IA seguidas. Espera ${espera} segundos y vuelve a intentar.`));
     }
     global = contar(global, t, ventanaGlobalMs);
     if (global.cuenta > maximoGlobal) {

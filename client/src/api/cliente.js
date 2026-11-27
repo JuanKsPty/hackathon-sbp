@@ -1,13 +1,15 @@
 // Cliente del API del backend. Todas las rutas cuelgan de /api (en desarrollo Vite las pasa al
 // server; en Docker lo hace nginx). Los contratos de cada respuesta están en /contracts.
 //
-// - Cada petición manda el perfil elegido en el header X-Perfil (contracts/perfiles.md).
+// - El perfil sale de la sesión (cookie HttpOnly del sitio interno); el sitio público siempre es Público.
+// - Cada petición manda X-Sbp: 1 (el server lo exige en POST, PUT y DELETE contra CSRF).
 // - Los errores llegan como ApiError (status, codigo, mensaje, detalles).
 // - Si no hay conexión con el API: codigo 'API_NO_DISPONIBLE'.
 // - Modo mock (solo en `npm run dev` con VITE_USAR_MOCKS=true): responde con los ejemplos de
 //   /contracts. El build de producción no incluye ese código ni esos datos (regla R2).
 import { ApiError, MENSAJE_API_NO_DISPONIBLE } from './errores.js'
 import { registrarFuente } from './fuente.js'
+import { HEADERS_BASE, siSesionVencida } from './sesion.js'
 
 export { ApiError } from './errores.js'
 
@@ -15,7 +17,7 @@ const BASE = '/api'
 
 let perfilActual = 'publico'
 
-// Lo llama PerfilContext al cambiar de perfil, antes de que las páginas vuelvan a pedir datos.
+// Lo llama PerfilContext con el perfil de la sesión; solo lo usa el modo mock.
 export function fijarPerfilDePeticiones(perfil) {
   perfilActual = perfil || 'publico'
 }
@@ -73,7 +75,7 @@ async function pedir(ruta, parametros, { signal } = {}) {
   let respuesta
   try {
     respuesta = await fetch(`${BASE}${ruta}${construirQuery(parametros)}`, {
-      headers: { Accept: 'application/json', 'X-Perfil': perfilActual },
+      headers: { Accept: 'application/json', ...HEADERS_BASE },
       signal,
     })
   } catch (error) {
@@ -82,7 +84,11 @@ async function pedir(ruta, parametros, { signal } = {}) {
   }
 
   const cuerpo = await leerCuerpo(respuesta)
-  if (!respuesta.ok) throw errorDeRespuesta(respuesta, cuerpo)
+  if (!respuesta.ok) {
+    const error = errorDeRespuesta(respuesta, cuerpo)
+    siSesionVencida(error)
+    throw error
+  }
   if (cuerpo === null) {
     throw new ApiError({
       status: respuesta.status,
@@ -143,7 +149,7 @@ export const DESCARGAS = ['rankings', 'subactividades', 'calidad', 'excluidas', 
 
 // URL para un <a href download>. Sin periodo, el CSV trae todos los períodos (_todos.csv).
 // movimientos acepta desde, hasta, ranking y solo_significativos.
-// Ojo: un enlace no manda X-Perfil; si una descarga llega a exigir perfil, hay que pedirla con fetch.
+// Un enlace manda la cookie de sesión (mismo origen), pero no X-Sbp; basta para un GET.
 export function urlDescarga(tipo, parametros = {}) {
   if (!DESCARGAS.includes(tipo)) {
     throw new ApiError({
@@ -154,18 +160,20 @@ export function urlDescarga(tipo, parametros = {}) {
   return `${BASE}/exportar/${tipo}.csv${construirQuery(parametros)}`
 }
 
-// Descarga con fetch (sí manda X-Perfil), para las descargas que exigen perfil: movimientos.csv
+// Descarga con fetch, para las descargas que exigen perfil: movimientos.csv
 // (entregable 5) y personalizado.csv. Si el API responde error, lanza ApiError como pedir().
 export async function descargarArchivo(ruta, parametros = {}) {
   let respuesta
   try {
-    respuesta = await fetch(`${BASE}${ruta}${construirQuery(parametros)}`, { headers: { 'X-Perfil': perfilActual } })
+    respuesta = await fetch(`${BASE}${ruta}${construirQuery(parametros)}`, { headers: { ...HEADERS_BASE } })
   } catch {
     throw new ApiError({ status: 0, codigo: 'API_NO_DISPONIBLE', mensaje: MENSAJE_API_NO_DISPONIBLE })
   }
   if (!respuesta.ok) {
     const cuerpo = await leerCuerpo(respuesta)
-    throw errorDeRespuesta(respuesta, cuerpo)
+    const error = errorDeRespuesta(respuesta, cuerpo)
+    siSesionVencida(error)
+    throw error
   }
   const blob = await respuesta.blob()
   const disposicion = respuesta.headers.get('Content-Disposition') ?? ''

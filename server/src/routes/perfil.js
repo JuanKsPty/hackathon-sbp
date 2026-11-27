@@ -12,6 +12,8 @@ export function rutasDePerfil() {
       nombre: NOMBRES_PERFIL[req.perfil],
       opciones: opcionesDe(req.perfil),
       perfiles: PERFILES.map((perfil) => ({ perfil, nombre: NOMBRES_PERFIL[perfil] })),
+      usuario: req.usuario ?? null,
+      sitio: req.sitio ?? 'directo',
     });
   });
 
