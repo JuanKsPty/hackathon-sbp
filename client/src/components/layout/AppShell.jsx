@@ -2,10 +2,13 @@ import { Outlet } from 'react-router'
 import { BarraFuente } from './BarraFuente.jsx'
 import { Encabezado } from './Encabezado.jsx'
 import { Navegacion } from './Navegacion.jsx'
+import { useControlPeriodo } from './SelectorPeriodo.jsx'
 import { AgenteFlotante } from '@/agente/AgenteFlotante.jsx'
 
 // Estructura de todas las páginas: barra lateral (>= 1024 px), encabezado y barra de fuente fijos arriba.
 export function AppShell() {
+  // El agente puede elegir el período desde cualquier página y tamaño de pantalla (#125).
+  useControlPeriodo()
   return (
     <div className="flex min-h-svh">
       <aside className="hidden w-64 shrink-0 border-r border-sidebar-border lg:block">
@@ -22,7 +25,7 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
-      {/* Agente flotante abajo a la derecha (#119): chat encima de la pantalla actual. */}
+      {/* Chat del agente (#119) encima de la pantalla actual; se abre desde el encabezado. */}
       <AgenteFlotante />
     </div>
   )

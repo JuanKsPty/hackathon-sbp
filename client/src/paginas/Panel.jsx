@@ -8,7 +8,7 @@ import { Pagina } from './Pagina.jsx'
 
 
 // Panel (#60): indicadores del período, líder de cada ranking, movimientos significativos con su
-// explicación (Analista y Administrador) e indicadores adicionales. El período se elige en el encabezado.
+// explicación (Analista y Administrador) e indicadores adicionales. El período se elige en el menú lateral.
 export default function Panel() {
   // Comparar períodos es configurable por el Administrador (perfiles y permisos): se pregunta por la opción.
   const { puede } = usePerfil()

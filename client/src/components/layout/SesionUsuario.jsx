@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { ChevronDownIcon, LogOutIcon, UserIcon } from 'lucide-react'
+import { LogOutIcon, UserIcon, UsersIcon } from 'lucide-react'
 import { salir } from '@/api/sesion.js'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,15 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { DESCRIPCIONES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { AVISO_ACCESO, DESCRIPCIONES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { cn } from '@/lib/utils'
 
-// Usuario de la sesión y botón Salir (solo sitio interno). Reemplaza al selector de perfil: el
-// perfil ya no se elige, sale de la cuenta con la que se entró (sección 10, entregable 8).
+// Quién está usando la app y con qué perfil, al pie del menú lateral (sección 10, entregable 8).
+// - Sitio interno: el usuario de la sesión, su perfil y Salir.
+// - Sitio público: "Consulta pública", sin inicio de sesión, y dónde están las opciones de Analista
+//   y Administrador.
 // Lleva data-guia="global.selector-perfil" para el cursor guía (contracts/guia.md).
-//   variante="menu":  botón con menú desplegable, para el encabezado.
-//   variante="lista": nombre, perfil y Salir a la vista, para el menú móvil (Sheet).
-export function SesionUsuario({ variante = 'menu', className }) {
+export function SesionUsuario({ className }) {
   const { usuario, perfil, nombre } = usePerfil()
   const [saliendo, setSaliendo] = useState(false)
 
@@ -33,43 +32,51 @@ export function SesionUsuario({ variante = 'menu', className }) {
     window.location.assign('/entrar')
   }
 
-  const quien = usuario?.nombre || usuario?.usuario || 'Sin sesión'
-
-  if (variante === 'lista') {
-    return (
-      <div data-guia="global.selector-perfil" className={cn('flex flex-col gap-2 rounded-md border border-sidebar-border px-2 py-2 text-sm', className)}>
-        <span className="flex flex-col gap-0.5">
-          <span className="font-medium">{quien}</span>
-          <span className="text-xs">Perfil {nombre}</span>
-        </span>
-        <Button variant="outline" size="sm" onClick={cerrarSesion} disabled={saliendo}>
-          <LogOutIcon aria-hidden="true" />
-          Salir
-        </Button>
-      </div>
-    )
-  }
+  const quien = __INTERNO__ ? usuario?.nombre || usuario?.usuario || 'Sin sesión' : 'Consulta pública'
+  const detalle = __INTERNO__ ? `Perfil ${nombre}` : 'Sin inicio de sesión'
+  const Icono = __INTERNO__ ? UserIcon : UsersIcon
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" aria-label={`${quien}, perfil ${nombre}. Abrir menú de la sesión`} data-guia="global.selector-perfil" className={className}>
-          <UserIcon aria-hidden="true" />
-          <span className="max-w-32 truncate">{quien}</span>
-          <span className="text-muted-foreground">· {nombre}</span>
-          <ChevronDownIcon className="text-muted-foreground" aria-hidden="true" />
-        </Button>
+      <DropdownMenuTrigger
+        data-guia="global.selector-perfil"
+        aria-label={`${quien}, ${detalle}. Abrir menú del perfil`}
+        className={cn(
+          'flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1.5 text-left outline-none transition-colors',
+          'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring',
+          'data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground',
+          className,
+        )}
+      >
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
+          <Icono className="size-3.5" aria-hidden="true" />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-sm font-medium">{quien}</span>
+          <span className="truncate text-xs opacity-80">{detalle}</span>
+        </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72 max-w-[calc(100vw-2rem)]">
-        <DropdownMenuLabel className="flex flex-col gap-0.5">
+      <DropdownMenuContent side="top" align="start" className="w-72 max-w-[calc(100vw-2rem)]">
+        <DropdownMenuLabel className="flex flex-col gap-1">
           <span>{quien}</span>
-          <span className="text-xs font-normal text-muted-foreground">Perfil {nombre}. {DESCRIPCIONES_PERFIL[perfil]}</span>
+          <span className="text-xs font-normal text-muted-foreground">
+            Perfil {nombre}. {DESCRIPCIONES_PERFIL[perfil]}
+          </span>
+          {!__INTERNO__ && (
+            <span className="text-xs font-normal text-muted-foreground">
+              Comparar períodos y Administración: {AVISO_ACCESO.charAt(0).toLowerCase() + AVISO_ACCESO.slice(1)}
+            </span>
+          )}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={cerrarSesion} disabled={saliendo}>
-          <LogOutIcon aria-hidden="true" />
-          Salir
-        </DropdownMenuItem>
+        {__INTERNO__ && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={cerrarSesion} disabled={saliendo}>
+              <LogOutIcon aria-hidden="true" />
+              Salir
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
