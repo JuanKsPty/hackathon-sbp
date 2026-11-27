@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { DownloadIcon, InfoIcon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { CheckIcon, DownloadIcon, InfoIcon, LinkIcon } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import {
   calidad as pedirCalidad,
   catalogos as pedirCatalogos,
@@ -15,7 +16,9 @@ import { FiltrosRanking, TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { GraficoRanking } from '@/components/rankings/GraficoRanking.jsx'
 import { SelectorRanking } from '@/components/rankings/SelectorRanking.jsx'
 import { TablaRanking } from '@/components/rankings/TablaRanking.jsx'
-import { buttonVariants } from '@/components/ui/button'
+import { escribirVista, leerVista } from '@/components/rankings/vista.js'
+import { TerminoGlosario } from '@/components/glosario/TerminoGlosario.jsx'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
@@ -28,16 +31,51 @@ const RANKING_CON_REGLA_SB21 = 'CONSUMO'
 // Página Rankings (#64): período (encabezado), los 6 rankings, tabla ordenable, gráfico,
 // filtros por banco y subactividad, y desglose por subactividad. Todas las cifras vienen del API (R2).
 export default function Rankings() {
-  const { periodo, cargando: cargandoPeriodos, error: errorPeriodos } = usePeriodo()
+  const {
+    periodo: periodoGlobal,
+    periodos,
+    cambiarPeriodo,
+    cargando: cargandoPeriodos,
+    error: errorPeriodos,
+  } = usePeriodo()
   const catalogo = useConsulta(pedirCatalogos)
   const listaRankings = catalogo.datos?.rankings ?? []
   const listaBancos = catalogo.datos?.bancos ?? []
 
-  const [elegido, setElegido] = useState(null)
-  const [banco, setBanco] = useState(TODOS)
-  const [subactividad, setSubactividad] = useState(TODOS)
-  const ranking = elegido ?? listaRankings[0]?.Ranking ?? null
+  // La vista vive en la URL (#129): ?periodo=…&ranking=…&banco=…&subactividad=… (lo inválido se ignora).
+  const [parametros, setParametros] = useSearchParams()
+  const vistaUrl = leerVista(parametros, { periodos, rankings: listaRankings, bancos: listaBancos })
+  const periodo = vistaUrl.periodo ?? periodoGlobal
+  const ranking = vistaUrl.ranking ?? listaRankings[0]?.Ranking ?? null
+  const banco = vistaUrl.banco ?? TODOS
+  const subactividad = vistaUrl.subactividad ?? TODOS
   const subactividadesDelRanking = listaRankings.find((r) => r.Ranking === ranking)?.Subactividades ?? []
+  const listoParaUrl = periodos.length > 0 && listaRankings.length > 0
+
+  const cambiarVista = (cambios) => {
+    const vista = { periodo, ranking, banco: vistaUrl.banco, subactividad: vistaUrl.subactividad, ...cambios }
+    setParametros(escribirVista(vista), { replace: true })
+  }
+  const sinFiltro = (valor) => (valor === TODOS ? null : valor)
+
+  // El período también está en el selector del encabezado (PeriodoContext). Se sincronizan sin tocarlo:
+  // - un enlace con ?periodo= válido cambia el encabezado;
+  // - si el usuario elige otro período en el encabezado, la URL lo sigue.
+  const periodoGlobalAnterior = useRef(null)
+  useEffect(() => {
+    if (!listoParaUrl) return
+    const anterior = periodoGlobalAnterior.current
+    periodoGlobalAnterior.current = periodoGlobal
+    const eligioEnEncabezado = anterior !== null && periodoGlobal !== anterior && periodoGlobal !== vistaUrl.periodo
+    if (!eligioEnEncabezado && vistaUrl.periodo && vistaUrl.periodo !== periodoGlobal) {
+      cambiarPeriodo(vistaUrl.periodo)
+      return
+    }
+    // La URL siempre refleja la vista completa y válida (así se puede copiar y compartir).
+    const periodoFinal = eligioEnEncabezado ? periodoGlobal : (vistaUrl.periodo ?? periodoGlobal)
+    const deseados = escribirVista({ periodo: periodoFinal, ranking, banco: vistaUrl.banco, subactividad: vistaUrl.subactividad })
+    if (deseados.toString() !== parametros.toString()) setParametros(deseados, { replace: true })
+  }, [listoParaUrl, periodoGlobal, vistaUrl.periodo, vistaUrl.banco, vistaUrl.subactividad, ranking, parametros, cambiarPeriodo, setParametros])
 
   const listo = Boolean(periodo && ranking)
   const consultaRanking = useConsulta((o) => pedirRankings({ periodo, ranking }, o), [periodo, ranking], { activa: listo })
@@ -45,10 +83,10 @@ export default function Rankings() {
   const conReglaSB21 = ranking === RANKING_CON_REGLA_SB21
   const consultaCalidad = useConsulta((o) => pedirCalidad({ periodo }, o), [periodo], { activa: Boolean(periodo) && conReglaSB21 })
 
-  const cambiarRanking = (nuevo) => {
-    setElegido(nuevo)
-    setSubactividad(TODOS) // las subactividades cambian con el ranking
-  }
+  // Las subactividades cambian con el ranking: al cambiarlo se quita ese filtro.
+  const cambiarRanking = (nuevo) => cambiarVista({ ranking: nuevo, subactividad: null })
+  const setBanco = (valor) => cambiarVista({ banco: sinFiltro(valor) })
+  const setSubactividad = (valor) => cambiarVista({ subactividad: sinFiltro(valor) })
 
   if (catalogo.cargando || cargandoPeriodos) {
     return <Contenedor><Cargando filas={6} /></Contenedor>
@@ -76,7 +114,10 @@ export default function Rankings() {
       <Card>
         <CardHeader>
           <CardTitle>Ranking y filtros</CardTitle>
-          <CardDescription>El período se elige en el encabezado.</CardDescription>
+          <CardDescription>El período se elige en el encabezado. El enlace guarda esta vista para compartirla.</CardDescription>
+          <CardAction>
+            <CopiarEnlace />
+          </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <SelectorRanking rankings={listaRankings} valor={ranking} alCambiar={cambiarRanking} />
@@ -137,7 +178,7 @@ export default function Rankings() {
             <p className="flex items-start gap-2 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
               <InfoIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
               <span>
-                Incluye la regla SB21: los créditos personales con facilidad 07 cuentan en Tarjeta.
+                Incluye la <TerminoGlosario termino="sb21">regla SB21</TerminoGlosario>: los créditos personales con facilidad 07 cuentan en Tarjeta.
                 {typeof reclasificadas === 'number' && ` En este período se reclasificaron ${formatearEntero(reclasificadas)} operaciones.`}
                 {' '}El total de la actividad no cambia.
               </span>
@@ -171,6 +212,35 @@ function Estado({ consulta, vacio, children }) {
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   if (vacio) return <Vacio titulo="Sin datos" descripcion="No hay datos para los filtros elegidos." />
   return children
+}
+
+// Copia la dirección actual, que ya trae la vista (período, ranking, banco y subactividad).
+function CopiarEnlace() {
+  const [copiado, setCopiado] = useState(false)
+
+  const copiar = async () => {
+    const enlace = window.location.href
+    try {
+      await navigator.clipboard.writeText(enlace)
+    } catch {
+      // Sin permiso de portapapeles (por ejemplo, fuera de https): se copia con un campo temporal.
+      const campo = document.createElement('textarea')
+      campo.value = enlace
+      document.body.appendChild(campo)
+      campo.select()
+      document.execCommand('copy')
+      campo.remove()
+    }
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2000)
+  }
+
+  return (
+    <Button variant="outline" size="sm" onClick={copiar} aria-live="polite">
+      {copiado ? <CheckIcon aria-hidden="true" /> : <LinkIcon aria-hidden="true" />}
+      {copiado ? 'Enlace copiado' : 'Copiar enlace'}
+    </Button>
+  )
 }
 
 // `guia`: identificador data-guia para el agente guía (contracts/guia.md), si el contrato lo define.
