@@ -26,6 +26,10 @@ import { decidirPeriodo, escribirFiltros, leerFiltros } from '@/lib/filtrosUrl.j
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Pagina } from './Pagina.jsx'
+import { NUEVA_PREGUNTA } from '@/components/asistente/conversacion.js'
+
+// Cuánto queda resaltada la fila que marca el agente.
+const RESALTADO_MS = 3000
 
 // La regla SB21 (sección 6) solo mueve saldo dentro de este ranking: Crédito personal con facilidad 07 → Tarjeta.
 const RANKING_CON_REGLA_SB21 = 'CONSUMO'
@@ -120,15 +124,29 @@ export default function Rankings() {
   // La tabla: su orden y la fila del agente viven aquí, así sobreviven a que la tabla se vuelva a
   // montar cuando cambian los datos (por ejemplo, justo después de elegir otro ranking).
   const [ordenTabla, setOrdenTabla] = useState(ORDEN_INICIAL)
-  const [delAgente, setDelAgente] = useState(null)
+  // La fila del agente es temporal: se quita a los 3 s y con cada pregunta nueva. `vez` hace que
+  // resaltar otra vez la misma fila vuelva a contar los 3 s.
+  const [resaltada, setResaltada] = useState(null)
+  const delAgente = resaltada?.codigo ?? null
+  useEffect(() => {
+    if (!resaltada) return undefined
+    const reloj = setTimeout(() => setResaltada(null), RESALTADO_MS)
+    return () => clearTimeout(reloj)
+  }, [resaltada])
+  useEffect(() => {
+    const limpiar = () => setResaltada(null)
+    window.addEventListener(NUEVA_PREGUNTA, limpiar)
+    return () => window.removeEventListener(NUEVA_PREGUNTA, limpiar)
+  }, [])
   useControlGuia('rankings.tabla', {
     ordenar: (columna, sentido) => setOrdenTabla({ clave: columna, ascendente: sentido === 'asc' }),
-    resaltar: (codigo) => setDelAgente(codigo),
+    resaltar: (codigo) => setResaltada({ codigo, vez: Date.now() }),
     ordenActual: () => ({ columna: ordenTabla.clave, orden: ordenTabla.ascendente ? 'asc' : 'desc' }),
-    estado: () => ({ orden: ordenTabla, delAgente }),
+    estado: () => ({ orden: ordenTabla }),
+    // Deshacer vuelve al orden de antes y quita el resaltado (no se restaura uno viejo).
     restaurar: (anterior) => {
       setOrdenTabla(anterior?.orden ?? ORDEN_INICIAL)
-      setDelAgente(anterior?.delAgente ?? null)
+      setResaltada(null)
     },
   })
   useControlGuia('rankings.filtro-banco', {
