@@ -2,21 +2,12 @@
 // y con qué resultado. Cada operación es una línea JSON en storage/operaciones.jsonl,
 // en la raíz del repo (la carpeta storage/ está en .gitignore: no se sube).
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { carpetaStorage } from './storage.js';
 
-const CARPETA_RAIZ = fileURLToPath(new URL('../../../', import.meta.url));
-
-// Carpeta donde se guarda la bitácora:
-// - STORAGE_DIR, si está definida;
-// - durante `npm test`, una carpeta temporal, para no ensuciar la bitácora real;
-// - si no, storage/ en la raíz del repo (la misma de los parámetros, #32).
-export function carpetaStorage() {
-  if (process.env.STORAGE_DIR) return path.resolve(process.env.STORAGE_DIR);
-  if (process.env.NODE_TEST_CONTEXT) return path.join(os.tmpdir(), `sbp-pruebas-${process.pid}`);
-  return path.join(CARPETA_RAIZ, 'storage');
-}
+// carpetaStorage vive en storage.js; se reexporta aquí porque otros módulos
+// (por ejemplo datos/cargaPeriodo.js de #29) la importan desde bitacora.js.
+export { carpetaStorage };
 
 export function archivoBitacora() {
   return path.join(carpetaStorage(), 'operaciones.jsonl');

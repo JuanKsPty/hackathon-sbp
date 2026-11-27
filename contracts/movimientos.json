@@ -1,0 +1,60 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo_anterior": "20260831",
+  "periodo_actual": "20260930",
+  "regla_significativo": {
+    "min_cambio_posicion_abs": 2,
+    "cambio_lider": true,
+    "min_var_saldo_pct_abs": 10
+  },
+  "rankings": [
+    {
+      "Ranking": "HIPOTECARIO",
+      "Lider_anterior": { "Codigo_Banco": "101", "Banco": "Banco Istmo" },
+      "Lider_actual": { "Codigo_Banco": "104", "Banco": "Banco Pacifico" },
+      "Cambio_Lider": true,
+      "movimientos": [
+        {
+          "Codigo_Banco": "104",
+          "Banco": "Banco Pacifico",
+          "Posicion_anterior": 3,
+          "Posicion_actual": 1,
+          "Cambio_Posicion": 2,
+          "Saldo_anterior": 1250000.00,
+          "Saldo_actual": 1400000.00,
+          "Var_Saldo": 150000.00,
+          "Var_Saldo_Pct": 12.0000,
+          "Significativo": true,
+          "Motivos": ["cambio_posicion", "cambio_lider", "var_saldo_pct"]
+        },
+        {
+          "Codigo_Banco": "101",
+          "Banco": "Banco Istmo",
+          "Posicion_anterior": 1,
+          "Posicion_actual": 2,
+          "Cambio_Posicion": -1,
+          "Saldo_anterior": 1380000.00,
+          "Saldo_actual": 1350000.00,
+          "Var_Saldo": -30000.00,
+          "Var_Saldo_Pct": -2.1739,
+          "Significativo": true,
+          "Motivos": ["cambio_lider"]
+        },
+        {
+          "Codigo_Banco": "112",
+          "Banco": "Banco Solidez",
+          "Posicion_anterior": 12,
+          "Posicion_actual": 12,
+          "Cambio_Posicion": 0,
+          "Saldo_anterior": 0.00,
+          "Saldo_actual": 0.00,
+          "Var_Saldo": 0.00,
+          "Var_Saldo_Pct": null,
+          "Significativo": false,
+          "Motivos": []
+        }
+      ]
+    }
+  ]
+}

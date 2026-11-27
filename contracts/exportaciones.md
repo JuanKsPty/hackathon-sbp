@@ -26,6 +26,7 @@ Entregables 2 a 5 de la sección 10. Los archivos son UTF-8, separados por coma,
 `Periodo_Anterior, Periodo_Actual, Ranking, Codigo_Banco, Banco, Posicion_anterior, Posicion_actual, Cambio_Posicion, Saldo_anterior, Saldo_actual, Var_Saldo, Var_Saldo_Pct, Significativo, Motivos`
 
 - **Parámetros:** acepta los mismos que `/api/movimientos` (`desde`, `hasta`, `ranking`, `solo_significativos`).
+- **Perfil:** como `/api/movimientos`, solo Analista y Administrador (`X-Perfil: analista` o `admin`); Público recibe `403 PERFIL_NO_AUTORIZADO` ([perfiles.md](perfiles.md)).
 - **`Var_Saldo_Pct`:** queda vacío si `Saldo_anterior = 0`.
 - **`Significativo`:** vale `SI` o `NO`.
 - **`Motivos`:** se separan con ` | `.
