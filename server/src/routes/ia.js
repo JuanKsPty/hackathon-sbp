@@ -11,7 +11,7 @@ import { urlApiInterna } from '../ai/apiInterna.js';
 import { elementosPara } from '../ai/guia.js';
 import { contextoDe, interpretarPregunta } from '../ai/intencion.js';
 import { contextoPantalla } from '../ai/pantalla.js';
-import { demostracionPorReglas, modoDe, pantallaPorReglas } from '../ai/pantallaReglas.js';
+import { comparacionPorReglas, demostracionPorReglas, modoDe, pantallaPorReglas } from '../ai/pantallaReglas.js';
 import { MODELO_POR_DEFECTO } from '../ai/redaccionIA.js';
 import { encabezado } from './formato.js';
 import { ErrorApi } from './errores.js';
@@ -102,9 +102,13 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
     const contexto = almacen?.fechas().length ? contextoDe(almacen) : null;
     // Sin IA (o si la IA no propuso gráficos), las reglas producen la misma acción.
     const porReglas = () => (contexto ? interpretarPregunta(pregunta, contexto, req.perfil) : null);
-    // Primero las preguntas sobre la tabla; si no, "¿cómo hago X?" en la app.
+    // Primero comparar períodos (#126), luego la tabla de rankings y, si no, "¿cómo hago X?" en la app.
     const pantallaReglas = () =>
-      contexto ? (pantallaPorReglas(pregunta, almacen, req.perfil) ?? demostracionPorReglas(pregunta, almacen, req.perfil)) : null;
+      contexto
+        ? (comparacionPorReglas(pregunta, almacen, req.perfil) ??
+          pantallaPorReglas(pregunta, almacen, req.perfil) ??
+          demostracionPorReglas(pregunta, almacen, req.perfil))
+        : null;
     try {
       const resultado = await preguntarAlAgente(pregunta, {
         ...opcionesIA,
