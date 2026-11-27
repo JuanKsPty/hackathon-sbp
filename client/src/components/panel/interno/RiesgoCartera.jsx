@@ -46,6 +46,7 @@ export function RiesgoCartera({ consulta }) {
           titulo="Concentración por ranking"
           descripcion="Parte del saldo de cada ranking que suman sus tres primeros bancos. El globo muestra el HHI (0 a 10 000)."
           consulta={consulta}
+          alto={260}
           vacio={concentracion.length === 0}
         >
           <ChartContainer config={CONFIG_CONCENTRACION} className="aspect-auto h-[260px] w-full">
@@ -62,6 +63,7 @@ export function RiesgoCartera({ consulta }) {
           titulo="Morosidad por banco"
           descripcion="Saldo en mora (días de mora mayores que cero) y saldo vencido, sobre el saldo de cada banco."
           consulta={consulta}
+          alto={12 * 30 + 60}
           vacio={mora.length === 0}
         >
           <ChartContainer config={CONFIG_MORA} className="aspect-auto w-full" style={{ height: Math.max(240, mora.length * 30 + 60) }}>

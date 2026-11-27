@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { PlaceholderGrafico } from '@/components/estados/PlaceholderGrafico.jsx'
 import { Link } from 'react-router'
 import { ArrowRightIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
@@ -47,7 +48,7 @@ export function GraficoPrincipal({ datos }) {
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <EstadoBloque consulta={rankings} filas={6} vacio={lista.length === 0} tituloVacio="Sin rankings en este período">
+      <EstadoBloque consulta={rankings} alto={600} vacio={lista.length === 0} tituloVacio="Sin rankings en este período">
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Segmentado
@@ -97,7 +98,7 @@ export function GraficoPrincipal({ datos }) {
               {subs.error ? (
                 <p className="text-sm text-muted-foreground">No se pudo leer el desglose por subactividad.</p>
               ) : subs.cargando || !subs.datos ? (
-                <div className="h-[200px] animate-pulse rounded-xl bg-muted" />
+                <PlaceholderGrafico alto={200} />
               ) : (
                 <ChartContainer config={config} className="aspect-auto w-full" style={{ height: Math.max(160, filasSub.length * 44 + 40) }}>
                   <BarChart data={filasSub} layout="vertical" margin={{ left: 0, right: 12 }} barCategoryGap={8}>

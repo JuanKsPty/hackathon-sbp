@@ -1,4 +1,5 @@
 import { Cargando } from '@/components/estados/Cargando.jsx'
+import { PlaceholderGrafico } from '@/components/estados/PlaceholderGrafico.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,10 +7,11 @@ import { cn } from '@/lib/utils'
 
 // Tarjeta de un gráfico del panel interno: título, una línea de contexto y el gráfico.
 // `consulta` (opcional) cubre la carga y el error; `vacio` muestra un aviso si no hay datos.
-export function MarcoGrafico({ titulo, descripcion, accion, consulta, vacio, mensajeVacio, children, className, ...props }) {
+// `alto` (px): alto del gráfico, para que la carga ocupe lo mismo y la tarjeta no cambie de tamaño.
+export function MarcoGrafico({ titulo, descripcion, accion, consulta, vacio, mensajeVacio, alto, children, className, ...props }) {
   let cuerpo = children
   if (consulta?.error) cuerpo = <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
-  else if (consulta && (consulta.cargando || !consulta.datos)) cuerpo = <Cargando filas={4} />
+  else if (consulta && (consulta.cargando || !consulta.datos)) cuerpo = alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
   else if (vacio) cuerpo = <Vacio titulo="Sin datos para graficar" descripcion={mensajeVacio} />
 
   return (

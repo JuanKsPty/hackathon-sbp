@@ -4,6 +4,7 @@ import { ChartColumnIcon, TriangleAlertIcon } from 'lucide-react'
 import { calidad, catalogos, movimientos, rankings, subactividades } from '@/api/cliente.js'
 import { EstadoControl } from '@/components/calidad/EstadoControl.jsx'
 import { Cargando } from '@/components/estados/Cargando.jsx'
+import { PlaceholderGrafico } from '@/components/estados/PlaceholderGrafico.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -177,14 +178,15 @@ function SelectorRanking({ rankings: lista, valor, alCambiar }) {
 }
 
 // Encabezado, estado de la consulta y la ruta del API de donde salen los datos.
-function Seccion({ titulo, descripcion, consulta, ruta, children }) {
+// `alto` (px): alto aproximado del gráfico, para que la carga no cambie el tamaño.
+function Seccion({ titulo, descripcion, consulta, ruta, alto, children }) {
   return (
     <section className="flex min-w-0 flex-col gap-3">
       <div>
         <h3 className="text-sm font-semibold">{titulo}</h3>
         {descripcion && <p className="text-xs text-muted-foreground">{descripcion}</p>}
       </div>
-      {consulta.cargando && <Cargando filas={4} />}
+      {consulta.cargando && (alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />)}
       {!consulta.cargando && consulta.error && <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />}
       {!consulta.cargando && !consulta.error && consulta.datos && children}
       <p className="font-mono text-[11px] break-all text-muted-foreground">Datos: GET /api{ruta}</p>
@@ -223,6 +225,7 @@ function SeccionRankings({ consulta, ranking, accion }) {
       descripcion="Bancos en el orden de su posición."
       consulta={consulta}
       ruta={`/rankings?periodo=${accion.periodo}`}
+      alto={altoPara(12)}
     >
       <Metricas
         opciones={Object.entries(METRICAS_RANKING).map(([clave, m]) => [clave, m.etiqueta])}
@@ -285,6 +288,7 @@ function SeccionSubactividades({ accion, ranking, consultaRankings }) {
       descripcion="Saldo de cada subactividad por banco (incluye la reclasificación SB21 a Tarjeta)."
       consulta={consulta}
       ruta={`/subactividades?periodo=${accion.periodo}`}
+      alto={altoPara(12) + 30}
     >
       {lista.length === 0 ? (
         <p className="text-sm text-muted-foreground">Sin subactividades para este ranking.</p>
@@ -349,6 +353,7 @@ function SeccionMovimientos({ accion, ranking }) {
       descripcion="Verde sube, rojo baja. Las barras llenas son movimientos significativos según la regla vigente."
       consulta={consulta}
       ruta={`/movimientos?desde=${accion.periodo_anterior}&hasta=${accion.periodo}`}
+      alto={altoPara(12)}
     >
       <Metricas
         opciones={Object.entries(METRICAS_MOVIMIENTO).map(([clave, m]) => [clave, m.etiqueta])}
@@ -412,6 +417,7 @@ function SeccionCalidad({ accion }) {
       descripcion="Exclusiones en cascada: cada fila cuenta solo en el primer filtro que incumple."
       consulta={consulta}
       ruta={`/calidad?periodo=${accion.periodo}`}
+      alto={240}
     >
       {periodo && (
         <>
@@ -473,6 +479,7 @@ function SeccionBanco({ accion }) {
       descripcion="Posición 1 arriba. Una línea por ranking y un punto por período cargado."
       consulta={consulta}
       ruta={`/rankings?periodo=…&banco=${accion.banco} (${accion.periodos.length} ${accion.periodos.length === 1 ? 'período' : 'períodos'})`}
+      alto={288}
     >
       <ChartContainer config={config} className="aspect-auto h-72 w-full">
         <LineChart data={serie} margin={{ left: 4, right: 16, top: 8 }}>

@@ -10,6 +10,7 @@ import {
   urlDescarga,
 } from '@/api/cliente.js'
 import { Cargando } from '@/components/estados/Cargando.jsx'
+import { PlaceholderGrafico } from '@/components/estados/PlaceholderGrafico.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { AyudaTermino } from '@/components/glosario/AyudaTermino.jsx'
@@ -235,7 +236,7 @@ export default function Rankings() {
           <CardDescription>{contexto} · un clic en una barra filtra ese banco</CardDescription>
         </CardHeader>
         <CardContent>
-          <Estado consulta={consultaRanking} vacio={bancosDelRanking.length === 0}>
+          <Estado consulta={consultaRanking} vacio={bancosDelRanking.length === 0} alto={420}>
             <GraficoRanking
               bancos={bancosDelRanking}
               bancoResaltado={bancoFiltrado}
@@ -300,8 +301,9 @@ function Contenedor({ filtros = null, children }) {
 }
 
 // Carga, error o contenido de una consulta.
-function Estado({ consulta, vacio, children }) {
-  if (consulta.cargando) return <Cargando filas={4} />
+// `alto` (px): si es un gráfico, la carga ocupa ese alto para que no cambie el tamaño.
+function Estado({ consulta, vacio, alto, children }) {
+  if (consulta.cargando) return alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   if (vacio) return <Vacio titulo="Sin datos" descripcion="No hay datos para los filtros elegidos." />
   return children

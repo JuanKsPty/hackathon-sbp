@@ -25,6 +25,7 @@ export function CalidadPorCorte({ consulta }) {
       titulo="Exclusiones por corte"
       descripcion="Filas que la cascada E1 → E4 deja fuera del universo válido, en cada corte."
       consulta={consulta}
+      alto={170}
       vacio={cortes.length === 0}
     >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

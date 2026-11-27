@@ -43,6 +43,7 @@ export function CarteraPorCorte({ consultaIndicadores }) {
         titulo="Composición por macroactividad"
         descripcion="Saldo de cada ranking en los últimos cortes. Análisis adicional: sale de /api/indicadores."
         consulta={consultaIndicadores}
+        alto={300}
         vacio={composicion.length === 0}
       >
         <ChartContainer config={configComposicion} className="aspect-auto h-[300px] w-full">
