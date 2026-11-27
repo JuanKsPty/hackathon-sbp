@@ -72,3 +72,10 @@ test('quién lidera: ordena por posición (el front se salta el paso si ya está
   assert.deepEqual(p.acciones.map((a) => a.tipo), ['ir', 'elegir', 'elegir', 'ordenar', 'resaltar']);
   assert.deepEqual([p.acciones[3].columna, p.acciones[3].orden], ['Posicion', 'asc']);
 });
+
+test('un banco sin ranking: no cambia de ranking (se queda en el abierto)', () => {
+  const { catalogos, periodos } = paqueteReal();
+  const p = pantallaPorReglas('muestra el banco 108', crearAlmacen(catalogos, periodos));
+  assert.ok(!p.acciones.some((a) => a.control === 'rankings.selector-ranking'));
+  assert.equal(p.acciones.at(-1).fila, '108');
+})

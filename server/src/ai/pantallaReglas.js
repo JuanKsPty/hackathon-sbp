@@ -87,7 +87,8 @@ export function pantallaPorReglas(pregunta, almacen, perfil = 'publico') {
   if (!columna) return null;
 
   const periodo = periodosMencionados(texto, contexto.fechas, []).at(-1) ?? contexto.fechas.at(-1);
-  const ranking = rankingMencionado(texto, contexto.rankings) ?? contexto.rankings[0];
+  const rankingPedido = rankingMencionado(texto, contexto.rankings);
+  const ranking = rankingPedido ?? contexto.rankings[0];
   const orden = ordenDe(pregunta, columna);
   const banco = mencionado ?? bancoArriba(almacen, periodo, ranking, columna, orden);
   if (!banco) return null;
@@ -96,7 +97,10 @@ export function pantallaPorReglas(pregunta, almacen, perfil = 'publico') {
   const acciones = [
     { tipo: 'ir', ruta: '/rankings', texto: 'Entra a Rankings desde el menú.' },
     { tipo: 'elegir', control: 'global.selector-periodo', valor: periodo, texto: `Elige el período de ${nombrePeriodo(periodo)}.` },
-    { tipo: 'elegir', control: 'rankings.selector-ranking', valor: ranking, texto: `Elige el ranking ${ranking}.` },
+    // "Muestra el banco 108" no nombra ranking: se queda en el que está abierto.
+    ...(mencionado && !rankingPedido
+      ? []
+      : [{ tipo: 'elegir', control: 'rankings.selector-ranking', valor: ranking, texto: `Elige el ranking ${ranking}.` }]),
     // Siempre se indica el orden (la tabla puede venir ordenada por otra columna de una pregunta
     // anterior); si ya está así, el front se salta el paso.
     { tipo: 'ordenar', control: 'rankings.tabla', columna, orden, texto: `Ordena la columna ${NOMBRE_COLUMNA[columna]} ${mayorMenor}.` },
