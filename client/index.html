@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/marca/favicon-32.png" />
     <link rel="apple-touch-icon" href="/marca/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#211E75" />
+    <meta name="theme-color" content="#FFFFFF" />
     <!-- Web app instalable en el celular (#8). -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -25,7 +25,10 @@
       try {
         var tema = localStorage.getItem('rankings.tema') || 'sistema'
         var oscuro = tema === 'oscuro' || (tema === 'sistema' && matchMedia('(prefers-color-scheme: dark)').matches)
-        if (oscuro) document.documentElement.classList.add('dark')
+        if (oscuro) {
+          document.documentElement.classList.add('dark')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0B0B0C')
+        }
       } catch (e) {}
     </script>
   </head>

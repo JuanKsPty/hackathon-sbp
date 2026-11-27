@@ -31,7 +31,8 @@ import { PieFuente } from './PieFuente.jsx'
 // IA o por reglas; los datos de cada gráfico se piden aquí a la API, que los saca del motor (R2):
 // la IA nunca entrega cifras para dibujar. Cada consulta lleva el perfil elegido (X-Perfil).
 
-const COLORES = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--sube)']
+// Cinco colores de serie: el verde de "sube" no se usa como serie para no leerse como dato positivo.
+const COLORES = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)']
 
 // Eje en millones para que quepa: 87562053.92 -> "87.6 M".
 const compacto = new Intl.NumberFormat('es-PA', { notation: 'compact', maximumFractionDigits: 1 })
