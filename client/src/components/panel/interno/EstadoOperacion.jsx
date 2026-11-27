@@ -19,6 +19,7 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
+import { NotaSistemaCompleto } from './NotaSistemaCompleto.jsx'
 import { Seccion } from './Seccion.jsx'
 import { Tarjeta } from './Tarjeta.jsx'
 
@@ -31,6 +32,7 @@ const OPERACIONES = { inicio_sesion: 'Inicio de sesión', cierre_sesion: 'Cierre
 // E1–E4 y las reconciliaciones, la regla de movimiento significativo vigente y las últimas entradas
 // de la bitácora. Usa GET /api/calidad, GET /api/parametros y GET /api/bitacora (los dos últimos
 // responden 403 a otro perfil). Solo lectura: los cambios se hacen en Administración.
+// Es de toda la operación: con un banco elegido (#204) lo dice una nota.
 export function EstadoOperacion() {
   const { perfil, puede } = usePerfil()
   const { periodos } = usePeriodo()
@@ -57,6 +59,7 @@ export function EstadoOperacion() {
         </Link>
       }
     >
+      <NotaSistemaCompleto className="-mt-2" />
       <div className="grid items-start gap-4 lg:grid-cols-3">
         <UltimoCorte consulta={consultaCalidad} ultimo={ultimo} />
         <ReglaActual consulta={consultaRegla} />

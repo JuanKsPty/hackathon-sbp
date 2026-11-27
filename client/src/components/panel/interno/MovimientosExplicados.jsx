@@ -7,8 +7,11 @@ import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { buttonVariants } from '@/components/ui/button'
+import { useBancoPanel } from '@/contexto/BancoPanelContext.jsx'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
+import { cambiosDeLider, movimientosSignificativos } from './datosBanco.js'
+import { NotaSistemaCompleto } from './NotaSistemaCompleto.jsx'
 import { Seccion } from './Seccion.jsx'
 import { Tarjeta } from './Tarjeta.jsx'
 
@@ -27,16 +30,16 @@ const claseSigno = (valor) => (valor > 0 ? 'text-sube' : valor < 0 ? 'text-baja'
 // Movimientos significativos del corte con la descomposición de su saldo (préstamos nuevos, que salen
 // y amortización) y su explicación (IA o reglas). Todo sale de GET /api/movimientos y
 // GET /api/movimientos/descomposicion; la explicación la pide ExplicacionesMovimientos.
+// Con banco (#204), solo los movimientos de ese banco (Codigo_Banco) y los cambios de líder donde
+// ganó o perdió el primer lugar. Las explicaciones no se pueden filtrar: lo dice una nota.
 export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consultaDescomposicion }) {
+  const { banco, nombreBanco } = useBancoPanel()
   const datos = consultaMovimientos.datos
   const filasDescomposicion = consultaDescomposicion.datos?.descomposicion ?? []
-  const buscarPiezas = (ranking, banco) => filasDescomposicion.find((f) => f.Ranking === ranking && f.Codigo_Banco === banco) ?? null
+  const buscarPiezas = (ranking, codigo) => filasDescomposicion.find((f) => f.Ranking === ranking && f.Codigo_Banco === codigo) ?? null
 
-  const rankings = datos?.rankings ?? []
-  const cambiosLider = rankings.filter((r) => r.Cambio_Lider)
-  const lista = rankings
-    .flatMap((r) => (r.movimientos ?? []).filter((m) => m.Significativo !== false).map((m) => ({ ...m, Ranking: r.Ranking })))
-    .sort((a, b) => Math.abs(b.Cambio_Posicion ?? 0) - Math.abs(a.Cambio_Posicion ?? 0) || Math.abs(b.Var_Saldo_Pct ?? 0) - Math.abs(a.Var_Saldo_Pct ?? 0))
+  const cambiosLider = cambiosDeLider(datos, banco)
+  const lista = movimientosSignificativos(datos, banco)
 
   let contenido
   if (!desde) {
@@ -51,6 +54,13 @@ export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consu
     contenido = <ErrorApi error={consultaMovimientos.error} alReintentar={consultaMovimientos.reintentar} />
   } else if (!datos) {
     contenido = <Cargando filas={4} />
+  } else if (lista.length === 0 && cambiosLider.length === 0 && banco) {
+    contenido = (
+      <Vacio
+        titulo={`Sin movimientos significativos de ${nombreBanco} en este corte`}
+        descripcion={`Entre ${formatearPeriodo(desde)} y ${formatearPeriodo(hasta)} el banco no cumplió la regla ni ganó o perdió el primer lugar de un ranking.`}
+      />
+    )
   } else if (lista.length === 0 && cambiosLider.length === 0) {
     contenido = (
       <Vacio
@@ -99,9 +109,10 @@ export function MovimientosExplicados({ desde, hasta, consultaMovimientos, consu
   return (
     <Seccion
       id="titulo-movimientos"
-      titulo="Movimientos significativos y por qué ocurrieron"
+      titulo={banco ? `Movimientos significativos de ${nombreBanco} y por qué ocurrieron` : 'Movimientos significativos y por qué ocurrieron'}
       descripcion={desde && hasta ? `${formatearPeriodo(desde)} → ${formatearPeriodo(hasta)}. Los de mayor cambio de posición, con la descomposición de su saldo.` : undefined}
     >
+      <NotaSistemaCompleto className="-mt-2" texto="Las explicaciones (IA o reglas) son de todos los bancos: no se filtran por banco." />
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <Tarjeta data-guia="panel.movimientos">{contenido}</Tarjeta>
         <ExplicacionesMovimientos guia="panel.explicaciones" />

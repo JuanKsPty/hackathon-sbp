@@ -8,7 +8,8 @@ import { cn } from '@/lib/utils'
 // Tarjeta de un gráfico del panel interno: título, una línea de contexto y el gráfico.
 // `consulta` (opcional) cubre la carga y el error; `vacio` muestra un aviso si no hay datos.
 // `alto` (px): alto del gráfico, para que la carga ocupe lo mismo y la tarjeta no cambie de tamaño.
-export function MarcoGrafico({ titulo, descripcion, accion, consulta, vacio, mensajeVacio, alto, children, className, ...props }) {
+// `nota` (opcional): una línea bajo la descripción, por ejemplo la del filtro por banco (#204).
+export function MarcoGrafico({ titulo, descripcion, accion, nota, consulta, vacio, mensajeVacio, alto, children, className, ...props }) {
   let cuerpo = children
   if (consulta?.error) cuerpo = <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   else if (consulta && !consulta.datos) cuerpo = alto ? <PlaceholderGrafico alto={alto} /> : <Cargando filas={4} />
@@ -20,6 +21,7 @@ export function MarcoGrafico({ titulo, descripcion, accion, consulta, vacio, men
         <CardTitle>{titulo}</CardTitle>
         {descripcion && <CardDescription>{descripcion}</CardDescription>}
         {accion && <CardAction>{accion}</CardAction>}
+        {nota}
       </CardHeader>
       <CardContent>{cuerpo}</CardContent>
     </Card>

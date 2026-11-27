@@ -111,6 +111,13 @@ test('en empate gana el código menor; sin saldo no hay líder; sin operaciones 
   assert.equal(sinOperaciones.productos[0].operaciones, null);
   assert.equal(sinOperaciones.productos[0].bancos[0].operaciones, null);
   assert.equal(sinOperaciones.bancos.find((b) => b.codigoBanco === '102').operacionesValidas, 1); // sale de los rankings
+
+  // Detalle de banco: en el empate de Vivienda propia, 102 va primero y 103 segundo.
+  const detalle = (codigo, p = periodo) => calcularProductos(p, catalogosReales(), { banco: codigo }).banco;
+  assert.equal(detalle('102').productos.find((p) => p.subactividad === 'Vivienda propia').posicion, 1);
+  assert.equal(detalle('103').productos.find((p) => p.subactividad === 'Vivienda propia').posicion, 2);
+  assert.equal(detalle('102').posicionCartera, 1);
+  assert.equal(detalle('102', { ...periodo, operaciones: undefined }).productos[0].operaciones, null);
 });
 
 // ---- API ----
@@ -176,4 +183,101 @@ test('GET /api/productos acepta "todos" y responde errores con el formato común
   const sinDatos = await pedir('/productos?periodo=20261231');
   assert.equal(sinDatos.status, 404);
   assert.equal(sinDatos.cuerpo.error.codigo, 'PERIODO_SIN_DATOS');
+});
+
+// ---- Detalle de un banco (?banco=, issue #204) ----
+
+test('detalle de banco: sus productos suman su saldo en cada ranking; posición, ponderación y lugares salen de los rankings', () => {
+  const { catalogos, periodos } = paqueteReal();
+  const acumulado = crearAlmacen(catalogos, periodos).acumulado();
+  for (const periodo of [...periodos, acumulado]) {
+    for (const codigo of catalogos.bancos.keys()) {
+      const { banco, bancos, saldoTotal } = calcularProductos(periodo, catalogos, { banco: codigo });
+      assert.equal(banco.codigoBanco, codigo);
+      assert.equal(banco.participacionE4, ponderacionE4(banco.totalCartera, saldoTotal));
+      for (const r of banco.rankings) {
+        const fila = periodo.rankings.find((x) => x.ranking === r.ranking).filas.find((f) => f.codigoBanco === codigo);
+        const productos = banco.productos.filter((p) => p.ranking === r.ranking);
+        assert.equal(suma(productos, 'saldo'), r.saldoActividad, `${periodo.fecha} ${codigo} ${r.ranking}`);
+        assert.equal(suma(productos, 'operaciones'), r.operacionesValidas, `${periodo.fecha} ${codigo} ${r.ranking}`);
+        assert.deepEqual([r.posicion, r.saldoActividad, r.ponderacionE4], [fila.posicion, fila.saldoActividad, fila.ponderacionE4]);
+      }
+      assert.equal(banco.rankingsLiderados, periodo.rankings.filter((r) => r.filas[0].codigoBanco === codigo).length);
+      // Lugar por cartera: bancos con más cartera (o igual y código menor), más 1.
+      const delante = bancos.filter((b) => b.totalCartera > banco.totalCartera || (b.totalCartera === banco.totalCartera && b.codigoBanco < codigo));
+      assert.equal(banco.posicionCartera, delante.length + 1);
+    }
+  }
+});
+
+test('detalle de banco: la posición en cada producto sigue saldo descendente y código menor', () => {
+  const periodo = septiembre();
+  for (const codigo of catalogosReales().bancos.keys()) {
+    const { banco, productos } = calcularProductos(periodo, catalogosReales(), { banco: codigo });
+    banco.productos.forEach((p, i) => {
+      const ordenados = [...productos[i].bancos].sort((a, b) => b.saldo - a.saldo || (a.codigoBanco < b.codigoBanco ? -1 : 1));
+      assert.equal(ordenados[p.posicion - 1].codigoBanco, codigo, `${codigo} ${p.subactividad}`);
+      assert.equal(p.participacionE4, ponderacionE4(p.saldo, productos[i].saldo));
+    });
+  }
+});
+
+const septiembre = () => paqueteReal().periodos.find((p) => p.fecha === '20260930');
+
+test('GET /api/productos sin banco: trae la composición por ranking y no trae la clave banco', async () => {
+  const { cuerpo } = await pedir('/productos?periodo=20260930');
+  assert.ok(!('banco' in cuerpo));
+  assert.deepEqual(cuerpo.rankings.map((r) => r.Ranking), catalogosReales().macroactividades);
+  assert.deepEqual(Object.keys(cuerpo.rankings[0]), ['Ranking', 'Saldo', 'Pct_Del_Total']);
+  assert.equal(cuerpo.rankings.reduce((total, r) => total + centavos(r.Saldo), 0), centavos(cuerpo.Saldo_Total_Valido));
+  const pct = cuerpo.rankings.reduce((total, r) => total + Math.round(r.Pct_Del_Total * 10000), 0);
+  assert.ok(Math.abs(pct - 1_000_000) <= 3, `la composición suma ${pct / 10000} %`); // 6 redondeos de ±0.00005
+});
+
+test('GET /api/productos?banco= coincide con /api/rankings?banco= y responde a los 3 perfiles', async () => {
+  for (const headers of [{ 'X-Perfil': 'publico' }, { 'X-Perfil': 'analista' }, { 'X-Perfil': 'admin' }, { 'X-Sitio': 'publico' }]) {
+    const { status, cuerpo } = await pedir('/productos?periodo=20260930&banco=108', headers);
+    assert.equal(status, 200, JSON.stringify(headers));
+    assert.equal(cuerpo.banco.Codigo_Banco, '108');
+  }
+  const { cuerpo } = await pedir('/productos?periodo=20260930&banco=108');
+  const rankings = (await pedir('/rankings?periodo=20260930&banco=108')).cuerpo.rankings;
+  assert.equal(cuerpo.banco.Banco, catalogosReales().bancos.get('108'));
+  assert.equal(cuerpo.banco.rankings.length, 6);
+  for (const r of cuerpo.banco.rankings) {
+    const [fila] = rankings.find((x) => x.Ranking === r.Ranking).bancos;
+    assert.equal(r.Saldo_Actividad, fila.Saldo_Actividad, r.Ranking);
+    assert.equal(r.Posicion, fila.Posicion, r.Ranking);
+    assert.equal(r.Ponderacion_Pct, fila.Ponderacion_Pct, r.Ranking);
+    assert.equal(r.Operaciones_Validas, fila.Operaciones_Validas, r.Ranking);
+    assert.equal(cuerpo.banco.Total_Cartera_Local_Valida, fila.Total_Cartera_Local_Valida);
+    const productos = cuerpo.banco.productos.filter((p) => p.Ranking === r.Ranking);
+    assert.equal(productos.reduce((total, p) => total + centavos(p.Saldo), 0), centavos(r.Saldo_Actividad), r.Ranking);
+  }
+  assert.equal(cuerpo.banco.productos.length, 22);
+  assert.equal(cuerpo.banco.Rankings_Liderados, cuerpo.banco.rankings.filter((r) => r.Posicion === 1).length);
+});
+
+test('GET /api/productos?banco=: las participaciones de los 12 bancos en cada producto suman cerca de 100', async () => {
+  const codigos = [...catalogosReales().bancos.keys()];
+  const respuestas = await Promise.all(codigos.map((codigo) => pedir(`/productos?periodo=20260930&banco=${codigo}`)));
+  for (let i = 0; i < 22; i++) {
+    const total = respuestas.reduce((s, { cuerpo }) => s + Math.round(cuerpo.banco.productos[i].Participacion_Pct * 10000), 0);
+    assert.ok(Math.abs(total - 1_000_000) <= 6, `${respuestas[0].cuerpo.banco.productos[i].Subactividad}: ${total / 10000} %`); // 12 redondeos
+  }
+  const cartera = respuestas.reduce((s, { cuerpo }) => s + Math.round(cuerpo.banco.Participacion_Pct * 10000), 0);
+  assert.ok(Math.abs(cartera - 1_000_000) <= 6);
+  assert.deepEqual(respuestas.map(({ cuerpo }) => cuerpo.banco.Posicion_Cartera).sort((a, b) => a - b), codigos.map((_, i) => i + 1));
+});
+
+test('GET /api/productos?banco=: inválido da 400 y funciona con el acumulado', async () => {
+  const invalido = await pedir('/productos?banco=999');
+  assert.equal(invalido.status, 400);
+  assert.equal(invalido.cuerpo.error.codigo, 'PARAMETRO_INVALIDO');
+  const todos = await pedir(`/productos?periodo=${TODOS}&banco=108`);
+  assert.equal(todos.status, 200);
+  assert.equal(todos.cuerpo.periodo, TODOS);
+  assert.equal(todos.cuerpo.banco.productos.length, 22);
+  const total = todos.cuerpo.bancos.find((b) => b.Codigo_Banco === '108').Total_Cartera_Local_Valida;
+  assert.equal(todos.cuerpo.banco.Total_Cartera_Local_Valida, total);
 });

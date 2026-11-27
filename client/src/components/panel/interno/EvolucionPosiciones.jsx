@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CrownIcon, MinusIcon } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
@@ -9,6 +9,7 @@ import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart'
+import { useBancoPanel } from '@/contexto/BancoPanelContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
@@ -25,8 +26,10 @@ const rankingDe = (respuesta, ranking) => respuesta?.rankings?.find((r) => r.Ran
 // Evolución de posiciones por ranking en el panel interno: pestañas de rankings, lista
 // lateral con la posición de cada banco (el líder primero) y gráfico de área del banco elegido.
 // Una petición a GET /api/rankings por período cargado hasta el elegido; no se calcula nada (R2).
+// Con banco (#204), ese banco va resaltado en la lista y elegido de entrada en el gráfico.
 export function EvolucionPosiciones() {
   const { periodos, periodo } = usePeriodo()
+  const { banco: bancoPanel, nombreBanco } = useBancoPanel()
   const fechas = periodos.map((p) => p.Fecha).filter((f) => f && (!periodo || f <= periodo)).sort()
   const clave = fechas.join(',')
   const consulta = useConsulta(
@@ -36,7 +39,10 @@ export function EvolucionPosiciones() {
   )
 
   const [rankingElegido, setRanking] = useState(null)
-  const [bancoElegido, setBanco] = useState(null)
+  // El banco elegido en la lista vale mientras no cambie el del filtro del Panel.
+  const [eleccion, setEleccion] = useState({ filtro: null, codigo: null })
+  const bancoElegido = eleccion.filtro === bancoPanel ? eleccion.codigo : null
+  const setBanco = (codigo) => setEleccion({ filtro: bancoPanel, codigo })
 
   const respuestas = consulta.datos ?? []
   const ultima = respuestas.at(-1)
@@ -55,7 +61,17 @@ export function EvolucionPosiciones() {
       })
   })()
 
-  const banco = bancos.find((b) => b.Codigo_Banco === bancoElegido) ?? bancos[0] ?? null
+  const banco = bancos.find((b) => b.Codigo_Banco === (bancoElegido ?? bancoPanel)) ?? bancos[0] ?? null
+  // Con banco en el filtro, la lista se desplaza hasta su fila, sin mover la página.
+  const listaRef = useRef(null)
+  const datosRankings = consulta.datos
+  useEffect(() => {
+    const lista = listaRef.current
+    const fila = lista?.querySelector('[data-filtrado]')
+    if (!lista || !fila) return
+    lista.scrollTop += fila.getBoundingClientRect().top - lista.getBoundingClientRect().top - (lista.clientHeight - fila.clientHeight) / 2
+  }, [bancoPanel, ranking, datosRankings])
+
   const serie = respuestas.map((r) => {
     const fila = rankingDe(r, ranking)?.bancos?.find((b) => b.Codigo_Banco === banco?.Codigo_Banco)
     return { periodo: r.periodo, saldo: fila?.Saldo_Actividad ?? null, posicion: fila?.Posicion ?? null, ponderacion: fila?.Ponderacion_Pct ?? null }
@@ -74,10 +90,15 @@ export function EvolucionPosiciones() {
             Posición al {formatearPeriodo(ultima?.periodo)}
             {anterior ? ` frente a ${formatearPeriodo(anterior.periodo)}` : ''}. Elige un banco.
           </p>
-          <ul className="flex max-h-[22rem] flex-col gap-0.5 overflow-y-auto">
+          <ul ref={listaRef} className="flex max-h-[22rem] flex-col gap-0.5 overflow-y-auto">
             {bancos.map((b) => (
-              <li key={b.Codigo_Banco}>
-                <FilaBanco banco={b} elegido={b.Codigo_Banco === banco?.Codigo_Banco} alElegir={() => setBanco(b.Codigo_Banco)} />
+              <li key={b.Codigo_Banco} data-filtrado={b.Codigo_Banco === bancoPanel || undefined}>
+                <FilaBanco
+                  banco={b}
+                  elegido={b.Codigo_Banco === banco?.Codigo_Banco}
+                  filtrado={b.Codigo_Banco === bancoPanel}
+                  alElegir={() => setBanco(b.Codigo_Banco)}
+                />
               </li>
             ))}
           </ul>
@@ -108,9 +129,16 @@ export function EvolucionPosiciones() {
     <Seccion
       id="titulo-evolucion"
       titulo="Evolución de posiciones por ranking"
-      descripcion="El líder primero; elige un banco para ver su saldo en cada corte."
+      descripcion={
+        bancoPanel
+          ? `El líder primero, con ${nombreBanco} resaltado; elige otro banco para ver su saldo en cada corte.`
+          : 'El líder primero; elige un banco para ver su saldo en cada corte.'
+      }
       accion={
-        <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit' })}>
+        <Link
+          to={bancoPanel ? `/rankings?${new URLSearchParams({ banco: bancoPanel })}` : '/rankings'}
+          className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit' })}
+        >
           Ver rankings
           <ArrowRightIcon aria-hidden="true" />
         </Link>
@@ -129,7 +157,8 @@ export function EvolucionPosiciones() {
   )
 }
 
-function FilaBanco({ banco: b, elegido, alElegir }) {
+// `filtrado`: es el banco del filtro del Panel (#204); va con un borde para distinguirlo.
+function FilaBanco({ banco: b, elegido, filtrado, alElegir }) {
   const Icono = b.tendencia === 'sube' ? ArrowUpIcon : b.tendencia === 'baja' ? ArrowDownIcon : MinusIcon
   const color = b.tendencia === 'sube' ? 'text-sube' : b.tendencia === 'baja' ? 'text-baja' : 'text-muted-foreground'
   const texto =
@@ -142,6 +171,7 @@ function FilaBanco({ banco: b, elegido, alElegir }) {
       className={cn(
         'flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         elegido && 'bg-muted',
+        filtrado && 'ring-1 ring-primary/60 ring-inset',
       )}
     >
       <span
@@ -152,7 +182,10 @@ function FilaBanco({ banco: b, elegido, alElegir }) {
       >
         {b.Posicion === 1 ? <CrownIcon className="size-3.5" aria-label="Líder" /> : formatearEntero(b.Posicion)}
       </span>
-      <span className="min-w-0 flex-1 truncate font-medium">{b.Banco}</span>
+      <span className="min-w-0 flex-1 truncate font-medium">
+        {b.Banco}
+        {filtrado && <span className="sr-only"> (banco del filtro)</span>}
+      </span>
       <span className={cn('flex shrink-0 items-center gap-0.5 text-xs', color)} title={texto}>
         <Icono className="size-3.5" aria-hidden="true" />
         <span className="sr-only">{texto}</span>

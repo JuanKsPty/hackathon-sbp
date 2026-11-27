@@ -8,6 +8,7 @@ import {
   evolucionDeProducto,
   opcionesProducto,
   PRODUCTO_INICIAL,
+  productoDelBanco,
 } from './datosProductos.js'
 
 // Respuesta de prueba con la forma de GET /api/productos. Valores ilustrativos, no del motor.
@@ -47,6 +48,16 @@ test('el apilado de CONSUMO tiene una fila por banco y una serie por producto', 
   assert.deepEqual(filas, [
     { codigo: '101', nombre: 'A', 'Credito personal': 4, Tarjeta: 5 },
     { codigo: '102', nombre: 'B', 'Credito personal': 5, Tarjeta: 2 },
+  ])
+})
+
+test('con banco, el producto y la evolución salen del bloque banco', () => {
+  const conBanco = (periodo, saldo) => ({ periodo, productos: [], banco: { productos: [{ Ranking: 'CONSUMO', Subactividad: 'Tarjeta', Saldo: saldo }] } })
+  assert.equal(productoDelBanco(conBanco('20260930', 3), PRODUCTO_INICIAL).Saldo, 3)
+  assert.equal(productoDelBanco(DATOS, PRODUCTO_INICIAL), null)
+  assert.deepEqual(evolucionDeProducto([conBanco('20260930', 3), conBanco('20260831', 2)], PRODUCTO_INICIAL, true), [
+    { periodo: '20260831', saldo: 2 },
+    { periodo: '20260930', saldo: 3 },
   ])
 })
 

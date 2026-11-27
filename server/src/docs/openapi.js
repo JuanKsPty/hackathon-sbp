@@ -251,10 +251,14 @@ export function crearDocumentoOpenApi(catalogos) {
       '/productos': {
         get: {
           tags: ['Consulta'],
-          summary: 'Totales por producto de crédito: las 22 subactividades con saldo, operaciones, % del ranking y del total, líder y los 12 bancos',
-          description: 'Lo calcula el motor (engine/productos.js) con el desglose del período, que ya incluye la reclasificación SB21 en Tarjeta. `Lider` es el banco con más saldo (en empate, el código menor) y es `null` si la subactividad no tiene saldo. Acepta `periodo=todos`. Formato en contracts/productos.md.',
-          parameters: [ref('periodo')],
-          responses: { ...jsonOk('Productos y bancos del período'), ...errores(400, 404) },
+          summary: 'Totales por producto de crédito: composición por ranking, las 22 subactividades con saldo, operaciones, % del ranking y del total, líder y los 12 bancos; con `banco`, el detalle de ese banco',
+          description: [
+            'Lo calcula el motor (engine/productos.js) con el desglose del período, que ya incluye la reclasificación SB21 en Tarjeta. `Lider` es el banco con más saldo (en empate, el código menor) y es `null` si la subactividad no tiene saldo. `rankings` es la composición del sistema: saldo de cada ranking y su `Pct_Del_Total`. Acepta `periodo=todos`.',
+            '',
+            'Con `banco` agrega el bloque `banco`: `Total_Cartera_Local_Valida`, `Operaciones_Validas`, `Participacion_Pct` (cartera / saldo total válido), `Posicion_Cartera` (lugar por cartera entre los 12; desempate: código menor) y `Rankings_Liderados`; `rankings[]` (los 6, con `Posicion`, `Saldo_Actividad` y `Ponderacion_Pct` como en /rankings, más `Participacion_Pct` del total del ranking y `Operaciones_Validas`) y `productos[]` (los 22, con `Saldo`, `Operaciones`, `Pct_Del_Ranking` sobre el saldo del banco en ese ranking, `Participacion_Pct` del total de la subactividad y `Posicion` del banco en ella). Sin `banco`, la respuesta no trae esa clave. Formato en contracts/productos.md.',
+          ].join('\n'),
+          parameters: [ref('periodo'), ref('banco')],
+          responses: { ...jsonOk('Composición, productos y bancos del período (y el detalle del banco pedido)'), ...errores(400, 404) },
         },
       },
       '/excluidas': {

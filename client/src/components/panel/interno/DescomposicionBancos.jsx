@@ -4,7 +4,9 @@ import { ArrowRightIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
 import { buttonVariants } from '@/components/ui/button'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '@/components/ui/chart'
+import { useBancoPanel } from '@/contexto/BancoPanelContext.jsx'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
+import { datosDescomposicion } from './datosBanco.js'
 import { EJE, formatoCompacto } from './graficos.js'
 import { MarcoGrafico } from './MarcoGrafico.jsx'
 import { Seccion } from './Seccion.jsx'
@@ -21,29 +23,26 @@ const conSigno = (v) => (typeof v === 'number' && v > 0 ? `+${formatearMonto(v)}
 // Por qué cambió el saldo de cada banco en el ranking elegido: barras apiladas con préstamos nuevos
 // (suman), préstamos que salen (restan) y amortización. Una sola llamada a
 // GET /api/movimientos/descomposicion sin ranking ni banco trae todas las filas; aquí solo se filtran.
+// Con banco (#204), una barra por ranking con las piezas de ese banco (filas de su Codigo_Banco).
 export function DescomposicionBancos({ desde, hasta, consulta }) {
+  const { banco, nombreBanco } = useBancoPanel()
   const filas = consulta.datos?.descomposicion ?? []
   const rankings = [...new Set(filas.map((f) => f.Ranking))]
   const [elegido, setElegido] = useState(null)
   const ranking = elegido && rankings.includes(elegido) ? elegido : rankings[0] ?? null
 
-  const datos = filas
-    .filter((f) => f.Ranking === ranking)
-    .sort((a, b) => (b.Var_Saldo ?? 0) - (a.Var_Saldo ?? 0))
-    .map((f) => ({
-      banco: f.Banco,
-      Nuevos: f.Nuevos?.Saldo ?? null,
-      Salen: f.Salen?.Saldo ?? null,
-      Amortizacion: f.Amortizacion?.Saldo ?? null,
-      Var_Saldo: f.Var_Saldo,
-      operaciones: { Nuevos: f.Nuevos?.Operaciones, Salen: f.Salen?.Operaciones, Amortizacion: f.Amortizacion?.Operaciones },
-    }))
+  const datos = datosDescomposicion(filas, { ranking, banco })
+  const titulo = banco ? `Descomposición por ranking · ${nombreBanco}` : ranking ? `Descomposición en ${ranking}` : 'Descomposición por banco'
 
   return (
     <Seccion
       id="titulo-descomposicion"
-      titulo="De dónde sale el cambio de cada banco"
-      descripcion="Préstamos nuevos, préstamos que salen y amortización de los que continúan."
+      titulo={banco ? `De dónde sale el cambio de ${nombreBanco}` : 'De dónde sale el cambio de cada banco'}
+      descripcion={
+        banco
+          ? 'Préstamos nuevos, préstamos que salen y amortización de los que continúan, en cada ranking.'
+          : 'Préstamos nuevos, préstamos que salen y amortización de los que continúan.'
+      }
       accion={
         <Link to="/comparar" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'w-fit' })}>
           Ver la evidencia en Comparar
@@ -51,24 +50,31 @@ export function DescomposicionBancos({ desde, hasta, consulta }) {
         </Link>
       }
     >
-      <SelectorRanking etiqueta="Ranking de la descomposición" rankings={rankings} valor={ranking} onCambio={setElegido} />
+      {/* Con banco no hace falta elegir ranking: se ven todos los del banco. */}
+      {!banco && <SelectorRanking etiqueta="Ranking de la descomposición" rankings={rankings} valor={ranking} onCambio={setElegido} />}
       <MarcoGrafico
-        titulo={ranking ? `Descomposición en ${ranking}` : 'Descomposición por banco'}
+        titulo={titulo}
         descripcion={
           desde && hasta
-            ? `${formatearPeriodo(desde)} → ${formatearPeriodo(hasta)}. Las tres piezas suman la variación del saldo de cada banco.`
+            ? `${formatearPeriodo(desde)} → ${formatearPeriodo(hasta)}. Las tres piezas suman la variación del saldo ${banco ? 'del banco en cada ranking' : 'de cada banco'}.`
             : 'Necesita un corte anterior para comparar.'
         }
         consulta={desde ? consulta : undefined}
-        alto={12 * 34 + 60}
+        alto={(banco ? 6 : 12) * 34 + 60}
         vacio={!desde || datos.length === 0}
-        mensajeVacio={desde ? 'El API no devolvió la descomposición para este ranking.' : 'Elige en el encabezado un período que tenga uno anterior.'}
+        mensajeVacio={
+          desde
+            ? banco
+              ? `El API no devolvió la descomposición de ${nombreBanco}.`
+              : 'El API no devolvió la descomposición para este ranking.'
+            : 'Elige en el encabezado un período que tenga uno anterior.'
+        }
       >
         <ChartContainer config={CONFIG} className="aspect-auto w-full" style={{ height: Math.max(220, datos.length * 34 + 60) }}>
           <BarChart data={datos} layout="vertical" stackOffset="sign" margin={{ top: 4, right: 12, bottom: 0, left: 0 }} barCategoryGap="22%">
             <CartesianGrid horizontal={false} strokeDasharray="3 3" />
             <XAxis type="number" {...EJE} tickFormatter={formatoCompacto} />
-            <YAxis type="category" dataKey="banco" {...EJE} width={118} interval={0} tickFormatter={(v) => (v.length > 17 ? `${v.slice(0, 16)}.` : v)} />
+            <YAxis type="category" dataKey="etiqueta" {...EJE} width={118} interval={0} tickFormatter={(v) => (v.length > 17 ? `${v.slice(0, 16)}.` : v)} />
             <ReferenceLine x={0} stroke="var(--border)" />
             <ChartTooltip cursor={{ fillOpacity: 0.2 }} content={<GloboBanco />} />
             <ChartLegend content={<ChartLegendContent />} />
@@ -87,7 +93,7 @@ function GloboBanco({ active, payload }) {
   if (!fila) return null
   return (
     <div className="grid min-w-52 gap-1 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
-      <span className="font-medium">{fila.banco}</span>
+      <span className="font-medium">{fila.etiqueta}</span>
       {Object.keys(CONFIG).map((clave) => (
         <span key={clave} className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5">

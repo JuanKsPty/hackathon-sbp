@@ -53,10 +53,17 @@ export function apiladoPorBanco(datos, ranking) {
   return { filas, series: productos.map((p) => p.Subactividad) }
 }
 
+// Producto del banco elegido (#204), del bloque `banco` de GET /api/productos?banco=.
+export function productoDelBanco(datos, clave) {
+  return (datos?.banco?.productos ?? []).find((p) => claveProducto(p) === clave) ?? null
+}
+
 // Saldo de un producto en cada corte (solo Analista y Administrador): [{ periodo, saldo }].
-export function evolucionDeProducto(respuestas, clave) {
+// `delBanco`: el saldo del banco elegido en lugar del total del sistema.
+export function evolucionDeProducto(respuestas, clave, delBanco = false) {
+  const buscar = delBanco ? productoDelBanco : buscarProducto
   return (respuestas ?? [])
-    .map((r) => ({ periodo: r?.periodo, saldo: buscarProducto(r, clave)?.Saldo ?? null }))
+    .map((r) => ({ periodo: r?.periodo, saldo: buscar(r, clave)?.Saldo ?? null }))
     .filter((f) => f.periodo && f.saldo !== null)
     .sort((a, b) => String(a.periodo).localeCompare(String(b.periodo)))
 }

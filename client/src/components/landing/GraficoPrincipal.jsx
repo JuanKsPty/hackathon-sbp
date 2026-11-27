@@ -2,12 +2,13 @@ import { useId, useState } from 'react'
 import { PlaceholderGrafico } from '@/components/estados/PlaceholderGrafico.jsx'
 import { Link } from 'react-router'
 import { ArrowRightIcon } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts'
 import { subactividades as pedirSubactividades } from '@/api/cliente.js'
 import { Segmentado } from '@/components/marca'
 import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { useBancoPanel } from '@/contexto/BancoPanelContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { alPeriodo, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
 import { saldoPorSubactividad } from './datosLanding.js'
@@ -32,6 +33,8 @@ const config = { saldo: { label: 'Saldo', color: 'var(--chart-1)' } }
 // elegido (GET /api/rankings) y su desglose por subactividad (GET /api/subactividades). R2.
 export function GraficoPrincipal({ datos }) {
   const { periodo, rankings } = datos
+  // Filtro por banco (#204): resalta su barra y el desglose por subactividad es solo de ese banco.
+  const { banco, nombreBanco } = useBancoPanel()
   const lista = rankings.datos?.rankings ?? []
   const [elegido, setElegido] = useState('')
   const actual = lista.find((r) => r.Ranking === elegido) ?? lista[0] ?? null
@@ -39,7 +42,11 @@ export function GraficoPrincipal({ datos }) {
   const idBancos = `deg-bancos-${useId().replace(/:/g, '')}`
   const idSub = `deg-sub-${useId().replace(/:/g, '')}`
 
-  const subs = useConsulta((o) => pedirSubactividades({ periodo, ranking }, o), [periodo, ranking], { activa: Boolean(periodo && ranking) })
+  const subs = useConsulta(
+    (o) => pedirSubactividades({ periodo, ranking, banco: banco ?? undefined }, o),
+    [periodo, ranking, banco],
+    { activa: Boolean(periodo && ranking) },
+  )
   const filasSub = saldoPorSubactividad(subs.datos?.subactividades?.filter((s) => s.Ranking === ranking))
 
   const filas = [...(actual?.bancos ?? [])]
@@ -69,7 +76,12 @@ export function GraficoPrincipal({ datos }) {
           </div>
 
           <div className="grid min-w-0 gap-4 xl:grid-cols-[1.4fr_1fr]">
-            <TarjetaGrafico id="titulo-grafico" fuerte={`Saldo por banco en ${ranking}`} suave={alPeriodo(periodo)} pie="En el orden del ranking. La ponderación es el saldo de la actividad sobre la cartera local válida del banco.">
+            <TarjetaGrafico
+              id="titulo-grafico"
+              fuerte={`Saldo por banco en ${ranking}`}
+              suave={alPeriodo(periodo)}
+              pie={`En el orden del ranking. La ponderación es el saldo de la actividad sobre la cartera local válida del banco.${nombreBanco ? ` Resaltado: ${nombreBanco}.` : ''}`}
+            >
               <ChartContainer config={config} className="aspect-auto h-[420px] w-full">
                 <BarChart data={filas} layout="vertical" margin={{ left: 0, right: 12 }} barCategoryGap={6}>
                   <Degradado id={idBancos} />
@@ -89,12 +101,22 @@ export function GraficoPrincipal({ datos }) {
                       />
                     }
                   />
-                  <Bar dataKey="saldo" fill={`url(#${idBancos})`} stroke="var(--color-saldo)" strokeOpacity={0.6} radius={[0, 8, 8, 0]} />
+                  <Bar dataKey="saldo" fill={`url(#${idBancos})`} stroke="var(--color-saldo)" strokeOpacity={0.6} radius={[0, 8, 8, 0]}>
+                    {/* Con banco elegido, su barra queda plena y las demás se atenúan (#204). */}
+                    {filas.map((f) => (
+                      <Cell key={f.codigo} fillOpacity={!banco || f.codigo === banco ? 1 : 0.3} strokeWidth={f.codigo === banco ? 2 : 1} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ChartContainer>
             </TarjetaGrafico>
 
-            <TarjetaGrafico id="titulo-subactividades" fuerte="Por subactividad" suave={ranking ? `en ${ranking}` : undefined} pie="Suma de los bancos del ranking en cada subactividad.">
+            <TarjetaGrafico
+              id="titulo-subactividades"
+              fuerte="Por subactividad"
+              suave={ranking ? `en ${ranking}${nombreBanco ? ` · ${nombreBanco}` : ''}` : undefined}
+              pie={nombreBanco ? `Saldo de ${nombreBanco} en cada subactividad del ranking.` : 'Suma de los bancos del ranking en cada subactividad.'}
+            >
               {subs.error ? (
                 <p className="text-sm text-muted-foreground">No se pudo leer el desglose por subactividad.</p>
               ) : subs.cargando || !subs.datos ? (
