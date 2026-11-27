@@ -2,13 +2,12 @@ import { EncabezadoCorte } from '@/components/landing/EncabezadoCorte.jsx'
 import { CalidadCorte, ComposicionCartera, Concentracion, Morosidad } from '@/components/landing/GraficasDelCorte.jsx'
 import { GraficoPrincipal } from '@/components/landing/GraficoPrincipal.jsx'
 import { LideresDelCorte } from '@/components/landing/LideresDelCorte.jsx'
-import { MovimientosDelMes } from '@/components/landing/MovimientosDelMes.jsx'
 import { useDatosLanding } from '@/components/landing/useDatosLanding.js'
 import { SeccionGris } from '@/components/marca'
 
 // Dashboard del sitio público (#139): el corte vigente elegido en el encabezado, con gráficas de
-// datos del API (R2). Conserva los data-guia de la ruta / (contracts/guia.md): panel.indicadores
-// (encabezado), panel.lideres, panel.movimientos y panel.indicadores-adicionales.
+// datos del API (R2). Solo el corte vigente: no compara períodos. Conserva los data-guia públicos de
+// la ruta / (contracts/guia.md): panel.indicadores (encabezado), panel.lideres y panel.indicadores-adicionales.
 export default function Inicio() {
   const datos = useDatosLanding()
 
@@ -29,9 +28,6 @@ export default function Inicio() {
         </div>
         <LideresDelCorte datos={datos} />
       </SeccionGris>
-
-      {/* Única sección que compara con el corte anterior: pendiente de decisión, se quita con esta línea. */}
-      <MovimientosDelMes />
     </div>
   )
 }

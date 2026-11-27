@@ -8,7 +8,7 @@ import { TarjetaGrafico } from './TarjetaGrafico.jsx'
 // Líder (posición 1) de cada ranking del corte vigente: banco, saldo y ponderación, de GET /api/rankings (R2).
 export function LideresDelCorte({ datos }) {
   const { periodo, rankings } = datos
-  const lista = rankings.datos ? lideresDelCorte(rankings.datos.rankings, null) : []
+  const lista = rankings.datos ? lideresDelCorte(rankings.datos.rankings) : []
 
   return (
     <TarjetaGrafico id="titulo-lideres" fuerte="Líder de cada ranking" suave={periodo ? `al ${formatearPeriodo(periodo)}` : undefined}>

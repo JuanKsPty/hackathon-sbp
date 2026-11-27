@@ -3,7 +3,7 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 
 // Datos del dashboard público para el período elegido en el encabezado. El público ve solo el corte
-// vigente: aquí no se pide ningún otro período (la comparación vive aislada en MovimientosDelMes).
+// vigente: aquí no se pide ningún otro período.
 // Todas las peticiones son públicas: /api/rankings, /api/calidad y /api/indicadores.
 export function useDatosLanding() {
   const { periodo, detallePeriodo } = usePeriodo()
