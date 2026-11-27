@@ -321,3 +321,30 @@ test('#89: un Host falso no desvía las consultas de las herramientas (SSRF)', a
   assert.equal(cuerpo.consultas[0].ok, true);
   assert.doesNotMatch(cuerpo.respuesta, /Banco Falso/);
 });
+
+test('#90: un fallo de red o una respuesta que no es JSON vuelve como error de herramienta', async () => {
+  const caida = await crearEjecutor('http://127.0.0.1:9/api')('listar_periodos', {});
+  assert.equal(caida.ok, false);
+  assert.match(caida.error, /No se pudo consultar la API/);
+
+  const noJson = await crearEjecutor('http://x/api', { fetchImpl: async () => new Response('<html>502</html>', { status: 502 }) })('listar_periodos', {});
+  assert.equal(noJson.ok, false);
+  assert.match(noJson.error, /No se pudo consultar la API/);
+});
+
+test('#90: si una herramienta falla, el agente sigue y responde', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('listar_periodos', {}),
+    (params) => {
+      const resultado = params.messages.at(-1).content[0];
+      assert.equal(resultado.is_error, true);
+      return responder('No pude consultar los períodos en este momento.')();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  process.env.API_INTERNA = 'http://127.0.0.1:9/api'; // API interna caída
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Qué períodos hay?' });
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.verificada, true);
+  assert.equal(cuerpo.consultas[0].ok, false);
+});
