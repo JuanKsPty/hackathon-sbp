@@ -59,3 +59,14 @@ test('ir: solo a páginas que existen y que el perfil puede ver', () => {
   assert.equal(validarAccion({ tipo: 'ir', ruta: 'https://evil.example' }, { contexto: c, perfil: 'admin' }).ok, false);
   assert.match(validarAccion({ tipo: 'volar' }, { contexto: c }).error, /desconocido/);
 });
+
+test('elegir: control existente, visible para el perfil y con un valor del catálogo', () => {
+  const c = contexto();
+  assert.deepEqual(validarAccion({ tipo: 'elegir', control: 'rankings.selector-ranking', valor: 'COMERCIO', texto: 'Elige COMERCIO.' }, { contexto: c }), {
+    ok: true, accion: { tipo: 'elegir', control: 'rankings.selector-ranking', ruta: '/rankings', valor: 'COMERCIO', texto: 'Elige COMERCIO.' },
+  });
+  assert.equal(validarAccion({ tipo: 'elegir', control: 'global.selector-periodo', valor: '20260831' }, { contexto: c }).accion.ruta, null);
+  assert.match(validarAccion({ tipo: 'elegir', control: 'rankings.selector-ranking', valor: 'VIVIENDA' }, { contexto: c }).error, /no existe/);
+  assert.match(validarAccion({ tipo: 'elegir', control: 'rankings.boton-magico', valor: 'x' }, { contexto: c }).error, /no existe o no se puede manejar/);
+  assert.match(validarAccion({ tipo: 'elegir', control: 'rankings.tabla', valor: 'x' }, { contexto: c }).error, /no admite "elegir"/);
+});

@@ -3,6 +3,8 @@
 // (modo "demostrar"). La IA propone acciones declarativas; aquí se validan contra este catálogo,
 // el perfil y los datos cargados, y la ruta de cada acción la pone el catálogo, no la IA.
 
+import { ELEMENTOS_GUIA, elementoGuia, perfilVeElemento } from './guia.js';
+
 // Qué acciones admite cada control (su id es el data-guia de contracts/guia.md).
 //   elegir:   qué tipo de valor acepta ('periodo' | 'ranking' | 'banco' | 'subactividad')
 //   ordenar:  columnas por las que se puede ordenar
@@ -64,8 +66,6 @@ export function errorDeValor(tipo, valor, contexto) {
   }
 }
 
-import { ELEMENTOS_GUIA, elementoGuia, perfilVeElemento } from './guia.js';
-
 // Páginas a las que el perfil puede ir: las rutas de los elementos de la guía que ve.
 function rutasPara(perfil) {
   return [...new Set(ELEMENTOS_GUIA.filter((e) => e.ruta && perfilVeElemento(e.guia, perfil)).map((e) => e.ruta))];
@@ -86,6 +86,21 @@ export function validarAccion(accion, { contexto, perfil = 'publico' }) {
     const rutas = rutasPara(perfil);
     if (!rutas.includes(accion.ruta)) return { ok: false, error: `no se puede ir a "${accion.ruta}" con el perfil ${perfil} (${rutas.join(', ')}).` };
     return { ok: true, accion: { tipo, ruta: accion.ruta, texto } };
+  }
+  // El resto de las acciones actúan sobre un control: tiene que existir, verlo el perfil y admitir la acción.
+  const control = accion.control;
+  const admite = CONTROLES[control];
+  if (!admite || !elementoGuia(control)) return { ok: false, error: `el control "${control}" no existe o no se puede manejar.` };
+  if (!perfilVeElemento(control, perfil)) return { ok: false, error: `el control "${control}" no está disponible para el perfil ${perfil}.` };
+  const ruta = elementoGuia(control).ruta;
+  if (tipo !== 'señalar' && !admite[tipo]) {
+    return { ok: false, error: `el control "${control}" no admite "${tipo}" (admite: ${Object.keys(admite).join(', ')}).` };
+  }
+
+  if (tipo === 'elegir') {
+    const error = errorDeValor(admite.elegir, accion.valor, contexto);
+    if (error) return { ok: false, error: `${control}: ${error}` };
+    return { ok: true, accion: { tipo, control, ruta, valor: accion.valor.trim(), texto } };
   }
   return { ok: false, error: `acción "${tipo}" todavía no soportada.` };
 }
