@@ -1,9 +1,8 @@
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CalendarRangeIcon, DownloadIcon } from 'lucide-react'
 import {
   catalogos as pedirCatalogos,
   descargarArchivo,
-  fijarPerfilDePeticiones,
   movimientos as pedirMovimientos,
   rankings as pedirRankings,
 } from '@/api/cliente.js'
@@ -41,11 +40,6 @@ export default function Comparar() {
   const { periodos, cargando, error, reintentar } = usePeriodo()
   const permitido = puedeComparar(perfil)
   const catalogo = useConsulta(pedirCatalogos, [], { activa: permitido })
-
-  // El perfil de las peticiones se fija en un efecto de PerfilProvider, que corre después de los
-  // efectos de esta página. Al cambiar de Público a Analista los pedidos saldrían todavía como
-  // Público (403): el efecto de layout corre antes que cualquier efecto de datos.
-  useLayoutEffect(() => fijarPerfilDePeticiones(perfil), [perfil])
 
   if (!permitido) {
     return (
