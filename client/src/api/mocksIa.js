@@ -6,6 +6,8 @@
 // Para ver el aviso "IA no disponible": VITE_MOCK_IA=false en el .env de la raíz del repo
 // (vite.config.js lee el .env de la raíz).
 // Para ver una respuesta no verificada: pregunta algo con "pronóstico" o "predice".
+// Para ver los gráficos del chat (#108): pregunta algo con "informe". La acción real la interpreta el
+// server (server/src/ai/intencion.js); aquí es una fija, y sus gráficos usan los mocks de api/mocks.js.
 import { ApiError } from './errores.js'
 import { AVISO_RESPALDO, FUENTE_RESPALDO } from './fuente.js'
 import { ETIQUETA_EXPLICACION, ETIQUETA_RESPUESTA } from './ia.js'
@@ -63,8 +65,28 @@ function mockExplicaciones({ desde = '20260831', hasta = '20260930', ranking } =
   }
 }
 
-function mockPreguntar({ pregunta = '' } = {}) {
-  const base = { ...encabezado(), pregunta, etiqueta: ETIQUETA_RESPUESTA }
+// Acción de ejemplo (#108), con el período de los ejemplos de /contracts.
+function mockAccion(pregunta, perfil) {
+  if (!/informe/i.test(pregunta)) return null
+  const publico = perfil === 'publico'
+  return {
+    tipo: 'informe',
+    origen: iaDisponible() ? 'ia' : 'reglas',
+    titulo: 'Informe de septiembre de 2026 (modo mock)',
+    periodo: '20260930',
+    periodo_anterior: publico ? null : '20260831',
+    periodos: ['20260930'],
+    ranking: null,
+    banco: null,
+    banco_nombre: null,
+    graficos: publico ? ['rankings', 'calidad'] : ['rankings', 'movimientos', 'calidad'],
+    avisos: publico ? ['Movimientos entre períodos: solo para los perfiles Analista y Administrador.'] : [],
+    resumen: 'Este es el informe de septiembre de 2026 (modo mock): los 6 rankings, los movimientos y la calidad de datos.',
+  }
+}
+
+function mockPreguntar({ pregunta = '' } = {}, perfil) {
+  const base = { ...encabezado(), pregunta, etiqueta: ETIQUETA_RESPUESTA, accion: mockAccion(pregunta, perfil) }
   if (!iaDisponible()) {
     return { ...base, ia_disponible: false, motivo: MOTIVO_SIN_KEY, respuesta: null, verificada: false, consultas: [] }
   }
@@ -129,7 +151,7 @@ export async function responderConMockIA(ruta, { parametros, cuerpo, perfil, sig
   }
   if (ruta === '/ia/preguntar') {
     await esperar(900, signal)
-    return mockPreguntar(cuerpo)
+    return mockPreguntar(cuerpo, perfil)
   }
   throw new ApiError({
     status: 0,

@@ -36,7 +36,9 @@ export function AvisoIA({ estado }) {
           salen del motor determinista. Las explicaciones de movimientos se muestran por reglas.
         </p>
         <p>
-          Puedes consultar directamente <Link to="/rankings">Rankings</Link> o <Link to="/calidad">Calidad de datos</Link>.
+          El chat sigue funcionando por reglas: pide un informe, un ranking, una comparación o cómo va un banco y te
+          muestra sus gráficos. También puedes ir a <Link to="/rankings">Rankings</Link> o{' '}
+          <Link to="/calidad">Calidad de datos</Link>.
         </p>
       </AlertDescription>
     </Alert>
