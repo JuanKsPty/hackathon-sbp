@@ -110,6 +110,18 @@ test('PUT /api/parametros como admin guarda la regla, la registra y /api/movimie
   assert.deepEqual(restablecida.cuerpo.regla_significativo, REGLA_POR_DEFECTO);
 });
 
+test('movimientos y su descarga (entregable 5): publico recibe 403; analista y admin, 200', async () => {
+  for (const ruta of ['/movimientos', '/exportar/movimientos.csv']) {
+    const publico = await pedir(ruta);
+    assert.equal(publico.status, 403, ruta);
+    assert.equal(publico.cuerpo.error.codigo, 'PERFIL_NO_AUTORIZADO', ruta);
+    for (const perfil of ['analista', 'admin']) {
+      const respuesta = await fetch(base + ruta, { headers: { 'X-Perfil': perfil } });
+      assert.equal(respuesta.status, 200, `${ruta} como ${perfil}`);
+    }
+  }
+});
+
 test('GET /api/admin/catalogos: solo admin; CINU congelado y registros desde los catálogos', async () => {
   assert.equal((await pedir('/admin/catalogos')).status, 403);
   assert.equal((await pedir('/admin/catalogos', { perfil: 'analista' })).status, 403);

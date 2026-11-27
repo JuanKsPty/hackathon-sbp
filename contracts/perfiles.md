@@ -4,8 +4,8 @@ Tres perfiles, cada uno con opciones distintas (sección 10, entregable 8 de las
 
 | Perfil | `X-Perfil` | Puede |
 | :--- | :--- | :--- |
-| Público | `publico` (o sin header) | consultar rankings, filtros, gráficos y tablas; descargar |
-| Analista | `analista` | lo de Público, más comparar períodos y entidades y generar reportes personalizados |
+| Público | `publico` (o sin header) | consultar rankings, filtros, gráficos y tablas; descargar los entregables 2 a 4 |
+| Analista | `analista` | lo de Público, más comparar períodos (movimientos y su descarga, entregable 5) y entidades y generar reportes personalizados |
 | Administrador | `admin` | lo de Analista, más cargar o actualizar un período, parámetros, catálogos y el registro de operaciones |
 
 La tabla completa de opciones está en un solo lugar: `OPCIONES` en `server/src/middleware/perfiles.js`.
@@ -39,6 +39,17 @@ Los endpoints de Analista y Administrador responden **403** a los demás perfile
 ```json
 { "error": { "codigo": "PERFIL_NO_AUTORIZADO", "mensaje": "Esta opción es solo para el perfil Administrador. Tu perfil es Público." } }
 ```
+
+| Endpoint | Opción | Perfiles |
+| :--- | :--- | :--- |
+| `GET /api/movimientos` | `comparar_periodos` | Analista, Administrador |
+| `GET /api/exportar/movimientos.csv` (entregable 5) | `comparar_periodos` | Analista, Administrador |
+| `POST /api/periodos` (#29) | `cargar_periodo` | Administrador |
+| `PUT /api/parametros` | `administrar_parametros` | Administrador |
+| `GET /api/admin/catalogos` | `administrar_catalogos` | Administrador |
+| `GET /api/bitacora` | `ver_bitacora` | Administrador |
+
+Las demás consultas (`/api/rankings`, `/api/subactividades`, `/api/calidad`, `/api/excluidas`, `/api/periodos`, `/api/catalogos`, `/api/parametros` y las descargas de los entregables 2 a 4) están abiertas para los 3 perfiles.
 
 Para proteger una ruta en el backend:
 

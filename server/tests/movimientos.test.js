@@ -26,8 +26,11 @@ before(async () => {
 
 after(() => servidor.close());
 
+// Comparar períodos es de Analista y Administrador (sección 10).
+const COMO_ANALISTA = { 'X-Perfil': 'analista' };
+
 async function pedir(ruta) {
-  const respuesta = await fetch(base + ruta);
+  const respuesta = await fetch(base + ruta, { headers: COMO_ANALISTA });
   return { status: respuesta.status, cuerpo: await respuesta.json() };
 }
 
@@ -141,7 +144,7 @@ test('errores con el formato común', async () => {
 });
 
 test('el entregable 5 (movimientos.csv) sale de los datos reales', async () => {
-  const respuesta = await fetch(`${base}/exportar/movimientos.csv`);
+  const respuesta = await fetch(`${base}/exportar/movimientos.csv`, { headers: COMO_ANALISTA });
   assert.equal(respuesta.status, 200);
   assert.match(respuesta.headers.get('content-disposition'), /movimientos_20260831_20260930\.csv/);
   const lineas = (await respuesta.text()).trim().split('\n');
