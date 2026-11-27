@@ -28,8 +28,8 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `global.menu-calidad` | Enlace a Calidad de datos | todos |
 | `global.menu-verificacion` | Enlace a Verificación del jurado | todos |
 | `global.menu-admin` | Enlace a Administración | admin |
-| `global.selector-perfil` | Selector de perfil | todos |
-| `global.selector-periodo` | Selector de período | todos |
+| `global.selector-perfil` | Sesión del sitio interno: usuario, perfil y Salir (`SesionUsuario`) | analista, admin |
+| `global.selector-periodo` | Período de los datos (mes), junto al título de Panel, Rankings y Calidad | todos |
 | `global.selector-tema` | Claro, oscuro o sistema | todos |
 | `global.barra-fuente` | Fuente, período y aviso de datos ficticios | todos |
 | `global.abrir-asistente` | Botón que abre el asistente IA | todos |
@@ -107,6 +107,8 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `admin.resultado-carga` | Resultado de la carga (E1–E4, universo, cambios de ranking) | admin |
 | `admin.regla-significativo` | Regla de movimiento significativo | admin |
 | `admin.catalogos` | Estado de los catálogos | admin |
+| `admin.usuarios` | Usuarios: crear, cambiar perfil, contraseña, activar o desactivar | admin |
+| `admin.permisos` | Perfiles y permisos: qué perfil puede usar cada opción | admin |
 | `admin.bitacora` | Registro de operaciones | admin |
 
 ## Asistente IA
@@ -114,7 +116,6 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `data-guia` | Elemento | Perfil |
 | :--- | :--- | :--- |
 | `asistente.pregunta` | Campo para escribir la pregunta | todos |
-| `asistente.fuentes` | Consultas que usó la IA | todos |
 
 ## Cómo los usa el agente
 

@@ -17,29 +17,33 @@ import { DesgloseSubactividades } from '@/components/rankings/DesgloseSubactivid
 import { FiltrosRanking, TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { GraficoRanking } from '@/components/rankings/GraficoRanking.jsx'
 import { SelectorRanking } from '@/components/rankings/SelectorRanking.jsx'
-import { TablaRanking } from '@/components/rankings/TablaRanking.jsx'
+import { ORDEN_INICIAL, TablaRanking } from '@/components/rankings/TablaRanking.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
-import { escribirFiltros, leerFiltros } from '@/lib/filtrosUrl.js'
+import { decidirPeriodo, escribirFiltros, leerFiltros } from '@/lib/filtrosUrl.js'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
+import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Pagina } from './Pagina.jsx'
 
 // La regla SB21 (sección 6) solo mueve saldo dentro de este ranking: Crédito personal con facilidad 07 → Tarjeta.
 const RANKING_CON_REGLA_SB21 = 'CONSUMO'
 
-// Página Rankings (#64): período (encabezado), los 6 rankings, tabla ordenable, gráfico,
+// Página Rankings (#64): período (junto al título), los 6 rankings, tabla ordenable, gráfico,
 // filtros por banco y subactividad, y desglose por subactividad. Todas las cifras vienen del API (R2).
 // Los filtros viven en la URL (#129): la vista se recarga igual y se puede compartir.
 export default function Rankings() {
-  const { periodos, periodo, cambiarPeriodo, cargando: cargandoPeriodos, error: errorPeriodos } = usePeriodo()
+  const { periodos, periodo: periodoGlobal, cambiarPeriodo, cargando: cargandoPeriodos, error: errorPeriodos } = usePeriodo()
   const catalogo = useConsulta(pedirCatalogos)
   const listaRankings = catalogo.datos?.rankings ?? []
   const listaBancos = catalogo.datos?.bancos ?? []
 
   const [parametros, setParametros] = useSearchParams()
   const filtros = leerFiltros(parametros, { periodos: periodos.map((p) => p.Fecha), rankings: listaRankings, bancos: listaBancos })
+  // El período de la vista sale de la URL desde el primer render (un enlace compartido no pide antes
+  // el período por defecto); si la URL no trae uno válido, es el del encabezado.
+  const periodo = filtros.periodo ?? periodoGlobal
   const ranking = filtros.ranking ?? listaRankings[0]?.Ranking ?? null
   const banco = filtros.banco ?? TODOS
   const subactividad = filtros.subactividad ?? TODOS
@@ -54,21 +58,32 @@ export default function Rankings() {
   const setBanco = (valor) => actualizar({ banco: valor === TODOS ? null : valor })
   const setSubactividad = (valor) => actualizar({ subactividad: valor === TODOS ? null : valor })
 
-  // Período: al abrir un enlace manda el de la URL; después, el del encabezado se copia a la URL.
+  // Período de la URL ↔ encabezado (PeriodoContext, sin modificarlo). Cada vez que cambia uno de los
+  // dos, decidirPeriodo (lib/filtrosUrl.js) dice cuál manda:
+  // - si el usuario eligió otro período en el encabezado, la URL lo sigue;
+  // - si cambió la URL (enlace, atrás/adelante, un Link o el agente), el encabezado la sigue.
   const listoCatalogo = !catalogo.cargando && !cargandoPeriodos && periodos.length > 0
-  const sincronizado = useRef(false)
+  const periodoGlobalAnterior = useRef(null)
   useEffect(() => {
     if (!listoCatalogo) return
-    if (!sincronizado.current) {
-      sincronizado.current = true
-      if (filtros.periodo && filtros.periodo !== periodo) {
-        cambiarPeriodo(filtros.periodo)
-        return
-      }
+    const accion = decidirPeriodo({
+      periodoUrl: filtros.periodo,
+      periodoGlobal,
+      periodoGlobalAnterior: periodoGlobalAnterior.current,
+    })
+    periodoGlobalAnterior.current = periodoGlobal
+    if (accion?.tipo === 'encabezado') cambiarPeriodo(accion.periodo)
+    // Solo el período, partiendo de la URL más reciente: así no pisa un filtro que se acaba de
+    // cambiar en el mismo instante (por ejemplo, el ranking que eligió el agente, #125).
+    else if (accion?.tipo === 'url') {
+      setParametros((previos) => {
+        const nuevos = new URLSearchParams(previos)
+        nuevos.set('periodo', accion.periodo)
+        return nuevos
+      }, { replace: true })
     }
-    if (periodo && parametros.get('periodo') !== periodo) actualizar({ periodo })
-    // Solo reacciona a que el catálogo esté listo y al período del encabezado.
-  }, [listoCatalogo, periodo]) // eslint-disable-line react-hooks/exhaustive-deps
+    // Reacciona a que el catálogo esté listo y a cualquier cambio del período en la URL o el encabezado.
+  }, [listoCatalogo, periodoGlobal, filtros.periodo]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const listo = Boolean(periodo && ranking)
   const consultaRanking = useConsulta((o) => pedirRankings({ periodo, ranking }, o), [periodo, ranking], { activa: listo })
@@ -98,16 +113,33 @@ export default function Rankings() {
   const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' || valor === TODOS ? null : valor)
   useControlGuia('rankings.selector-ranking', {
     elegir: (valor) => cambiarEnUrl({ ranking: valor, subactividad: null }),
+    actual: () => ranking,
     estado: () => ({ ranking: filtros.ranking, subactividad: filtros.subactividad }),
     restaurar: (anterior) => cambiarEnUrl({ ranking: anterior?.ranking, subactividad: anterior?.subactividad }),
   })
+  // La tabla: su orden y la fila del agente viven aquí, así sobreviven a que la tabla se vuelva a
+  // montar cuando cambian los datos (por ejemplo, justo después de elegir otro ranking).
+  const [ordenTabla, setOrdenTabla] = useState(ORDEN_INICIAL)
+  const [delAgente, setDelAgente] = useState(null)
+  useControlGuia('rankings.tabla', {
+    ordenar: (columna, sentido) => setOrdenTabla({ clave: columna, ascendente: sentido === 'asc' }),
+    resaltar: (codigo) => setDelAgente(codigo),
+    ordenActual: () => ({ columna: ordenTabla.clave, orden: ordenTabla.ascendente ? 'asc' : 'desc' }),
+    estado: () => ({ orden: ordenTabla, delAgente }),
+    restaurar: (anterior) => {
+      setOrdenTabla(anterior?.orden ?? ORDEN_INICIAL)
+      setDelAgente(anterior?.delAgente ?? null)
+    },
+  })
   useControlGuia('rankings.filtro-banco', {
     elegir: (valor) => cambiarEnUrl({ banco: sinFiltro(valor) }),
+    actual: () => filtros.banco ?? 'todos',
     estado: () => filtros.banco,
     restaurar: (anterior) => cambiarEnUrl({ banco: anterior }),
   })
   useControlGuia('rankings.filtro-subactividad', {
     elegir: (valor) => cambiarEnUrl({ subactividad: sinFiltro(valor) }),
+    actual: () => filtros.subactividad ?? 'todas',
     estado: () => filtros.subactividad,
     restaurar: (anterior) => cambiarEnUrl({ subactividad: anterior }),
   })
@@ -138,7 +170,7 @@ export default function Rankings() {
       <Card>
         <CardHeader>
           <CardTitle>Ranking y filtros</CardTitle>
-          <CardDescription>El período se elige en el encabezado. La dirección de la página guarda esta vista.</CardDescription>
+          <CardDescription>Elige el ranking y, si quieres, un banco o una subactividad. El período está junto al título. La dirección de la página guarda esta vista.</CardDescription>
           <CardAction>
             <CopiarEnlace />
           </CardAction>
@@ -168,7 +200,13 @@ export default function Rankings() {
         </CardHeader>
         <CardContent>
           <Estado consulta={consultaRanking} vacio={bancosVisibles.length === 0}>
-            <TablaRanking bancos={bancosVisibles} bancoResaltado={bancoFiltrado} />
+            <TablaRanking
+              bancos={bancosVisibles}
+              bancoResaltado={bancoFiltrado}
+              orden={ordenTabla}
+              alOrdenar={setOrdenTabla}
+              delAgente={delAgente}
+            />
           </Estado>
         </CardContent>
       </Card>
@@ -227,7 +265,7 @@ export default function Rankings() {
 
 function Contenedor({ children }) {
   return (
-    <Pagina titulo="Rankings" descripcion="Posición de cada banco en las actividades de crédito, con su saldo, ponderación y desglose.">
+    <Pagina titulo="Rankings" descripcion="Posición de cada banco en las actividades de crédito, con su saldo, ponderación y desglose." acciones={<PeriodoDePagina />}>
       {children}
     </Pagina>
   )

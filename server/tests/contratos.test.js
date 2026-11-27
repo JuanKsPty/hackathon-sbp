@@ -35,6 +35,8 @@ const PETICIONES = {
   'perfil.json': { ruta: '/perfil', perfil: 'admin' },
   'catalogos-admin.json': { ruta: '/admin/catalogos', perfil: 'admin' },
   'bitacora.json': { ruta: '/bitacora', perfil: 'admin' },
+  'permisos.json': { ruta: '/admin/permisos', perfil: 'admin' },
+  'usuarios.json': { ruta: '/admin/usuarios', perfil: 'admin' },
   'carga.json': { carga: true },
 };
 

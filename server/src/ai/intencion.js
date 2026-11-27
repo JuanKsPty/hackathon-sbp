@@ -76,6 +76,12 @@ export function normalizar(texto) {
     .trim();
 }
 
+/** ['20260731', '20260831', '20260930'] -> 'julio, agosto o septiembre'. */
+function mesesDisponibles(fechas) {
+  const nombres = [...new Set(fechas.map((f) => MESES[Number(f.slice(4, 6)) - 1]).filter(Boolean))];
+  return nombres.length > 1 ? `${nombres.slice(0, -1).join(', ')} o ${nombres.at(-1)}` : (nombres[0] ?? '');
+}
+
 /** '20260930' -> 'septiembre de 2026'. */
 export function nombrePeriodo(fecha) {
   const mes = MESES[Number(String(fecha).slice(4, 6)) - 1];
@@ -122,24 +128,32 @@ function titulo({ tipo, periodo, periodoAnterior, ranking, banco, nombreBanco })
   }
 }
 
-// Frase fija que acompaña los gráficos cuando la respuesta no la redacta la IA. Solo nombra lo que
-// se muestra (períodos, ranking, banco): no trae cifras del motor.
+// "julio" y "septiembre de 2026" -> "julio a septiembre de 2026" (el año una sola vez si coincide).
+function rangoDeMeses(anterior, periodo) {
+  const desde = nombrePeriodo(anterior);
+  const hasta = nombrePeriodo(periodo);
+  return anterior.slice(0, 4) === periodo.slice(0, 4) ? `${desde.replace(/ de \d{4}$/, '')} a ${hasta}` : `${desde} a ${hasta}`;
+}
+
+// Frase corta que acompaña los gráficos cuando la respuesta no la redacta la IA: una línea que dice
+// qué se muestra (los detalles están en los gráficos). No trae cifras del motor.
 function resumen(accion, nombreBanco) {
-  const { tipo, periodo, periodo_anterior: anterior, ranking, graficos } = accion;
-  const mes = `${nombrePeriodo(periodo)} (${periodo})`;
-  const contra = anterior ? `${nombrePeriodo(anterior)} (${anterior})` : null;
-  const partes = {
-    rankings: ranking ? `el ranking ${ranking}` : 'los 6 rankings',
-    subactividades: 'su desglose por subactividad',
-    banco: `las posiciones de ${nombreBanco} en cada ranking y período`,
-    movimientos: contra ? `los movimientos contra ${contra}` : 'los movimientos',
-    calidad: 'la calidad de datos del período',
-  };
-  if (graficos.length === 0) return `No hay gráficos que pueda mostrarte para ${mes}.`;
-  const lista = graficos.map((g) => partes[g]);
-  const enumeracion = lista.length > 1 ? `${lista.slice(0, -1).join(', ')} y ${lista.at(-1)}` : lista[0];
-  const encabezado = tipo === 'informe' ? `Este es el informe de ${mes}: ` : `Te muestro, para ${mes}, `;
-  return `${encabezado}${enumeracion}.`;
+  const { tipo, periodo, periodo_anterior: anterior, ranking, graficos, avisos } = accion;
+  if (graficos.length === 0) return avisos[0] ?? 'No hay gráficos que pueda mostrarte.';
+  const mes = nombrePeriodo(periodo);
+  switch (tipo) {
+    case 'informe':
+      return `Aquí está el informe de ${mes}${ranking ? ` (${ranking})` : ''}.`;
+    case 'ranking':
+      return ranking ? `Aquí está el ranking ${ranking} de ${mes}.` : `Aquí están los rankings de ${mes}.`;
+    case 'comparar':
+    case 'movimientos':
+      return `Aquí están los movimientos${ranking ? ` de ${ranking}` : ''} de ${rangoDeMeses(anterior, periodo)}.`;
+    case 'banco':
+      return `Así va ${nombreBanco} (${accion.banco}).`;
+    default:
+      return `Aquí está la calidad de datos de ${mes}.`;
+  }
 }
 
 /**
@@ -274,7 +288,7 @@ export function interpretarPregunta(pregunta, contexto, perfil = 'publico') {
       banco_nombre: banco ? contexto.bancos.get(banco) : null,
       graficos: [],
       avisos,
-      resumen: `${avisos.join(' ')} Períodos disponibles: ${contexto.fechas.join(', ')}.`,
+      resumen: `${avisos[0]} Prueba con ${mesesDisponibles(contexto.fechas)}.`,
     };
   }
 

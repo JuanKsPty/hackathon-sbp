@@ -3,7 +3,7 @@
 //   GET/PUT /api/parametros   regla de movimiento significativo (contracts/administracion.md, #30)
 //   GET /api/admin/catalogos  estado de los catálogos (#30)
 //   GET /api/bitacora         registro de operaciones (contracts/bitacora.md, #31)
-// cliente.js solo hace GET; aquí se permiten POST y PUT. El primer argumento (perfil) ya no se usa:
+// cliente.js solo hace GET; aquí se permiten POST, PUT, PATCH y DELETE. El primer argumento (perfil) ya no se usa:
 // el perfil sale de la cookie de sesión. Los errores llegan como ApiError, igual que en cliente.js.
 import { ApiError, MENSAJE_API_NO_DISPONIBLE } from './errores.js'
 import { registrarFuente } from './fuente.js'
@@ -85,3 +85,23 @@ export const guardarParametros = (perfil, regla) =>
 export const leerCatalogosAdmin = (perfil, opciones) => pedirComo(perfil, '/admin/catalogos', opciones)
 
 export const leerBitacora = (perfil, opciones) => pedirComo(perfil, '/bitacora', opciones)
+
+// Contenido de un catálogo (bancos, cinu, sb21, diccionario) y la URL de su CSV original.
+export const leerCatalogo = (perfil, clave, opciones) => pedirComo(perfil, `/admin/catalogos/${encodeURIComponent(clave)}`, opciones)
+export const urlCatalogoCsv = (clave) => `${BASE}/admin/catalogos/${encodeURIComponent(clave)}?formato=csv`
+
+// Perfiles y permisos (contracts/perfiles.md): qué perfil puede usar cada opción configurable.
+const json = (metodo, cuerpo) => ({ metodo, headers: { 'Content-Type': 'application/json' }, cuerpo: JSON.stringify(cuerpo) })
+
+export const leerPermisos = (perfil, opciones) => pedirComo(perfil, '/admin/permisos', opciones)
+// opciones: { opcion: ['publico' | 'analista', ...] } (el Administrador se agrega solo)
+export const guardarPermisos = (perfil, opciones) => pedirComo(perfil, '/admin/permisos', json('PUT', { opciones }))
+export const restablecerPermisos = (perfil) => pedirComo(perfil, '/admin/permisos', { metodo: 'DELETE' })
+
+// Usuarios del sitio interno (contracts/perfiles.md). Nunca devuelven contraseñas.
+export const leerUsuarios = (perfil, opciones) => pedirComo(perfil, '/admin/usuarios', opciones)
+// datos: { usuario, nombre, perfil, clave }
+export const crearUsuario = (perfil, datos) => pedirComo(perfil, '/admin/usuarios', json('POST', datos))
+// cambios: { nombre?, perfil?, activo?, clave? }
+export const actualizarUsuario = (perfil, usuario, cambios) =>
+  pedirComo(perfil, `/admin/usuarios/${encodeURIComponent(usuario)}`, json('PATCH', cambios))

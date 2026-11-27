@@ -20,6 +20,13 @@ function sistemaEsOscuro() {
 function aplicarTema(tema) {
   const oscuro = tema === 'oscuro' || (tema === 'sistema' && sistemaEsOscuro())
   document.documentElement.classList.toggle('dark', oscuro)
+  // La barra del navegador del teléfono sigue al tema elegido: toma el --background de tema.css.
+  try {
+    const fondo = getComputedStyle(document.documentElement).getPropertyValue('--background').trim()
+    if (fondo) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', fondo)
+  } catch {
+    // Sin estilos calculados (pruebas o navegador viejo): la meta queda como está.
+  }
 }
 
 export function TemaProvider({ children }) {

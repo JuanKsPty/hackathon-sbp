@@ -11,22 +11,25 @@ Hay dos formas de conectarlo:
 
 ## Uso remoto (app desplegada)
 
-La URL del conector es la de la app más `/api/mcp`, con el perfil como parámetro:
+La URL del conector es la de cada sitio más `/api/mcp`. El perfil sale del sitio, no de la URL (#120):
 
-```
-https://<dominio-de-la-app>/api/mcp?perfil=analista
-```
+| Sitio | URL | Perfil |
+| :--- | :--- | :--- |
+| Público | `https://sbp.juank.tech/api/mcp` | Público (sin movimientos) |
+| Interno | `https://interno.sbp.juank.tech/api/mcp` con `Authorization: Bearer <MCP_TOKEN>` | Analista |
+
+`MCP_TOKEN` va en el `.env` del server (Dokploy), nunca en el repo (R5). Sin token, el MCP interno responde 401.
 
 - **Claude (web o Desktop):** **Settings → Connectors → Add custom connector**, pega la URL y guarda. En un chat, activa el conector y pregunta.
-- **Claude Code:** `claude mcp add --transport http rankings-sbp "https://<dominio>/api/mcp?perfil=analista"`
+- **Claude Code:** `claude mcp add --transport http rankings-sbp https://sbp.juank.tech/api/mcp`, o el interno con `--header "Authorization: Bearer <MCP_TOKEN>"`.
 - **Prueba rápida sin cliente:**
   ```bash
-  curl -s -X POST "https://<dominio>/api/mcp?perfil=analista" \
+  curl -s -X POST "https://sbp.juank.tech/api/mcp" \
     -H "content-type: application/json" -H "accept: application/json, text/event-stream" \
     -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
   ```
 
-`perfil` es `publico` (por defecto), `analista` o `admin`. Es el mismo modo de perfiles de la app (sin contraseña): las herramientas son de solo lectura y con `publico` no se ofrece la de movimientos.
+Las herramientas son de solo lectura y con Público no se ofrece la de movimientos. `?perfil=publico|analista|admin` solo vale en llamadas directas al API desde la misma máquina (sin pasar por nginx), por ejemplo en pruebas locales.
 
 Cómo funciona: [`routes/mcp.js`](../routes/mcp.js) atiende cada POST sin guardar sesiones (modo sin estado) y las herramientas consultan la API del mismo contenedor (`http://127.0.0.1:$PORT/api`; se cambia con `MCP_API_INTERNA`). Pasa por el proxy `/api/` del client, así que no hace falta exponer otro puerto en Dokploy.
 

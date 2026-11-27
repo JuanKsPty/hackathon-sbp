@@ -118,8 +118,74 @@ export function crearDocumentoOpenApi(catalogos) {
       '/admin/catalogos': {
         get: { tags: ['Perfiles y administración'], summary: 'Estado de los catálogos cargados (solo Administrador)', responses: { ...jsonOk('Catálogos', 'catalogos-admin.json'), ...errores(403) } },
       },
+      '/admin/catalogos/{clave}': {
+        get: {
+          tags: ['Perfiles y administración'],
+          summary: 'Contenido de un catálogo del paquete del reto, o su CSV original con ?formato=csv (solo Administrador)',
+          parameters: [
+            { name: 'clave', in: 'path', required: true, schema: { type: 'string', enum: ['cinu', 'sb21', 'bancos', 'diccionario'] } },
+            { name: 'formato', in: 'query', required: false, schema: { type: 'string', enum: ['csv'] } },
+          ],
+          responses: { ...jsonOk('Columnas y filas del catálogo'), ...errores(403, 404) },
+        },
+      },
       '/bitacora': {
         get: { tags: ['Perfiles y administración'], summary: 'Registro de operaciones (solo Administrador)', responses: { ...jsonOk('Operaciones', 'bitacora.json'), ...errores(403) } },
+      },
+      '/admin/permisos': {
+        get: { tags: ['Perfiles y administración'], summary: 'Perfiles y permisos: qué perfil puede usar cada opción (solo Administrador)', responses: { ...jsonOk('Permisos vigentes', 'permisos.json'), ...errores(403) } },
+        put: {
+          tags: ['Perfiles y administración'],
+          summary: 'Cambiar los perfiles de las opciones configurables (solo Administrador). El Administrador siempre las tiene todas.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { type: 'object', required: ['opciones'], properties: { opciones: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string', enum: ['publico', 'analista'] } } } } },
+                example: { opciones: { descargar: ['publico', 'analista'], comparar_periodos: ['analista'], reportes_personalizados: [] } },
+              },
+            },
+          },
+          responses: { ...jsonOk('Permisos guardados'), ...errores(400, 403) },
+        },
+        delete: { tags: ['Perfiles y administración'], summary: 'Volver a los permisos por defecto (solo Administrador)', responses: { ...jsonOk('Permisos por defecto'), ...errores(403) } },
+      },
+      '/admin/usuarios': {
+        get: { tags: ['Perfiles y administración'], summary: 'Usuarios del sitio interno, sin contraseñas (solo Administrador)', responses: { ...jsonOk('Usuarios', 'usuarios.json'), ...errores(403, 503) } },
+        post: {
+          tags: ['Perfiles y administración'],
+          summary: 'Crear un usuario Analista o Administrador (solo Administrador)',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['usuario', 'perfil', 'clave'],
+                  properties: { usuario: { type: 'string' }, nombre: { type: 'string' }, perfil: { type: 'string', enum: ['analista', 'admin'] }, clave: { type: 'string', minLength: 10 } },
+                },
+              },
+            },
+          },
+          responses: { 201: { description: 'Usuario creado (sin la contraseña)' }, ...errores(400, 403, 409, 503) },
+        },
+      },
+      '/admin/usuarios/{usuario}': {
+        patch: {
+          tags: ['Perfiles y administración'],
+          summary: 'Cambiar nombre, perfil, estado o contraseña de un usuario (solo Administrador). Cierra sus sesiones abiertas si cambia perfil, estado o contraseña.',
+          parameters: [{ name: 'usuario', in: 'path', required: true, schema: { type: 'string' } }],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { type: 'object', properties: { nombre: { type: 'string' }, perfil: { type: 'string', enum: ['analista', 'admin'] }, activo: { type: 'boolean' }, clave: { type: 'string', minLength: 10 } } },
+                example: { perfil: 'admin' },
+              },
+            },
+          },
+          responses: { ...jsonOk('Usuario actualizado'), ...errores(400, 403, 404, 409, 503) },
+        },
       },
       '/salud': { get: { tags: ['Consulta'], summary: 'Estado de la API y períodos cargados', responses: jsonOk('API disponible') } },
       '/periodos': {
@@ -243,7 +309,7 @@ export function crearDocumentoOpenApi(catalogos) {
         post: {
           tags: ['IA'],
           summary: 'MCP remoto (Streamable HTTP, sin estado): conectar Claude u otro cliente MCP por URL',
-          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. Perfil con `?perfil=` (por defecto publico). Solo acepta POST: GET y DELETE responden 405 (modo sin estado). Instrucciones en `server/src/mcp/README.md`.',
+          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. En el sitio público el perfil es siempre publico; en el interno exige `Authorization: Bearer <MCP_TOKEN>` (perfil analista). `?perfil=` solo vale en llamadas directas al API desde la misma máquina. Solo acepta POST: GET y DELETE responden 405 (modo sin estado). Instrucciones en `server/src/mcp/README.md`.',
           parameters: [{ name: 'perfil', in: 'query', required: false, schema: { type: 'string', enum: PERFILES } }],
           requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' }, example: { jsonrpc: '2.0', id: 1, method: 'tools/list' } } } },
           responses: { ...jsonOk('Respuesta JSON-RPC'), ...errores(400) },
@@ -368,11 +434,13 @@ export function crearDocumentoOpenApi(catalogos) {
         [
           [400, 'Parámetro inválido (PARAMETRO_INVALIDO)'],
           [403, 'El perfil no tiene esta opción (PERFIL_NO_AUTORIZADO)'],
-          [404, 'Período sin datos (PERIODO_SIN_DATOS)'],
+          [404, 'Período sin datos (PERIODO_SIN_DATOS) o usuario inexistente (USUARIO_NO_ENCONTRADO)'],
+          [409, 'Conflicto: el usuario ya existe (USUARIO_EXISTE), viene del .env (USUARIO_SOLO_LECTURA) o el cambio dejaría sin Administrador (OPERACION_NO_PERMITIDA)'],
           [413, 'El archivo supera el límite de 50 MB (ARCHIVO_MUY_GRANDE)'],
           [415, 'Formato no soportado: el cuerpo debe ser texto CSV en UTF-8 (FORMATO_NO_SOPORTADO)'],
           [422, 'Períodos inválidos: desde debe ser anterior a hasta (PERIODOS_INVALIDOS)'],
           [429, 'Demasiados pedidos a la IA (DEMASIADOS_PEDIDOS); el header Retry-After dice cuántos segundos esperar'],
+          [503, 'La base de usuarios no responde (USUARIOS_NO_DISPONIBLES) o todavía no permite cambios (USUARIOS_SOLO_LECTURA)'],
         ].map(([codigo, descripcion]) => [
           `Error${codigo}`,
           { description: descripcion, content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },

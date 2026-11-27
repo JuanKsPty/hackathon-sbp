@@ -1,4 +1,5 @@
-// Períodos cargados (GET /api/periodos) y el período elegido en el encabezado.
+// Períodos cargados (GET /api/periodos) y el período elegido («Período de los datos», junto al título
+// de Panel, Rankings y Calidad; vale para toda la app).
 // Por defecto se elige `ultimo`, el más reciente que reporta el API.
 import { createContext, useContext, useMemo, useState } from 'react'
 import { periodos as pedirPeriodos } from '@/api/cliente.js'

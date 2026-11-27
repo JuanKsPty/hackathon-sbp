@@ -1,24 +1,129 @@
 /*
- * Tema Radar SBP · base monocromática con acento verde (#138).
- * Lenguaje visual tomado de una landing de banca digital (sin su marca): fondo blanco,
- * secciones gris muy claro, bloques negros con cuadrícula y brillo menta, píldoras.
- * La app NO usa el logo ni el nombre de la SBP como marca y siempre muestra
+ * Paleta E+ · Azul institucional claro (pedido de Juan: "menos morada, más ligera").
+ * Azul medio #1656A4 sobre fondos pizarra casi blancos, tarjetas y barra lateral blancas; el modo
+ * oscuro es un carbón azulado sin violeta. El dorado queda solo para "destacado" y para la franja de
+ * datos ficticios. El logo es el oficial de la SBP (public/marca/) y la app siempre muestra
  * "Datos ficticios · Uso informativo, no opinión formal de la SBP".
- *
- * Contraste: todo texto 4.5:1 sobre su fondo; marcas de gráfico 3:1 sobre card.
- * El verde #1F9D63 solo da 3.5:1 sobre blanco, así que va en íconos y marcas
- * (--marca, --chart-1); el texto verde usa #157A4C (--accent-foreground, --sube).
- * El brillo menta (--brillo) nunca va debajo de texto.
+ * Contraste verificado con script en claro y oscuro: texto 4.5:1; bordes de campos y gráficos 3:1.
  *
  * Tokens con los nombres de shadcn/ui, más los propios del reto:
  *   sube / baja / igual  -> cambio de posición entre períodos
- *   destacado            -> movimientos significativos (ámbar)
- *   aviso                -> franja de datos ficticios (ámbar)
- *   marca / brillo       -> verde de íconos y brillo menta de los bloques oscuros
- *   bloque               -> fondo de BloqueOscuro y su texto
- *   seccion              -> fondo de SeccionGris
+ *   destacado            -> movimientos significativos (dorado)
+ *   aviso                -> franja de datos ficticios
+ *   agente               -> cursor y resaltados del agente en pantalla (naranja, distinto del azul)
+ *   marca, brillo, bloque, seccion -> componentes de la landing (components/marca, #138)
+ *
+ * .estilo-landing: la landing pública (#138/#139) conserva su base visual propia (blanco y negro con
+ * acento verde, Inter y píldoras). Todo lo que esté dentro de un contenedor con esa clase toma estos
+ * valores; el resto de la app usa la paleta E+. Guía en client/DISENO.md.
  */
 :root {
+  --background: #F8FAFC;
+  --foreground: #0C1322;
+  --card: #FFFFFF;
+  --card-foreground: #0C1322;
+  --popover: #FFFFFF;
+  --popover-foreground: #0C1322;
+  --primary: #1656A4;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EAF0F7;
+  --secondary-foreground: #1C3C66;
+  --muted: #EDF1F6;
+  --muted-foreground: #4F5D70;
+  --accent: #E8F0FA;
+  --accent-foreground: #174A8B;
+  --destructive: #B42318;
+  --border: #E2E8F0;
+  --input: #838D9C;
+  --ring: #2E6DB9;
+  --chart-1: #1656A4;
+  --chart-2: #B65F17;
+  --chart-3: #229A92;
+  --chart-4: #7E2A48;
+  --chart-5: #5E6878;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #1656A4;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8F0FA;
+  --sidebar-accent-foreground: #174A8B;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #2E6DB9;
+  --sube: #136B45;
+  --sube-fondo: #E4F3EB;
+  --baja: #B42318;
+  --baja-fondo: #FCEBE9;
+  --igual: #4F5D70;
+  --igual-fondo: #EDF1F6;
+  --destacado: #6E5520;
+  --destacado-fondo: #F8F0DC;
+  --aviso: #6E5520;
+  --aviso-fondo: #FAF3E1;
+  --marca: #1F9D63;
+  --marca-fondo: #E7F6EE;
+  --brillo: #6EE7B7;
+  --bloque: #0B0B0C;
+  --bloque-foreground: #FFFFFF;
+  --bloque-muted: #A1A1A8;
+  --seccion: #F4F4F5;
+  --agente: #C8651A;
+  --radius: 0.375rem;
+}
+
+.dark {
+  --background: #0F141A;
+  --foreground: #E6EAF0;
+  --card: #161C24;
+  --card-foreground: #E6EAF0;
+  --popover: #1B222C;
+  --popover-foreground: #E6EAF0;
+  --primary: #6FA8EE;
+  --primary-foreground: #0B1A2E;
+  --secondary: #212A35;
+  --secondary-foreground: #E6EAF0;
+  --muted: #1C232C;
+  --muted-foreground: #9AA6B6;
+  --accent: #22344B;
+  --accent-foreground: #E6EEF8;
+  --destructive: #FCA59C;
+  --border: #28313D;
+  --input: #687280;
+  --ring: #6FA8EE;
+  --chart-1: #6FA8EE;
+  --chart-2: #E39150;
+  --chart-3: #86DCD0;
+  --chart-4: #D9466F;
+  --chart-5: #768396;
+  --sidebar: #141A21;
+  --sidebar-foreground: #C3CCD8;
+  --sidebar-primary: #8DBBF4;
+  --sidebar-primary-foreground: #0B1A2E;
+  --sidebar-accent: #1F3047;
+  --sidebar-accent-foreground: #B9D6FA;
+  --sidebar-border: #252E3A;
+  --sidebar-ring: #6FA8EE;
+  --sube: #56D393;
+  --sube-fondo: #0F2E22;
+  --baja: #E66E68;
+  --baja-fondo: #3A1A1D;
+  --igual: #A3AEBD;
+  --igual-fondo: #1C232C;
+  --destacado: #E6C987;
+  --destacado-fondo: #342A12;
+  --aviso: #E6C987;
+  --aviso-fondo: #342A12;
+  --marca: #34D399;
+  --marca-fondo: #0F2A1F;
+  --brillo: #6EE7B7;
+  --bloque: #141416;
+  --bloque-foreground: #FFFFFF;
+  --bloque-muted: #A1A1A8;
+  --seccion: #111113;
+  --agente: #E39150;
+}
+
+/* Landing (#138): base monocromática con acento verde. */
+.estilo-landing {
   --background: #FFFFFF;
   --foreground: #0B0B0C;
   --card: #FFFFFF;
@@ -68,9 +173,10 @@
   --bloque-muted: #A1A1A8;
   --seccion: #F4F4F5;
   --radius: 0.625rem;
+  --agente: #C8651A;
 }
 
-.dark {
+.dark .estilo-landing {
   --background: #0B0B0C;
   --foreground: #F4F4F5;
   --card: #141416;
@@ -119,4 +225,5 @@
   --bloque-foreground: #FFFFFF;
   --bloque-muted: #A1A1A8;
   --seccion: #111113;
+  --agente: #E39150;
 }

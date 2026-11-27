@@ -18,10 +18,13 @@ Registro básico de lo que pasa en la plataforma: qué archivo se cargó, cuánd
 
 | `operacion` | Quién la registra |
 | :--- | :--- |
-| `carga_inicial` | `server/src/servidor.js`, una por archivo AT03 de `data/` al arrancar |
+| `carga_inicial` | `server/src/servidor.js`, una por arranque con los archivos AT03 de `data/` (separados por coma) y sus períodos |
 | `carga_periodo` | la carga o actualización de un período (#29) |
 | `cambio_parametros` | `PUT /api/parametros` (#30) |
 | `acceso_denegado` | `requierePerfil` cada vez que responde 403; `detalle` trae el método y la ruta |
+| `inicio_sesion`, `cierre_sesion` | `POST` y `DELETE /api/sesion`; un intento fallido queda como `rechazado` con perfil `publico` |
+| `cambio_permisos`, `restablecer_permisos` | `PUT` y `DELETE /api/admin/permisos`; `detalle` dice qué opción cambió y de qué perfiles a cuáles |
+| `alta_usuario`, `cambio_usuario` | `POST` y `PATCH /api/admin/usuarios`; `detalle` dice qué cambió, nunca la contraseña |
 | `suscripcion` | alta o baja de las alertas por correo (#7); `detalle` trae los bancos y rankings, nunca el correo |
 | `evento_zapier` | cada aviso a Zapier (#7); `detalle` trae el evento, su id y el estado (`ENVIADO`, `PENDIENTE` o `ERROR`) |
 

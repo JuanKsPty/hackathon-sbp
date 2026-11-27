@@ -21,7 +21,7 @@ export const NOMBRES_PERFIL = {
 export const DESCRIPCIONES_PERFIL = {
   publico: 'Consulta rankings, filtra, ve gráficos y descarga los reportes abiertos.',
   analista: 'Además compara períodos y entidades y genera reportes personalizados.',
-  admin: 'Además carga períodos y administra parámetros, catálogos y el registro de operaciones.',
+  admin: 'Además carga períodos y administra parámetros, catálogos, usuarios, permisos y el registro de operaciones.',
 }
 
 // Cómo llegar a una opción que el perfil actual no tiene, para los avisos de "sección bloqueada".

@@ -11,7 +11,9 @@
 import crypto from 'node:crypto';
 import { ErrorApi } from '../routes/errores.js';
 import { registrarOperacion } from '../datos/bitacora.js';
+import { leerPermisosGuardados } from '../datos/permisos.js';
 import { leerCookie, leerToken } from '../auth/sesion.js';
+import { sesionRevocada } from '../auth/revocaciones.js';
 
 export const NOMBRES_PERFIL = {
   publico: 'Público',
@@ -21,30 +23,103 @@ export const NOMBRES_PERFIL = {
 
 export const PERFILES = Object.keys(NOMBRES_PERFIL);
 
-// Qué puede hacer cada perfil. Es la ÚNICA definición: GET /api/perfil la entrega a la UI
-// para armar el menú y requiereOpcion() la usa para responder 403.
+// Qué puede hacer cada perfil POR DEFECTO. Es la ÚNICA definición: GET /api/perfil la entrega a la
+// UI para armar el menú y requiereOpcion() la usa para responder 403.
+// El Administrador puede cambiar los perfiles de las opciones `configurable` (perfiles y permisos,
+// lámina 6); lo que guarda va a storage/permisos.json (datos/permisos.js) y tiene prioridad.
+// Las demás quedan fijas: `motivo` dice por qué.
+const SOLO_ADMIN = 'Es una opción de administración: siempre es solo del Administrador.';
 export const OPCIONES = [
-  { opcion: 'consultar_rankings', nombre: 'Consultar rankings, filtros, gráficos y tablas', perfiles: ['publico', 'analista', 'admin'] },
-  { opcion: 'descargar', nombre: 'Descargar reportes', perfiles: ['publico', 'analista', 'admin'] },
-  { opcion: 'comparar_periodos', nombre: 'Comparar períodos', perfiles: ['analista', 'admin'] },
-  { opcion: 'comparar_entidades', nombre: 'Comparar entidades', perfiles: ['analista', 'admin'] },
-  { opcion: 'reportes_personalizados', nombre: 'Reportes personalizados', perfiles: ['analista', 'admin'] },
-  { opcion: 'cargar_periodo', nombre: 'Cargar o actualizar un período', perfiles: ['admin'] },
-  { opcion: 'administrar_parametros', nombre: 'Parámetros', perfiles: ['admin'] },
-  { opcion: 'administrar_catalogos', nombre: 'Catálogos', perfiles: ['admin'] },
-  { opcion: 'ver_bitacora', nombre: 'Registro de operaciones', perfiles: ['admin'] },
+  { opcion: 'consultar_rankings', nombre: 'Consultar rankings, filtros, gráficos y tablas', perfiles: ['publico', 'analista', 'admin'], motivo: 'Es la consulta básica: la tienen todos los perfiles.' },
+  { opcion: 'descargar', nombre: 'Descargar reportes', perfiles: ['publico', 'analista', 'admin'], configurable: true },
+  { opcion: 'comparar_periodos', nombre: 'Comparar períodos', perfiles: ['analista', 'admin'], configurable: true },
+  { opcion: 'comparar_entidades', nombre: 'Comparar entidades', perfiles: ['analista', 'admin'], igualA: 'comparar_periodos', motivo: 'Va junto con Comparar períodos: es la misma página.' },
+  { opcion: 'reportes_personalizados', nombre: 'Reportes personalizados', perfiles: ['analista', 'admin'], configurable: true },
+  { opcion: 'cargar_periodo', nombre: 'Cargar o actualizar un período', perfiles: ['admin'], motivo: SOLO_ADMIN },
+  { opcion: 'administrar_parametros', nombre: 'Parámetros', perfiles: ['admin'], motivo: SOLO_ADMIN },
+  { opcion: 'administrar_catalogos', nombre: 'Catálogos', perfiles: ['admin'], motivo: SOLO_ADMIN },
+  { opcion: 'ver_bitacora', nombre: 'Registro de operaciones', perfiles: ['admin'], motivo: SOLO_ADMIN },
+  { opcion: 'configurar_permisos', nombre: 'Perfiles y permisos', perfiles: ['admin'], motivo: SOLO_ADMIN },
+  { opcion: 'gestionar_usuarios', nombre: 'Usuarios', perfiles: ['admin'], motivo: SOLO_ADMIN },
 ];
 
+// Perfiles a los que el Administrador puede dar o quitar una opción configurable. El Administrador
+// siempre tiene todas: así nunca se queda sin acceso a esta pantalla.
+export const PERFILES_CONFIGURABLES = ['publico', 'analista'];
+
+const ordenar = (perfiles) => PERFILES.filter((perfil) => perfiles.includes(perfil));
+
+// Tabla vigente: la de arriba con lo que guardó el Administrador. Cada fila trae además
+// `por_defecto` y `configurable`, para la pantalla de perfiles y permisos.
+export function permisosVigentes(guardados = leerPermisosGuardados()) {
+  const perfilesDe = new Map();
+  for (const fila of OPCIONES) {
+    let perfiles = fila.perfiles;
+    if (fila.configurable && Array.isArray(guardados?.[fila.opcion])) {
+      perfiles = ordenar([...guardados[fila.opcion].filter((p) => PERFILES_CONFIGURABLES.includes(p)), 'admin']);
+    }
+    if (fila.igualA) perfiles = perfilesDe.get(fila.igualA) ?? perfiles;
+    perfilesDe.set(fila.opcion, perfiles);
+  }
+  return OPCIONES.map((fila) => ({
+    opcion: fila.opcion,
+    nombre: fila.nombre,
+    perfiles: perfilesDe.get(fila.opcion),
+    por_defecto: fila.perfiles,
+    configurable: Boolean(fila.configurable),
+    motivo: fila.motivo ?? null,
+  }));
+}
+
+// Perfiles que hoy tienen una opción.
+export function perfilesConOpcion(opcion, guardados) {
+  return permisosVigentes(guardados).find((o) => o.opcion === opcion)?.perfiles ?? [];
+}
+
 // Opciones de un perfil, en el orden de la tabla.
-export function opcionesDe(perfil) {
-  return OPCIONES.filter((o) => o.perfiles.includes(perfil)).map(({ opcion, nombre }) => ({ opcion, nombre }));
+export function opcionesDe(perfil, guardados) {
+  return permisosVigentes(guardados).filter((o) => o.perfiles.includes(perfil)).map(({ opcion, nombre }) => ({ opcion, nombre }));
+}
+
+// Valida lo que manda el Administrador: { opcion: [perfiles] } solo con opciones configurables y
+// perfiles Público o Analista (el Administrador se agrega solo). Devuelve el objeto limpio para guardar.
+// Regla de jerarquía: lo que puede el Público también lo puede el Analista (cada perfil tiene lo del
+// anterior, entregable 8).
+export function validarPermisos(entrada) {
+  if (!entrada || typeof entrada !== 'object' || Array.isArray(entrada)) {
+    throw new Error('Manda "opciones" como un objeto { opcion: [perfiles] }.');
+  }
+  const configurables = OPCIONES.filter((o) => o.configurable).map((o) => o.opcion);
+  const limpio = {};
+  for (const [opcion, perfiles] of Object.entries(entrada)) {
+    const fila = OPCIONES.find((o) => o.opcion === opcion);
+    if (!fila) throw new Error(`La opción "${opcion}" no existe.`);
+    if (!fila.configurable) throw new Error(`"${fila.nombre}" no se puede cambiar. ${fila.motivo ?? ''}`.trim());
+    if (!Array.isArray(perfiles) || perfiles.some((p) => typeof p !== 'string')) {
+      throw new Error(`Los perfiles de "${fila.nombre}" deben ser una lista.`);
+    }
+    const sinAdmin = [...new Set(perfiles.map((p) => p.trim().toLowerCase()))].filter((p) => p !== 'admin');
+    const ajeno = sinAdmin.find((p) => !PERFILES_CONFIGURABLES.includes(p));
+    if (ajeno) throw new Error(`"${ajeno}" no es un perfil que se pueda configurar (usa publico o analista).`);
+    if (sinAdmin.includes('publico') && !sinAdmin.includes('analista')) {
+      throw new Error(`Si el Público puede "${fila.nombre}", el Analista también debe poder: cada perfil tiene lo del anterior.`);
+    }
+    limpio[opcion] = ordenar(sinAdmin);
+  }
+  // Las configurables que no vinieron conservan lo vigente.
+  const vigentes = permisosVigentes();
+  for (const opcion of configurables) {
+    if (!(opcion in limpio)) limpio[opcion] = vigentes.find((o) => o.opcion === opcion).perfiles.filter((p) => p !== 'admin');
+  }
+  return limpio;
 }
 
 // Rutas del sitio interno que responden sin sesión.
 const LIBRES_SIN_SESION = new Set(['/salud', '/perfil', '/sesion', '/ia/estado']);
 const METODOS_SEGUROS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-const esLoopback = (req) => {
+// También lo usa el MCP (routes/mcp.js) para aceptar ?perfil= solo desde la misma máquina.
+export const esLoopback = (req) => {
   const ip = req.socket?.remoteAddress ?? '';
   return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
 };
@@ -68,6 +143,14 @@ function perfilDeHeader(req) {
   return valor;
 }
 
+// Sesión de la cookie, o null si no hay, venció o el Administrador la cortó (cambió el perfil, la
+// contraseña o desactivó al usuario después de que inició sesión).
+function sesionVigente(req) {
+  const sesion = leerToken(leerCookie(req));
+  if (!sesion || sesionRevocada(sesion.usuario, sesion.emitido)) return null;
+  return sesion;
+}
+
 // Middleware: deja en req.sitio el sitio, en req.perfil el perfil y en req.usuario el usuario (o null).
 export function leerPerfil(req, res, next) {
   const sitio = (req.get('X-Sitio') ?? '').trim().toLowerCase();
@@ -81,7 +164,7 @@ export function leerPerfil(req, res, next) {
 
   if (sitio === 'interno') {
     req.sitio = 'interno';
-    const sesion = leerToken(leerCookie(req));
+    const sesion = sesionVigente(req);
     if (sesion) {
       // Defensa CSRF: los cambios con cookie deben traer el header X-Sbp (un sitio ajeno no puede
       // mandarlo sin CORS, y el API no tiene CORS).
@@ -110,7 +193,7 @@ export function leerPerfil(req, res, next) {
       req.usuario = { usuario: 'mcp', nombre: 'Cliente MCP' };
       return next();
     }
-    const sesion = leerToken(leerCookie(req));
+    const sesion = sesionVigente(req);
     if (sesion) {
       req.perfil = sesion.perfil;
       req.usuario = { usuario: sesion.usuario, nombre: sesion.nombre };
@@ -143,10 +226,11 @@ export function requierePerfil(...permitidos) {
   };
 }
 
-// Igual que requierePerfil, pero toma los perfiles de la tabla OPCIONES.
+// Igual que requierePerfil, pero toma los perfiles de la tabla vigente (OPCIONES más lo que guardó
+// el Administrador). Se consulta en cada petición: un cambio de permisos aplica sin reiniciar.
 // Ejemplo: router.get('/bitacora', requiereOpcion('ver_bitacora'), ...)
 export function requiereOpcion(opcion) {
   const fila = OPCIONES.find((o) => o.opcion === opcion);
   if (!fila) throw new Error(`La opción "${opcion}" no está en la tabla OPCIONES de perfiles.js.`);
-  return requierePerfil(...fila.perfiles);
+  return (req, res, next) => requierePerfil(...perfilesConOpcion(opcion))(req, res, next);
 }

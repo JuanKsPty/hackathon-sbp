@@ -33,14 +33,14 @@ import { Pagina } from './Pagina.jsx'
 
 // Comparar períodos (comparar_periodos) y comparar entidades (comparar_entidades) son de
 // Analista y Administrador; el backend responde 403 al resto aunque se llame directo a la API.
-const puedeComparar = (perfil) => perfil === 'analista' || perfil === 'admin'
 
 // Página Comparar (#61): movimientos entre dos períodos, evolución de posiciones, descomposición
 // del saldo y comparación de 2 bancos. Todas las cifras vienen del API (R2).
 export default function Comparar() {
-  const { perfil } = usePerfil()
+  const { perfil, puede } = usePerfil()
   const { periodos, cargando, error, reintentar } = usePeriodo()
-  const permitido = puedeComparar(perfil)
+  // Opción configurable por el Administrador (perfiles y permisos), no un perfil fijo.
+  const permitido = puede('comparar_periodos')
   const catalogo = useConsulta(pedirCatalogos, [], { activa: permitido })
 
   if (!permitido) {

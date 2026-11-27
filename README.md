@@ -180,7 +180,7 @@ La app tiene **dos sitios**, cada uno con su propio nginx:
 
 - El nginx de cada sitio marca cada pedido con el header `X-Sitio`. El público solo deja pasar los endpoints públicos y descarta cookies y tokens.
 - En el sitio interno, el server exige sesión (cookie HttpOnly firmada, 8 horas) y responde 401 `SESION_REQUERIDA` sin ella. Los cambios (POST/PUT/DELETE) llevan además el header `X-Sbp: 1` (defensa CSRF).
-- **Usuarios:** tabla `interno.usuarios` en Supabase (contraseñas con scrypt, [`server/db/001_usuarios.sql`](server/db/001_usuarios.sql)). Si Supabase no está configurada o no responde, el server usa los usuarios de `USUARIOS` en el `.env`, así la demo local funciona sin internet. Ninguna contraseña está en el repo (R5); `npm run usuarios --prefix server -- <usuario> <analista|admin>` genera una.
+- **Usuarios:** tabla `interno.usuarios` en Supabase (contraseñas con scrypt, [`server/db/001_usuarios.sql`](server/db/001_usuarios.sql)). Si Supabase no está configurada o no responde, el server usa los usuarios de `USUARIOS` en el `.env`, así la demo local funciona sin internet. Ninguna contraseña está en el repo (R5); `npm run usuarios --prefix server -- <usuario> <analista|admin>` genera una. El Administrador también crea usuarios y cambia su perfil, estado o contraseña desde **Administración › Usuarios** (en Supabase, después de aplicar [`server/db/002_gestion_usuarios.sql`](server/db/002_gestion_usuarios.sql); sin Supabase, se guardan en `storage/usuarios.json`), y decide qué perfil puede usar cada opción configurable en **Perfiles y permisos** ([contracts/perfiles.md](contracts/perfiles.md)).
 - `POST /api/sesion` inicia sesión, `DELETE /api/sesion` la cierra y `GET /api/perfil` le dice a la UI quién es y qué opciones mostrar.
 - El backend responde 403 (`PERFIL_NO_AUTORIZADO`) a lo que el perfil no puede hacer. Como Público no se puede cargar un período; como Administrador, en el sitio interno, sí.
 - MCP: el del sitio público responde siempre como Público. El del interno (`/api/mcp`) pide `Authorization: Bearer <MCP_TOKEN>` y responde como Analista.
@@ -197,8 +197,8 @@ Sin `ANTHROPIC_API_KEY`, la app funciona igual: usa las explicaciones por reglas
 
 ## Identidad visual
 
-- **Paleta D:** índigo y dorado, inspirada en el sitio de la SBP, con tipografía Roboto. Está en `client/src/styles/tema.css`, con los nombres de tokens de shadcn/ui más los propios: `sube`, `baja`, `igual`, `destacado` y `aviso`. Cumple contraste 4.5:1 en modo claro y en oscuro.
-- **Logo y assets:** el logo, las ilustraciones, la imagen para compartir y los fondos de la presentación se hicieron con Higgsfield. La app no usa el logo ni la marca de la SBP.
+- **Base visual (#138):** blanco y negro con acento verde, secciones gris muy claro y modo oscuro negro, sin violeta. Tipografía Inter. La guía está en [`client/DISENO.md`](client/DISENO.md) y los tokens en `client/src/styles/tema.css`: los de shadcn/ui más los propios (`sube`, `baja`, `igual`, `destacado`, `aviso`, `marca`, `agente`…). Contraste 4.5:1 en texto y 3:1 en marcas de gráfico.
+- **Logo y assets:** el menú, el favicon, los íconos de instalación, la pantalla de Entrar y la imagen para compartir usan el logo oficial de la SBP (tomado de superbancos.gob.pa), porque la app se presenta en su hackathon. La app sigue mostrando siempre "Datos ficticios · Uso informativo, no opinión formal de la SBP". Las ilustraciones de estados vacíos y de error y los fondos de la presentación se hicieron con Higgsfield.
 
 ## Cómo contribuir
 

@@ -19,8 +19,10 @@ const DESCARGAS = {
 export function rutasDeExportacion(almacen, { obtenerMovimientos } = {}) {
   const rutas = Router();
 
+  // Las descargas abiertas son de la opción "descargar": por defecto, los 3 perfiles; el
+  // Administrador puede cambiarlo en perfiles y permisos.
   for (const [archivo, generarCsv] of Object.entries(DESCARGAS)) {
-    rutas.get(`/exportar/${archivo}`, (req, res) => {
+    rutas.get(`/exportar/${archivo}`, requiereOpcion('descargar'), (req, res) => {
       const periodos = periodosPedidos(almacen, req.query.periodo);
       const sufijo = req.query.periodo ?? 'todos';
       enviarCsv(res, archivo.replace('.csv', `_${sufijo}.csv`), generarCsv(periodos));

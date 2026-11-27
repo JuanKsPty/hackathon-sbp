@@ -13,7 +13,18 @@ const MENU_POR_RUTA = {
 
 const guia = (id) => `[data-guia="${id}"]`
 
-/** Selector del elemento que toca el cursor, o null si la acción no tiene un lugar en pantalla. */
+/**
+ * Selectores del elemento que toca el cursor, del más preciso al más general (el primero que exista
+ * en pantalla), o [] si la acción no tiene un lugar. Al elegir, apunta a la opción (la pestaña
+ * COMERCIO), no al centro del control.
+ */
+export function objetivosDe(accion) {
+  const uno = objetivoDe(accion)
+  if (accion?.tipo === 'elegir') return [`${guia(accion.control)} [data-guia-opcion="${accion.valor}"]`, uno]
+  return uno ? [uno] : []
+}
+
+/** Selector principal del elemento (sin la opción). */
 export function objetivoDe(accion) {
   switch (accion?.tipo) {
     case 'ir':

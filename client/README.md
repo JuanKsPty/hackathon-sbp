@@ -45,11 +45,11 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 | `sitios/` | Tabla de rutas de cada sitio (`publico.jsx`, `interno.jsx`). |
 | `hooks/` | `useConsulta`: carga, error y reintento de una consulta. |
 | `guia/` | Cursor guía del asistente (#72): motor, búsqueda de `data-guia` y capa visual. Ver [`src/guia/README.md`](src/guia/README.md). |
-| `components/layout/` | `AppShell`, `Encabezado`, `BarraFuente` (siempre visible), `SesionUsuario` (usuario y Salir, sitio interno) y el menú, que cambia según el perfil. |
+| `components/layout/` | `AppShell`, `Encabezado` (arriba a la derecha solo el botón del agente), `BarraFuente` (siempre visible) y el menú lateral, que cambia según el perfil. Al pie del menú, `PerfilLateral` reúne `SesionUsuario` (usuario y Salir en el sitio interno; "Consulta pública" en el público) y el tema. El período de los datos (`PeriodoDePagina`, por mes: "Septiembre 2026") va junto al título de Panel, Rankings y Calidad, con la prop `acciones` de `Pagina`. |
 | `components/estados/` | `Cargando`, `Vacio` y `ErrorApi`. |
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
 | `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |
-| `styles/tema.css` | Paleta D (SBP): único lugar con colores. Se registran como clases en `index.css`. |
+| `styles/tema.css` | Tokens de la base visual (#138, ver [`DISENO.md`](DISENO.md)): único lugar con colores. Se registran como clases en `index.css`. |
 
 ## Perfiles
 
@@ -69,4 +69,4 @@ puede('cargar_periodo') // true solo si las opciones del perfil lo incluyen
 
 - Ninguna cifra (saldos, posiciones, porcentajes) se escribe en el código: todo sale del API (R2).
 - Fuente, período y "Datos ficticios · Uso informativo, no opinión formal de la SBP" se ven en todas las páginas.
-- La app no usa el logo ni el nombre de la SBP como marca.
+- El logo es el oficial de la SBP (`public/marca/`: `logo.svg` es el emblema del menú; `sbp-logo.png` y `sbp-logo-blanco.png`, el logo completo para claro y oscuro). El aviso de datos ficticios y de uso informativo nunca se quita.

@@ -15,14 +15,16 @@ const puerto = Number(process.env.PORT ?? 3001);
 try {
   console.log(`Procesando los AT03 de ${carpetaDatos} ...`);
   const almacen = almacenDesdeCarpeta(carpetaDatos);
-  // La carga inicial queda en la bitácora: qué archivo, cuándo y con qué resultado (#31).
-  for (const periodo of almacen.todos()) {
+  // La carga inicial queda en la bitácora: qué archivos, cuándo y con qué resultado (#31).
+  // Una sola línea por arranque (antes eran una por archivo y llenaban la bitácora en cada reinicio).
+  const iniciales = almacen.todos();
+  if (iniciales.length > 0) {
     registrarOperacion({
       operacion: 'carga_inicial',
-      archivo: periodo.nombreArchivo,
+      archivo: iniciales.map((p) => p.nombreArchivo).join(', '),
       perfil: 'sistema',
       resultado: 'exito',
-      detalle: `Período ${periodo.fecha}`,
+      detalle: `Arranque del servidor: períodos ${iniciales.map((p) => p.fecha).join(', ')}`,
     });
   }
   // Períodos que subió el Administrador (#29): se recargan después de data/ y la reemplazan si traen la misma Fecha.
