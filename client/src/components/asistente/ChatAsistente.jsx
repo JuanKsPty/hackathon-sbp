@@ -128,7 +128,7 @@ export function ChatAsistente({ className, enPanel = false, pie = null }) {
       {pendiente && (
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
-          Consultando el motor…
+          Pensando…
         </p>
       )}
       {pie}
