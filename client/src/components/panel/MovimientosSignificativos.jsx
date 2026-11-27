@@ -29,11 +29,12 @@ const conSigno = (valor, texto) => (typeof valor === 'number' && valor > 0 ? `+$
 // GET /api/movimientos es solo de Analista y Administrador: Público ve un aviso y no se hace la petición.
 // Todas las cifras salen del API (R2).
 export function MovimientosSignificativos() {
-  const { perfil } = usePerfil()
+  const { perfil, puede } = usePerfil()
   const { periodos, periodo } = usePeriodo()
   const [ranking, setRanking] = useState('')
 
-  const permitido = perfil === 'analista' || perfil === 'admin'
+  // Opción configurable por el Administrador (perfiles y permisos).
+  const permitido = puede('comparar_periodos')
   const desde = periodo ? periodoAnterior(periodos, periodo) : null
   const activa = permitido && Boolean(desde && periodo)
 

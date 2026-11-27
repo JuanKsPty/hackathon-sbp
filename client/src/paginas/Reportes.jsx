@@ -30,12 +30,11 @@ const DESCARGAS_ABIERTAS = [
   { tipo: 'alertas', titulo: 'Alertas de calidad', entregable: 'Alertas', descripcion: 'Avisos de calidad que no excluyen filas.' },
 ]
 
-const puedeAnalizar = (perfil) => perfil === 'analista' || perfil === 'admin'
 
 // Página Reportes (#68): descargas de los entregables 2 a 5 y el reporte personalizado del Analista.
 // Todas las cifras salen del API (R2); aquí solo se eligen filtros y se piden los CSV.
 export default function Reportes() {
-  const { perfil } = usePerfil()
+  const { perfil, puede, opcionesListas } = usePerfil()
   const { periodos, cargando, error, reintentar } = usePeriodo()
   const catalogo = useConsulta(pedirCatalogos)
 
@@ -62,34 +61,45 @@ export default function Reportes() {
 
   return (
     <Contenedor>
-      <DescargasAbiertas periodos={periodos} />
-      {/* __INTERNO__: el bundle público no incluye estas descargas (sitio interno). */}
-      {__INTERNO__ && puedeAnalizar(perfil) ? (
-        <>
-          <DescargaMovimientos periodos={periodos} rankings={rankings} />
-          <ReportePersonalizado periodos={periodos} rankings={rankings} bancos={bancos} />
-        </>
+      {/* Las tres opciones son configurables por el Administrador (perfiles y permisos). */}
+      {!opcionesListas || puede('descargar') ? (
+        <DescargasAbiertas periodos={periodos} />
       ) : (
-        <>
-          <Card data-guia="reportes.descarga-movimientos">
-            <CardHeader>
-              <CardTitle>Movimientos de posición</CardTitle>
-              <CardDescription>Entregable 5</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SoloAnalista perfil={perfil} que="La descarga de movimientos entre períodos" />
-            </CardContent>
-          </Card>
-          <Card data-guia="reportes.personalizado">
-            <CardHeader>
-              <CardTitle>Reporte personalizado</CardTitle>
-              <CardDescription>Períodos, rankings y bancos a tu medida</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SoloAnalista perfil={perfil} que="El reporte personalizado" />
-            </CardContent>
-          </Card>
-        </>
+        <Card>
+          <CardHeader>
+            <CardTitle>Descargas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SoloAnalista perfil={perfil} que="La descarga de reportes" />
+          </CardContent>
+        </Card>
+      )}
+      {/* __INTERNO__: el bundle público no incluye estas descargas (sitio interno). */}
+      {__INTERNO__ && puede('comparar_periodos') ? (
+        <DescargaMovimientos periodos={periodos} rankings={rankings} />
+      ) : (
+        <Card data-guia="reportes.descarga-movimientos">
+          <CardHeader>
+            <CardTitle>Movimientos de posición</CardTitle>
+            <CardDescription>Entregable 5</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SoloAnalista perfil={perfil} que="La descarga de movimientos entre períodos" />
+          </CardContent>
+        </Card>
+      )}
+      {__INTERNO__ && puede('reportes_personalizados') ? (
+        <ReportePersonalizado periodos={periodos} rankings={rankings} bancos={bancos} />
+      ) : (
+        <Card data-guia="reportes.personalizado">
+          <CardHeader>
+            <CardTitle>Reporte personalizado</CardTitle>
+            <CardDescription>Períodos, rankings y bancos a tu medida</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SoloAnalista perfil={perfil} que="El reporte personalizado" />
+          </CardContent>
+        </Card>
       )}
     </Contenedor>
   )
