@@ -10,6 +10,8 @@ import { once } from 'node:events';
 import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
+import { calidadDePeriodo } from '../src/routes/formato.js';
+import { eventoPeriodoPublicado, eventoConfirmacion, eventoSuscripcion } from '../src/automation/zapier.js';
 import { CARPETA_DATOS, paqueteReal } from './ayuda.js';
 
 // Bitácora, parámetros y copias de la carga van a una carpeta temporal propia.
@@ -34,6 +36,22 @@ const PETICIONES = {
   'catalogos-admin.json': { ruta: '/admin/catalogos', perfil: 'admin' },
   'bitacora.json': { ruta: '/bitacora', perfil: 'admin' },
   'carga.json': { carga: true },
+};
+
+// Eventos que la app manda a Zapier (#7, contracts/eventos-zapier.md): no son respuestas de la API,
+// así que cada ejemplo se compara con el evento real que arma automation/zapier.js con los datos del reto.
+const suscriptor = { correo: 'equipo@ejemplo.com', bancos: [], rankings: [], activo: true, token: 't-1' };
+const EVENTOS = {
+  'evento-periodo-publicado.json': () => {
+    const { catalogos, periodos } = paqueteReal();
+    const septiembre = periodos.find((p) => p.fecha === '20260930');
+    const comparacion = crearObtenerMovimientos(crearAlmacen(catalogos, periodos))({ desde: '20260831', hasta: '20260930' });
+    const publicado = { fecha: septiembre.fecha, accion: 'NUEVO', comparacion, calidad: calidadDePeriodo(septiembre), periodo: septiembre };
+    return eventoPeriodoPublicado(publicado, { archivo: 'AT03_sintetico_202609.csv', catalogos, suscriptores: [suscriptor] });
+  },
+  'evento-confirmacion-suscripcion.json': () =>
+    eventoConfirmacion({ ...suscriptor, confirmacion: { token: 'c-1', bancos: ['104'], rankings: [], solicitado_en: '2026-11-27T15:00:00Z' } }),
+  'evento-suscripcion-actualizada.json': () => eventoSuscripcion({ ...suscriptor, bancos: ['104'] }, 'alta'),
 };
 
 let servidor;
@@ -95,8 +113,14 @@ const leerEjemplo = (archivo) => JSON.parse(fs.readFileSync(new URL(archivo, CAR
 
 test('cada ejemplo JSON de /contracts tiene su prueba de forma', () => {
   const ejemplos = fs.readdirSync(CARPETA_CONTRATOS).filter((archivo) => archivo.endsWith('.json')).sort();
-  assert.deepEqual(ejemplos, Object.keys(PETICIONES).sort());
+  assert.deepEqual(ejemplos, [...Object.keys(PETICIONES), ...Object.keys(EVENTOS)].sort());
 });
+
+for (const [archivo, armarEvento] of Object.entries(EVENTOS)) {
+  test(`contracts/${archivo} tiene la forma del evento que se manda a Zapier`, () => {
+    assert.deepEqual(diferenciasDeForma(leerEjemplo(archivo), armarEvento()), []);
+  });
+}
 
 for (const [archivo, peticion] of Object.entries(PETICIONES)) {
   const descripcion = peticion.carga ? 'POST /api/periodos (admin)' : `GET /api${peticion.ruta} (${peticion.perfil ?? 'publico'})`;

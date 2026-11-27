@@ -33,6 +33,7 @@
       "Saldo_actual": 1400000.00,
       "Var_Saldo": 150000.00,
       "Var_Saldo_Pct": 12.0000,
+      "Significativo": true,
       "Motivos": ["cambio_posicion", "cambio_lider", "var_saldo_pct"],
       "Explicacion": "Banco Pacifico sube del puesto 3 al 1 en HIPOTECARIO: su saldo crece 150000.00 (12.0000 %)."
     }
@@ -53,6 +54,8 @@
           "Saldo_actual": 1400000.00,
           "Var_Saldo": 150000.00,
           "Var_Saldo_Pct": 12.0000,
+          "Significativo": true,
+      "Significativo": true,
           "Motivos": ["cambio_posicion", "cambio_lider", "var_saldo_pct"],
           "Explicacion": "Banco Pacifico sube del puesto 3 al 1 en HIPOTECARIO: su saldo crece 150000.00 (12.0000 %)."
         }
