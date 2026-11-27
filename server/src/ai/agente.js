@@ -215,7 +215,8 @@ export async function preguntarAlAgente(pregunta, opciones) {
 
     const texto = respuesta.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim();
     // Los textos de la guía también se verifican: tampoco pueden inventar números.
-    const textoGuia = (guia?.pasos ?? []).map((p) => p.texto).join('\n');
+    // Y los de las acciones de pantalla (#121): el globo de la demostración tampoco puede inventar cifras.
+    const textoGuia = [...(guia?.pasos ?? []), ...(pantalla?.acciones ?? [])].map((p) => p.texto).filter(Boolean).join('\n');
     const { ok, noEncontrados } = verificarNumeros(`${texto}\n${textoGuia}`, fuentes);
     if (ok) {
       return { ia_disponible: true, motivo: null, etiqueta: ETIQUETA_AGENTE, respuesta: texto, verificada: true, consultas, guia, accion, pantalla };
