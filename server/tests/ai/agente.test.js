@@ -617,5 +617,5 @@ test('respuestas directas: effort low y la instrucción de responder en una o do
   const base = await levantar({ cliente })
   await preguntar(base, { pregunta: 'Hola' })
   assert.equal(cliente.llamadas[0].output_config.effort, 'low')
-  assert.match(cliente.llamadas[0].system, /Responde directo, en una o dos frases/)
+  assert.match(cliente.llamadas[0].system, /Responde directo, en una sola frase y solo con lo que se pregunta/)
 })

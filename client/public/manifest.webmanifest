@@ -6,8 +6,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#FFFFFF",
-  "background_color": "#FFFFFF",
+  "theme_color": "#F8FAFC",
+  "background_color": "#F8FAFC",
   "icons": [
     {
       "src": "/marca/icon-192.png",

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LogOutIcon, UserIcon, UsersIcon } from 'lucide-react'
+import { ArrowUpRightIcon, GlobeIcon, LockKeyholeIcon, LogOutIcon, UserIcon, UsersIcon } from 'lucide-react'
 import { salir } from '@/api/sesion.js'
 import {
   DropdownMenu,
@@ -11,11 +11,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { AVISO_ACCESO, DESCRIPCIONES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { cn } from '@/lib/utils'
+import { urlOtroSitio } from './otroSitio.js'
 
 // Quién está usando la app y con qué perfil, al pie del menú lateral (sección 10, entregable 8).
 // - Sitio interno: el usuario de la sesión, su perfil y Salir.
 // - Sitio público: "Consulta pública", sin inicio de sesión, y dónde están las opciones de Analista
 //   y Administrador.
+// En los dos sitios, el menú lleva al otro sitio (público <-> interno, otroSitio.js).
 // Lleva data-guia="global.selector-perfil" para el cursor guía (contracts/guia.md).
 export function SesionUsuario({ className }) {
   const { usuario, perfil, nombre } = usePerfil()
@@ -35,6 +37,9 @@ export function SesionUsuario({ className }) {
   const quien = __INTERNO__ ? usuario?.nombre || usuario?.usuario || 'Sin sesión' : 'Consulta pública'
   const detalle = __INTERNO__ ? `Perfil ${nombre}` : 'Sin inicio de sesión'
   const Icono = __INTERNO__ ? UserIcon : UsersIcon
+  const otroSitio =
+    typeof window === 'undefined' ? '/' : urlOtroSitio({ interno: __INTERNO__, ubicacion: window.location, env: import.meta.env })
+  const IconoOtroSitio = __INTERNO__ ? GlobeIcon : LockKeyholeIcon
 
   return (
     <DropdownMenu>
@@ -68,14 +73,19 @@ export function SesionUsuario({ className }) {
             </span>
           )}
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <a href={otroSitio}>
+            <IconoOtroSitio aria-hidden="true" />
+            {__INTERNO__ ? 'Ir al sitio público' : 'Ir al sitio interno'}
+            <ArrowUpRightIcon aria-hidden="true" className="ml-auto text-muted-foreground" />
+          </a>
+        </DropdownMenuItem>
         {__INTERNO__ && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={cerrarSesion} disabled={saliendo}>
-              <LogOutIcon aria-hidden="true" />
-              Salir
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem onSelect={cerrarSesion} disabled={saliendo}>
+            <LogOutIcon aria-hidden="true" />
+            Salir
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

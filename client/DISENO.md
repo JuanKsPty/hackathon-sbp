@@ -1,17 +1,28 @@
-# Guía visual del Radar SBP (#138)
+# Guía visual
 
-Base común de los dos sitios (`SITIO=publico` y `SITIO=interno`). Toma el lenguaje visual de una landing de banca digital, no su marca. El logo sí es el oficial de la SBP (pedido de Juan): el emblema en el menú, el favicon y los íconos, y el logo completo en Entrar (`public/marca/`).
+## Dos estilos
+
+Decisión de Juan:
+
+- **La app** usa la paleta E+ (azul institucional claro): azul medio `#1656A4`, fondos pizarra casi blancos, barra lateral blanca y modo oscuro carbón. Las fuentes son Roboto y Roboto Mono. Los botones y las tarjetas son los de shadcn, con radio 6 px. Las páginas usan `Pagina` (título, descripción y `acciones` a la derecha; ahí va el período en Panel, Rankings y Calidad).
+- **La landing** pública (#139) usa la base visual de #138, descrita en el resto de esta guía: blanco y negro con acento verde, Inter, botones en píldora y tarjetas con radio 16 y sombra suave. Para eso, la landing envuelve su contenido en un contenedor con la clase **`estilo-landing`**: dentro, `tema.css` y `index.css` cambian los tokens, la fuente y las formas. Fuera de ese contenedor no se usan `BloqueOscuro`, `TituloDosTonos` ni las píldoras.
+
+El logo es el oficial de la SBP: el emblema en el menú, el favicon y los íconos, y el logo completo en Entrar (`public/marca/`). Layout de la app: barra lateral con las secciones y, al pie, el perfil (sesión, tema y enlace al otro sitio). Arriba a la derecha solo va el botón del agente.
+
+---
+
+# Base visual de la landing (#138)
 
 ## Reglas que no se rompen
 
 - La fuente, el período y el aviso "Datos ficticios · Uso informativo, no opinión formal de la SBP" se ven en todas las pantallas.
 - Todos los `data-guia` de `contracts/guia.md` siguen en su lugar. Los componentes de `marca/` pasan `...props`, así que `data-guia` se les puede poner directo.
 - Ninguna cifra se escribe a mano (R2): `Cifra`, títulos y gráficos reciben valores que salen de los datos.
-- Modo oscuro, 360 px, PWA, perfiles y modo mocks (`VITE_USAR_MOCKS=true`).
+- Modo oscuro, 360 px, PWA, perfiles y modo mocks (`VITE_USAR_MOCKS=true`), en la landing y en la app.
 - Arriba a la derecha del encabezado solo va el botón del agente ("Asistente IA"). Abre el chat flotante debajo de él. El cursor y los resaltados del agente usan el token `agente` (naranja).
 - Solo clases de tokens (`bg-background`, `text-sube`, …). Nada de colores sueltos en los componentes.
 
-## Tokens (`src/styles/tema.css`)
+## Tokens de la landing (`.estilo-landing` en `src/styles/tema.css`)
 
 Los nombres son los de siempre (shadcn más `sube`, `baja`, `igual`, `destacado` y `aviso`). Se suman `marca`, `marca-fondo`, `brillo`, `bloque`, `bloque-foreground`, `bloque-muted` y `seccion`.
 
@@ -42,7 +53,7 @@ Inter Variable (`@fontsource-variable/inter`, empaquetada para correr sin intern
 
 ## Primitivas (`src/components/ui/`)
 
-- **Button**: todos son píldora (`rounded-full`). `variant="default"` es el negro (blanco en oscuro) y `variant="outline"` el blanco con borde. Sobre `BloqueOscuro` van `variant="claro"` y `variant="borde-claro"`. `size="pildora"` es la píldora grande de las llamadas a la acción.
+- **Button**: dentro de `.estilo-landing` son píldora (fuera, el botón de siempre). `variant="default"` es el negro (blanco en oscuro) y `variant="outline"` el blanco con borde. Sobre `BloqueOscuro` van `variant="claro"` y `variant="borde-claro"`. `size="pildora"` es la píldora grande de las llamadas a la acción.
 - **Card**: `superficie="tarjeta"` (por defecto) es blanca, con radio 16 y sombra. `superficie="seccion"` es gris, con radio 24 y sin sombra.
 - **Badge**: píldora. Variantes nuevas: `marca`, `sube`, `baja`, `igual`, `destacado` y `aviso`. `size="pildora"` la hace más alta.
 
