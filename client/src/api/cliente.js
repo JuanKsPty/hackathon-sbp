@@ -139,6 +139,10 @@ export const movimientosDescomposicion = ({ desde, hasta, ranking, banco, eviden
 // periodo (puntos 2 a 5; por defecto el último) y banco acotan los datos; los chequeos usan todos los bancos.
 export const verificacion = ({ periodo, banco } = {}, opciones) => pedir('/verificacion', { periodo, banco }, opciones)
 
+// Regla de movimiento significativo vigente (contracts/administracion.md). Leerla es público; cambiarla
+// es del Administrador (api/admin.js). La usa la landing del sitio público (#139).
+export const parametros = (opciones) => pedir('/parametros', undefined, opciones)
+
 // Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
 // para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)

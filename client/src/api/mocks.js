@@ -30,6 +30,7 @@ const ARCHIVOS = {
   '/excluidas': 'excluidas',
   '/movimientos': 'movimientos',
   '/indicadores': 'indicadores',
+  '/parametros': 'parametros',
   '/perfil': 'perfil',
   '/verificacion': 'verificacion',
 }
