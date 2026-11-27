@@ -1,5 +1,5 @@
-// Cursor del agente guía (#72): triángulo naranja con la base en arco hacia adentro, borde blanco
-// (se ve en tema claro y oscuro) y un brillo naranja suave. La punta está en (4, 3) del viewBox:
+// Cursor del agente guía (#72): triángulo celeste con la base en arco hacia adentro, borde blanco
+// (se ve en tema claro y oscuro) y un brillo celeste suave. La punta está en (4, 3) del viewBox:
 // el componente se desplaza para que la punta caiga justo en `top`/`left`.
 import { useId } from 'react'
 

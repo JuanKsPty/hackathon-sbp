@@ -1,4 +1,4 @@
-// Capa visual de la demostración (#123): cursor naranja que se desliza entre los elementos, onda
+// Capa visual de la demostración (#123): cursor celeste que se desliza entre los elementos, onda
 // al "tocar" y globo con el texto del paso. Aparece y desaparece con animación (tw-animate-css).
 // Aspecto provisional hasta el diseño final de @JuanKsPty; el recorrido está en DemostracionContext.
 import { CursorGuia } from '@/guia/CursorGuia.jsx'
