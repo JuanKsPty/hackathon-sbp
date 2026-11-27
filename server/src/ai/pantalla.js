@@ -146,3 +146,62 @@ export function validarPantalla(propuesta, { contexto, perfil = 'publico' }) {
   });
   return errores.length ? { ok: false, errores } : { ok: true, pantalla: { modo, acciones } };
 }
+
+export const NOMBRE_HERRAMIENTA_PANTALLA = 'usar_pantalla';
+
+// Cómo se describe cada control a la IA: qué acciones admite y con qué valores.
+function describirControl(id) {
+  const admite = CONTROLES[id];
+  const partes = [];
+  if (admite.elegir) partes.push(`elegir (${admite.elegir}${SIN_FILTRO[admite.elegir] ? ` o "${SIN_FILTRO[admite.elegir]}"` : ''})`);
+  if (admite.ordenar) partes.push(`ordenar (${admite.ordenar.join(', ')})`);
+  if (admite.resaltar) partes.push(`resaltar (fila = código de ${admite.resaltar})`);
+  return `- ${id}: ${partes.join('; ')}`;
+}
+
+/** Definición de la herramienta para el perfil: solo sus páginas y controles. */
+export function definicionPantalla(perfil = 'publico') {
+  const controles = Object.keys(CONTROLES).filter((id) => perfilVeElemento(id, perfil));
+  const senalables = ELEMENTOS_GUIA.filter((e) => perfilVeElemento(e.guia, perfil)).map((e) => e.guia);
+  return {
+    name: NOMBRE_HERRAMIENTA_PANTALLA,
+    description: [
+      'Deja la pantalla de la app lista para lo que se preguntó, además de tu respuesta en el chat.',
+      'modo "ejecutar": la pregunta pide un dato ("¿cuál es…?", "¿quién…?", "¿cuánto…?"). La app aplica las acciones al instante (ir a la página, elegir filtros, ordenar, resaltar el resultado) y el usuario puede pedir "Muéstrame cómo".',
+      'modo "demostrar": la pregunta es cómo o dónde se hace algo ("¿cómo veo…?", "¿dónde está…?"). Un cursor recorre cada acción en orden; cada una necesita un texto corto que explique ese paso.',
+      'Usa los códigos de banco de 3 dígitos y los períodos AAAAMMDD de los resultados de las herramientas. No calcules: para el banco con más o menos de algo, ordena la columna y resalta el banco que viste en los datos.',
+      `Páginas (ir): ${rutasPara(perfil).join(', ')}.`,
+      'Controles que se pueden manejar:',
+      ...controles.map(describirControl),
+      'Cualquier elemento de la guía se puede señalar (tipo "señalar").',
+    ].join('\n'),
+    input_schema: {
+      type: 'object',
+      properties: {
+        modo: { type: 'string', enum: MODOS },
+        acciones: {
+          type: 'array',
+          minItems: 1,
+          maxItems: MAX_ACCIONES,
+          items: {
+            type: 'object',
+            properties: {
+              tipo: { type: 'string', enum: TIPOS_ACCION },
+              ruta: { type: 'string', description: 'Para "ir": la página.' },
+              control: { type: 'string', enum: senalables, description: 'data-guia del elemento.' },
+              valor: { type: 'string', description: 'Para "elegir".' },
+              columna: { type: 'string', enum: COLUMNAS_RANKING, description: 'Para "ordenar".' },
+              orden: { type: 'string', enum: ['asc', 'desc'] },
+              fila: { type: 'string', description: 'Para "resaltar": código de banco.' },
+              texto: { type: 'string', description: 'Qué se hace en este paso, en una frase corta (obligatorio al demostrar).' },
+            },
+            required: ['tipo'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['modo', 'acciones'],
+      additionalProperties: false,
+    },
+  };
+}

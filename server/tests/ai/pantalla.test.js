@@ -1,7 +1,7 @@
 // Acciones de pantalla del agente (#121).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CONTROLES, COLUMNAS_RANKING, contextoPantalla, errorDeValor, validarAccion, validarPantalla } from '../../src/ai/pantalla.js';
+import { CONTROLES, COLUMNAS_RANKING, contextoPantalla, errorDeValor, validarAccion, validarPantalla, definicionPantalla } from '../../src/ai/pantalla.js';
 import { crearAlmacen } from '../../src/datos/almacen.js';
 import { paqueteReal } from '../ayuda.js';
 import { elementoGuia } from '../../src/ai/guia.js';
@@ -125,4 +125,19 @@ test('validarPantalla: modo, cantidad de acciones y texto obligatorio al demostr
   // Junta todos los errores, con el número de acción.
   const mal = validarPantalla({ modo: 'ejecutar', acciones: [acciones[0], { tipo: 'resaltar', control: 'rankings.tabla', fila: '999' }, { tipo: 'volar' }] }, { contexto: c });
   assert.deepEqual(mal.errores.map((e) => e.slice(0, 9)), ['Acción 2:', 'Acción 3:']);
+});
+
+test('definicionPantalla: controles y páginas según el perfil', () => {
+  const publico = definicionPantalla('publico');
+  const admin = definicionPantalla('admin');
+  assert.equal(publico.name, 'usar_pantalla');
+  const enumControl = (d) => d.input_schema.properties.acciones.items.properties.control.enum;
+  assert.ok(enumControl(publico).includes('rankings.tabla'));
+  assert.ok(!enumControl(publico).includes('admin.bitacora'));
+  assert.ok(enumControl(admin).includes('admin.bitacora'));
+  assert.match(publico.description, /rankings\.tabla: ordenar \(.*Operaciones_Validas\); resaltar/);
+  assert.match(publico.description, /modo "ejecutar"/);
+  assert.match(publico.description, /modo "demostrar"/);
+  assert.doesNotMatch(publico.description, /\/comparar/);
+  assert.match(definicionPantalla('analista').description, /\/comparar/);
 });
