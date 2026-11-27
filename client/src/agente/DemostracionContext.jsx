@@ -23,6 +23,9 @@ function esperar(ms, signal) {
   })
 }
 
+// Espera al próximo cuadro pintado, después de que React aplique los cambios de estado pendientes.
+const siguienteCuadro = () => new Promise((resolver) => requestAnimationFrame(() => setTimeout(resolver, 0)))
+
 // Clic de verdad, como el de un mouse: las pestañas se activan al presionar (mousedown) y los
 // enlaces y botones con el click. Después el ejecutor aplica la acción igual, así el resultado es
 // exacto aunque el clic no baste (por ejemplo, una columna que ya estaba ordenada al revés).
@@ -71,6 +74,9 @@ export function DemostracionProvider({ children }) {
       }
 
       const antesDe = async (accion) => {
+        // Primero que React pinte lo que dejó la acción anterior (por ejemplo, el orden nuevo de la
+        // tabla): si no, la fila se mide en su lugar viejo y el scroll va hacia allá y vuelve.
+        await siguienteCuadro()
         // Del objetivo más preciso al más general: la opción (pestaña COMERCIO) y, si no está, el control.
         // El enlace del menú está en el DOM desde el inicio: si no se ve, se pasa rápido al botón de menú.
         let el = null

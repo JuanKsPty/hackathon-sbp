@@ -36,7 +36,7 @@ test('ir: el enlace del menú y, si no se ve, el botón de menú', () => {
 
 test('clic de verdad: menú, columna y la opción; no el control general ni la fila', () => {
   assert.equal(seTocaDeVerdad({ tipo: 'ir' }, 0), true)
-  assert.equal(seTocaDeVerdad({ tipo: 'ordenar' }, 0), true)
+  assert.equal(seTocaDeVerdad({ tipo: 'ordenar' }, 0), false)
   assert.equal(seTocaDeVerdad({ tipo: 'elegir' }, 0), true)
   assert.equal(seTocaDeVerdad({ tipo: 'elegir' }, 1), false)
   assert.equal(seTocaDeVerdad({ tipo: 'resaltar' }, 0), false)
