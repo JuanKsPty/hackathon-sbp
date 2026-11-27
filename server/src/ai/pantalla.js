@@ -87,10 +87,11 @@ export function validarAccion(accion, { contexto, perfil = 'publico' }) {
     if (!rutas.includes(accion.ruta)) return { ok: false, error: `no se puede ir a "${accion.ruta}" con el perfil ${perfil} (${rutas.join(', ')}).` };
     return { ok: true, accion: { tipo, ruta: accion.ruta, texto } };
   }
-  // El resto de las acciones actúan sobre un control: tiene que existir, verlo el perfil y admitir la acción.
+  // El resto de las acciones actúan sobre un elemento de la guía: tiene que existir y verlo el perfil.
+  // "señalar" sirve para cualquiera; las demás, solo para los controles que admiten esa acción.
   const control = accion.control;
-  const admite = CONTROLES[control];
-  if (!admite || !elementoGuia(control)) return { ok: false, error: `el control "${control}" no existe o no se puede manejar.` };
+  if (!elementoGuia(control)) return { ok: false, error: `el control "${control}" no existe o no se puede manejar.` };
+  const admite = CONTROLES[control] ?? {};
   if (!perfilVeElemento(control, perfil)) return { ok: false, error: `el control "${control}" no está disponible para el perfil ${perfil}.` };
   const ruta = elementoGuia(control).ruta;
   if (tipo !== 'señalar' && !admite[tipo]) {
@@ -118,5 +119,7 @@ export function validarAccion(accion, { contexto, perfil = 'publico' }) {
     if (error) return { ok: false, error: `${control}: ${error}` };
     return { ok: true, accion: { tipo, control, ruta, fila: accion.fila.trim(), texto } };
   }
-  return { ok: false, error: `acción "${tipo}" todavía no soportada.` };
+
+  // señalar: solo apunta al elemento (no cambia nada en la pantalla).
+  return { ok: true, accion: { tipo, control, ruta, texto } };
 }

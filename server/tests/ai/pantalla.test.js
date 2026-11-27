@@ -91,3 +91,13 @@ test('resaltar: fila de un banco del catálogo', () => {
   assert.match(validarAccion({ tipo: 'resaltar', control: 'rankings.tabla', fila: 'todos' }, { contexto: c }).error, /no "todos"/);
   assert.match(validarAccion({ tipo: 'resaltar', control: 'rankings.filtro-banco', fila: '104' }, { contexto: c }).error, /no admite "resaltar"/);
 });
+
+test('señalar: cualquier elemento de la guía visible para el perfil', () => {
+  const c = contexto();
+  assert.deepEqual(validarAccion({ tipo: 'señalar', control: 'rankings.grafico', texto: 'Aquí ves los saldos.' }, { contexto: c }), {
+    ok: true, accion: { tipo: 'señalar', control: 'rankings.grafico', ruta: '/rankings', texto: 'Aquí ves los saldos.' },
+  });
+  assert.equal(validarAccion({ tipo: 'señalar', control: 'global.selector-perfil' }, { contexto: c }).accion.ruta, null);
+  assert.match(validarAccion({ tipo: 'señalar', control: 'admin.bitacora' }, { contexto: c, perfil: 'publico' }).error, /perfil publico/);
+  assert.match(validarAccion({ tipo: 'ordenar', control: 'rankings.grafico', columna: 'Banco' }, { contexto: c }).error, /no admite "ordenar"/);
+});
