@@ -25,7 +25,7 @@ Registro básico de lo que pasa en la plataforma: qué archivo se cargó, cuánd
 
 ## Dónde se guarda
 
-Una línea JSON por operación en **`server/storage/operaciones.jsonl`**. La carpeta `storage/` está en `.gitignore`: no se sube al repo.
+Una línea JSON por operación en **`storage/operaciones.jsonl`**, en la raíz del repo (la misma carpeta de los parámetros guardados, #32). La carpeta `storage/` está en `.gitignore`: no se sube al repo.
 
 - Con la variable de entorno `STORAGE_DIR` se usa otra carpeta.
 - Durante `npm test` se escribe en una carpeta temporal, para no ensuciar la bitácora real.
