@@ -20,7 +20,7 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 | :--- | :--- | :--- |
 | Dominio | `sbp.juank.tech` | `interno.sbp.juank.tech` |
 | Inicio de sesión | No: siempre perfil Público | Sí (`/entrar`); el perfil sale de la cuenta |
-| Rutas | `src/sitios/publico.jsx`: Panel, Rankings, Reportes, Calidad, Verificación, Asistente | `src/sitios/interno.jsx`: además Comparar y Administración |
+| Rutas | `src/sitios/publico.jsx`: Panel, Rankings, Reportes, Calidad, Verificación, Asistente y `/presentacion` | `src/sitios/interno.jsx`: además Comparar y Administración |
 | Service worker | Sí (#8) | No (borra uno viejo) |
 | nginx | `nginx.publico.conf`: lista blanca del API, sin cookies | `nginx.interno.conf`: todo el API |
 
@@ -48,7 +48,7 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 | `components/layout/` | `AppShell`, `Encabezado` (arriba a la derecha solo el botón del agente), `BarraFuente` (siempre visible) y el menú lateral, que cambia según el perfil. Al pie del menú, `PerfilLateral` reúne `SesionUsuario` (usuario y Salir en el sitio interno; "Consulta pública" en el público) y el tema. El período de los datos (`PeriodoDePagina`, por mes: "Septiembre 2026") va junto al título de Panel, Rankings y Calidad, con la prop `acciones` de `Pagina`. |
 | `components/estados/` | `Cargando`, `Vacio` y `ErrorApi`. |
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
-| `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |
+| `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin` y `/presentacion` (solo sitio público: láminas a pantalla completa, sin el menú, con las cifras del API en vivo; las láminas están en `components/presentacion/`). |
 | `styles/tema.css` | Tokens de la base visual (#138, ver [`DISENO.md`](DISENO.md)): único lugar con colores. Se registran como clases en `index.css`. |
 
 ## Perfiles

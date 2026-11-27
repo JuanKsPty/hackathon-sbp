@@ -7,6 +7,7 @@ Todo lo que el equipo necesita para presentar: el deck, el guion de la demo en v
 | Archivo | Para qué sirve |
 | :--- | :--- |
 | [`deck.pptx`](deck.pptx) | El deck: 16:9, 15 láminas, con notas del orador en cada una. Es el archivo que se presenta. |
+| `/presentacion` (sitio público) | Versión web y corta del deck (14 láminas) dentro de la app: misma capa de diseño y cifras en vivo del API. Se navega con las flechas o deslizando, `F` pone pantalla completa y `?lamina=N` abre una lámina. Código en `client/src/paginas/Presentacion.jsx` y `client/src/components/presentacion/`. |
 | [`guion.md`](guion.md) | Guion de la demo en vivo (unos 10 minutos): tiempos, clics exactos, en qué sitio (público 5173 o interno 5174) va cada paso, quién habla, plan B y preguntas probables del jurado con la ruta donde está la respuesta. |
 | [`generar_deck.py`](generar_deck.py) | Genera `deck.pptx` con python-pptx. Los textos, las notas y las cifras están en este archivo. |
 | [`preparar-demo.mjs`](preparar-demo.mjs) | Deja la app corriendo (API, sitio público y sitio interno) con solo julio y agosto cargados, para cargar septiembre en vivo (entregable 7). Avisa si faltan las cuentas del interno. |
