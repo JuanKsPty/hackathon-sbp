@@ -1,0 +1,100 @@
+/*
+ * Paleta D · SBP — elegida por el equipo (canvas "Rankings SBP · Paletas").
+ * Índigo y dorado tomados del logo y del sitio superbancos.gob.pa; tipografía Roboto.
+ * La app NO usa el logo ni el nombre de la SBP como marca y siempre muestra
+ * "Datos ficticios · Uso informativo, no opinión formal de la SBP".
+ * Todo el texto cumple contraste 4.5:1 y los colores de gráficos 3:1 sobre card.
+ *
+ * Tokens con los nombres de shadcn/ui, más los propios del reto:
+ *   sube / baja / igual  -> cambio de posición entre períodos
+ *   destacado            -> movimientos significativos (dorado)
+ *   aviso                -> franja de datos ficticios
+ */
+:root {
+  --background: #F6F4FE;
+  --foreground: #1F2340;
+  --card: #FFFFFF;
+  --card-foreground: #1F2340;
+  --popover: #FFFFFF;
+  --popover-foreground: #1F2340;
+  --primary: #2E2B86;
+  --primary-foreground: #FFFFFF;
+  --secondary: #ECEAF8;
+  --secondary-foreground: #211E75;
+  --muted: #EEEDF7;
+  --muted-foreground: #55566F;
+  --accent: #ECEAF8;
+  --accent-foreground: #211E75;
+  --destructive: #B42318;
+  --border: #DBDBE4;
+  --input: #DBDBE4;
+  --ring: #3643A1;
+  --chart-1: #2E2B86;
+  --chart-2: #A7843A;
+  --chart-3: #4A8BD6;
+  --chart-4: #304254;
+  --chart-5: #9191A6;
+  --sidebar: #211E75;
+  --sidebar-foreground: #D3D2EC;
+  --sidebar-primary: #D2B26A;
+  --sidebar-primary-foreground: #211E75;
+  --sidebar-accent: #2E2B86;
+  --sidebar-accent-foreground: #D2B26A;
+  --sidebar-border: #2E2B86;
+  --sidebar-ring: #D2B26A;
+  --sube: #136B45;
+  --sube-fondo: #E3F2EA;
+  --baja: #B42318;
+  --baja-fondo: #FBEAE8;
+  --igual: #55566F;
+  --igual-fondo: #EEEDF7;
+  --destacado: #6E5520;
+  --destacado-fondo: #F6EEDC;
+  --aviso: #6E5520;
+  --aviso-fondo: #F6EEDC;
+  --radius: 0.375rem;
+}
+
+.dark {
+  --background: #0F0E2E;
+  --foreground: #ECEBF8;
+  --card: #17163F;
+  --card-foreground: #ECEBF8;
+  --popover: #17163F;
+  --popover-foreground: #ECEBF8;
+  --primary: #D2B26A;
+  --primary-foreground: #1A1440;
+  --secondary: #23215A;
+  --secondary-foreground: #ECEBF8;
+  --muted: #1F1E4D;
+  --muted-foreground: #A6A5C8;
+  --accent: #23215A;
+  --accent-foreground: #ECEBF8;
+  --destructive: #F0786B;
+  --border: #2C2A63;
+  --input: #2C2A63;
+  --ring: #8E8AD0;
+  --chart-1: #8E8AD0;
+  --chart-2: #D2B26A;
+  --chart-3: #519BEA;
+  --chart-4: #C9C8E6;
+  --chart-5: #6E6D99;
+  --sidebar: #0B0A24;
+  --sidebar-foreground: #A6A5C8;
+  --sidebar-primary: #D2B26A;
+  --sidebar-primary-foreground: #0B0A24;
+  --sidebar-accent: #23215A;
+  --sidebar-accent-foreground: #D2B26A;
+  --sidebar-border: #2C2A63;
+  --sidebar-ring: #D2B26A;
+  --sube: #4CC38A;
+  --sube-fondo: #10302A;
+  --baja: #F28B7F;
+  --baja-fondo: #3A1A1D;
+  --igual: #A6A5C8;
+  --igual-fondo: #1F1E4D;
+  --destacado: #E6C987;
+  --destacado-fondo: #3A2F14;
+  --aviso: #E6C987;
+  --aviso-fondo: #3A2F14;
+}
