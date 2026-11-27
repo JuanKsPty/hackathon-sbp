@@ -2,7 +2,8 @@
 // Es una versión funcional mínima con los componentes y colores del tema; el diseño final lo define
 // @JuanKsPty. La lógica está en GuiaContext.jsx y motor.js.
 import { useLayoutEffect, useRef, useState } from 'react'
-import { ChevronLeftIcon, ChevronRightIcon, MousePointer2Icon, XIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from 'lucide-react'
+import { CursorGuia } from './CursorGuia.jsx'
 import { Button } from '@/components/ui/button'
 import { useGuia } from './GuiaContext.jsx'
 import { posicionGlobo } from './motor.js'
@@ -49,10 +50,10 @@ export function CapaGuia() {
             className="absolute rounded-lg ring-4 ring-primary/70 transition-all duration-300 ease-out motion-reduce:transition-none"
             style={{ ...resaltado, boxShadow: '0 0 0 9999px rgb(0 0 0 / 0.35)' }}
           />
-          <MousePointer2Icon
-            aria-hidden="true"
-            className="absolute size-7 fill-primary text-primary-foreground drop-shadow transition-all duration-500 ease-out motion-reduce:transition-none"
-            style={{ top: rect.top + rect.height / 2, left: rect.left + Math.min(rect.width / 2, 48) }}
+          <CursorGuia
+            className="transition-all duration-500 ease-out motion-reduce:transition-none"
+            top={rect.top + rect.height / 2}
+            left={rect.left + Math.min(rect.width / 2, 48)}
           />
         </>
       )}
