@@ -327,6 +327,25 @@ export function crearDocumentoOpenApi(catalogos) {
           },
         },
       },
+      '/prestamos/{numero}': {
+        get: {
+          tags: ['Descargas'],
+          summary: 'Ficha de un préstamo en todos los períodos: banco, ranking, saldo, peso en el banco, exclusiones, alertas y campos del AT03 (Analista y Admin)',
+          parameters: [{ name: 'numero', in: 'path', required: true, description: 'Numero_Prestamo', schema: { type: 'string' } }],
+          responses: { ...jsonOk('Ficha del préstamo por período'), ...errores(400, 403, 404) },
+        },
+      },
+      '/exportar/prestamo.html': {
+        get: {
+          tags: ['Descargas'],
+          summary: 'Informe HTML autocontenido de un préstamo (Analista y Admin)',
+          parameters: [{ name: 'numero', in: 'query', required: true, description: 'Numero_Prestamo', schema: { type: 'string' } }],
+          responses: {
+            200: { description: 'HTML descargable (Content-Disposition: attachment)', content: { 'text/html': { schema: { type: 'string' } } } },
+            ...errores(400, 403, 404),
+          },
+        },
+      },
       '/ia/estado': { get: { tags: ['IA'], summary: 'Si la IA está disponible y con qué modelo', responses: jsonOk('Estado de la IA') } },
       '/ia/guia': {
         get: { tags: ['IA'], summary: 'Elementos que el agente guía puede señalar para el perfil (data-guia)', responses: jsonOk('Elementos de la guía') },
