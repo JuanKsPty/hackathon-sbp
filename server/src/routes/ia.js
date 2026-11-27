@@ -10,6 +10,7 @@ import { crearEjecutor } from '../ai/herramientas.js';
 import { urlApiInterna } from '../ai/apiInterna.js';
 import { elementosPara } from '../ai/guia.js';
 import { contextoDe, interpretarPregunta } from '../ai/intencion.js';
+import { contextoPantalla } from '../ai/pantalla.js';
 import { MODELO_POR_DEFECTO } from '../ai/redaccionIA.js';
 import { encabezado } from './formato.js';
 import { ErrorApi } from './errores.js';
@@ -106,6 +107,8 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
         historial,
         perfil: req.perfil,
         contexto,
+        // Acciones de pantalla (#121): se validan contra los datos cargados en este momento.
+        contextoPantalla: almacen?.fechas().length ? contextoPantalla(almacen) : null,
         catalogos: almacen?.catalogos,
         ejecutar: crearEjecutor(baseUrl, { perfil: req.perfil }),
       });
@@ -124,6 +127,7 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
         consultas: [],
         guia: null,
         accion: porReglas(),
+        pantalla: null,
       });
     }
   });
