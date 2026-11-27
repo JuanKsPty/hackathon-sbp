@@ -51,6 +51,7 @@ export function TablaMovimientos({ movimientos, bancoElegido, alElegirBanco }) {
           return (
             <TableRow
               key={fila.Codigo_Banco}
+              data-fila-banco={fila.Codigo_Banco}
               data-state={elegido ? 'selected' : undefined}
               onClick={() => alElegirBanco(elegido ? null : fila.Codigo_Banco)}
               className="cursor-pointer"

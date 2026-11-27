@@ -24,6 +24,11 @@ export const CONTROLES = {
   'rankings.filtro-banco': { elegir: 'banco' },
   'rankings.filtro-subactividad': { elegir: 'subactividad' },
   'rankings.tabla': { ordenar: COLUMNAS_RANKING, resaltar: 'banco' },
+  // Comparar períodos (#126): solo perfiles con comparar_periodos (lo decide la guía).
+  'comparar.selector-desde': { elegir: 'periodo' },
+  'comparar.selector-hasta': { elegir: 'periodo' },
+  'comparar.selector-ranking': { elegir: 'ranking' },
+  'comparar.tabla-movimientos': { resaltar: 'banco' },
 };
 
 export const TIPOS_ACCION = ['ir', 'elegir', 'ordenar', 'resaltar', 'señalar'];

@@ -29,6 +29,7 @@ import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearPeriodo } from '@/lib/formato.js'
+import { useControlGuia } from '@/agente/useControlGuia.js'
 import { Pagina } from './Pagina.jsx'
 
 // Comparar períodos (comparar_periodos) y comparar entidades (comparar_entidades) son de
@@ -157,6 +158,32 @@ function Comparacion({ periodos, rankings, bancos }) {
     }
     return lista
   }, [bancoElegido, bancoA, bancoB])
+
+  // Acciones de pantalla del agente (#126): elegir períodos y ranking, y resaltar un banco en la
+  // tabla (lo mismo que tocar su fila: también lo resalta el gráfico). Todo se puede deshacer.
+  useControlGuia('comparar.selector-desde', {
+    elegir: (valor) => setElegidoDesde(valor),
+    actual: () => desde,
+    estado: () => elegidoDesde,
+    restaurar: (anterior) => setElegidoDesde(anterior ?? null),
+  })
+  useControlGuia('comparar.selector-hasta', {
+    elegir: (valor) => setElegidoHasta(valor),
+    actual: () => hasta,
+    estado: () => elegidoHasta,
+    restaurar: (anterior) => setElegidoHasta(anterior ?? null),
+  })
+  useControlGuia('comparar.selector-ranking', {
+    elegir: (valor) => setElegidoRanking(valor),
+    actual: () => ranking,
+    estado: () => elegidoRanking,
+    restaurar: (anterior) => setElegidoRanking(anterior ?? null),
+  })
+  useControlGuia('comparar.tabla-movimientos', {
+    resaltar: (codigo) => setBancoElegido(codigo),
+    estado: () => bancoElegido,
+    restaurar: (anterior) => setBancoElegido(anterior ?? null),
+  })
 
   const opcionesPeriodo = fechas.map((f) => ({ valor: f, etiqueta: formatearPeriodo(f) }))
   const opcionesRanking = nombresRankings.map((r) => ({ valor: r, etiqueta: r }))

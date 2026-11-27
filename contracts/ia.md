@@ -143,6 +143,9 @@ Además de responder, la IA puede dejar el dashboard listo para lo que se pregun
   | `rankings.filtro-banco` | `elegir` (código o `todos`) |
   | `rankings.filtro-subactividad` | `elegir` (subactividad o `todas`) |
   | `rankings.tabla` | `ordenar` (columnas de `/api/rankings`) y `resaltar` (banco) |
+  | `comparar.selector-desde`, `comparar.selector-hasta` | `elegir` (período `AAAAMMDD`); solo Analista y Administrador |
+  | `comparar.selector-ranking` | `elegir` (ranking) |
+  | `comparar.tabla-movimientos` | `resaltar` (banco) |
 
   Cualquier elemento de [guia.md](guia.md) se puede `señalar`.
 - **Validación en el backend:**
