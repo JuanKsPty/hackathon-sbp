@@ -1,0 +1,23 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "ultimo": "20260930",
+  "periodos": [
+    {
+      "Fecha": "20260831",
+      "Archivo": "AT03_sintetico_202608.csv",
+      "Filas_Leidas": 1000,
+      "Universo_Local_Valido": 950,
+      "Saldo_Total_Valido": 125000000.5,
+      "Reconciliaciones_OK": true
+    },
+    {
+      "Fecha": "20260930",
+      "Archivo": "AT03_sintetico_202609.csv",
+      "Filas_Leidas": 1100,
+      "Universo_Local_Valido": 1040,
+      "Saldo_Total_Valido": 131000000.25,
+      "Reconciliaciones_OK": true
+    }
+  ]
+}

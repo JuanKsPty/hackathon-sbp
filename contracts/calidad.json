@@ -1,0 +1,34 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodos": [
+    {
+      "Fecha": "20260930",
+      "Archivo": "AT03_sintetico_202609.csv",
+      "Filas_Leidas": 1100,
+      "E1_Duplicados": 2,
+      "E2_Destino_Extranjero": 40,
+      "E3_Saldo_No_Positivo": 10,
+      "E4_Actividad_No_Catalogada": 8,
+      "Universo_Local_Valido": 1040,
+      "Saldo_Total_Valido": 131000000.25,
+      "Cascada_Cuadra": true,
+      "Reclasificadas_Tarjeta": 12,
+      "Alertas": {
+        "Banco_Fuera_Catalogo": 0,
+        "Facilidad_Fuera_Catalogo": 0,
+        "Incoherencia_Consumo": 0,
+        "Tipo_Dato": 0
+      },
+      "Conteos_Independientes": { "E1": 2, "E2": 41, "E3": 11, "E4": 8 },
+      "Reconciliaciones": {
+        "R1": { "ok": true, "diferencias": [] },
+        "R2": { "ok": true, "diferencias": [] },
+        "R3": { "ok": true, "Suma_Totales": 131000000.25, "Suma_Universo": 131000000.25 },
+        "Unicidad": { "ok": true, "repetidos": [] }
+      },
+      "Alertas_Total": 0,
+      "alertas": []
+    }
+  ]
+}

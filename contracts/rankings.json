@@ -1,0 +1,40 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo": "20260930",
+  "archivo": "AT03_sintetico_202609.csv",
+  "rankings": [
+    {
+      "Ranking": "HIPOTECARIO",
+      "bancos": [
+        {
+          "Posicion": 1,
+          "Codigo_Banco": "104",
+          "Banco": "Banco Pacifico",
+          "Saldo_Actividad": 1400000.0,
+          "Total_Cartera_Local_Valida": 7000000.0,
+          "Ponderacion_Pct": 20.0,
+          "Operaciones_Validas": 35
+        },
+        {
+          "Posicion": 2,
+          "Codigo_Banco": "101",
+          "Banco": "Banco Istmo",
+          "Saldo_Actividad": 1350000.75,
+          "Total_Cartera_Local_Valida": 9000000.0,
+          "Ponderacion_Pct": 15.0001,
+          "Operaciones_Validas": 31
+        },
+        {
+          "Posicion": 12,
+          "Codigo_Banco": "112",
+          "Banco": "Banco Solidez",
+          "Saldo_Actividad": 0.0,
+          "Total_Cartera_Local_Valida": 5000000.0,
+          "Ponderacion_Pct": 0.0,
+          "Operaciones_Validas": 0
+        }
+      ]
+    }
+  ]
+}
