@@ -676,7 +676,7 @@ def lamina_demo(prs, d):
 [Todos · 10 min. El guion con los clics exactos está en presentacion/guion.md]
 Aquí pasamos al navegador. Antes de esta lámina, la app ya está corriendo en local con solo julio y agosto cargados (R1).
 
-Orden: perfiles, con el dashboard del sitio público y el sitio interno con login; cargar septiembre en el interno y ver cómo cambian los rankings; el Panel del interno, que es un dashboard de gráficas según el perfil; Rankings con período, filtros y gráfico; Calidad; Comparar; Verificación del jurado; Asistente IA, el botón de arriba a la derecha, con el cursor que hace clic en la pantalla; y Reportes con las descargas y los correos.
+Orden: perfiles, con el dashboard del sitio público y el sitio interno con login; cargar septiembre en el interno y ver cómo cambian los rankings; el Panel del interno, que es un dashboard de gráficas según el perfil; Rankings con período, filtros y gráfico; Calidad; Comparar; Verificación del jurado; Asistente IA, el botón flotante de abajo a la derecha, con el cursor que hace clic en la pantalla; y Reportes con las descargas y los correos.
 
 Alternativa sin PowerPoint: la presentación web, en /presentacion del sitio público, con las cifras en vivo (guion, sección Presentación web).
 
@@ -903,7 +903,7 @@ Consulta: el usuario pregunta en lenguaje natural y el agente responde llamando 
 
 Explicación: cada movimiento significativo tiene una frase armada por plantillas, siempre disponible. Si hay llave, Claude la redacta mejor, pero un verificador comprueba que cada número del texto exista en la respuesta del motor; si no existe, esa frase se reemplaza por la de reglas.
 
-Cursor guía y acciones de pantalla: el agente puede proponer acciones de una lista cerrada (ir, elegir, ordenar, resaltar y señalar) y el backend las valida contra el catálogo, los datos y el perfil; la ruta la pone el catálogo, no la IA. El front las ejecuta de dos maneras: en modo ejecutar deja la pantalla lista al instante, con un botón «Muéstrame cómo» que deshace y lo demuestra; en modo demostrar, cuando el usuario pregunta cómo o dónde, un cursor sale del botón Asistente IA y hace clic de verdad en el menú, la pestaña y la columna. Solo toca lo que el perfil ve.
+Cursor guía y acciones de pantalla: el agente puede proponer acciones de una lista cerrada (ir, elegir, ordenar, resaltar y señalar) y el backend las valida contra el catálogo, los datos y el perfil; la ruta la pone el catálogo, no la IA. El front las ejecuta de dos maneras: en modo ejecutar deja la pantalla lista al instante, con un botón «Muéstrame cómo» que deshace y lo demuestra; en modo demostrar, cuando el usuario pregunta cómo o dónde, un cursor sale del botón flotante del asistente y hace clic de verdad en el menú, la pestaña y la columna. Solo toca lo que el perfil ve.
 
 Y si no hay llave de IA o falla, la app sigue: explicaciones por reglas y un aviso. Hay un límite de pedidos para no gastar la llave y una evaluación del agente con casos del jurado (siguiente lámina).
 
@@ -962,7 +962,7 @@ def lamina_innovacion(prs, d):
     tarjetas = [
         ("Dashboards por perfil", "Gráficas del corte en cada perfil, con morosidad, concentración (HHI y top 3) y vencimientos como análisis adicional."),
         ("Descomposición", "De dónde sale cada variación de saldo: préstamos nuevos, los que salen y la amortización."),
-        ("Cursor guía y gráficos", "El chat flota bajo el botón Asistente IA. El cursor hace clic en la pantalla y el chat muestra gráficos."),
+        ("Cursor guía y gráficos", "El chat flota sobre el botón del asistente. El cursor hace clic en la pantalla y el chat muestra gráficos."),
         ("MCP remoto", "Conecta Claude por URL, de solo lectura. Público sin clave; interno con token Bearer."),
         ("App instalable (PWA)", "El sitio público trae manifest y service worker: se instala desde el navegador."),
         ("API documentada", "Swagger UI en /api/docs y el documento OpenAPI en /api/openapi.json."),
@@ -985,7 +985,7 @@ Dashboards e indicadores: el sitio público abre en un dashboard del corte vigen
 
 Descomposición: para cada variación de saldo entre períodos, de dónde viene: préstamos nuevos, préstamos que salen y amortización. Suma exacta.
 
-Cursor guía y chat flotante: el asistente es el botón Asistente IA, arriba a la derecha, que abre el chat debajo de él, encima de la pantalla y sin cambiar de página; el cursor y los gráficos salen de ahí.
+Cursor guía y chat flotante: el asistente es un botón redondo flotante, abajo a la derecha, que abre el chat justo encima, sin cambiar de página; el cursor y los gráficos salen de ahí.
 
 MCP remoto: se pega la URL {URL_PUBLICA}/api/mcp en Claude, como conector, y se hacen las mismas consultas de solo lectura; el sitio público siempre responde como Público, por URL, sin clave. El del sitio interno, {URL_INTERNA}/api/mcp, exige un token Bearer y responde como Analista. No hace falta instalar nada.
 
