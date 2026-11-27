@@ -22,6 +22,8 @@ Registro básico de lo que pasa en la plataforma: qué archivo se cargó, cuánd
 | `carga_periodo` | la carga o actualización de un período (#29) |
 | `cambio_parametros` | `PUT /api/parametros` (#30) |
 | `acceso_denegado` | `requierePerfil` cada vez que responde 403; `detalle` trae el método y la ruta |
+| `suscripcion` | alta o baja de las alertas por correo (#7); `detalle` trae los bancos y rankings, nunca el correo |
+| `evento_zapier` | cada aviso a Zapier (#7); `detalle` trae el evento, su id y el estado (`ENVIADO`, `PENDIENTE` o `ERROR`) |
 
 ## Dónde se guarda
 

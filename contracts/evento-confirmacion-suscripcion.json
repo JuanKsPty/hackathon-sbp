@@ -1,0 +1,11 @@
+{
+  "evento": "confirmacion_suscripcion",
+  "id_evento": "confirmacion_suscripcion-solicitud-c9d0e1f2",
+  "enviado_en": "2026-11-27T15:18:00-05:00",
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "correo": "equipo@ejemplo.com",
+  "enlace_confirmacion": "https://radar.ejemplo.com/api/suscripciones/confirmar?token=7a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+  "bancos": ["104", "111"],
+  "rankings": []
+}

@@ -1,0 +1,75 @@
+{
+  "evento": "periodo_publicado",
+  "id_evento": "periodo_publicado-20260930-a1b2c3d4",
+  "enviado_en": "2026-11-27T15:30:00-05:00",
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo": "20260930",
+  "periodo_anterior": "20260831",
+  "archivo": "AT03_sintetico_202609.csv",
+  "resumen": {
+    "Filas_Leidas": 1100,
+    "E1_Duplicados": 2,
+    "E2_Destino_Extranjero": 40,
+    "E3_Saldo_No_Positivo": 10,
+    "E4_Actividad_No_Catalogada": 8,
+    "Universo_Local_Valido": 1040,
+    "Saldo_Total_Valido": 131000000.25,
+    "Alertas_Total": 0
+  },
+  "lideres": [
+    { "Ranking": "HIPOTECARIO", "Codigo_Banco": "104", "Banco": "Banco Pacifico", "Cambio_Lider": true },
+    { "Ranking": "CONSUMO", "Codigo_Banco": "101", "Banco": "Banco Istmo", "Cambio_Lider": false }
+  ],
+  "movimientos_significativos": [
+    {
+      "Ranking": "HIPOTECARIO",
+      "Codigo_Banco": "104",
+      "Banco": "Banco Pacifico",
+      "Posicion_anterior": 3,
+      "Posicion_actual": 1,
+      "Cambio_Posicion": 2,
+      "Saldo_anterior": 1250000.00,
+      "Saldo_actual": 1400000.00,
+      "Var_Saldo": 150000.00,
+      "Var_Saldo_Pct": 12.0000,
+      "Significativo": true,
+      "Motivos": ["cambio_posicion", "cambio_lider", "var_saldo_pct"],
+      "Explicacion": "Banco Pacifico sube del puesto 3 al 1 en HIPOTECARIO: su saldo crece 150000.00 (12.0000 %)."
+    }
+  ],
+  "destinatarios": [
+    {
+      "correo": "equipo@ejemplo.com",
+      "enlace_baja": "http://localhost:3001/api/suscripciones/baja?token=3f2c9a40-7b1e-4c55-9d0a-2e8f61b7c4d1",
+      "movimientos": [
+        {
+          "Ranking": "HIPOTECARIO",
+          "Codigo_Banco": "104",
+          "Banco": "Banco Pacifico",
+          "Posicion_anterior": 3,
+          "Posicion_actual": 1,
+          "Cambio_Posicion": 2,
+          "Saldo_anterior": 1250000.00,
+          "Saldo_actual": 1400000.00,
+          "Var_Saldo": 150000.00,
+          "Var_Saldo_Pct": 12.0000,
+          "Significativo": true,
+      "Significativo": true,
+          "Motivos": ["cambio_posicion", "cambio_lider", "var_saldo_pct"],
+          "Explicacion": "Banco Pacifico sube del puesto 3 al 1 en HIPOTECARIO: su saldo crece 150000.00 (12.0000 %)."
+        }
+      ]
+    }
+  ],
+  "casos": [
+    {
+      "Caso_ID": "20260930-103-E1",
+      "Codigo_Banco": "103",
+      "Banco": "Banco Centralia",
+      "Tipo_Alerta": "E1_Duplicados",
+      "Cantidad": 2,
+      "Detalle": "2 préstamos repetidos dentro del período; se conservó la primera ocurrencia."
+    }
+  ]
+}
