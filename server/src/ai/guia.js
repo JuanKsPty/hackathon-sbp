@@ -73,12 +73,48 @@ export function elementosPara(perfil = 'publico') {
   return ELEMENTOS_GUIA.filter((e) => puedeVer(e, perfil));
 }
 
+export const NOMBRE_HERRAMIENTA_GUIA = 'guiar_usuario';
+const MAX_PASOS = 6;
+
+/** Definición de la herramienta de guía para el perfil: solo admite sus identificadores. */
+export function definicionGuia(perfil = 'publico') {
+  const elementos = elementosPara(perfil);
+  const lista = elementos.map((e) => `- ${e.guia}: ${e.descripcion}${e.ruta ? ` (${e.ruta})` : ''}`).join('\n');
+  return {
+    name: NOMBRE_HERRAMIENTA_GUIA,
+    description: `Muestra al usuario, con un cursor sobre la pantalla, cómo hacer algo en la app: una lista ordenada de 1 a ${MAX_PASOS} pasos, cada uno señala un elemento y dice qué hacer ahí en una frase corta. Úsala cuando pregunte cómo o dónde hacer algo en la app. Elementos disponibles:\n${lista}`,
+    input_schema: {
+      type: 'object',
+      properties: {
+        pasos: {
+          type: 'array',
+          minItems: 1,
+          maxItems: MAX_PASOS,
+          items: {
+            type: 'object',
+            properties: {
+              guia: { type: 'string', enum: elementos.map((e) => e.guia) },
+              texto: { type: 'string', description: 'Qué hacer en ese elemento, en una frase corta.' },
+            },
+            required: ['guia', 'texto'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['pasos'],
+      additionalProperties: false,
+    },
+  };
+}
+
 /**
  * Valida los pasos que propone la IA y les agrega la ruta desde el catálogo (la IA no elige rutas).
  * @returns {{ ok: true, pasos } | { ok: false, errores: string[] }}
  */
 export function validarPasos(pasos, perfil = 'publico') {
-  if (!Array.isArray(pasos) || pasos.length === 0) return { ok: false, errores: ['pasos debe ser una lista con al menos un paso.'] };
+  if (!Array.isArray(pasos) || pasos.length === 0 || pasos.length > MAX_PASOS) {
+    return { ok: false, errores: [`pasos debe ser una lista de 1 a ${MAX_PASOS} pasos.`] };
+  }
   const errores = [];
   const validos = pasos.map((paso, i) => {
     const elemento = POR_GUIA.get(paso?.guia);

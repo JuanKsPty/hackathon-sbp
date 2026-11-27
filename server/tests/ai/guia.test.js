@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ELEMENTOS_GUIA, elementosPara, validarPasos } from '../../src/ai/guia.js';
+import { ELEMENTOS_GUIA, elementosPara, validarPasos, definicionGuia } from '../../src/ai/guia.js';
 
 test('el catálogo coincide con contracts/guia.md', () => {
   const md = readFileSync(new URL('../../../contracts/guia.md', import.meta.url), 'utf8');
@@ -48,4 +48,12 @@ test('validarPasos agrega la ruta del catálogo y rechaza lo que no corresponde'
   assert.match(mal.errores[2], /falta el texto/);
 
   assert.equal(validarPasos([]).ok, false);
+});
+
+test('definicionGuia solo admite los identificadores del perfil', () => {
+  const enumDe = (perfil) => definicionGuia(perfil).input_schema.properties.pasos.items.properties.guia.enum;
+  assert.deepEqual(enumDe('publico'), elementosPara('publico').map((e) => e.guia));
+  assert.ok(enumDe('admin').includes('admin.bitacora'));
+  assert.ok(!enumDe('analista').includes('admin.bitacora'));
+  assert.match(definicionGuia('publico').description, /rankings\.tabla: Tabla del ranking/);
 });
