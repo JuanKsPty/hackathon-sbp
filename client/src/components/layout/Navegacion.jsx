@@ -1,16 +1,22 @@
 import { DownloadIcon } from 'lucide-react'
 import { NavLink } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { useInstalarApp } from '@/hooks/useInstalarApp'
 import { cn } from '@/lib/utils'
-import { NOMBRE_APP, SECCIONES } from './navegacion.js'
+import { NOMBRE_APP, seccionesVisibles } from './navegacion.js'
+import { SelectorPerfil } from './SelectorPerfil.jsx'
 
 // Menú de secciones. Se usa en la barra lateral (escritorio) y dentro del Sheet (móvil).
-// Abajo muestra "Instalar app" cuando el navegador permite instalarla (#8).
-export function Navegacion({ alNavegar }) {
+// Solo muestra las secciones que el perfil puede usar (opciones de GET /api/perfil).
+// `conSelectorPerfil`: añade el selector de perfil bajo las secciones, solo por debajo de 640 px
+// (desde ahí lo muestra el encabezado). Abajo muestra "Instalar app" cuando el navegador permite
+// instalarla (#8).
+export function Navegacion({ alNavegar, conSelectorPerfil = false }) {
   const { disponible, instalar } = useInstalarApp()
+  const { puede } = usePerfil()
   return (
-    <div className="flex h-full flex-col gap-6 bg-sidebar px-3 py-5 text-sidebar-foreground">
+    <div className="flex h-full flex-col gap-6 overflow-y-auto bg-sidebar px-3 py-5 text-sidebar-foreground">
       <div className="flex items-center gap-3 px-2">
         <img src="/marca/logo.svg" alt="" className="size-9 shrink-0" />
         <div className="min-w-0">
@@ -20,7 +26,7 @@ export function Navegacion({ alNavegar }) {
       </div>
       <nav aria-label="Secciones">
         <ul className="flex flex-col gap-1">
-          {SECCIONES.map(({ ruta, nombre, icono: Icono, guia }) => (
+          {seccionesVisibles(puede).map(({ ruta, nombre, icono: Icono, guia }) => (
             <li key={ruta}>
               <NavLink
                 to={ruta}
@@ -43,6 +49,7 @@ export function Navegacion({ alNavegar }) {
           ))}
         </ul>
       </nav>
+      {conSelectorPerfil && <SelectorPerfil variante="lista" className="sm:hidden" />}
       {disponible && (
         <div className="mt-auto">
           <Button

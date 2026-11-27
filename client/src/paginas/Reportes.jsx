@@ -12,7 +12,7 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { NOMBRES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { NOMBRES_PERFIL, UBICACION_SELECTOR_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearPeriodo } from '@/lib/formato.js'
@@ -339,7 +339,7 @@ function SoloAnalista({ perfil, que }) {
     <Vacio
       icono={LockIcon}
       titulo="Solo para los perfiles Analista y Administrador"
-      descripcion={`${que} es del Analista y del Administrador. Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. Cambia de perfil en el encabezado para usarlo.`}
+      descripcion={`${que} es del Analista y del Administrador. Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. Para usarlo, elige Analista o Administrador en ${UBICACION_SELECTOR_PERFIL}.`}
     />
   )
 }

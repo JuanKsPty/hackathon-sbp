@@ -15,7 +15,7 @@ const BASE = '/api'
 
 let perfilActual = 'publico'
 
-// Lo llama PerfilContext cada vez que cambia el perfil.
+// Lo llama PerfilContext al cambiar de perfil, antes de que las páginas vuelvan a pedir datos.
 export function fijarPerfilDePeticiones(perfil) {
   perfilActual = perfil || 'publico'
 }
@@ -65,7 +65,7 @@ function errorDeRespuesta(respuesta, cuerpo) {
 async function pedir(ruta, parametros, { signal } = {}) {
   if (import.meta.env.DEV && import.meta.env.VITE_USAR_MOCKS === 'true') {
     const { responderConMock } = await import('./mocks.js')
-    const cuerpo = await responderConMock(ruta, parametros)
+    const cuerpo = await responderConMock(ruta, parametros, perfilActual)
     registrarFuente(cuerpo)
     return cuerpo
   }
@@ -118,7 +118,8 @@ export const excluidas = ({ periodo, motivo, banco } = {}, opciones) =>
 export const movimientos = ({ desde, hasta, ranking, solo_significativos } = {}, opciones) =>
   pedir('/movimientos', { desde, hasta, ranking, solo_significativos }, opciones)
 
-// Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usará el selector (#4).
+// Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
+// para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)
 
 // ---- Descargas CSV (contracts/exportaciones.md) ----

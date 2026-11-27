@@ -32,7 +32,31 @@ const ARCHIVOS = {
   '/perfil': 'perfil',
 }
 
-export async function responderConMock(ruta) {
+// Perfil mínimo que pide cada opción (contracts/perfiles.md). perfil.json es la respuesta de
+// Administrador: para los demás perfiles se filtra con esta tabla. Una opción que no esté aquí
+// se trata como de Administrador.
+const ORDEN_PERFILES = ['publico', 'analista', 'admin']
+const PERFIL_MINIMO = {
+  consultar_rankings: 'publico',
+  descargar: 'publico',
+  comparar_periodos: 'analista',
+  comparar_entidades: 'analista',
+  reportes_personalizados: 'analista',
+}
+
+// GET /api/perfil respeta el perfil elegido (header X-Perfil), como el API real.
+function mockPerfil(ejemplo, perfil) {
+  const elegido = ORDEN_PERFILES.includes(perfil) ? perfil : 'publico'
+  const nivel = ORDEN_PERFILES.indexOf(elegido)
+  return {
+    ...ejemplo,
+    perfil: elegido,
+    nombre: ejemplo.perfiles.find((p) => p.perfil === elegido)?.nombre ?? elegido,
+    opciones: ejemplo.opciones.filter(({ opcion }) => ORDEN_PERFILES.indexOf(PERFIL_MINIMO[opcion] ?? 'admin') <= nivel),
+  }
+}
+
+export async function responderConMock(ruta, parametros, perfil) {
   // Una pequeña espera para ver los estados de carga.
   await new Promise((listo) => setTimeout(listo, 250))
 
@@ -46,5 +70,5 @@ export async function responderConMock(ruta) {
   const nombre = ARCHIVOS[ruta]
   const ejemplo = nombre ? contrato(nombre) : null
   if (!ejemplo) throw sinMock(ruta)
-  return ejemplo
+  return ruta === '/perfil' ? mockPerfil(ejemplo, perfil) : ejemplo
 }
