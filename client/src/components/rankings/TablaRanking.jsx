@@ -1,3 +1,4 @@
+import { useControlGuia } from '@/agente/useControlGuia.js'
 import { useMemo, useState } from 'react'
 import { ArrowDownIcon, ArrowUpIcon, ArrowUpDownIcon } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -32,6 +33,13 @@ export function TablaRanking({ bancos, bancoResaltado }) {
   const ordenarPor = (clave) =>
     setOrden((previo) => ({ clave, ascendente: previo.clave === clave ? !previo.ascendente : true }))
 
+  // Acciones de pantalla del agente (#125): ordenar por una columna y deshacerlo.
+  useControlGuia('rankings.tabla', {
+    ordenar: (columna, sentido) => setOrden({ clave: columna, ascendente: sentido === 'asc' }),
+    estado: () => ({ orden }),
+    restaurar: (anterior) => anterior?.orden && setOrden(anterior.orden),
+  })
+
   return (
     <Table data-guia="rankings.tabla">
       <TableHeader>
@@ -48,6 +56,7 @@ export function TablaRanking({ bancos, bancoResaltado }) {
                 <button
                   type="button"
                   onClick={() => ordenarPor(clave)}
+                  data-guia-columna={clave}
                   className="inline-flex items-center gap-1 rounded-sm hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                   {titulo}
@@ -60,7 +69,11 @@ export function TablaRanking({ bancos, bancoResaltado }) {
       </TableHeader>
       <TableBody>
         {filas.map((fila) => (
-          <TableRow key={fila.Codigo_Banco} data-state={fila.Codigo_Banco === bancoResaltado ? 'selected' : undefined}>
+          <TableRow
+            key={fila.Codigo_Banco}
+            data-fila-banco={fila.Codigo_Banco}
+            data-state={fila.Codigo_Banco === bancoResaltado ? 'selected' : undefined}
+          >
             {COLUMNAS.map(({ clave, formato }) =>
               clave === 'Banco' ? (
                 <TableCell key={clave}>
