@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { crearApp } from './app.js';
 import { almacenDesdeCarpeta } from './datos/almacen.js';
 import { registrarOperacion } from './datos/bitacora.js';
+import { recargarPeriodosGuardados } from './datos/cargaPeriodo.js';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const carpetaDatos = path.resolve(process.env.DATA_DIR ?? path.join(aqui, '..', '..', 'data'));
@@ -23,6 +24,10 @@ try {
       detalle: `Período ${periodo.fecha}`,
     });
   }
+  // Períodos que subió el Administrador (#29): se recargan después de data/ y la reemplazan si traen la misma Fecha.
+  const { recargados, avisos } = recargarPeriodosGuardados(almacen);
+  avisos.forEach((aviso) => console.warn(`Aviso: ${aviso}`));
+  if (recargados.length > 0) console.log(`Períodos recargados de storage/periodos: ${recargados.join(', ')}`);
   crearApp({ almacen }).listen(puerto, () => {
     console.log(`API lista en http://localhost:${puerto}/api · períodos: ${almacen.fechas().join(', ') || 'ninguno'}`);
   });
