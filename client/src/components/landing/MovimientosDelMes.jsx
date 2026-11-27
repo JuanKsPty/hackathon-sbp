@@ -1,4 +1,6 @@
-import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CalendarRangeIcon, MinusIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowLeftRightIcon, ArrowRightIcon, ArrowUpIcon, CalendarRangeIcon, MinusIcon } from 'lucide-react'
+import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
+import { Badge } from '@/components/ui/badge'
 import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { cn } from '@/lib/utils'
@@ -27,12 +29,14 @@ export function MovimientosDelMes({ datos }) {
   const regla = movimientos.datos?.regla
 
   return (
-    <section aria-labelledby="titulo-movimientos" className="flex min-w-0 flex-col gap-5 rounded-3xl bg-muted p-4 sm:p-8">
-      <div className="flex flex-col gap-1">
-        <h2 id="titulo-movimientos" className="text-2xl font-medium tracking-tight sm:text-3xl">
-          Movimientos del mes{' '}
-          <span className="text-muted-foreground">{anterior ? `del ${formatearPeriodo(anterior)} al ${formatearPeriodo(periodo)}` : ''}</span>
-        </h2>
+    <SeccionGris role="region" aria-labelledby="titulo-movimientos" className="flex min-w-0 flex-col gap-5 sm:p-8">
+      <div className="flex flex-col gap-3">
+        <Etiqueta icono={ArrowLeftRightIcon}>Frente al corte anterior</Etiqueta>
+        <TituloDosTonos
+          id="titulo-movimientos"
+          fuerte="Movimientos del mes"
+          suave={anterior ? `del ${formatearPeriodo(anterior)} al ${formatearPeriodo(periodo)}` : undefined}
+        />
         {anterior && total > 0 && (
           <p className="text-sm text-muted-foreground">
             {total > principales.length
@@ -67,7 +71,7 @@ export function MovimientosDelMes({ datos }) {
       </div>
 
       <ReglaVigente regla={regla} />
-    </section>
+    </SeccionGris>
   )
 }
 
@@ -76,10 +80,12 @@ function FilaMovimiento({ movimiento: m }) {
   const Icono = sentido === 'sube' ? ArrowUpIcon : sentido === 'baja' ? ArrowDownIcon : MinusIcon
   const varPct = variacionCorta(m.Var_Saldo_Pct)
   return (
-    <li className="flex min-w-0 flex-col gap-3 rounded-2xl bg-card p-4 text-card-foreground shadow-sm">
+    <li className="flex min-w-0 flex-col gap-3 rounded-tarjeta bg-card p-4 text-card-foreground shadow-tarjeta ring-1 ring-foreground/5 animate-aparecer dark:shadow-none dark:ring-border">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <span className="w-fit rounded-full border px-2 py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground">{m.Ranking}</span>
+          <Badge variant="outline" className="w-fit">
+            {m.Ranking}
+          </Badge>
           <span className="font-medium break-words">{m.Banco}</span>
         </div>
         <span className={cn('cifra flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-sm font-medium', COLORES[sentido])}>
@@ -102,15 +108,9 @@ function FilaMovimiento({ movimiento: m }) {
         </span>
         <span className="flex flex-wrap gap-1">
           {m.Motivos.map((motivo) => (
-            <span
-              key={motivo}
-              className={cn(
-                'rounded-full px-2 py-0.5 text-[11px] font-medium',
-                motivo === 'cambio_lider' ? 'bg-destacado-fondo text-destacado' : 'bg-muted text-muted-foreground',
-              )}
-            >
+            <Badge key={motivo} variant={motivo === 'cambio_lider' ? 'destacado' : 'secondary'}>
               {MOTIVOS[motivo] ?? motivo}
-            </span>
+            </Badge>
           ))}
         </span>
       </div>

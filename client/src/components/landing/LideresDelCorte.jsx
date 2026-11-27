@@ -1,7 +1,9 @@
 import { Link } from 'react-router'
 import { ArrowRightIcon, ArrowUpIcon, CrownIcon, MinusIcon, SparklesIcon } from 'lucide-react'
+import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
 import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
-import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
 import { formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { lideresDelCorte } from './datosLanding.js'
 import { ordinal } from './formatoLanding.js'
@@ -13,15 +15,19 @@ export function LideresDelCorte({ datos }) {
   const lista = lideres.datos ? lideresDelCorte(lideres.datos.rankingsActual, lideres.datos.rankingsAnterior) : []
 
   return (
-    <section aria-labelledby="titulo-lideres" className="flex flex-col gap-5 rounded-3xl bg-muted p-4 sm:p-8">
+    <SeccionGris role="region" aria-labelledby="titulo-lideres" className="flex flex-col gap-5 sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 id="titulo-lideres" className="text-2xl font-medium tracking-tight sm:text-3xl">
-          Líder de cada ranking{' '}
-          <span className="text-muted-foreground">{periodo ? `al ${formatearPeriodo(periodo)}` : 'del período'}</span>
-        </h2>
-        <Link to="/rankings" className="inline-flex h-9 items-center gap-1.5 rounded-full border bg-card px-4 text-sm font-medium hover:bg-accent">
+        <div className="flex flex-col gap-3">
+          <Etiqueta icono={CrownIcon}>Primer lugar por saldo</Etiqueta>
+          <TituloDosTonos
+            id="titulo-lideres"
+            fuerte="Líder de cada ranking"
+            suave={periodo ? `al ${formatearPeriodo(periodo)}` : 'del período'}
+          />
+        </div>
+        <Link to="/rankings" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
           Todos los rankings
-          <ArrowRightIcon className="size-4" aria-hidden="true" />
+          <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
         </Link>
       </div>
 
@@ -38,12 +44,11 @@ export function LideresDelCorte({ datos }) {
               <li
                 key={ranking}
                 style={{ animationDelay: `${i * 60}ms` }}
-                className="flex min-w-0 flex-col gap-3 rounded-2xl bg-card p-5 text-card-foreground shadow-sm animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 motion-reduce:animate-none"
+                className="flex min-w-0 flex-col gap-3 rounded-tarjeta bg-card p-5 text-card-foreground shadow-tarjeta ring-1 ring-foreground/5 animate-aparecer dark:shadow-none dark:ring-border"
               >
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sube-fondo px-2.5 py-0.5 text-xs font-medium text-sube">
-                  <CrownIcon className="size-3.5" aria-hidden="true" />
+                <Badge variant="marca" size="pildora" className="w-fit">
                   {ranking}
-                </span>
+                </Badge>
                 {lider && lider.Operaciones_Validas !== 0 ? (
                   <>
                     <div className="flex flex-col gap-0.5">
@@ -63,7 +68,7 @@ export function LideresDelCorte({ datos }) {
           </ul>
         </EstadoBloque>
       </div>
-    </section>
+    </SeccionGris>
   )
 }
 
@@ -73,21 +78,23 @@ function CambioLider({ antes, anterior }) {
   const corte = formatearPeriodo(anterior)
   let Icono = MinusIcon
   let texto = `Sigue líder desde el ${corte}`
-  let clase = 'bg-muted text-muted-foreground'
+  let variante = 'igual'
   if (posicionAnterior === null) {
     Icono = SparklesIcon
     texto = 'Nuevo en el ranking'
-    clase = 'bg-destacado-fondo text-destacado'
+    variante = 'destacado'
   } else if (posicionAnterior !== 1) {
     Icono = ArrowUpIcon
     texto = `Sube desde el ${ordinal(posicionAnterior)}`
-    clase = 'bg-sube-fondo text-sube'
+    variante = 'sube'
   }
   return (
-    <span className={cn('cifra inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium', clase)} title={liderAnterior ? `Antes lideraba ${liderAnterior}` : undefined}>
-      <Icono className="size-3.5" aria-hidden="true" />
-      {texto}
-      {liderAnterior && <span className="sr-only">. Antes lideraba {liderAnterior}</span>}
+    <span className="flex flex-col items-end gap-1">
+      <Badge variant={variante} className="cifra">
+        <Icono aria-hidden="true" />
+        {texto}
+      </Badge>
+      {liderAnterior && <span className="text-muted-foreground">Antes lideraba {liderAnterior}</span>}
     </span>
   )
 }

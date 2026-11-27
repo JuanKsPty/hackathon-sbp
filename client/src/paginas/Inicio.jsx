@@ -5,6 +5,7 @@ import { HeroPeriodo } from '@/components/landing/HeroPeriodo.jsx'
 import { LideresDelCorte } from '@/components/landing/LideresDelCorte.jsx'
 import { MovimientosDelMes } from '@/components/landing/MovimientosDelMes.jsx'
 import { useDatosLanding } from '@/components/landing/useDatosLanding.js'
+import { SeccionGris } from '@/components/marca'
 import { IndicadoresAdicionales } from '@/components/panel/IndicadoresAdicionales.jsx'
 
 // Landing del sitio público (#139): dashboard del período elegido en el encabezado, en orden de
@@ -21,9 +22,9 @@ export default function Inicio() {
       <MovimientosDelMes datos={datos} />
       <ConfianzaDatos datos={datos} />
       {/* Análisis adicional (morosidad, vencimientos y concentración), fuera de los 6 rankings. */}
-      <section aria-label="Indicadores adicionales" className="min-w-0 rounded-3xl bg-muted p-2 sm:p-4">
+      <SeccionGris role="region" aria-label="Indicadores adicionales" className="min-w-0 sm:p-8">
         <IndicadoresAdicionales />
-      </section>
+      </SeccionGris>
       <CierreLanding datos={datos} />
     </div>
   )
