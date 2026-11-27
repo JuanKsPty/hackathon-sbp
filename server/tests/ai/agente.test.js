@@ -570,19 +570,24 @@ test('#121: una acción inválida vuelve como error y la IA puede corregirla', a
   assert.equal(cuerpo.pantalla.acciones.length, 3);
 });
 
-test('#121: un número inventado en el texto de una acción descarta la respuesta y la pantalla', async () => {
+test('#121: un número inventado en el texto de una acción descarta la pantalla de la IA (quedan las reglas)', async () => {
   const conCifra = { modo: 'demostrar', acciones: [{ tipo: 'resaltar', control: 'rankings.tabla', fila: '104', texto: 'Tiene 987654 operaciones.' }] };
   const cliente = clienteGuionado([usarHerramienta('usar_pantalla', conCifra), responder('Listo.'), responder('Listo.')]);
   const base = await levantar({ cliente });
   const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo el banco con más operaciones?' });
   assert.equal(cuerpo.verificada, false);
-  assert.equal(cuerpo.pantalla, null);
+  // La pantalla de la IA se descartó; la de reglas no trae textos de la IA.
+  assert.ok(cuerpo.pantalla.acciones.every((a) => !a.texto.includes('987654')));
 });
 
-test('#121: sin IA la respuesta trae pantalla: null', async () => {
+test('#121: sin IA, las reglas dejan la pantalla lista', async () => {
   const base = await levantar({ apiKey: '' });
-  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuál es el banco con más operaciones?' });
-  assert.equal(cuerpo.pantalla, null);
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuál es el banco con más operaciones en comercio?' });
+  assert.equal(cuerpo.ia_disponible, false);
+  assert.equal(cuerpo.pantalla.modo, 'ejecutar');
+  assert.equal(cuerpo.pantalla.acciones.at(-1).tipo, 'resaltar');
+  const otra = await preguntar(base, { pregunta: 'Hola' });
+  assert.equal(otra.cuerpo.pantalla, null);
 });
 
 test('#121: las instrucciones explican cuándo ejecutar y cuándo demostrar', async () => {
