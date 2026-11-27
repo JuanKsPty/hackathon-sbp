@@ -51,11 +51,11 @@ function textoPeriodo(accion) {
   return formatearPeriodo(accion.periodo)
 }
 
-// Panel con los gráficos de la última pregunta. `conAyuda`: si todavía no hay gráficos, muestra
+// Panel con los gráficos de la última pregunta (si los pedía) o de la respuesta elegida con "Ver gráficos". `conAyuda`: si todavía no hay gráficos, muestra
 // una tarjeta que explica qué se puede pedir (en la página /asistente).
 export function GraficosAsistente({ className, conAyuda = false }) {
-  const { mensajes } = useConversacion()
-  const accion = ultimaAccion(mensajes)
+  const { mensajes, graficos } = useConversacion()
+  const accion = ultimaAccion(mensajes, graficos)
   const contenedor = useRef(null)
   const vista = useRef(accion?.id ?? null)
 

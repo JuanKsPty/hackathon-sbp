@@ -15,6 +15,7 @@ import { useAgente } from '@/agente/AgenteContext.jsx'
 import { useDemostracion } from '@/agente/DemostracionContext.jsx'
 import { Button } from '@/components/ui/button'
 import { traerALaVista } from './desplazar.js'
+import { verGraficosDe } from './conversacion.js'
 
 // Negritas (**texto**) y viñetas simples: la IA a veces responde con algo de Markdown.
 function conNegritas(linea) {
@@ -52,7 +53,7 @@ function Burbuja({ icono: Icono = BotIcon, children }) {
 
 // Respuesta de POST /api/ia/preguntar. `guia` va solo en la última respuesta (un data-guia por página).
 // Solo la respuesta y los botones (pedido de @atraverso06): sin etiquetas, fuentes ni resúmenes.
-export function MensajeAsistente({ datos }) {
+export function MensajeAsistente({ datos, id }) {
   // Texto: la respuesta de la IA; sin IA, la frase de las reglas; si no hay, un aviso corto.
   let texto = datos?.respuesta
   let icono = BotIcon
@@ -66,13 +67,13 @@ export function MensajeAsistente({ datos }) {
   return (
     <Burbuja icono={icono}>
       <TextoRespuesta texto={texto} />
-      <BotonesRespuesta datos={datos} />
+      <BotonesRespuesta datos={datos} id={id} />
     </Burbuja>
   )
 }
 
 // Botones de la respuesta: "Ver gráficos" y "Muéstrame cómo" (o la guía, si no hay pantalla).
-function BotonesRespuesta({ datos }) {
+function BotonesRespuesta({ datos, id }) {
   const conGraficos = datos?.accion?.graficos?.length > 0
   const conPantalla = datos?.pantalla?.acciones?.length > 0
   const conGuia = !conPantalla && datos?.guia?.pasos?.length > 0
@@ -81,7 +82,7 @@ function BotonesRespuesta({ datos }) {
   if (!conGraficos && !conPantalla && !conGuia) return null
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {conGraficos && <BotonVerGraficos />}
+      {conGraficos && <BotonVerGraficos id={id} />}
       {conPantalla && <BotonMostrarComo pantalla={datos.pantalla} />}
       {conGuia && <BotonGuia pasos={datos.guia.pasos} />}
     </div>
@@ -92,9 +93,12 @@ function BotonesRespuesta({ datos }) {
 
 // Lleva a los gráficos: el último panel en pantalla (el del chat flotante, si está abierto) o la
 // página /asistente si el chat está en otro lugar.
-function BotonVerGraficos() {
+function BotonVerGraficos({ id }) {
   const navegar = useNavigate()
-  function verGraficos() {
+  async function verGraficos() {
+    // Primero se eligen los gráficos de esta respuesta; luego, ya dibujados, se llevan a la vista.
+    verGraficosDe(id)
+    await new Promise((listo) => requestAnimationFrame(() => requestAnimationFrame(listo)))
     const paneles = document.querySelectorAll('[data-graficos-asistente]')
     const panel = paneles[paneles.length - 1]
     if (panel) traerALaVista(panel)
