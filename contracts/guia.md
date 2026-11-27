@@ -28,7 +28,7 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `global.menu-calidad` | Enlace a Calidad de datos | todos |
 | `global.menu-verificacion` | Enlace a Verificación del jurado | todos |
 | `global.menu-admin` | Enlace a Administración | admin |
-| `global.selector-perfil` | Selector de perfil | todos |
+| `global.selector-perfil` | Sesión del sitio interno: usuario, perfil y Salir (`SesionUsuario`) | analista, admin |
 | `global.selector-periodo` | Selector de período | todos |
 | `global.selector-tema` | Claro, oscuro o sistema | todos |
 | `global.barra-fuente` | Fuente, período y aviso de datos ficticios | todos |

@@ -13,8 +13,9 @@ import { ErrorApi } from './errores.js';
 // API que consultan las herramientas: la del propio server (mismo contenedor), no la URL pública.
 const apiInternaPorDefecto = urlApiInterna;
 
-// El perfil va en la URL del conector (?perfil=analista) porque los clientes MCP no siempre permiten
-// headers propios. Sin parámetro, el X-Perfil de la petición (por defecto publico).
+// En los sitios desplegados el perfil sale del sitio: el público siempre es Público y el interno exige
+// Authorization: Bearer MCP_TOKEN (perfil Analista). ?perfil= solo vale en llamadas directas al API
+// (sin X-Sitio, desde la misma máquina), por ejemplo en pruebas locales.
 function perfilDe(req) {
   // En los sitios (nginx) el perfil sale de la sesión o del token MCP, nunca de la URL.
   if (req.sitio === 'publico' || req.sitio === 'interno') return req.perfil ?? 'publico';
