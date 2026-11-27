@@ -5,7 +5,13 @@ import { once } from 'node:events';
 import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
 import { formatearCentavos } from '../src/engine/index.js';
-import { paqueteReal } from './ayuda.js';
+import { paqueteReal, leerReferencia } from './ayuda.js';
+
+// Cifras esperadas: salen de tests/referencia, no se escriben a mano (R2).
+const calidadReferencia = (fecha) => leerReferencia('referencia_calidad.csv').find((r) => r.Fecha === fecha);
+const rankingReferencia = (fecha, ranking, posicion) =>
+  leerReferencia('referencia_rankings.csv').find((r) => r.Fecha === fecha && r.Ranking === ranking && r.Posicion === String(posicion));
+const comoRegex = (texto) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 let servidor;
 let base;
@@ -59,9 +65,10 @@ test('GET /api/rankings serializa montos con 2 decimales y ponderación con 4, i
     assert.equal(b.Saldo_Actividad, Number(formatearCentavos(motor[i].saldoActividad)));
     assert.equal(b.Total_Cartera_Local_Valida, Number(formatearCentavos(motor[i].totalCartera)));
   });
-  // Lo que viaja en el JSON es exactamente el número con sus decimales (cifra de la referencia de pruebas).
-  assert.match(texto, /"Saldo_Actividad":87562053\.92/);
-  assert.match(texto, /"Ponderacion_Pct":19\.5397/);
+  // Lo que viaja en el JSON es exactamente el número con sus decimales de la referencia de pruebas.
+  const lider = rankingReferencia('20260731', 'HIPOTECARIO', 1);
+  assert.match(texto, new RegExp(`"Saldo_Actividad":${comoRegex(lider.Saldo_Actividad)}[,}]`));
+  assert.match(texto, new RegExp(`"Ponderacion_Pct":${comoRegex(lider.Ponderacion_Pct)}[,}]`));
 });
 
 test('GET /api/rankings filtra por ranking y banco', async () => {
@@ -70,7 +77,7 @@ test('GET /api/rankings filtra por ranking y banco', async () => {
   assert.equal(cuerpo.rankings.every((r) => r.bancos.length === 1 && r.bancos[0].Codigo_Banco === '111'), true);
   const { cuerpo: construccion } = await pedir('/rankings?periodo=20260831&ranking=CONSTRUCCION');
   assert.equal(construccion.rankings.length, 1);
-  assert.equal(construccion.rankings[0].bancos[0].Codigo_Banco, '111'); // líder de agosto según la referencia
+  assert.equal(construccion.rankings[0].bancos[0].Codigo_Banco, rankingReferencia('20260831', 'CONSTRUCCION', 1).Codigo_Banco);
 });
 
 test('GET /api/subactividades devuelve el desglose filtrado', async () => {
@@ -85,11 +92,10 @@ test('GET /api/calidad devuelve los 3 períodos con la cascada y las reconciliac
   const { cuerpo } = await pedir('/calidad');
   assert.equal(cuerpo.periodos.length, 3);
   const julio = cuerpo.periodos[0];
-  assert.deepEqual(
-    [julio.Filas_Leidas, julio.E1_Duplicados, julio.E2_Destino_Extranjero, julio.E3_Saldo_No_Positivo, julio.E4_Actividad_No_Catalogada, julio.Universo_Local_Valido],
-    [25000, 20, 886, 48, 42, 24004],
-  );
-  assert.equal(julio.Saldo_Total_Valido, 4342391663.85);
+  const ref = calidadReferencia('20260731');
+  const campos = ['Filas_Leidas', 'E1_Duplicados', 'E2_Destino_Extranjero', 'E3_Saldo_No_Positivo', 'E4_Actividad_No_Catalogada', 'Universo_Local_Valido'];
+  assert.deepEqual(campos.map((c) => julio[c]), campos.map((c) => Number(ref[c])));
+  assert.equal(julio.Saldo_Total_Valido, Number(ref.Saldo_Total_Valido));
   assert.equal(julio.Reconciliaciones.R1.ok && julio.Reconciliaciones.R2.ok && julio.Reconciliaciones.R3.ok, true);
   const { cuerpo: uno } = await pedir('/calidad?periodo=20260831');
   assert.equal(uno.periodos.length, 1);
@@ -97,7 +103,7 @@ test('GET /api/calidad devuelve los 3 períodos con la cascada y las reconciliac
 
 test('GET /api/excluidas lista las filas excluidas con su motivo', async () => {
   const { cuerpo } = await pedir('/excluidas?periodo=20260731&motivo=E1');
-  assert.equal(cuerpo.total, 20);
+  assert.equal(cuerpo.total, Number(calidadReferencia('20260731').E1_Duplicados));
   assert.equal(cuerpo.excluidas.every((e) => e.Motivo === 'E1' && e.Fila_Archivo >= 2), true);
 });
 
