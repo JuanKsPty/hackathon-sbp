@@ -21,6 +21,10 @@ export const COLUMNAS = {
     'Periodo_Anterior', 'Periodo_Actual', 'Ranking', 'Codigo_Banco', 'Banco', 'Posicion_anterior', 'Posicion_actual',
     'Cambio_Posicion', 'Saldo_anterior', 'Saldo_actual', 'Var_Saldo', 'Var_Saldo_Pct', 'Significativo', 'Motivos',
   ],
+  descomposicion: [
+    'Periodo_Anterior', 'Periodo_Actual', 'Ranking', 'Codigo_Banco', 'Banco', 'Saldo_anterior', 'Saldo_actual', 'Var_Saldo',
+    'Nuevos_Saldo', 'Nuevos_Operaciones', 'Salen_Saldo', 'Salen_Operaciones', 'Amortizacion_Saldo', 'Continuan_Operaciones',
+  ],
 };
 
 // Entregable 2: rankings por período.
@@ -100,6 +104,18 @@ export function csvMovimientos(respuesta) {
     }
   }
   return aCsv(COLUMNAS.movimientos, filas);
+}
+
+// Descomposición de cada movimiento (Nuevos + Salen + Amortizacion = Var_Saldo).
+// Recibe la respuesta de /api/movimientos/descomposicion.
+export function csvDescomposicion(respuesta) {
+  const filas = respuesta.descomposicion.map((d) => [
+    respuesta.periodo_anterior, respuesta.periodo_actual, d.Ranking, d.Codigo_Banco, d.Banco,
+    d.Saldo_anterior.toFixed(2), d.Saldo_actual.toFixed(2), d.Var_Saldo.toFixed(2),
+    d.Nuevos.Saldo.toFixed(2), d.Nuevos.Operaciones, d.Salen.Saldo.toFixed(2), d.Salen.Operaciones,
+    d.Amortizacion.Saldo.toFixed(2), d.Amortizacion.Operaciones,
+  ]);
+  return aCsv(COLUMNAS.descomposicion, filas);
 }
 
 function aCsv(columnas, filas) {

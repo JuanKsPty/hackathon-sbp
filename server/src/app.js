@@ -3,6 +3,7 @@ import express from 'express';
 import { rutasDeConsulta } from './routes/consulta.js';
 import { rutasDeExportacion } from './routes/exportaciones.js';
 import { rutasDeMovimientos } from './routes/movimientos.js';
+import { crearObtenerDescomposicion, rutasDeDescomposicion } from './routes/descomposicion.js';
 import { rutasDePerfil } from './routes/perfil.js';
 import { rutasDeBitacora } from './routes/bitacora.js';
 import { rutasDeAdministracion } from './routes/administracion.js';
@@ -30,6 +31,9 @@ export function crearApp({ almacen, obtenerMovimientos }) {
   app.use('/api', rutasDeConsulta(almacen));
   app.use('/api', rutasDeExportacion(almacen, { obtenerMovimientos }));
   if (obtenerMovimientos) app.use('/api', rutasDeMovimientos(obtenerMovimientos));
+  // Descomposición de cada movimiento por préstamo (nuevos, salen, amortización) y su evidencia.
+  // Queda bajo /api/movimientos, así que la restricción de arriba (comparar_periodos) también la cubre.
+  app.use('/api', rutasDeDescomposicion(crearObtenerDescomposicion(almacen)));
   app.use('/api', rutasDeCarga(almacen, { obtenerMovimientos })); // POST /api/periodos, solo admin (#29)
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.
 

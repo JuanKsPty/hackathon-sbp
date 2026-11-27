@@ -4,7 +4,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { procesarCarpeta } from '../src/datos/paquete.js';
-import { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, formatearCentavos, ErrorDeDatos } from '../src/engine/index.js';
+import { crearAlmacen } from '../src/datos/almacen.js';
+import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
+import { crearObtenerDescomposicion } from '../src/routes/descomposicion.js';
+import {
+  csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovimientos, csvDescomposicion,
+  formatearCentavos, ErrorDeDatos,
+} from '../src/engine/index.js';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const argumentos = leerArgumentos(process.argv.slice(2));
@@ -12,9 +18,15 @@ const carpetaDatos = path.resolve(argumentos.datos ?? path.join(aqui, '..', '..'
 const carpetaSalida = path.resolve(argumentos.salida ?? path.join(aqui, '..', 'salidas'));
 
 try {
-  const { periodos, avisos } = procesarCarpeta(carpetaDatos);
+  const { catalogos, periodos, avisos } = procesarCarpeta(carpetaDatos);
   if (periodos.length === 0) throw new ErrorDeDatos(`No hay archivos AT03*.csv en ${carpetaDatos}.`);
   avisos.forEach((aviso) => console.warn(`Aviso: ${aviso}`));
+
+  // Entregable 5: períodos consecutivos (jul -> ago, ago -> sep), con la misma función que /api/movimientos.
+  const almacen = crearAlmacen(catalogos, periodos);
+  const obtenerMovimientos = crearObtenerMovimientos(almacen);
+  const obtenerDescomposicion = crearObtenerDescomposicion(almacen);
+  const pares = periodos.slice(1).map((actual, i) => ({ desde: periodos[i].fecha, hasta: actual.fecha }));
 
   fs.mkdirSync(carpetaSalida, { recursive: true });
   const archivos = {
@@ -24,6 +36,10 @@ try {
     'excluidas.csv': csvExcluidas(periodos),
     'alertas.csv': csvAlertas(periodos),
   };
+  if (pares.length > 0) {
+    archivos['movimientos.csv'] = unirCsv(pares.map((par) => csvMovimientos(obtenerMovimientos(par))));
+    archivos['descomposicion_movimientos.csv'] = unirCsv(pares.map((par) => csvDescomposicion(obtenerDescomposicion(par))));
+  }
   for (const [nombre, contenido] of Object.entries(archivos)) {
     fs.writeFileSync(path.join(carpetaSalida, nombre), contenido, 'utf8');
   }
@@ -57,6 +73,11 @@ function imprimirResumen(periodos) {
     const lideres = periodos.map((p) => p.rankings.find((r) => r.ranking === ranking).filas[0].codigoBanco);
     console.log(`  ${ranking.padEnd(13)} ${lideres.join(' / ')}`);
   }
+}
+
+// Une varios CSV con el mismo encabezado (el encabezado va una sola vez).
+function unirCsv(textos) {
+  return textos.map((texto, i) => (i === 0 ? texto : texto.slice(texto.indexOf('\n') + 1))).join('');
 }
 
 function leerArgumentos(lista) {

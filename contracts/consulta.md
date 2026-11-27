@@ -59,6 +59,19 @@ Si se filtra por `banco`, cada ranking trae solo ese banco, con su posición rea
 ## `GET /api/excluidas`
 Exclusión auditable: `excluidas[]` trae `Fila_Archivo`, `Numero_Prestamo`, `Codigo_Banco`, `Motivo` (`E1`–`E4`) y `Detalle`. `total` es la cantidad después de aplicar los filtros.
 
+## `GET /api/movimientos/descomposicion`
+Explica de dónde sale el `Var_Saldo` de `/api/movimientos`, siguiendo `Numero_Prestamo` entre los dos períodos. No cambia el contrato de `/api/movimientos` (#1).
+
+- **Parámetros:** `desde` y `hasta` funcionan igual que en `/api/movimientos`. `ranking` y `banco` filtran. `evidencia=true` exige `ranking` y `banco`.
+- **`Continuidad`:** `Continuan`, `Entran` y `Salen`, la cantidad de préstamos de todo el universo válido.
+- **`descomposicion[]`:** una fila por ranking y banco, con `Ranking`, `Codigo_Banco`, `Banco`, `Saldo_anterior`, `Saldo_actual` y `Var_Saldo`. Trae además tres piezas, cada una con `Saldo` y `Operaciones`, que suman `Var_Saldo` exacto al centavo:
+  - `Nuevos`: préstamos que entran.
+  - `Salen`: préstamos que ya no están; el saldo va negativo.
+  - `Amortizacion`: diferencia de saldo de los préstamos que continúan.
+- **`evidencia`** (solo con `evidencia=true`): la tabla de respaldo del botón "ver evidencia". Las listas van de mayor a menor monto:
+  - `Nuevos[]` y `Salen[]` traen `Numero_Prestamo` y `Saldo`.
+  - `Continuan[]` trae `Numero_Prestamo`, `Saldo_anterior`, `Saldo_actual` y `Diferencia`.
+
 ## Errores
 Usan el formato común `{ "error": { "codigo", "mensaje", "detalles"? } }`. `detalles` solo aparece cuando hay información adicional.
 
