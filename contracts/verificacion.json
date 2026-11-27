@@ -1,0 +1,223 @@
+{
+  "fuente": "AT03 sintético · Hackathon SBP 2026",
+  "aviso": "Datos ficticios · Uso informativo, no opinión formal de la SBP",
+  "periodo": "20260930",
+  "archivo": "AT03_sintetico_202609.csv",
+  "periodos": [
+    "20260731",
+    "20260831",
+    "20260930"
+  ],
+  "banco": {
+    "Codigo_Banco": "101",
+    "Banco": "Banco Istmo"
+  },
+  "todo_ok": true,
+  "puntos": [
+    {
+      "punto": 1,
+      "titulo": "Reporte de calidad: E1–E4 y universo local válido",
+      "datos": {
+        "periodos": [
+          {
+            "Fecha": "20260731",
+            "Filas_Leidas": 100,
+            "E1_Duplicados": 100,
+            "E2_Destino_Extranjero": 100,
+            "E3_Saldo_No_Positivo": 100,
+            "E4_Actividad_No_Catalogada": 100,
+            "Universo_Local_Valido": 100
+          },
+          {
+            "Fecha": "20260831",
+            "Filas_Leidas": 100,
+            "E1_Duplicados": 100,
+            "E2_Destino_Extranjero": 100,
+            "E3_Saldo_No_Positivo": 100,
+            "E4_Actividad_No_Catalogada": 100,
+            "Universo_Local_Valido": 100
+          },
+          {
+            "Fecha": "20260930",
+            "Filas_Leidas": 100,
+            "E1_Duplicados": 100,
+            "E2_Destino_Extranjero": 100,
+            "E3_Saldo_No_Positivo": 100,
+            "E4_Actividad_No_Catalogada": 100,
+            "Universo_Local_Valido": 100
+          }
+        ]
+      },
+      "chequeos": [
+        {
+          "nombre": "Filas leídas = E1 + E2 + E3 + E4 + universo, en cada período",
+          "ok": true
+        },
+        {
+          "nombre": "Ningún préstamo se repite en el universo válido",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "punto": 2,
+      "titulo": "Rankings obligatorios: posiciones y saldos",
+      "datos": {
+        "rankings": [
+          {
+            "Ranking": "HIPOTECARIO",
+            "bancos": [
+              {
+                "Posicion": 1,
+                "Codigo_Banco": "101",
+                "Banco": "Banco Istmo",
+                "Saldo_Actividad": 1000.5
+              }
+            ]
+          }
+        ]
+      },
+      "chequeos": [
+        {
+          "nombre": "Cada ranking tiene 12 bancos con posiciones 1 a 12 sin huecos",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "punto": 3,
+      "titulo": "Rankings COMERCIO y CONSUMO: posiciones y saldos",
+      "datos": {
+        "rankings": [
+          {
+            "Ranking": "COMERCIO",
+            "bancos": [
+              {
+                "Posicion": 1,
+                "Codigo_Banco": "101",
+                "Banco": "Banco Istmo",
+                "Saldo_Actividad": 1000.5
+              }
+            ]
+          },
+          {
+            "Ranking": "CONSUMO",
+            "bancos": [
+              {
+                "Posicion": 1,
+                "Codigo_Banco": "101",
+                "Banco": "Banco Istmo",
+                "Saldo_Actividad": 1000.5
+              }
+            ]
+          }
+        ]
+      },
+      "chequeos": [
+        {
+          "nombre": "Cada ranking tiene 12 bancos con posiciones 1 a 12 sin huecos",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "punto": 4,
+      "titulo": "Total de cartera local válida y ponderación",
+      "datos": {
+        "bancos": [
+          {
+            "Codigo_Banco": "101",
+            "Banco": "Banco Istmo",
+            "Total_Cartera_Local_Valida": 1000.5,
+            "Ponderacion_Pct": {
+              "HIPOTECARIO": 1000.5,
+              "CONSTRUCCION": 1000.5,
+              "INDUSTRIA": 1000.5,
+              "AGROPECUARIO": 1000.5,
+              "COMERCIO": 1000.5,
+              "CONSUMO": 1000.5
+            }
+          }
+        ]
+      },
+      "chequeos": [
+        {
+          "nombre": "El denominador (total de cartera) es el mismo en los 6 rankings de cada banco",
+          "ok": true
+        },
+        {
+          "nombre": "Las 6 ponderaciones de cada banco suman 100 (con la tolerancia del redondeo)",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "punto": 5,
+      "titulo": "Desglose por subactividad (CONSUMO con la reclasificación SB21 a Tarjeta)",
+      "datos": {
+        "Reclasificadas_Tarjeta": 100,
+        "consumo": [
+          {
+            "Codigo_Banco": "101",
+            "Banco": "Banco Istmo",
+            "Saldo_Actividad": 1000.5,
+            "Subactividades": {
+              "Credito personal": 1000.5,
+              "Automovil": 1000.5,
+              "Tarjeta": 1000.5
+            }
+          }
+        ]
+      },
+      "chequeos": [
+        {
+          "nombre": "CONSUMO incluye la subactividad Tarjeta",
+          "ok": true
+        },
+        {
+          "nombre": "En cada ranking y banco, la suma de subactividades = saldo de la actividad (el total de CONSUMO no cambia con SB21)",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "punto": 6,
+      "titulo": "Períodos procesados y reconciliaciones",
+      "datos": {
+        "periodos": [
+          {
+            "Fecha": "20260731",
+            "Archivo": "AT03_sintetico_202607.csv",
+            "R1": true,
+            "R2": true,
+            "R3": true
+          },
+          {
+            "Fecha": "20260831",
+            "Archivo": "AT03_sintetico_202608.csv",
+            "R1": true,
+            "R2": true,
+            "R3": true
+          },
+          {
+            "Fecha": "20260930",
+            "Archivo": "AT03_sintetico_202609.csv",
+            "R1": true,
+            "R2": true,
+            "R3": true
+          }
+        ]
+      },
+      "chequeos": [
+        {
+          "nombre": "Hay 3 períodos procesados (se esperan al menos 3)",
+          "ok": true
+        },
+        {
+          "nombre": "Reconciliaciones 1 y 2 cuadran al centavo en todos los períodos",
+          "ok": true
+        }
+      ]
+    }
+  ]
+}
