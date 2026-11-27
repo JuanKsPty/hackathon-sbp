@@ -281,6 +281,17 @@ export function crearDocumentoOpenApi(catalogos) {
       '/exportar/calidad.csv': { get: { tags: ['Descargas'], summary: 'Entregable 4: calidad E1–E4', parameters: [ref('periodo')], responses: { ...csvOk('CSV de calidad'), ...errores(400, 404) } } },
       '/exportar/excluidas.csv': { get: { tags: ['Descargas'], summary: 'Filas excluidas con su motivo', parameters: [ref('periodo')], responses: { ...csvOk('CSV de excluidas'), ...errores(400, 404) } } },
       '/exportar/alertas.csv': { get: { tags: ['Descargas'], summary: 'Alertas de calidad', parameters: [ref('periodo')], responses: { ...csvOk('CSV de alertas'), ...errores(400, 404) } } },
+      '/exportar/dashboard.html': {
+        get: {
+          tags: ['Descargas'],
+          summary: 'Dashboard HTML autocontenido (rankings, barras SVG y calidad E1–E4); no reemplaza a los CSV',
+          parameters: [ref('periodo'), ref('ranking'), ref('banco')],
+          responses: {
+            200: { description: 'HTML descargable (Content-Disposition: attachment)', content: { 'text/html': { schema: { type: 'string' } } } },
+            ...errores(400, 404),
+          },
+        },
+      },
       '/exportar/movimientos.csv': {
         get: {
           tags: ['Descargas'],
