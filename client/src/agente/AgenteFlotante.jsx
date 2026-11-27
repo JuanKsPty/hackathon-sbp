@@ -51,7 +51,7 @@ export function AgenteFlotante() {
           <MinusIcon aria-hidden="true" />
         </Button>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+      <div data-desplazable="" className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-4">
         <ChatAsistente enPanel className="min-h-[24rem]" />
         <GraficosAsistente />
       </div>

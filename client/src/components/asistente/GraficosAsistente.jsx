@@ -25,6 +25,7 @@ import {
   ultimaAccion,
 } from './accion.js'
 import { useConversacion } from './conversacion.js'
+import { traerALaVista } from './desplazar.js'
 import { PieFuente } from './PieFuente.jsx'
 
 // Gráficos de lo que se le pidió al chat (#108). La acción (qué mostrar) la interpreta el server, con
@@ -58,14 +59,13 @@ export function GraficosAsistente({ className, conAyuda = false }) {
   const contenedor = useRef(null)
   const vista = useRef(accion?.id ?? null)
 
-  // Al llegar gráficos nuevos, si quedaron fuera de la pantalla, se traen a la vista.
+  // Al llegar gráficos nuevos, si quedaron fuera de la vista, se traen a la vista. Dentro del chat
+  // flotante (un contenedor con data-desplazable) solo se desplaza ese contenedor: la página de
+  // atrás se queda donde está.
   useEffect(() => {
     if (!accion?.id || accion.id === vista.current) return
     vista.current = accion.id
-    const nodo = contenedor.current
-    if (!nodo) return
-    const { top, bottom } = nodo.getBoundingClientRect()
-    if (top > window.innerHeight - 120 || bottom < 0) nodo.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    traerALaVista(contenedor.current, { soloSiOculto: true })
   }, [accion?.id])
 
   if (!accion && !conAyuda) return null
