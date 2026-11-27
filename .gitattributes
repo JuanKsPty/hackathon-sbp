@@ -1,0 +1,4 @@
+# Los CSV del paquete se guardan byte a byte (CRLF, sin conversión de fin de línea)
+# para que lo que lee el motor sea exactamente lo que entregó la SBP.
+*.csv -text
+*.pptx binary

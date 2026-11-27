@@ -1,0 +1,24 @@
+# Dependencias y builds
+node_modules/
+dist/
+build/
+coverage/
+
+# Variables de entorno (R5: nunca credenciales en el repo)
+.env
+.env.*
+!.env.example
+
+# Persistencia local (períodos cargados, log, parámetros)
+storage/
+
+# Sistema y editores
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Archivos de bloqueo de Office (~$archivo.pptx)
+~$*
