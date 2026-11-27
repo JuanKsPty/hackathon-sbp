@@ -93,6 +93,24 @@ test('el verificador detecta números inventados', () => {
   assert.equal(verificarNumeros('Al 30 de septiembre de 2026 lidera Banco Pacifico.', datos).ok, true);
 });
 
+// Límite documentado en src/ai/README.md (#86, B3): el verificador comprueba que el número exista
+// en los resultados, no que sea el de ese banco ni ese campo. Los valores salen de los datos de
+// ejemplo, no se escriben a mano.
+test('límite conocido: un entero pequeño que existe en otro campo pasa aunque no sea el de ese dato', () => {
+  const mov = datos.rankings[0].movimientos[0];
+  const otro = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].find((n) => n !== Math.abs(mov.Cambio_Posicion) && verificarNumeros(String(n), datos).ok);
+  assert.ok(otro, 'los enteros 1 a 12 casi siempre existen en los datos (posiciones, códigos, fechas)');
+  assert.equal(verificarNumeros(`${mov.Banco} subió ${otro} posiciones.`, datos).ok, true);
+});
+
+test('límite conocido: un entero sin decimales coincide con un valor que redondea a él', () => {
+  const fraccion = extraerNumeros(JSON.stringify(datos)).find((n) => n.decimales > 0 && n.valor >= 1);
+  assert.ok(fraccion);
+  assert.equal(verificarNumeros(`creció ${Math.round(fraccion.valor)}`, datos).ok, true);
+  // Con los decimales escritos sí se exige el valor: uno que no está en los datos no pasa.
+  assert.equal(verificarNumeros(`creció ${(fraccion.valor + 10_000_000.5).toFixed(fraccion.decimales)}`, datos).ok, false);
+});
+
 test('sin API key responde por reglas y avisa que la IA no está disponible', async () => {
   const r = await explicarMovimientos(datos, { apiKey: '' });
   assert.equal(r.ia_disponible, false);
