@@ -619,3 +619,12 @@ test('respuestas directas: effort low y la instrucción de responder en una o do
   assert.equal(cliente.llamadas[0].output_config.effort, 'low')
   assert.match(cliente.llamadas[0].system, /Responde directo, en una sola frase y solo con lo que se pregunta/)
 })
+
+test('#121: si la pantalla de la IA queda a medias (no resalta nada), mandan las reglas', async () => {
+  const aMedias = { modo: 'demostrar', acciones: [{ tipo: 'ir', ruta: '/rankings' }, { tipo: 'elegir', control: 'rankings.selector-ranking', valor: 'COMERCIO' }] };
+  const cliente = clienteGuionado([usarHerramienta('usar_pantalla', aMedias), responder('Banco Solidez (112) lidera COMERCIO en 20260930.')]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo quién lidera COMERCIO?' });
+  assert.equal(cuerpo.pantalla.acciones.at(-1).tipo, 'resaltar');
+  assert.ok(cuerpo.pantalla.acciones.some((a) => a.tipo === 'elegir' && a.valor === 'COMERCIO'));
+});
