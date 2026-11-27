@@ -4,7 +4,6 @@ import { Router } from 'express';
 import { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovimientos } from '../engine/index.js';
 import { periodosPedidos } from './parametros.js';
 import { ErrorApi } from './errores.js';
-import { requiereOpcion } from '../middleware/perfiles.js';
 
 const DESCARGAS = {
   'rankings.csv': csvRankings, // entregable 2
@@ -28,8 +27,7 @@ export function rutasDeExportacion(almacen, { obtenerMovimientos } = {}) {
   }
 
   // Entregable 5: movimientos entre dos períodos (acepta los mismos parámetros que /api/movimientos).
-  // Como /api/movimientos, es de Analista y Administrador (sección 10); Público recibe 403.
-  rutas.get('/exportar/movimientos.csv', requiereOpcion('comparar_periodos'), async (req, res) => {
+  rutas.get('/exportar/movimientos.csv', async (req, res) => {
     if (!obtenerMovimientos) {
       throw new ErrorApi(501, 'NO_DISPONIBLE', 'La comparación entre períodos (/api/movimientos, #32) todavía no está conectada.');
     }

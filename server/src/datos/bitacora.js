@@ -5,6 +5,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { carpetaStorage } from './storage.js';
 
+// carpetaStorage vive en storage.js; se reexporta aquí porque otros módulos
+// (por ejemplo datos/cargaPeriodo.js de #29) la importan desde bitacora.js.
+export { carpetaStorage };
+
 export function archivoBitacora() {
   return path.join(carpetaStorage(), 'operaciones.jsonl');
 }

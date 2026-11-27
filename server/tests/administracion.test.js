@@ -120,6 +120,9 @@ test('movimientos y su descarga (entregable 5): publico recibe 403; analista y a
       assert.equal(respuesta.status, 200, `${ruta} como ${perfil}`);
     }
   }
+  // La restricción va en el montaje: también cubre lo que cuelgue de /api/movimientos.
+  const descomposicion = await pedir('/movimientos/descomposicion');
+  assert.equal(descomposicion.status, 403);
 });
 
 test('GET /api/admin/catalogos: solo admin; CINU congelado y registros desde los catálogos', async () => {

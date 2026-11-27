@@ -6,7 +6,8 @@ import path from 'node:path';
 import { once } from 'node:events';
 import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
-import { registrarOperacion, leerOperaciones, archivoBitacora } from '../src/datos/bitacora.js';
+import { registrarOperacion, leerOperaciones, archivoBitacora, carpetaStorage } from '../src/datos/bitacora.js';
+import { carpetaStorage as carpetaDeStorage } from '../src/datos/storage.js';
 import { catalogosReales } from './ayuda.js';
 
 // La bitácora de estas pruebas va a una carpeta temporal propia.
@@ -32,6 +33,11 @@ async function pedirBitacora(perfil) {
   const respuesta = await fetch(`${base}/bitacora`, { headers });
   return { status: respuesta.status, cuerpo: await respuesta.json() };
 }
+
+test('bitacora.js reexporta carpetaStorage de storage.js (la usa la carga de período, #29)', () => {
+  assert.equal(carpetaStorage, carpetaDeStorage);
+  assert.equal(carpetaStorage(), carpeta);
+});
 
 test('sin operaciones, la bitácora está vacía', () => {
   assert.equal(fs.existsSync(archivoBitacora()), false);

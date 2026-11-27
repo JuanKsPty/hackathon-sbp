@@ -5,7 +5,6 @@ import { leerReglaMovimientos } from '../automation/parametros.js';
 import { encabezado, monto, porcentaje } from './formato.js';
 import { periodoPedido, rankingPedido } from './parametros.js';
 import { ErrorApi } from './errores.js';
-import { requiereOpcion } from '../middleware/perfiles.js';
 
 const lider = (fila) => (fila ? { Codigo_Banco: fila.codigoBanco, Banco: fila.banco } : null);
 
@@ -76,7 +75,6 @@ export function crearObtenerMovimientos(almacen, { obtenerRegla = () => leerRegl
 
 export function rutasDeMovimientos(obtenerMovimientos) {
   const rutas = Router();
-  // Comparar períodos es de Analista y Administrador (sección 10); Público recibe 403.
-  rutas.get('/movimientos', requiereOpcion('comparar_periodos'), (req, res) => res.json(obtenerMovimientos(req.query)));
+  rutas.get('/movimientos', (req, res) => res.json(obtenerMovimientos(req.query)));
   return rutas;
 }
