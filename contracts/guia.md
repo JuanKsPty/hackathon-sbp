@@ -21,7 +21,7 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 
 | `data-guia` | Elemento | Perfil |
 | :--- | :--- | :--- |
-| `global.menu-panel` | Enlace del menú a Panel | todos |
+| `global.menu-panel` | Enlace del menú a Panel (en el sitio público se llama Inicio) | todos |
 | `global.menu-rankings` | Enlace a Rankings | todos |
 | `global.menu-comparar` | Enlace a Comparar períodos | analista, admin |
 | `global.menu-reportes` | Enlace a Reportes | todos |
@@ -31,10 +31,10 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `global.selector-perfil` | Sesión del sitio interno: usuario, perfil y Salir (`SesionUsuario`) | analista, admin |
 | `global.selector-periodo` | Período de los datos (mes), junto al título de Panel, Rankings y Calidad | todos |
 | `global.selector-tema` | Claro, oscuro o sistema | todos |
-| `global.barra-fuente` | Fuente, período y aviso de datos ficticios | todos |
+| `global.barra-fuente` | Fuente, período y aviso de datos ficticios, al pie de la página | todos |
 | `global.abrir-asistente` | Botón que abre el asistente IA | todos |
 
-## Panel (`/`)
+## Panel (`/`; en el sitio público, Inicio)
 
 | `data-guia` | Elemento | Perfil |
 | :--- | :--- | :--- |

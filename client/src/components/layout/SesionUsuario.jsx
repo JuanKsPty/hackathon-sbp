@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowUpRightIcon, GlobeIcon, LockKeyholeIcon, LogOutIcon, UserIcon, UsersIcon } from 'lucide-react'
+import { ArrowUpRightIcon, GlobeIcon, LogOutIcon, UserIcon, UsersIcon } from 'lucide-react'
 import { salir } from '@/api/sesion.js'
 import {
   DropdownMenu,
@@ -9,17 +9,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { AVISO_ACCESO, DESCRIPCIONES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { DESCRIPCIONES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { cn } from '@/lib/utils'
 import { urlOtroSitio } from './otroSitio.js'
 
 // Quién está usando la app y con qué perfil, al pie del menú lateral (sección 10, entregable 8).
-// - Sitio interno: el usuario de la sesión, su perfil y Salir.
-// - Sitio público: "Consulta pública", sin inicio de sesión, y dónde están las opciones de Analista
-//   y Administrador.
-// En los dos sitios, el menú lleva al otro sitio (público <-> interno, otroSitio.js).
-// Lleva data-guia="global.selector-perfil" para el cursor guía (contracts/guia.md).
+// - Sitio interno: el usuario de la sesión, su perfil, el enlace al sitio público y Salir. Lleva
+//   data-guia="global.selector-perfil" para el cursor guía (contracts/guia.md).
+// - Sitio público: "Consulta pública", abierta y sin cuenta. No menciona el sitio interno.
 export function SesionUsuario({ className }) {
+  if (!__INTERNO__) return <ConsultaPublica className={className} />
+  return <SesionInterna className={className} />
+}
+
+function ConsultaPublica({ className }) {
+  return (
+    <div className={cn('flex min-w-0 flex-1 items-center gap-2 px-1.5 py-1.5', className)}>
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
+        <UsersIcon className="size-3.5" aria-hidden="true" />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-medium">Consulta pública</span>
+        <span className="truncate text-xs opacity-80">Abierta, sin cuenta</span>
+      </span>
+    </div>
+  )
+}
+
+function SesionInterna({ className }) {
   const { usuario, perfil, nombre } = usePerfil()
   const [saliendo, setSaliendo] = useState(false)
 
@@ -34,12 +51,10 @@ export function SesionUsuario({ className }) {
     window.location.assign('/entrar')
   }
 
-  const quien = __INTERNO__ ? usuario?.nombre || usuario?.usuario || 'Sin sesión' : 'Consulta pública'
-  const detalle = __INTERNO__ ? `Perfil ${nombre}` : 'Sin inicio de sesión'
-  const Icono = __INTERNO__ ? UserIcon : UsersIcon
+  const quien = usuario?.nombre || usuario?.usuario || 'Sin sesión'
+  const detalle = `Perfil ${nombre}`
   const otroSitio =
-    typeof window === 'undefined' ? '/' : urlOtroSitio({ interno: __INTERNO__, ubicacion: window.location, env: import.meta.env })
-  const IconoOtroSitio = __INTERNO__ ? GlobeIcon : LockKeyholeIcon
+    typeof window === 'undefined' ? '/' : urlOtroSitio({ interno: true, ubicacion: window.location, env: import.meta.env })
 
   return (
     <DropdownMenu>
@@ -54,7 +69,7 @@ export function SesionUsuario({ className }) {
         )}
       >
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
-          <Icono className="size-3.5" aria-hidden="true" />
+          <UserIcon className="size-3.5" aria-hidden="true" />
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-sm font-medium">{quien}</span>
@@ -67,26 +82,19 @@ export function SesionUsuario({ className }) {
           <span className="text-xs font-normal text-muted-foreground">
             Perfil {nombre}. {DESCRIPCIONES_PERFIL[perfil]}
           </span>
-          {!__INTERNO__ && (
-            <span className="text-xs font-normal text-muted-foreground">
-              Comparar períodos y Administración: {AVISO_ACCESO.charAt(0).toLowerCase() + AVISO_ACCESO.slice(1)}
-            </span>
-          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <a href={otroSitio}>
-            <IconoOtroSitio aria-hidden="true" />
-            {__INTERNO__ ? 'Ir al sitio público' : 'Ir al sitio interno'}
+            <GlobeIcon aria-hidden="true" />
+            Ir al sitio público
             <ArrowUpRightIcon aria-hidden="true" className="ml-auto text-muted-foreground" />
           </a>
         </DropdownMenuItem>
-        {__INTERNO__ && (
-          <DropdownMenuItem onSelect={cerrarSesion} disabled={saliendo}>
-            <LogOutIcon aria-hidden="true" />
-            Salir
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem onSelect={cerrarSesion} disabled={saliendo}>
+          <LogOutIcon aria-hidden="true" />
+          Salir
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -8,7 +8,7 @@ const el = (guia, ruta, descripcion, opcion = null) => ({ guia, ruta, descripcio
 
 export const ELEMENTOS_GUIA = [
   // Global (layout): la ruta null significa "en cualquier página".
-  el('global.menu-panel', null, 'Enlace del menú a Panel'),
+  el('global.menu-panel', null, 'Enlace del menú a Panel (en el sitio público se llama Inicio)'),
   el('global.menu-rankings', null, 'Enlace del menú a Rankings'),
   el('global.menu-comparar', null, 'Enlace del menú a Comparar períodos', 'comparar_periodos'),
   el('global.menu-reportes', null, 'Enlace del menú a Reportes'),
@@ -19,7 +19,7 @@ export const ELEMENTOS_GUIA = [
   el('global.selector-perfil', null, 'Sesión del sitio interno: usuario, perfil y Salir', 'comparar_periodos'),
   el('global.selector-periodo', null, 'Período de los datos (mes), junto al título de Panel, Rankings y Calidad'),
   el('global.selector-tema', null, 'Tema claro, oscuro o sistema'),
-  el('global.barra-fuente', null, 'Fuente, período y aviso de datos ficticios'),
+  el('global.barra-fuente', null, 'Fuente, período y aviso de datos ficticios, al pie de la página'),
   el('global.abrir-asistente', null, 'Botón que abre el asistente IA'),
   // Panel
   el('panel.indicadores', '/', 'Indicadores del período: universo válido, saldo total y reconciliaciones'),

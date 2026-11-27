@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router'
+import { Link, NavLink } from 'react-router'
+import { PresentationIcon } from 'lucide-react'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { cn } from '@/lib/utils'
 import { NOMBRE_APP, seccionesVisibles } from './navegacion.js'
@@ -7,6 +8,7 @@ import { PerfilLateral } from './PerfilLateral.jsx'
 // Menú lateral. Se usa en la barra lateral (escritorio) y dentro del Sheet (móvil).
 // - Arriba: el emblema de la SBP y el nombre de la app.
 // - En medio: las secciones que el perfil puede usar (opciones de GET /api/perfil).
+// - En el público, debajo: la presentación del proyecto (/presentacion).
 // - Al pie: el bloque de perfil con la sesión y el tema (PerfilLateral).
 export function Navegacion({ alNavegar }) {
   const { puede } = usePerfil()
@@ -21,7 +23,7 @@ export function Navegacion({ alNavegar }) {
       </div>
       <nav aria-label="Secciones">
         <ul className="flex flex-col gap-1">
-          {seccionesVisibles(puede).map(({ ruta, nombre, icono: Icono, guia }) => (
+          {seccionesVisibles(puede, { interno: __INTERNO__ }).map(({ ruta, nombre, icono: Icono, guia }) => (
             <li key={ruta}>
               <NavLink
                 to={ruta}
@@ -45,6 +47,19 @@ export function Navegacion({ alNavegar }) {
           ))}
         </ul>
       </nav>
+      {!__INTERNO__ && (
+        <Link
+          to="/presentacion"
+          onClick={alNavegar}
+          className="flex items-start gap-3 rounded-md border border-sidebar-border px-3 py-2.5 text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+        >
+          <PresentationIcon className="mt-0.5 size-4 shrink-0 text-sidebar-primary" aria-hidden="true" />
+          <span className="flex flex-col">
+            <span className="font-medium">Presentación</span>
+            <span className="text-xs opacity-80">Qué es y cómo se calcula, en láminas</span>
+          </span>
+        </Link>
+      )}
       <PerfilLateral className="mt-auto" />
     </div>
   )

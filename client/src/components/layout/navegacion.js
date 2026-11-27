@@ -2,6 +2,7 @@ import {
   ArrowLeftRightIcon,
   ClipboardCheckIcon,
   FileDownIcon,
+  HouseIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
   SettingsIcon,
@@ -21,10 +22,15 @@ export const SECCIONES = [
   { ruta: '/admin', nombre: 'Administración', icono: SettingsIcon, guia: 'global.menu-admin', opcion: 'cargar_periodo' },
 ]
 
+// Sitio público: la ruta / es el Inicio (paginas/Inicio.jsx) en vez del Panel del Analista. Conserva
+// data-guia="global.menu-panel" para que el agente y el cursor guía lleguen igual (contracts/guia.md).
+export const SECCIONES_PUBLICO = SECCIONES.map((s) => (s.ruta === '/' ? { ...s, nombre: 'Inicio', icono: HouseIcon } : s))
+
 // Secciones que el perfil puede usar. `puede(opcion)` viene de usePerfil(); mientras las opciones
 // cargan (o si el API falla) `puede` es siempre falso y quedan solo las secciones públicas.
-export function seccionesVisibles(puede) {
-  return SECCIONES.filter(({ opcion }) => !opcion || puede(opcion))
+// `interno`: true en el sitio interno (__INTERNO__); el público usa SECCIONES_PUBLICO.
+export function seccionesVisibles(puede, { interno = true } = {}) {
+  return (interno ? SECCIONES : SECCIONES_PUBLICO).filter(({ opcion }) => !opcion || puede(opcion))
 }
 
 export const NOMBRE_APP = 'Rankings de Crédito'

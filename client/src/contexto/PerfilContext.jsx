@@ -25,10 +25,11 @@ export const DESCRIPCIONES_PERFIL = {
 }
 
 // Cómo llegar a una opción que el perfil actual no tiene, para los avisos de "sección bloqueada".
-// En el público: el sitio interno. En el interno: entrar con otra cuenta.
+// En el interno: entrar con otra cuenta. En el público no se menciona el sitio interno (y las
+// secciones de otros perfiles ni se muestran).
 export const AVISO_ACCESO = __INTERNO__
   ? 'Para usarlo, entra con una cuenta de Analista o Administrador.'
-  : 'Está disponible en el sitio interno, para Analistas y Administradores.'
+  : 'No forma parte de la consulta pública.'
 
 const SIN_OPCIONES = []
 const PERFILES_RESPALDO = PERFILES.map((perfil) => ({ perfil, nombre: NOMBRES_PERFIL[perfil] }))

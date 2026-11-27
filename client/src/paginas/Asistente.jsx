@@ -15,7 +15,8 @@ export default function Asistente() {
         <ChatAsistente />
         <div className="flex min-w-0 flex-col gap-6">
           <GraficosAsistente conAyuda />
-          <ExplicacionesMovimientos />
+          {/* Por qué se movió cada banco es del Analista: el sitio público no lo muestra. */}
+          {__INTERNO__ && <ExplicacionesMovimientos />}
         </div>
       </div>
     </Pagina>

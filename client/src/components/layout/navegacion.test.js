@@ -25,3 +25,11 @@ test('cada sección restringida pide una opción y todas llevan data-guia', () =
   assert.equal(SECCIONES.find((s) => s.ruta === '/admin').opcion, 'cargar_periodo')
   assert.ok(SECCIONES.every((s) => s.guia?.startsWith('global.menu-')))
 })
+
+test('el sitio público llama Inicio a la ruta / y conserva su data-guia', () => {
+  const publico = seccionesVisibles(() => false, { interno: false })
+  assert.deepEqual(publico.map((s) => s.ruta), ['/', '/rankings', '/reportes', '/calidad', '/verificacion'])
+  assert.equal(publico[0].nombre, 'Inicio')
+  assert.equal(publico[0].guia, 'global.menu-panel')
+  assert.equal(seccionesVisibles(() => false)[0].nombre, 'Panel')
+})
