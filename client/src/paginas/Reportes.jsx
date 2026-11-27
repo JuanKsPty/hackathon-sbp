@@ -8,6 +8,7 @@ import {
 } from '@/api/cliente.js'
 import { DetallePrestamo } from '@/components/comparar/DetallePrestamo.jsx'
 import { BuscarPrestamo } from '@/components/comparar/EvidenciaPrestamos.jsx'
+import { SelectorPrestamo } from '@/components/comparar/SelectorPrestamo.jsx'
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
@@ -116,8 +117,9 @@ export default function Reportes() {
   )
 }
 
-// Busca un préstamo por su número y abre su ficha lateral con "Descargar informe". Si el número no
-// existe, la ficha muestra el error del API (404 PRESTAMO_NO_ENCONTRADO) sin romper la página.
+// Elige un préstamo en cascada (período → banco → ranking → préstamo) o escribe su número, y abre su
+// ficha lateral con "Descargar informe". Si el número no existe, la ficha muestra el error del API
+// (404 PRESTAMO_NO_ENCONTRADO) sin romper la página.
 function TarjetaBuscarPrestamo() {
   const [numero, setNumero] = useState(null)
   return (
@@ -125,12 +127,16 @@ function TarjetaBuscarPrestamo() {
       <CardHeader>
         <CardTitle>Buscar préstamo</CardTitle>
         <CardDescription>
-          Ficha de un préstamo en todos los períodos e informe descargable. El número sale de la evidencia de Comparar
-          períodos (préstamos de respaldo) o del CSV de filas excluidas.
+          Elige período, banco y ranking, y luego el préstamo: se abre su ficha en todos los períodos con el informe
+          descargable.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <BuscarPrestamo alBuscar={setNumero} />
+      <CardContent className="flex flex-col gap-4">
+        <SelectorPrestamo alElegir={setNumero} />
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">O escribe el número</span>
+          <BuscarPrestamo alBuscar={setNumero} />
+        </div>
       </CardContent>
       <DetallePrestamo numero={numero} alCerrar={() => setNumero(null)} />
     </Card>

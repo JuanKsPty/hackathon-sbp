@@ -109,3 +109,38 @@ test('préstamos: 403 al perfil Público, 400 con un número inválido y 404 si 
   assert.equal(noExiste.status, 404);
   assert.equal((await noExiste.json()).error.codigo, 'PRESTAMO_NO_ENCONTRADO');
 });
+
+test('GET /prestamos (Analista): préstamos válidos del banco y ranking, de mayor a menor saldo', async () => {
+  const periodo = almacen.todos()[0];
+  const { ranking, filas } = periodo.rankings[0];
+  const banco = filas[0].codigoBanco;
+  const respuesta = await fetch(`${base}/prestamos?periodo=${periodo.fecha}&banco=${banco}&ranking=${encodeURIComponent(ranking)}`, COMO_ANALISTA);
+  assert.equal(respuesta.status, 200);
+  const lista = await respuesta.json();
+  assert.equal(lista.fuente, FUENTE);
+  assert.equal(lista.aviso, AVISO);
+  assert.equal(lista.periodo, periodo.fecha);
+  const esperados = periodo.operaciones.filter((o) => o.codigoBanco === banco && o.macro === ranking);
+  assert.equal(lista.total, esperados.length);
+  assert.equal(lista.prestamos.length, filas[0].operacionesValidas);
+  assert.deepEqual(new Set(lista.prestamos.map((p) => p.Numero_Prestamo)), new Set(esperados.map((o) => o.numeroPrestamo)));
+  for (let i = 1; i < lista.prestamos.length; i += 1) assert.ok(lista.prestamos[i - 1].Saldo >= lista.prestamos[i].Saldo, 'no está ordenada por saldo');
+  const primero = esperados.find((o) => o.numeroPrestamo === lista.prestamos[0].Numero_Prestamo);
+  assert.equal(lista.prestamos[0].Saldo, Number(formatearCentavos(primero.saldo)));
+  assert.equal(lista.prestamos[0].Subactividad, primero.sub);
+  // Sin período: el último cargado.
+  const ultimo = await (await fetch(`${base}/prestamos?banco=${banco}&ranking=${encodeURIComponent(ranking)}`, COMO_ANALISTA)).json();
+  assert.equal(ultimo.periodo, almacen.ultimaFecha());
+});
+
+test('GET /prestamos: 403 al perfil Público y 400 si falta o no vale banco, ranking o período', async () => {
+  const { ranking, filas } = almacen.todos()[0].rankings[0];
+  const banco = filas[0].codigoBanco;
+  const r = encodeURIComponent(ranking);
+  assert.equal((await fetch(`${base}/prestamos?banco=${banco}&ranking=${r}`)).status, 403);
+  for (const consulta of [`ranking=${r}`, `banco=${banco}`, `banco=999999&ranking=${r}`, `banco=${banco}&ranking=NO_EXISTE`, `periodo=2026&banco=${banco}&ranking=${r}`]) {
+    const respuesta = await fetch(`${base}/prestamos?${consulta}`, COMO_ANALISTA);
+    assert.equal(respuesta.status, 400, consulta);
+    assert.equal((await respuesta.json()).error.codigo, 'PARAMETRO_INVALIDO', consulta);
+  }
+});
