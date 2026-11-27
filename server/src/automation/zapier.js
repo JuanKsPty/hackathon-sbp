@@ -33,11 +33,17 @@ const DETALLE_MOTIVO = {
 export const urlDeZapier = () =>
   process.env.NODE_TEST_CONTEXT ? '' : (process.env.ZAPIER_WEBHOOK_URL ?? '').trim();
 
-// Enlace para darse de baja desde el correo: lo atiende GET /api/suscripciones/baja.
-export function enlaceDeBaja(token) {
-  const base = `http://localhost:${process.env.PORT || 3001}`;
-  return `${base}/api/suscripciones/baja?token=${encodeURIComponent(token)}`;
+// Dirección pública de la app para los enlaces de los correos (APP_URL en el .env, por ejemplo
+// https://radar.ejemplo.com, donde también responde /api). Sin APP_URL, localhost: solo sirve en desarrollo.
+export function urlPublica() {
+  const configurada = (process.env.APP_URL ?? '').trim().replace(/\/+$/, '');
+  return configurada || `http://localhost:${process.env.PORT || 3001}`;
 }
+
+// Enlaces de los correos: los atienden GET /api/suscripciones/baja y /api/suscripciones/confirmar.
+export const enlaceDeBaja = (token) => `${urlPublica()}/api/suscripciones/baja?token=${encodeURIComponent(token)}`;
+export const enlaceDeConfirmacion = (token) =>
+  `${urlPublica()}/api/suscripciones/confirmar?token=${encodeURIComponent(token)}`;
 
 // Fecha y hora de Panamá (UTC-5 todo el año): así la hoja muestra la hora local de la demo.
 export function ahoraEnPanama(fecha = new Date()) {
@@ -152,7 +158,23 @@ export function eventoPeriodoPublicado(publicado, { archivo, catalogos, suscript
   };
 }
 
-// suscripcion_actualizada: alta, cambio de preferencias o baja.
+// confirmacion_suscripcion: correo con el enlace para confirmar (doble confirmación).
+// Así nadie puede suscribir un correo ajeno: sin hacer clic en el enlace no recibe alertas.
+export function eventoConfirmacion(suscripcion, { enviadoEn = ahoraEnPanama() } = {}) {
+  return {
+    evento: 'confirmacion_suscripcion',
+    id_evento: idEvento('confirmacion_suscripcion', 'solicitud'),
+    enviado_en: enviadoEn,
+    fuente: FUENTE,
+    aviso: AVISO,
+    correo: suscripcion.correo,
+    enlace_confirmacion: enlaceDeConfirmacion(suscripcion.confirmacion.token),
+    bancos: suscripcion.confirmacion.bancos,
+    rankings: suscripcion.confirmacion.rankings,
+  };
+}
+
+// suscripcion_actualizada: suscripción confirmada (alta) o baja.
 export function eventoSuscripcion(suscripcion, accion, { enviadoEn = ahoraEnPanama() } = {}) {
   return {
     evento: 'suscripcion_actualizada',

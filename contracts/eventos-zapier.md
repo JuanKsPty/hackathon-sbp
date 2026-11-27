@@ -8,6 +8,7 @@ Avisos automáticos que la app manda a Zapier: alertas por correo a los suscript
 - **Zapier solo reparte.** La app decide qué movimientos son significativos (regla del Administrador, #30), a quién le llega cada uno y qué casos se abren. Zapier no calcula ni filtra cifras.
 - **Si Zapier falla, la app sigue.** Sin URL, sin internet o sin respuesta en 5 segundos, la carga del período termina igual y el aviso queda en la bitácora como `PENDIENTE`. Si Zapier responde con error, queda como `ERROR`.
 - **Durante `npm test` nunca se llama a Zapier**, aunque la variable esté definida.
+- **Enlaces de los correos:** usan `APP_URL` (la dirección pública de la app, donde también responde `/api`). Sin `APP_URL` usan `http://localhost:PORT`, que solo sirve en desarrollo.
 - **Convenciones:** las mismas de [`consulta.md`](consulta.md). Códigos como texto, fechas `AAAAMMDD`, montos con 2 decimales y nombres de campo de las indicaciones. Todos los eventos traen `fuente` y `aviso`.
 
 Todos los eventos traen además:
@@ -20,7 +21,8 @@ Los números de los ejemplos son **ilustrativos**: los valores reales los calcul
 | Evento | Cuándo lo manda la app | Ejemplo |
 | :--- | :--- | :--- |
 | `periodo_publicado` | Al publicar un período con `POST /api/periodos` (solo Administrador) | [evento-periodo-publicado.json](evento-periodo-publicado.json) |
-| `suscripcion_actualizada` | Cuando alguien se suscribe, cambia sus preferencias o se da de baja | [evento-suscripcion-actualizada.json](evento-suscripcion-actualizada.json) |
+| `confirmacion_suscripcion` | Cuando alguien pide suscribirse o cambiar sus preferencias | [evento-confirmacion-suscripcion.json](evento-confirmacion-suscripcion.json) |
+| `suscripcion_actualizada` | Cuando alguien confirma la suscripción o se da de baja | [evento-suscripcion-actualizada.json](evento-suscripcion-actualizada.json) |
 
 ## `periodo_publicado`
 Lo arma `server/src/automation/zapier.js` desde el gancho de la carga (`automation/publicacion.js`), uno por período publicado.
@@ -39,8 +41,13 @@ Lo arma `server/src/automation/zapier.js` desde el gancho de la carga (`automati
 2. Envía un correo a cada destinatario con el resumen, sus movimientos, el aviso de datos ficticios y el enlace para darse de baja.
 3. Agrega cada caso a la pestaña **Casos** con `Estado = Abierto`. Si el `Caso_ID` ya existe (el período se volvió a publicar), no lo duplica.
 
+## `confirmacion_suscripcion` (doble confirmación)
+Trae `correo`, `enlace_confirmacion`, `bancos[]` y `rankings[]` (lo que se pidió seguir).
+
+**Qué hace Zapier:** envía al correo un mensaje con el enlace para confirmar. No toca la hoja: el suscriptor se registra recién cuando confirma. Así nadie puede suscribir un correo ajeno: sin abrir el enlace, ese correo no recibe alertas.
+
 ## `suscripcion_actualizada`
-Trae `correo`, `accion` (`alta` o `baja`), `bancos[]` y `rankings[]`. Una lista vacía significa todos los bancos o todos los rankings.
+Trae `correo`, `accion` (`alta` cuando confirma, `baja` cuando se da de baja), `bancos[]` y `rankings[]`. Una lista vacía significa todos los bancos o todos los rankings.
 
 **Qué hace Zapier:** crea o actualiza la fila del correo en la pestaña **Suscriptores** (`Correo, Bancos, Rankings, Estado, Actualizado_En`).
 
@@ -52,11 +59,14 @@ La lista oficial de suscriptores vive en la app, en `storage/suscripciones.json`
 
 | Endpoint | Perfil | Qué hace |
 | :--- | :--- | :--- |
-| `POST /api/suscripciones` | todos | Cuerpo `{ "correo", "bancos": [], "rankings": [] }`. Crea la suscripción o cambia sus preferencias. Responde `{ fuente, aviso, mensaje, suscripcion }` |
-| `GET /api/suscripciones/baja?token=...` | todos | Enlace del correo. Da de baja y responde una página HTML; un token desconocido responde 404 |
-| `GET /api/suscripciones` | Administrador | `{ fuente, aviso, total, suscripciones[] }`, sin los tokens |
+| `POST /api/suscripciones` | todos | Cuerpo `{ "correo", "bancos": [], "rankings": [] }`. Guarda la solicitud y manda el correo de confirmación. No activa nada ni cambia una suscripción activa hasta que se confirme. Responde `{ fuente, aviso, confirmacion_enviada, mensaje, suscripcion }` |
+| `GET /api/suscripciones/confirmar?token=...` | todos | Enlace del correo de confirmación. Activa la suscripción (o aplica las preferencias nuevas) y responde una página HTML. Vence a las 48 horas; un token desconocido o vencido responde 404 |
+| `GET /api/suscripciones/baja?token=...` | todos | Enlace de las alertas. Da de baja y responde una página HTML; un token desconocido responde 404 |
+| `GET /api/suscripciones` | Administrador | `{ fuente, aviso, total, suscripciones[] }`, sin los tokens; `pendiente_de_confirmar` indica si hay una solicitud sin confirmar |
 
 `bancos` y `rankings` deben existir en los catálogos. Si no, o si el correo no es válido, la respuesta es `400 PARAMETRO_INVALIDO` con el formato común de errores.
+
+**Límite de pedidos** (`LIMITE_SUSCRIPCIONES` en `routes/suscripciones.js`): hasta 5 solicitudes por IP cada 10 minutos, y no se reenvía la confirmación al mismo correo antes de 1 minuto. Si se pasa, la respuesta es `429 DEMASIADOS_PEDIDOS` con el header `Retry-After`.
 
 ## Bitácora
 Cada aviso queda en la bitácora (#31) como `evento_zapier`, con el evento, su id y el estado. Cada alta o baja queda como `suscripcion`. Nunca se guarda la URL ni los correos.
