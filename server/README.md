@@ -32,7 +32,7 @@ Todas son opcionales. La plantilla es [`.env.example`](../.env.example), en la r
 | `ANTHROPIC_API_KEY` | vacío: IA apagada | Explicaciones y agente de IA (sin llave funcionan por reglas o avisan) |
 | `AI_MODEL` | `claude-opus-5-5` | Modelo de Claude |
 | `MCP_API_URL`, `MCP_PERFIL` | `http://localhost:3001/api`, `publico` | Servidor MCP por stdio |
-| `MCP_API_INTERNA` | `http://127.0.0.1:$PORT/api` | API que consulta el MCP remoto (`/api/mcp`) |
+| `API_INTERNA` (antes `MCP_API_INTERNA`) | `http://127.0.0.1:$PORT/api` | API que consultan las herramientas del agente (`/api/ia/preguntar`) y del MCP remoto (`/api/mcp`); nunca se arma con el header `Host` de la petición (`src/ai/apiInterna.js`) |
 | `EVAL_API_URL` | API en memoria | Evaluar el agente contra una API ya desplegada |
 | `BASE_URL` | `http://localhost:3001` | App que revisa la prueba de humo (`npm run humo`), con o sin `/api` |
 
