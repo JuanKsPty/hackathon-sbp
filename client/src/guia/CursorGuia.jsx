@@ -20,7 +20,7 @@ export function CursorGuia({ top, left, className, style }) {
       <defs>
         <filter id={filtro} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="1.6" result="difuso" />
-          <feFlood floodColor="#C8651A" floodOpacity="0.75" />
+          <feFlood style={{ floodColor: 'var(--agente)' }} floodOpacity="0.75" />
           <feComposite in2="difuso" operator="in" result="brillo" />
           <feMerge>
             <feMergeNode in="brillo" />
@@ -30,7 +30,7 @@ export function CursorGuia({ top, left, className, style }) {
       </defs>
       <path
         d="M4 3 L27 15.5 Q17.5 17.5 13.5 27.5 Z"
-        fill="#C8651A"
+        style={{ fill: 'var(--agente)' }}
         stroke="#fff"
         strokeWidth="1.6"
         strokeLinejoin="round"

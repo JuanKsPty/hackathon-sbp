@@ -17,6 +17,8 @@
  *   marca / brillo       -> verde de íconos y brillo menta de los bloques oscuros
  *   bloque               -> fondo de BloqueOscuro y su texto
  *   seccion              -> fondo de SeccionGris
+ *   agente               -> cursor y resaltados del agente en pantalla (naranja: no se confunde
+ *                           con el verde de marca ni con sube)
  */
 :root {
   --background: #FFFFFF;
@@ -67,6 +69,7 @@
   --bloque-foreground: #FFFFFF;
   --bloque-muted: #A1A1A8;
   --seccion: #F4F4F5;
+  --agente: #C8651A;
   --radius: 0.625rem;
 }
 
@@ -119,4 +122,5 @@
   --bloque-foreground: #FFFFFF;
   --bloque-muted: #A1A1A8;
   --seccion: #111113;
+  --agente: #E39150;
 }

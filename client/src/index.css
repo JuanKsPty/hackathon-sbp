@@ -66,6 +66,7 @@
   --color-destacado-fondo: var(--destacado-fondo);
   --color-aviso: var(--aviso);
   --color-aviso-fondo: var(--aviso-fondo);
+  --color-agente: var(--agente);
   --color-marca: var(--marca);
   --color-marca-fondo: var(--marca-fondo);
   --color-brillo: var(--brillo);
