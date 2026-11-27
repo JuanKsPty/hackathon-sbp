@@ -18,7 +18,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
-        // Para la landing (#138, sobre BloqueOscuro): píldora clara y píldora con borde claro.
+        // Sobre BloqueOscuro (landing y presentación): botón claro y botón con borde claro.
         claro:
           "bg-bloque-foreground text-bloque hover:bg-bloque-foreground/85",
         "borde-claro":
@@ -36,9 +36,9 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
-        // Llamada a la acción grande de la landing (#138).
+        // Llamada a la acción grande de la landing y la presentación (en .estilo-landing es píldora).
         pildora:
-          "h-11 gap-2 rounded-full px-5 text-sm has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4 [&_svg:not([class*='size-'])]:size-4",
+          "h-11 gap-2 rounded-lg px-5 text-sm has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4 [&_svg:not([class*='size-'])]:size-4",
       },
     },
     defaultVariants: {

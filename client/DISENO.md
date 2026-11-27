@@ -5,13 +5,16 @@
 Decisión de Juan:
 
 - **La app** usa la paleta E+ (azul institucional claro): azul medio `#1656A4`, fondos pizarra casi blancos, barra lateral blanca y modo oscuro carbón. Las fuentes son Roboto y Roboto Mono. Los botones y las tarjetas son los de shadcn, con radio 6 px. Las páginas usan `Pagina` (título, descripción y `acciones` a la derecha; ahí va el período en Panel, Rankings y Calidad).
-- **La landing** pública (#139) usa la base visual de #138, descrita en el resto de esta guía: blanco y negro con acento verde, Inter, botones en píldora y tarjetas con radio 16 y sombra suave. Para eso, la landing envuelve su contenido en un contenedor con la clase **`estilo-landing`**: dentro, `tema.css` y `index.css` cambian los tokens, la fuente y las formas. Fuera de ese contenedor no se usan `BloqueOscuro`, `TituloDosTonos` ni las píldoras.
+- **El Inicio público** (`/` del sitio público, #139) y **la presentación** (`/presentacion`) también usan el estilo SBP: paleta E+, Roboto y radios sobrios. Usan los componentes de `marca/`, que fuera de `.estilo-landing` toman tonos SBP: `BloqueOscuro` es azul marino (`--bloque`) con cuadrícula y brillo azul claro (`--brillo`), `Etiqueta` usa el azul de acento y `Cifra`, `SeccionGris` y el bloque tienen radios de 10, 12 y 14 px (`--radio-*`).
+- **El sitio público no menciona el sitio interno.** No hay enlaces ni avisos que lleven a él, y las opciones de Analista y Administrador no se muestran (ni bloqueadas). El asistente tampoco lo menciona al responderle a Público.
+- **Fuente, período y aviso** van en un pie fijo abajo (`BarraFuente`, `sticky bottom-0`), visible siempre sin desplazarse (lámina 9).
+- **`.estilo-landing`** conserva la base visual de #138 descrita en el resto de esta guía: blanco y negro con acento verde, Inter, botones en píldora y tarjetas con radio 16 y sombra suave. Ya no la usa ninguna pantalla; dentro de ese contenedor, `tema.css` y `index.css` cambian los tokens, la fuente y las formas.
 
 El logo es el oficial de la SBP: el emblema en el menú, el favicon y los íconos, y el logo completo en Entrar (`public/marca/`). Layout de la app: barra lateral con las secciones y, al pie, el perfil (sesión, tema y enlace al otro sitio). Arriba a la derecha solo va el botón del agente.
 
 ---
 
-# Base visual de la landing (#138)
+# Base visual de #138 (`.estilo-landing`)
 
 ## Reglas que no se rompen
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { composicionCartera, contarBancos, lideresDelCorte, saldoPorSubactividad, urlSitioInterno } from './datosLanding.js'
+import { composicionCartera, contarBancos, lideresDelCorte, saldoPorSubactividad } from './datosLanding.js'
 
 const banco = (Codigo_Banco, Posicion, Saldo_Actividad) => ({
   Codigo_Banco,
@@ -53,10 +53,3 @@ test('saldoPorSubactividad suma los bancos de cada subactividad', () => {
   ])
 })
 
-test('urlSitioInterno: subdominio en producción y puerto vecino en local', () => {
-  assert.equal(urlSitioInterno({ protocol: 'https:', hostname: 'sbp.juank.tech', port: '' }), 'https://interno.sbp.juank.tech/')
-  assert.equal(urlSitioInterno({ protocol: 'http:', hostname: 'localhost', port: '5173' }), 'http://localhost:5174/')
-  assert.equal(urlSitioInterno({ protocol: 'http:', hostname: 'localhost', port: '8080' }), 'http://localhost:8081/')
-  assert.equal(urlSitioInterno({ protocol: 'http:', hostname: 'localhost', port: '4173' }), 'http://localhost:4174/')
-  assert.equal(urlSitioInterno({ hostname: 'sbp.juank.tech' }, 'https://otro.example/'), 'https://otro.example/')
-})

@@ -503,19 +503,26 @@ async function promptPara(perfil) {
   return cliente.llamadas[0].system;
 }
 
-test('prompt de Público: menciona al Analista y al Administrador para lo que no tiene', async () => {
+test('prompt de Público: menciona al Analista y al Administrador para lo que no tiene, sin hablar del sitio interno', async () => {
   const sistema = await promptPara('publico');
-  assert.match(sistema, /el perfil Público\. Hay dos sitios/);
-  assert.match(sistema, /entrar al sitio interno con una cuenta de ese perfil/);
+  assert.match(sistema, /usa la consulta pública, sin inicio de sesión, con el perfil Público/);
+  assert.doesNotMatch(sistema, /sitio interno|dos sitios/);
   assert.doesNotMatch(sistema, /selector de perfil/);
   const ajenas = sistema.split('Opciones que su perfil no tiene: ')[1].split('\n')[0];
   // Comparar períodos es del Analista (y del Administrador); cargar un período, solo del Administrador.
   assert.match(ajenas, /Comparar períodos \(solo Analista o Administrador\)/);
   assert.match(ajenas, /Cargar o actualizar un período \(solo Administrador\)/);
   // Y la instrucción: decir qué perfil la tiene, no armar un sustituto ni decir que la app no lo tiene.
-  assert.match(sistema, /dile qué perfil tiene esa opción y que para usarla hay que entrar al sitio interno/);
+  assert.match(sistema, /dile qué perfil tiene esa opción y que no forma parte de la consulta pública/);
+  assert.match(sistema, /No menciones otros sitios/);
   assert.match(sistema, /no digas que la app no lo tiene/);
   assert.match(sistema, /Nunca armes una comparación por tu cuenta/);
+});
+
+test('prompt de Analista: lo del Administrador se usa entrando al sitio interno con esa cuenta', async () => {
+  const sistema = await promptPara('analista');
+  assert.match(sistema, /el perfil Analista\. Hay dos sitios/);
+  assert.match(sistema, /entrar al sitio interno con una cuenta de ese perfil/);
 });
 
 test('el prompt sale de OPCIONES: cada opción aparece en el de cada perfil, como propia o ajena', async () => {

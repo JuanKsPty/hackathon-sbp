@@ -11,11 +11,13 @@
  *   destacado            -> movimientos significativos (dorado)
  *   aviso                -> franja de datos ficticios
  *   agente               -> cursor y resaltados del agente en pantalla (naranja, distinto del azul)
- *   marca, brillo, bloque, seccion -> componentes de la landing (components/marca, #138)
+ *   marca, brillo, bloque, seccion -> componentes de marca (components/marca): bloque azul marino
+ *                                    institucional con brillo azul claro, para la landing pública y
+ *                                    la presentación.
  *
- * .estilo-landing: la landing pública (#138/#139) conserva su base visual propia (blanco y negro con
- * acento verde, Inter y píldoras). Todo lo que esté dentro de un contenedor con esa clase toma estos
- * valores; el resto de la app usa la paleta E+. Guía en client/DISENO.md.
+ * .estilo-landing: la base visual de #138 (blanco y negro con acento verde, Inter y píldoras). Ya no
+ * la usa ninguna pantalla: la landing y la presentación van con el estilo SBP. Se conserva para
+ * comparar. Guía en client/DISENO.md.
  */
 :root {
   --background: #F8FAFC;
@@ -59,15 +61,19 @@
   --destacado-fondo: #F8F0DC;
   --aviso: #6E5520;
   --aviso-fondo: #FAF3E1;
-  --marca: #1F9D63;
-  --marca-fondo: #E7F6EE;
-  --brillo: #6EE7B7;
-  --bloque: #0B0B0C;
+  --marca: #1656A4;
+  --marca-fondo: #E8F0FA;
+  --brillo: #5B9BE6;
+  --bloque: #0E2A52;
   --bloque-foreground: #FFFFFF;
-  --bloque-muted: #A1A1A8;
-  --seccion: #F4F4F5;
+  --bloque-muted: #BCCBDF;
+  --seccion: #EDF1F6;
   --agente: #C8651A;
   --radius: 0.375rem;
+  /* Radios de los componentes de marca (tarjeta, sección y bloque): sobrios, como el resto de E+. */
+  --radio-tarjeta: 10px;
+  --radio-seccion: 12px;
+  --radio-bloque: 14px;
 }
 
 .dark {
@@ -112,13 +118,13 @@
   --destacado-fondo: #342A12;
   --aviso: #E6C987;
   --aviso-fondo: #342A12;
-  --marca: #34D399;
-  --marca-fondo: #0F2A1F;
-  --brillo: #6EE7B7;
-  --bloque: #141416;
+  --marca: #6FA8EE;
+  --marca-fondo: #22344B;
+  --brillo: #6FA8EE;
+  --bloque: #13253F;
   --bloque-foreground: #FFFFFF;
-  --bloque-muted: #A1A1A8;
-  --seccion: #111113;
+  --bloque-muted: #B3C2D6;
+  --seccion: #131920;
   --agente: #E39150;
 }
 
@@ -174,6 +180,9 @@
   --seccion: #F4F4F5;
   --radius: 0.625rem;
   --agente: #C8651A;
+  --radio-tarjeta: 16px;
+  --radio-seccion: 24px;
+  --radio-bloque: 28px;
 }
 
 .dark .estilo-landing {

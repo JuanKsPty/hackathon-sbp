@@ -77,8 +77,8 @@ export default function Reportes() {
           </CardContent>
         </Card>
       )}
-      {/* __INTERNO__: el bundle público no incluye estas descargas (sitio interno). */}
-      {__INTERNO__ && puede('comparar_periodos') ? (
+      {/* El sitio público no muestra las descargas del Analista: ni bloqueadas (no entran en su bundle). */}
+      {!__INTERNO__ ? null : puede('comparar_periodos') ? (
         <DescargaMovimientos periodos={periodos} rankings={rankings} />
       ) : (
         <Card data-guia="reportes.descarga-movimientos">
@@ -91,7 +91,7 @@ export default function Reportes() {
           </CardContent>
         </Card>
       )}
-      {__INTERNO__ && puede('reportes_personalizados') ? (
+      {!__INTERNO__ ? null : puede('reportes_personalizados') ? (
         <ReportePersonalizado periodos={periodos} rankings={rankings} bancos={bancos} />
       ) : (
         <Card data-guia="reportes.personalizado">
@@ -113,7 +113,14 @@ export default function Reportes() {
 
 function Contenedor({ children }) {
   return (
-    <Pagina titulo="Reportes" descripcion="Descargas CSV de los entregables: rankings, subactividades, calidad, excluidas, alertas, movimientos y el reporte personalizado. Aquí también te suscribes a las alertas por correo.">
+    <Pagina
+      titulo="Reportes"
+      descripcion={
+        __INTERNO__
+          ? 'Descargas CSV de los entregables: rankings, subactividades, calidad, excluidas, alertas, movimientos y el reporte personalizado. Aquí también te suscribes a las alertas por correo.'
+          : 'Descarga los datos en CSV para tu propio análisis: rankings, subactividades, calidad, filas excluidas y alertas. Aquí también te suscribes a las alertas por correo.'
+      }
+    >
       {children}
     </Pagina>
   )

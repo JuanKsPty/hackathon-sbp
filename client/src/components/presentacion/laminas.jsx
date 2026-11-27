@@ -524,7 +524,7 @@ export function Perfiles() {
         icono={UsersIcon}
         etiqueta="Perfiles"
         fuerte="Tres perfiles con opciones distintas"
-        suave="en dos sitios: uno público y uno interno."
+        suave="y cada uno ve solo lo suyo."
       />
       <div className="grid flex-1 grid-cols-3 gap-6">
         {perfiles.map(({ icono, nombre, sub, puntos }, i) => (
@@ -684,7 +684,7 @@ export function Arquitectura() {
       <EncabezadoLamina
         icono={ServerIcon}
         etiqueta="Arquitectura"
-        fuerte="Dos sitios, un server y un motor puro."
+        fuerte="Un client, un server y un motor puro."
         suave="Todo corre en local con Docker."
       />
       <SeccionGris className="flex flex-1 items-stretch gap-4 p-8 sm:p-8">
@@ -693,8 +693,8 @@ export function Arquitectura() {
         </div>
         <Flecha />
         <div className="flex w-[300px] flex-col justify-center gap-4">
-          <Caja icono={GlobeIcon} titulo="Sitio público" texto="React + Vite en nginx. Sin login; solo una lista blanca del API." />
-          <Caja icono={LockIcon} titulo="Sitio interno" texto="El mismo código, con login. Analista y Administrador." />
+          <Caja icono={GlobeIcon} titulo="Client web" texto="React + Vite en nginx. Funciona como app instalable (PWA)." />
+          <Caja icono={LockIcon} titulo="Por perfil" texto="Cada perfil ve solo sus opciones; el API responde 403 al resto." />
         </div>
         <Flecha />
         <div className="flex flex-1 flex-col justify-center">
@@ -739,7 +739,7 @@ export function Decisiones() {
     { icono: CalculatorIcon, titulo: 'Motor puro, sin Express ni disco', texto: 'Determinista: los mismos CSV dan siempre el mismo ranking.' },
     { icono: ScaleIcon, titulo: 'Centavos enteros y BigInt', texto: 'Sumas exactas al centavo y ponderación sin errores de punto flotante.' },
     { icono: FlaskConicalIcon, titulo: 'Pruebas con node:test', texto: 'Con los CSV reales, incluida la autoverificación de la sección 12.' },
-    { icono: CheckCircle2Icon, titulo: 'CI en cada PR', texto: 'Pruebas del server y del client, y el build de los dos sitios.' },
+    { icono: CheckCircle2Icon, titulo: 'CI en cada PR', texto: 'Pruebas del server y del client, y el build en cada cambio.' },
     { icono: FileSpreadsheetIcon, titulo: 'Contratos del API', texto: 'Cada ejemplo de /contracts se compara con la respuesta real.' },
     { icono: KeyRoundIcon, titulo: 'Sin secretos en el repo', texto: 'Llaves y usuarios en el .env; el repo solo trae .env.example (R5).' },
   ]
@@ -796,16 +796,10 @@ export function Cierre() {
             </Link>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6 text-xl">
-          <p className="flex flex-col gap-1">
-            <span className="text-bloque-muted">Sitio público</span>
-            <span className="font-medium text-bloque-foreground">sbp.juank.tech</span>
-          </p>
-          <p className="flex flex-col gap-1">
-            <span className="text-bloque-muted">Sitio interno · Analista y Administrador</span>
-            <span className="font-medium text-bloque-foreground">interno.sbp.juank.tech</span>
-          </p>
-        </div>
+        <p className="flex flex-col gap-1 text-xl">
+          <span className="text-bloque-muted">Consulta pública</span>
+          <span className="font-medium text-bloque-foreground">sbp.juank.tech</span>
+        </p>
       </BloqueOscuro>
     </div>
   )

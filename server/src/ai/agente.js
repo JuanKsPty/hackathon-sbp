@@ -43,14 +43,20 @@ function seccionPerfil(perfil) {
   const quienes = (opcion) => opcion.perfiles.map((p) => NOMBRES_PERFIL[p]).join(' o ');
   const propias = OPCIONES.filter((o) => o.perfiles.includes(perfil)).map((o) => o.nombre);
   const ajenas = OPCIONES.filter((o) => !o.perfiles.includes(perfil)).map((o) => `${o.nombre} (solo ${quienes(o)})`);
+  // La consulta pública no menciona el sitio interno: a Público solo se le dice que esa opción no es suya.
+  const publico = perfil === 'publico';
   const lineas = [
-    `Perfiles de la app: quien pregunta tiene el perfil ${NOMBRES_PERFIL[perfil]}. Hay dos sitios: el público, sin inicio de sesión y siempre con perfil Público, y el interno, donde Analista y Administrador entran con su cuenta. El perfil no se elige: sale de la cuenta con la que se inicia sesión.`,
+    publico
+      ? `Perfiles de la app: quien pregunta usa la consulta pública, sin inicio de sesión, con el perfil ${NOMBRES_PERFIL[perfil]}. Es para ciudadanos, periodistas, estudiantes, investigadores y bancos que quieren consultar los rankings, descargarlos y revisar la calidad de los datos.`
+      : `Perfiles de la app: quien pregunta tiene el perfil ${NOMBRES_PERFIL[perfil]}. Hay dos sitios: el público, sin inicio de sesión y siempre con perfil Público, y el interno, donde Analista y Administrador entran con su cuenta. El perfil no se elige: sale de la cuenta con la que se inicia sesión.`,
     `- Opciones de su perfil: ${propias.join('; ')}.`,
   ];
   if (ajenas.length > 0) {
     lineas.push(
       `- Opciones que su perfil no tiene: ${ajenas.join('; ')}.`,
-      'Si pide o pregunta cómo hacer algo de esa lista, no lo hagas por otra vía ni armes un sustituto con los datos de otras herramientas, y no digas que la app no lo tiene: dile qué perfil tiene esa opción y que para usarla hay que entrar al sitio interno con una cuenta de ese perfil.',
+      publico
+        ? 'Si pide o pregunta cómo hacer algo de esa lista, no lo hagas por otra vía ni armes un sustituto con los datos de otras herramientas, y no digas que la app no lo tiene: dile qué perfil tiene esa opción y que no forma parte de la consulta pública. No menciones otros sitios, direcciones ni cómo iniciar sesión.'
+        : 'Si pide o pregunta cómo hacer algo de esa lista, no lo hagas por otra vía ni armes un sustituto con los datos de otras herramientas, y no digas que la app no lo tiene: dile qué perfil tiene esa opción y que para usarla hay que entrar al sitio interno con una cuenta de ese perfil.',
     );
   }
   return lineas.join('\n');

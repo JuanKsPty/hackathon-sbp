@@ -78,10 +78,10 @@
   --color-bloque-muted: var(--bloque-muted);
   --color-seccion: var(--seccion);
 
-  /* Radios y sombra de la guía: tarjeta 16, sección 24, bloque oscuro 28. */
-  --radius-tarjeta: 16px;
-  --radius-seccion: 24px;
-  --radius-bloque: 28px;
+  /* Radios de los componentes de marca: en E+ 10, 12 y 14; en .estilo-landing 16, 24 y 28 (tema.css). */
+  --radius-tarjeta: var(--radio-tarjeta);
+  --radius-seccion: var(--radio-seccion);
+  --radius-bloque: var(--radio-bloque);
   --shadow-tarjeta: 0 8px 30px rgba(0, 0, 0, 0.06);
 
   /* Aparición suave (clase animate-aparecer); se apaga con prefers-reduced-motion. */
@@ -135,7 +135,7 @@
   }
 }
 
-/* Fondo de BloqueOscuro: cuadrícula de líneas blancas al 5 % cada 48 px y brillo menta. */
+/* Fondo de BloqueOscuro: cuadrícula de líneas blancas al 5 % cada 48 px y brillo (azul claro en E+). */
 @utility cuadricula-bloque {
   background-image:
     linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),

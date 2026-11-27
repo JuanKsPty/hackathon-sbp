@@ -1,6 +1,6 @@
 // Presentación de la app (/presentacion, sitio público): láminas a pantalla completa, sin el
-// AppShell. Es una página de vitrina, como la landing: va dentro de `.estilo-landing` (base visual
-// #138, client/DISENO.md), así que usa sus tokens y los componentes de marca/. El resto de la app usa E+.
+// AppShell. Usa el estilo SBP (paleta E+) con los componentes de marca/, igual que el Inicio público
+// (client/DISENO.md).
 // Las cifras salen del API en vivo (components/presentacion/useDatosPresentacion.js).
 //
 // Navegación: flechas, Av Pág / Re Pág, espacio, Inicio y Fin; F pone pantalla completa; en el
@@ -121,7 +121,7 @@ export default function Presentacion() {
 
   return (
     <main
-      className="estilo-landing flex h-dvh flex-col overflow-hidden bg-seccion"
+      className="flex h-dvh flex-col overflow-hidden bg-seccion"
       onTouchStart={alEmpezarToque}
       onTouchEnd={alTerminarToque}
     >
@@ -167,7 +167,7 @@ export default function Presentacion() {
       <nav aria-label="Controles de la presentación" className="flex h-14 shrink-0 items-center justify-between gap-2 px-4">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <HouseIcon aria-hidden="true" className="size-4" />
-          Ir a la app
+          Ir al inicio
         </Link>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={() => ir(indice - 1)} disabled={indice === 0} aria-label="Lámina anterior">
