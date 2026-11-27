@@ -54,7 +54,7 @@ export function EstadoCatalogos() {
   const fuente = datos?.catalogos?.[0]?.fuente
 
   return (
-    <Card>
+    <Card data-guia="admin.catalogos">
       <CardHeader>
         <CardTitle>Catálogos</CardTitle>
         <CardDescription>

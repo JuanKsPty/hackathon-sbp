@@ -40,7 +40,7 @@ export function CargaPeriodo({ alCambiar }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <form onSubmit={enviar} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <form onSubmit={enviar} data-guia="admin.subir-archivo" className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <label className="sr-only" htmlFor="archivo-at03">
             Archivo AT03
           </label>
@@ -61,7 +61,7 @@ export function CargaPeriodo({ alCambiar }) {
           </Button>
         </form>
 
-        <div aria-live="polite" className="flex flex-col gap-4">
+        <div aria-live="polite" data-guia="admin.resultado-carga" className="flex flex-col gap-4">
           {estado.error && <ErrorDeCarga error={estado.error} />}
           {estado.resultado && <ResultadoCarga resultado={estado.resultado} />}
         </div>

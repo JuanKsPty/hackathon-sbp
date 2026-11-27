@@ -168,7 +168,7 @@ export function ReglaSignificativo({ alCambiar }) {
     )
 
   return (
-    <Card>
+    <Card data-guia="admin.regla-significativo">
       <CardHeader>
         <CardTitle>Regla de movimiento significativo</CardTitle>
         <CardDescription>

@@ -70,7 +70,7 @@ export function Bitacora({ version }) {
   }
 
   return (
-    <Card>
+    <Card data-guia="admin.bitacora">
       <CardHeader>
         <CardTitle>Registro de operaciones</CardTitle>
         <CardDescription>
