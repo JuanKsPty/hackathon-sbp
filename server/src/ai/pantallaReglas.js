@@ -97,7 +97,10 @@ export function pantallaPorReglas(pregunta, almacen, perfil = 'publico') {
     { tipo: 'ir', ruta: '/rankings', texto: 'Entra a Rankings desde el menú.' },
     { tipo: 'elegir', control: 'global.selector-periodo', valor: periodo, texto: `Elige el período de ${nombrePeriodo(periodo)}.` },
     { tipo: 'elegir', control: 'rankings.selector-ranking', valor: ranking, texto: `Elige el ranking ${ranking}.` },
-    { tipo: 'ordenar', control: 'rankings.tabla', columna, orden, texto: `Ordena la columna ${NOMBRE_COLUMNA[columna]} ${mayorMenor}.` },
+    // La tabla ya viene ordenada por posición (de la 1 a la 12): ese orden no hace falta pedirlo.
+    ...(columna === 'Posicion' && orden === 'asc'
+      ? []
+      : [{ tipo: 'ordenar', control: 'rankings.tabla', columna, orden, texto: `Ordena la columna ${NOMBRE_COLUMNA[columna]} ${mayorMenor}.` }]),
     { tipo: 'resaltar', control: 'rankings.tabla', fila: banco, texto: `Aquí está ${contexto.bancos.get(banco)}.` },
   ];
   const validacion = validarPantalla({ modo: modoDe(pregunta), acciones }, { contexto, perfil });
