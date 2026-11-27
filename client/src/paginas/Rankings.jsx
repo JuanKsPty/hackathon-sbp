@@ -1,3 +1,4 @@
+import { useControlGuia } from '@/agente/useControlGuia.js'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { CheckIcon, DownloadIcon, InfoIcon, LinkIcon } from 'lucide-react'
@@ -77,6 +78,39 @@ export default function Rankings() {
 
   // Las subactividades cambian con el ranking: al cambiarlo se quita ese filtro.
   const cambiarRanking = (nuevo) => actualizar({ ranking: nuevo, subactividad: null })
+
+  // Acciones de pantalla del agente (#125). Van antes de los returns tempranos (reglas de los hooks).
+  // El agente puede aplicar varias acciones seguidas antes de que la página se vuelva a dibujar: por
+  // eso cada una parte de la URL más reciente (actualización funcional), no de los filtros del render.
+  const cambiarEnUrl = (cambios) =>
+    setParametros(
+      (previos) => {
+        const nuevos = new URLSearchParams(previos)
+        for (const [nombre, valor] of Object.entries(cambios)) {
+          if (valor) nuevos.set(nombre, valor)
+          else nuevos.delete(nombre)
+        }
+        return nuevos
+      },
+      { replace: true },
+    )
+  // El backend usa "todos"/"todas" para quitar el filtro.
+  const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' || valor === TODOS ? null : valor)
+  useControlGuia('rankings.selector-ranking', {
+    elegir: (valor) => cambiarEnUrl({ ranking: valor, subactividad: null }),
+    estado: () => ({ ranking: filtros.ranking, subactividad: filtros.subactividad }),
+    restaurar: (anterior) => cambiarEnUrl({ ranking: anterior?.ranking, subactividad: anterior?.subactividad }),
+  })
+  useControlGuia('rankings.filtro-banco', {
+    elegir: (valor) => cambiarEnUrl({ banco: sinFiltro(valor) }),
+    estado: () => filtros.banco,
+    restaurar: (anterior) => cambiarEnUrl({ banco: anterior }),
+  })
+  useControlGuia('rankings.filtro-subactividad', {
+    elegir: (valor) => cambiarEnUrl({ subactividad: sinFiltro(valor) }),
+    estado: () => filtros.subactividad,
+    restaurar: (anterior) => cambiarEnUrl({ subactividad: anterior }),
+  })
 
   if (catalogo.cargando || cargandoPeriodos) {
     return <Contenedor><Cargando filas={6} /></Contenedor>

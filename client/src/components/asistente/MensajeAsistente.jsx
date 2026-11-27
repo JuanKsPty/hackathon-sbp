@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import {
   ArrowDownIcon,
@@ -11,6 +12,8 @@ import {
   SearchXIcon,
 } from 'lucide-react'
 import { useGuia } from '@/guia/GuiaContext.jsx'
+import { useAgente } from '@/agente/AgenteContext.jsx'
+import { useDemostracion } from '@/agente/DemostracionContext.jsx'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ETIQUETA_RESPUESTA } from '@/api/ia.js'
@@ -97,6 +100,7 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
       </div>
       <ResumenAccion accion={datos.accion} />
       <BotonGuia pasos={datos.guia?.pasos} />
+      <PantallaDelMensaje datos={datos} />
       <FuentesConsultadas consultas={datos.consultas} guia={guiaFuentes} />
     </Burbuja>
   )
@@ -160,6 +164,38 @@ function BotonVerGraficos() {
 }
 
 // Cursor guía (#72): si la IA respondió con pasos (`guia`), los muestra sobre la pantalla.
+// Acciones de pantalla (#124). Cada respuesta se aplica una sola vez, aunque el mensaje se vuelva a
+// dibujar o esté a la vez en el panel y en /asistente (la conversación es una sola).
+const pantallasAplicadas = new WeakSet()
+
+function PantallaDelMensaje({ datos }) {
+  const { ejecutarPantalla, deshacerUltima } = useAgente()
+  const { demostrar, demostrando } = useDemostracion()
+  const pantalla = datos?.pantalla
+  // Al llegar la respuesta: "ejecutar" se aplica al instante; "demostrar" arranca el cursor.
+  useEffect(() => {
+    if (!pantalla || pantallasAplicadas.has(pantalla)) return
+    pantallasAplicadas.add(pantalla)
+    if (pantalla.modo === 'ejecutar') ejecutarPantalla(pantalla)
+    else if (pantalla.modo === 'demostrar') demostrar(pantalla)
+  }, [pantalla, ejecutarPantalla, demostrar])
+
+  if (!pantalla?.acciones?.length) return null
+  // "Muéstrame cómo": deshace lo aplicado y lo demuestra paso a paso desde donde estaba el usuario.
+  const mostrarComo = () => {
+    if (pantalla.modo === 'ejecutar') deshacerUltima()
+    demostrar(pantalla)
+  }
+  return (
+    <div>
+      <Button variant="outline" size="sm" onClick={mostrarComo} disabled={demostrando}>
+        <MousePointer2Icon aria-hidden="true" />
+        {pantalla.modo === 'ejecutar' ? 'Muéstrame cómo' : 'Ver de nuevo'}
+      </Button>
+    </div>
+  )
+}
+
 function BotonGuia({ pasos }) {
   const { iniciar } = useGuia()
   if (!pasos?.length) return null
