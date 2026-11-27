@@ -12,6 +12,7 @@ export function BarraFuente() {
   return (
     <div
       role="note"
+      data-guia="global.barra-fuente"
       aria-label="Fuente y aviso de los datos"
       className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b bg-aviso-fondo px-4 py-1.5 text-xs text-aviso lg:px-6"
     >
