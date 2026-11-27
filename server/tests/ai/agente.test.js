@@ -256,3 +256,21 @@ test('guía: un número inventado en los pasos invalida la respuesta', async () 
   assert.equal(cuerpo.verificada, false);
   assert.equal(cuerpo.guia, null);
 });
+
+test('GET /api/ia/guia lista los elementos del perfil', async () => {
+  const base = await levantar({ apiKey: '' });
+  const publico = await (await fetch(`${base}/ia/guia`)).json();
+  const admin = await (await fetch(`${base}/ia/guia`, { headers: { 'X-Perfil': 'admin' } })).json();
+  assert.equal(publico.perfil, 'publico');
+  assert.ok(publico.elementos.some((e) => e.guia === 'rankings.tabla' && e.ruta === '/rankings'));
+  assert.ok(!publico.elementos.some((e) => e.guia.startsWith('admin.')));
+  assert.ok(admin.elementos.some((e) => e.guia === 'admin.bitacora'));
+  assert.deepEqual(Object.keys(admin.elementos[0]), ['guia', 'ruta', 'descripcion']);
+});
+
+test('si la IA falla, la respuesta trae guia: null', async () => {
+  const cliente = { beta: { messages: { create: async () => { throw new Error('sin red'); } } } };
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo los rankings?' });
+  assert.equal(cuerpo.guia, null);
+});

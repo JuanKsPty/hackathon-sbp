@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { explicarMovimientos } from '../ai/explicaciones.js';
 import { preguntarAlAgente } from '../ai/agente.js';
 import { crearEjecutor } from '../ai/herramientas.js';
+import { elementosPara } from '../ai/guia.js';
 import { MODELO_POR_DEFECTO } from '../ai/redaccionIA.js';
 import { encabezado } from './formato.js';
 import { ErrorApi } from './errores.js';
@@ -35,6 +36,15 @@ export function rutasDeIA({ obtenerMovimientos, opcionesIA = {} } = {}) {
   const apiKey = () => opcionesIA.apiKey ?? process.env.ANTHROPIC_API_KEY;
 
   // Para que la UI sepa si mostrar el chat o el aviso "IA no disponible".
+  // #72: elementos que el agente guía puede señalar para este perfil (contracts/guia.md).
+  // El front lo usa para comprobar que cada uno tiene su data-guia en pantalla.
+  rutas.get('/ia/guia', (req, res) => {
+    res.json({
+      perfil: req.perfil,
+      elementos: elementosPara(req.perfil).map(({ guia, ruta, descripcion }) => ({ guia, ruta, descripcion })),
+    });
+  });
+
   rutas.get('/ia/estado', (req, res) => {
     const disponible = Boolean(apiKey() || opcionesIA.cliente);
     res.json({
@@ -80,6 +90,7 @@ export function rutasDeIA({ obtenerMovimientos, opcionesIA = {} } = {}) {
         respuesta: null,
         verificada: false,
         consultas: [],
+        guia: null,
       });
     }
   });
