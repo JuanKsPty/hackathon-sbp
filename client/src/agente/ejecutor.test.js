@@ -99,3 +99,15 @@ test('antesDe se llama antes de navegar (el cursor toca el menú), también si l
   // La acción "elegir" es de /rankings: primero un "ir" implícito (todavía en /), después elegir (ya en /rankings).
   assert.deepEqual(orden, ['ir:/', 'elegir:/rankings'])
 })
+
+test('no navega dos veces si el router todavía no informó la ruta nueva', async () => {
+  const e = escenario()
+  // Router "lento": la ruta que informa no cambia durante la ejecución.
+  const navegaciones = []
+  await ejecutarAcciones(ACCIONES, {
+    ...e,
+    rutaActual: () => '/',
+    navegar: (r) => { navegaciones.push(r); e.navegar(r) },
+  })
+  assert.deepEqual(navegaciones, ['/rankings'])
+})

@@ -27,15 +27,18 @@ export async function ejecutarAcciones(acciones, { registro, navegar, rutaActual
   const guardados = new Set()
   const aplicadas = []
   const fallidas = []
+  // Ruta a la que se navegó: el router la informa un instante después, así no se navega dos veces.
+  let ruta = rutaActual()
 
   for (const accion of acciones) {
     if (signal?.aborted) break
     // Cambiar de página: antes, la demostración lleva el cursor al menú (también si la navegación
     // está implícita en una acción de otra página).
-    if (accion.ruta && necesitaNavegar(accion, rutaActual())) {
+    if (accion.ruta && necesitaNavegar(accion, ruta)) {
       await antesDe?.(accion.tipo === 'ir' ? accion : { tipo: 'ir', ruta: accion.ruta, texto: '' }, null)
       if (signal?.aborted) break
       navegar(accion.ruta)
+      ruta = accion.ruta
     }
     if (accion.tipo === 'ir') {
       aplicadas.push(accion)
