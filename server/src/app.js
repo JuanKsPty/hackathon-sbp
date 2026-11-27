@@ -6,11 +6,13 @@ import { rutasDeMovimientos } from './routes/movimientos.js';
 import { rutasDePerfil } from './routes/perfil.js';
 import { rutasDeBitacora } from './routes/bitacora.js';
 import { rutasDeAdministracion } from './routes/administracion.js';
+import { rutasDeCarga } from './routes/carga.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
 
 // obtenerMovimientos (opcional): cálculo de /api/movimientos (#32, crearObtenerMovimientos en
-// routes/movimientos.js). Si se pasa, monta GET /api/movimientos y la exportación del entregable 5.
+// routes/movimientos.js). Si se pasa, monta GET /api/movimientos y la exportación del entregable 5,
+// y la carga de un período (#29) responde también los cambios de ranking.
 export function crearApp({ almacen, obtenerMovimientos }) {
   const app = express();
   app.disable('x-powered-by');
@@ -28,6 +30,7 @@ export function crearApp({ almacen, obtenerMovimientos }) {
   app.use('/api', rutasDeConsulta(almacen));
   app.use('/api', rutasDeExportacion(almacen, { obtenerMovimientos }));
   if (obtenerMovimientos) app.use('/api', rutasDeMovimientos(obtenerMovimientos));
+  app.use('/api', rutasDeCarga(almacen, { obtenerMovimientos })); // POST /api/periodos, solo admin (#29)
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.
 
   app.use(rutaNoEncontrada);
