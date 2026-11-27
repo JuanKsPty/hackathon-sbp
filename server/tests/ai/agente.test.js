@@ -367,17 +367,25 @@ test('#86: una guía con números del catálogo ("entregable 4", "E1–E4") se a
   assert.deepEqual(cuerpo.consultas, []); // no consultó datos: los números salen solo del catálogo
 });
 
-test('#86: los números del catálogo valen solo para los elementos de la guía', async () => {
-  // "entregable 3" no está en la descripción de reportes.descarga-calidad ("entregable 4"): se descarta.
-  const cliente = clienteGuionado([
-    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'reportes.descarga-calidad', texto: 'Descarga el entregable 3.' }] }),
+test('#86: un número suelto de la descripción del catálogo se acepta solo en el elemento que lo trae', async () => {
+  // "Selector de los 6 rankings": el 6 es del catálogo de rankings.selector-ranking, no un dato del motor.
+  const conSuElemento = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'rankings.selector-ranking', texto: 'Elige uno de los 6 rankings.' }] }),
+    responder('Te muestro dónde elegir el ranking.'),
+  ]);
+  const { cuerpo: aceptada } = await preguntar(await levantar({ cliente: conSuElemento }), { pregunta: '¿Dónde cambio de ranking?' }, 'publico');
+  assert.equal(aceptada.verificada, true);
+  assert.equal(aceptada.guia.pasos[0].guia, 'rankings.selector-ranking');
+
+  // El mismo 6 en un paso que señala otro elemento (rankings.tabla no lo trae): se descarta.
+  const conOtroElemento = clienteGuionado([
+    usarHerramienta('guiar_usuario', { pasos: [{ guia: 'rankings.tabla', texto: 'Elige uno de los 6 rankings.' }] }),
     responder('Listo.'),
     responder('Listo.'),
   ]);
-  const base = await levantar({ cliente });
-  const { cuerpo } = await preguntar(base, { pregunta: '¿Dónde descargo la calidad?' }, 'analista');
-  assert.equal(cuerpo.verificada, false);
-  assert.equal(cuerpo.guia, null);
+  const { cuerpo: descartada } = await preguntar(await levantar({ cliente: conOtroElemento }), { pregunta: '¿Dónde veo la tabla?' }, 'publico');
+  assert.equal(descartada.verificada, false);
+  assert.equal(descartada.guia, null);
 });
 
 test('#86 (B2): un número que escribe el usuario no cuenta como verificado', async () => {
@@ -457,4 +465,19 @@ test('#86 (C4): el modelo recibe las herramientas con los rankings y bancos del 
   const catalogos = await (await fetch(`${base}/catalogos`)).json();
   const rankings = cliente.llamadas[0].tools.find((t) => t.name === 'consultar_rankings').input_schema.properties.ranking.description;
   for (const { Ranking } of catalogos.rankings) assert.ok(rankings.includes(Ranking), Ranking);
+});
+
+test('#86: los códigos (E1, SB21, AT03) en la respuesta no hacen que se descarte', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('consultar_calidad', { periodo: '20260731' }),
+    (params) => {
+      const periodo = ultimoResultado(params).periodos[0];
+      return responder(`En julio (20260731) se excluyeron ${periodo.E1_Duplicados} préstamos duplicados (E1) del AT03; la regla SB21 no cambia ese conteo. Ver el entregable 4.`)();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuántos préstamos duplicados se excluyeron en julio?' }, 'publico');
+  assert.equal(cuerpo.verificada, true);
+  assert.match(cuerpo.respuesta, /\(E1\)/);
+  assert.equal(cliente.llamadas.length, 2); // sin pedir corrección
 });

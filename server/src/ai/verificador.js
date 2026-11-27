@@ -4,10 +4,35 @@
 // Números con separador de miles ("1,400,000.00") o sin él ("12", "-2.17").
 const NUMERO = /\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/g;
 
-/** Extrae los números de un texto como { valor, decimales, texto } (valor absoluto). */
+// No son cifras del motor, y no hay por qué verificarlas (#86):
+//  - Los códigos: letras seguidas de dígitos pegados ("E1", "E1–E4", "SB21", "AT03", "R2").
+//  - Las referencias a una parte de un documento o de la app: la etiqueta y su número ("entregable 4",
+//    "reconciliación 1 y 2", "sección 11.1", "paso 3"). Una lista continúa con "y", "e", "a" o un guion
+//    y con números de 1 o 2 dígitos que no sean una cifra ("criterio 2, 10.5%" deja el 10.5).
+// Se borran del texto (se reemplazan por espacios) antes de buscar números.
+const LETRA = 'A-Za-zÁÉÍÓÚÜáéíóúüÑñ';
+const CODIGO = new RegExp(`[${LETRA}]+\\d+(?:[.,]\\d+)*`, 'g');
+const ETIQUETAS = 'entregables?|reconciliaci(?:ón|on|ones)|reconciliacion(?:es)?|secci(?:ón|on|ones)|láminas?|laminas?|criterios?|puntos?|pasos?|reglas?';
+const REFERENCIA_NUM = '\\d+(?:\\.\\d+)*';
+const CONTINUA = '\\d{1,2}(?![\\d%]|[.,]\\d)';
+const REFERENCIA = new RegExp(
+  `(?<![${LETRA}])(?:${ETIQUETAS})\\s+(?:` +
+    `${REFERENCIA_NUM}(?:\\s*,\\s*${CONTINUA})+\\s+(?:y|e)\\s+${CONTINUA}` + // 1, 2 y 3
+    `|${REFERENCIA_NUM}\\s+(?:y|e|a)\\s+${CONTINUA}` + // 1 y 2
+    `|${REFERENCIA_NUM}\\s*[–-]\\s*${CONTINUA}` + // 1–4
+    `|${REFERENCIA_NUM})`, // 4
+  'gi',
+);
+const enBlanco = (texto) => ' '.repeat(texto.length);
+
+/**
+ * Extrae los números de un texto como { valor, decimales, texto } (valor absoluto), sin los códigos
+ * ni las referencias a "entregable 4" y similares.
+ */
 export function extraerNumeros(texto) {
   const encontrados = [];
-  for (const match of texto.matchAll(NUMERO)) {
+  const limpio = texto.replace(REFERENCIA, enBlanco).replace(CODIGO, enBlanco);
+  for (const match of limpio.matchAll(NUMERO)) {
     const crudo = match[0];
     const decimales = crudo.includes('.') ? crudo.split('.')[1].length : 0;
     encontrados.push({ texto: crudo, valor: Number(crudo.replaceAll(',', '')), decimales });

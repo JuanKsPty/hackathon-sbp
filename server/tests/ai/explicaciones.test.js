@@ -93,6 +93,36 @@ test('el verificador detecta números inventados', () => {
   assert.equal(verificarNumeros('Al 30 de septiembre de 2026 lidera Banco Pacifico.', datos).ok, true);
 });
 
+// Códigos y referencias no son cifras del motor (#86): no se extraen para verificarlos.
+test('extraerNumeros ignora los códigos y las referencias a "entregable 4" y similares', () => {
+  for (const texto of [
+    'E1–E4', 'E1', 'SB21', 'AT03', 'R2', 'Q3',
+    'entregable 4', 'entregables 2 a 4', 'entregable 2–4', 'Entregable 4: calidad',
+    'reconciliación 1', 'reconciliaciones 1 y 2', 'reconciliaciones 1, 2 y 3',
+    'sección 11.1', 'lámina 8', 'criterio 3', 'punto 5', 'paso 2', 'regla 1',
+  ]) {
+    assert.deepEqual(extraerNumeros(texto), [], texto);
+  }
+});
+
+test('extraerNumeros sigue extrayendo las cifras', () => {
+  const valores = (texto) => extraerNumeros(texto).map((n) => n.texto);
+  assert.deepEqual(valores('B/. 1,234.56'), ['1,234.56']);
+  assert.deepEqual(valores('se excluyeron 20 duplicados (E1)'), ['20']);
+  assert.deepEqual(valores('en el 3.º lugar'), ['3']);
+  assert.deepEqual(valores('subió 3 puntos'), ['3']); // la etiqueta va después del número: es una cifra
+  assert.deepEqual(valores('el 20260731 y el entregable 4'), ['20260731']);
+  // Una cifra junto a una referencia no se pierde.
+  assert.deepEqual(valores('criterio 2, 10.5% de variación'), ['10.5']);
+  assert.deepEqual(valores('reconciliación 1 y 5,000.00'), ['5,000.00']);
+  assert.deepEqual(valores('reconciliación 1 y 50%'), ['50']);
+});
+
+test('el verificador acepta códigos y referencias pero sigue pidiendo las cifras', () => {
+  assert.equal(verificarNumeros('Entregable 4: exclusiones E1–E4 y reconciliación 1 de SB21 en AT03.', {}).ok, true);
+  assert.deepEqual(verificarNumeros('Se excluyeron 987654 filas (E1).', {}).noEncontrados, ['987654']);
+});
+
 // Límite documentado en src/ai/README.md (#86, B3): el verificador comprueba que el número exista
 // en los resultados, no que sea el de ese banco ni ese campo. Los valores salen de los datos de
 // ejemplo, no se escriben a mano.

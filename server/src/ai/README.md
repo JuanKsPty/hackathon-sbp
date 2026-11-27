@@ -38,6 +38,13 @@ Sin key, o si la IA falla, todo sale por reglas y `motivo` explica por qué.
 - **Los enteros pequeños casi siempre pasan.** Del 1 al 12 y los años existen en cualquier respuesta del motor (posiciones, códigos de banco, fechas). "Subió 3 posiciones" cuando fueron 2 pasa si hay un 3 en otro campo.
 - **Un número sin decimales coincide con cualquier valor que redondee a él.** "12" pasa si el motor trae `11.7`. Con decimales escritos (`11.70`) se exige el valor.
 
+**Qué no se verifica porque no es una cifra del motor.** `extraerNumeros` ignora los *códigos* y las *referencias*:
+
+- **Códigos:** letras con dígitos pegados: `E1`, `E1–E4`, `SB21`, `AT03`, `R2`. Son nombres, no cantidades; antes un "(E1)" en la respuesta contaba como el número 1 y, al no estar en los datos, descartaba una respuesta correcta.
+- **Referencias:** una etiqueta y su número: `entregable 4`, `reconciliación 1 y 2`, `sección 11.1`, `lámina`, `criterio`, `punto`, `paso` o `regla` seguidos de un número. Una lista sigue con `y`, `e`, `a` o un guion, solo con números de 1 o 2 dígitos que no sean una cifra: en "criterio 2, 10.5%" se ignora el 2 y se verifica el 10.5. Si la etiqueta va *después* del número ("subió 3 puntos"), es una cifra y se verifica.
+
+Siguen verificándose los montos (`B/. 1,234.56`), los conteos (`20 duplicados`), los ordinales (`3.º lugar`) y las fechas.
+
 Lo que sí protege de forma práctica es lo que más importa en la demo: **montos con decimales, porcentajes con decimales y cifras grandes inventados**, que no coinciden por azar con ningún valor del motor. Tampoco se verifica el signo ni las palabras ("sube", "baja", "lidera"). Por eso, además:
 
 - Cada respuesta trae `consultas` (qué endpoints leyó la IA) para contrastarla con los datos, y los rankings oficiales y los reportes nunca pasan por la IA: salen del motor.
@@ -66,7 +73,7 @@ Si el usuario pregunta *cómo* o *dónde* hacer algo en la app, el agente usa la
 - [`guia.js`](guia.js): catálogo de elementos (`data-guia`) con su ruta y el permiso de perfil que necesitan. Es la misma lista de [`contracts/guia.md`](../../../contracts/guia.md); un test verifica que coincidan.
 - La herramienta solo admite los identificadores del perfil (lista cerrada en el esquema) y el backend vuelve a validar cada paso. La ruta la pone el catálogo, no la IA. Los textos de los pasos pasan por el verificador de números.
 - `GET /api/ia/guia` lista los elementos de cada perfil.
-- Los números de las descripciones del catálogo ("entregable 4", "E1–E4") cuentan como citables, pero solo los de los elementos que la guía señala: una pregunta de *cómo* o *dónde* no consulta datos y, sin esto, el verificador descartaría una guía correcta (#86).
+- Los números sueltos de las descripciones del catálogo ("Selector de los 6 rankings") cuentan como citables, pero solo los de los elementos que la guía señala: una pregunta de *cómo* o *dónde* no consulta datos y, sin esto, el verificador descartaría una guía correcta. Los códigos y las referencias ("entregable 4", "E1–E4") ya no se verifican (ver el verificador, arriba) (#86).
 
 ## Evaluación del agente
 
