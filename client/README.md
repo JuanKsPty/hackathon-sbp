@@ -26,6 +26,7 @@ Desde la raíz del repo, `npm run dev` levanta el server y el client juntos.
 | `api/` | Cliente del API (`cliente.js`): header `X-Perfil`, errores `ApiError`, fuente y aviso, modo mock. |
 | `contexto/` | Tema (claro, oscuro, sistema), perfil y período elegido. |
 | `hooks/` | `useConsulta`: carga, error y reintento de una consulta. |
+| `guia/` | Cursor guía del asistente (#72): motor, búsqueda de `data-guia` y capa visual. Ver [`src/guia/README.md`](src/guia/README.md). |
 | `components/layout/` | `AppShell`, `Encabezado`, `BarraFuente` (siempre visible) y menú. |
 | `components/estados/` | `Cargando`, `Vacio` y `ErrorApi`. |
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
