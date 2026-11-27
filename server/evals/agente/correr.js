@@ -42,7 +42,10 @@ async function levantarApi() {
   const { crearObtenerMovimientos } = await import('../../src/routes/movimientos.js');
   const carpeta = path.resolve(process.env.DATA_DIR ?? fileURLToPath(new URL('../../../data', import.meta.url)));
   const almacen = almacenDesdeCarpeta(carpeta);
-  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0);
+  // Sin el límite de pedidos de IA (#84): la evaluación hace 18 preguntas seguidas desde la misma IP y,
+  // si la IA responde rápido, pasaría de 10 por minuto y los últimos casos fallarían con 429.
+  const sinLimite = { maximo: Number.POSITIVE_INFINITY, maximoGlobal: Number.POSITIVE_INFINITY };
+  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), limiteIA: sinLimite }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   return { base: `http://127.0.0.1:${servidor.address().port}/api`, cerrar: () => servidor.close() };
 }
