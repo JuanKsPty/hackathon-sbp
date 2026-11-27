@@ -7,6 +7,7 @@ import { TemaProvider } from '@/contexto/TemaContext.jsx'
 import { GuiaProvider } from '@/guia/GuiaContext.jsx'
 import { CapaGuia } from '@/guia/CapaGuia.jsx'
 import Admin from '@/paginas/Admin.jsx'
+import Asistente from '@/paginas/Asistente.jsx'
 import Calidad from '@/paginas/Calidad.jsx'
 import Comparar from '@/paginas/Comparar.jsx'
 import NoEncontrada from '@/paginas/NoEncontrada.jsx'
@@ -31,6 +32,7 @@ export default function App() {
                   <Route path="reportes" element={<Reportes />} />
                   <Route path="calidad" element={<Calidad />} />
                   <Route path="admin" element={<Admin />} />
+                  <Route path="asistente" element={<Asistente />} />
                   <Route path="*" element={<NoEncontrada />} />
                 </Route>
               </Routes>

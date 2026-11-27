@@ -23,7 +23,7 @@ export function SelectorTema() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Cambiar tema">
+        <Button variant="ghost" size="icon" aria-label="Cambiar tema" data-guia="global.selector-tema">
           <Actual aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
