@@ -1,45 +1,28 @@
-// Láminas de la presentación web (/presentacion). La historia va por roles y con poco lenguaje
-// técnico: el problema de cada persona (Público, Analista, Administrador), lo que la app le da a
-// cada una y lo que nos diferencia. Después del cierre, la arquitectura y el QR al sitio público.
+// Láminas de la presentación web (/presentacion): portada, la propuesta (una app, tres roles) y
+// cierre. Después del cierre, la arquitectura y el QR al sitio público.
 // Ninguna cifra se escribe aquí (R2): todas llegan en `datos` (useDatosPresentacion), y
 // mientras no llegan se ve "—".
 import { Link } from 'react-router'
 import {
   ArrowRightIcon,
-  BellRingIcon,
-  BotIcon,
   CalculatorIcon,
-  CheckCircle2Icon,
-  CreditCardIcon,
-  CrownIcon,
   DatabaseIcon,
-  FileDownIcon,
   FileSpreadsheetIcon,
-  FilterIcon,
-  FlaskConicalIcon,
   GlobeIcon,
   KeyRoundIcon,
-  ListOrderedIcon,
   LockIcon,
-  MessageSquareTextIcon,
   MonitorIcon,
-  MousePointerClickIcon,
   RadarIcon,
-  ScaleIcon,
-  SearchIcon,
   ServerIcon,
   ShieldCheckIcon,
   SmartphoneIcon,
   SparklesIcon,
-  TagsIcon,
-  TriangleAlertIcon,
-  UploadIcon,
   UsersIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { BloqueOscuro, Etiqueta, SeccionGris } from '@/components/marca'
-import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
+import { formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
 import { EncabezadoLamina, IconoCirculo, Lamina, Tarjeta } from './piezas.jsx'
 
@@ -117,82 +100,8 @@ export function Portada({ datos }) {
   )
 }
 
-// Los cuatro motivos por los que se quita una fila del archivo (cascada E1 a E4).
-const MOTIVOS = [
-  { campo: 'E1_Duplicados' },
-  { campo: 'E2_Destino_Extranjero' },
-  { campo: 'E3_Saldo_No_Positivo' },
-  { campo: 'E4_Actividad_No_Catalogada' },
-]
-
 // ---------------------------------------------------------------------------------------------
-// 2. El problema, contado por las tres personas que usan la información
-// ---------------------------------------------------------------------------------------------
-export function Problema({ datos }) {
-  const c = datos.calidadUltimo
-  const conErrores = c && MOTIVOS.every(({ campo }) => typeof c[campo] === 'number') ? MOTIVOS.reduce((t, { campo }) => t + c[campo], 0) : null
-  const personas = [
-    {
-      icono: GlobeIcon,
-      rol: 'Público',
-      pregunta: '¿Qué banco presta más para vivienda?',
-      hoy: ['Busca en archivos Excel y PDF', 'No puede filtrar ni comparar a su gusto'],
-    },
-    {
-      icono: UsersIcon,
-      rol: 'Analista',
-      pregunta: '¿Qué cambió de agosto a septiembre?',
-      hoy: ['Cruza hojas a mano durante horas', 'Entender el porqué de cada cambio es otro trabajo'],
-    },
-    {
-      icono: KeyRoundIcon,
-      rol: 'Administrador',
-      pregunta: '¿Cómo publico el mes sin errores?',
-      hoy: [
-        'Prepara cada corte a mano',
-        conErrores != null
-          ? `El archivo trae errores: ${formatearEntero(conErrores)} filas con problemas en el último corte`
-          : 'El archivo trae errores: préstamos repetidos, saldos en cero, sectores que no existen',
-      ],
-    },
-  ]
-
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={TriangleAlertIcon}
-        etiqueta="El problema"
-        fuerte="La información de crédito existe,"
-        suave="pero llegar a ella cuesta."
-      />
-      <div className="grid flex-1 grid-cols-3 gap-6">
-        {personas.map(({ icono, rol, pregunta, hoy }) => (
-          <Tarjeta key={rol} className="gap-6 p-8">
-            <div className="flex items-center gap-4">
-              <IconoCirculo icono={icono} />
-              <span className="text-xl font-medium text-muted-foreground">{rol}</span>
-            </div>
-            <p className="text-[32px] leading-tight font-medium tracking-tight">“{pregunta}”</p>
-            <div className="mt-auto flex flex-col gap-3">
-              <span className="text-base font-medium tracking-wide text-muted-foreground uppercase">Hoy</span>
-              <ul className="flex flex-col gap-3 text-[21px] leading-snug">
-                {hoy.map((texto) => (
-                  <li key={texto} className="flex items-start gap-3">
-                    <span aria-hidden="true" className="mt-2.5 size-2.5 shrink-0 rounded-full bg-baja" />
-                    {texto}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Tarjeta>
-        ))}
-      </div>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 3. La propuesta: una app, tres roles
+// 2. La propuesta: una app, tres roles
 // ---------------------------------------------------------------------------------------------
 export function Propuesta() {
   const roles = [
@@ -236,117 +145,7 @@ export function Propuesta() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Lámina de un rol: quién es y su pregunta a la izquierda, lo que la app le da a la derecha.
-// ---------------------------------------------------------------------------------------------
-function LaminaRol({ icono, etiqueta, fuerte, suave, quien, pregunta, funciones, pie }) {
-  return (
-    <Lamina className="gap-8">
-      <EncabezadoLamina icono={icono} etiqueta={etiqueta} fuerte={fuerte} suave={suave} />
-      <div className="grid flex-1 grid-cols-[340px_1fr] gap-6">
-        <BloqueOscuro className="flex flex-col justify-between gap-6 p-8 sm:p-8">
-          <div className="flex flex-col gap-2">
-            <span className="text-base text-bloque-muted">Para quién</span>
-            <p className="text-[24px] leading-snug font-medium text-bloque-foreground">{quien}</p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-base text-bloque-muted">Su pregunta</span>
-            <p className="text-[30px] leading-tight font-medium text-bloque-foreground">“{pregunta}”</p>
-          </div>
-        </BloqueOscuro>
-        <ul className="grid grid-cols-3 grid-rows-2 gap-4">
-          {funciones.map(({ icono: Icono, titulo, texto }) => (
-            <li key={titulo}>
-              <Tarjeta className="h-full gap-3 p-6">
-                <IconoCirculo icono={Icono} />
-                <h3 className="text-[25px] leading-tight font-medium tracking-tight">{titulo}</h3>
-                <p className="text-[19px] leading-snug text-muted-foreground">{texto}</p>
-              </Tarjeta>
-            </li>
-          ))}
-        </ul>
-      </div>
-      {pie && <p className="text-xl text-muted-foreground">{pie}</p>}
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 4. Público
-// ---------------------------------------------------------------------------------------------
-export function RolPublico() {
-  return (
-    <LaminaRol
-      icono={GlobeIcon}
-      etiqueta="Público · sin cuenta"
-      fuerte="Consultar sin saber nada técnico."
-      suave="Si sabes hacer una pregunta, sabes usar la app."
-      quien="Un ciudadano, un periodista, un estudiante."
-      pregunta="¿Qué banco presta más para vivienda?"
-      funciones={[
-        { icono: CrownIcon, titulo: 'Ver quién lidera', texto: 'Seis rankings por sector, siempre con los doce bancos.' },
-        { icono: FilterIcon, titulo: 'Filtrar y explorar', texto: 'Por mes, banco y sector. Un clic en el gráfico filtra y la tabla se ordena.' },
-        { icono: MessageSquareTextIcon, titulo: 'Preguntar en español', texto: 'El asistente responde con los datos y deja la pantalla lista.' },
-        { icono: MousePointerClickIcon, titulo: 'Te enseña dónde', texto: 'Si preguntas “¿cómo…?”, un cursor recorre la app y señala dónde tocar.' },
-        { icono: FileDownIcon, titulo: 'Descargar', texto: 'Rankings, sectores y calidad de los datos, en CSV.' },
-        { icono: BellRingIcon, titulo: 'Alertas por correo', texto: 'Se suscribe a los bancos y sectores que le interesan.' },
-      ]}
-      pie="Funciona en el celular y se instala como app. Cada pantalla dice la fuente, el período y que los datos son ficticios."
-    />
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 5. Lo que nos diferencia
-// ---------------------------------------------------------------------------------------------
-export function Diferencia() {
-  const puntos = [
-    { icono: SparklesIcon, titulo: 'IA que no inventa', texto: 'Si la IA cita un número que el motor no dio, se descarta y queda la explicación por reglas.' },
-    { icono: SearchIcon, titulo: 'Explica por qué cambió', texto: 'Cada movimiento trae su frase, y el saldo se separa en préstamos nuevos, salidas y pagos.' },
-    { icono: MousePointerClickIcon, titulo: 'Te enseña a usarla', texto: 'Preguntas “¿cómo…?” y un cursor recorre la app señalando dónde tocar.' },
-    { icono: UploadIcon, titulo: 'El mes nuevo, en segundos', texto: 'Se sube el archivo, todo se recalcula y los suscriptores reciben el aviso por correo.' },
-    { icono: ShieldCheckIcon, titulo: 'Funciona sin IA', texto: 'Sin llave de IA la app responde igual, por reglas. Nada depende de un tercero.' },
-    { icono: BotIcon, titulo: 'Conectada a Claude', texto: 'Se consulta desde Claude por MCP, de solo lectura y con el perfil que corresponde.' },
-  ]
-  return (
-    <Lamina>
-      <EncabezadoLamina
-        icono={RadarIcon}
-        etiqueta="Lo que nos diferencia"
-        fuerte="No es otro tablero de rankings."
-        suave="Explica, enseña y se comprueba."
-      />
-      <ul className="grid flex-1 grid-cols-3 grid-rows-2 gap-5">
-        {puntos.map(({ icono, titulo, texto }) => (
-          <li key={titulo}>
-            <Tarjeta className="h-full gap-4 p-7">
-              <IconoCirculo icono={icono} />
-              <h3 className="text-[28px] leading-tight font-medium tracking-tight">{titulo}</h3>
-              <p className="text-[20px] leading-snug text-muted-foreground">{texto}</p>
-            </Tarjeta>
-          </li>
-        ))}
-      </ul>
-      <BloqueOscuro className="flex items-center gap-5 px-8 py-6 sm:px-8 sm:py-6">
-        <CheckCircle2Icon aria-hidden="true" className="size-8 shrink-0 text-brillo" />
-        <p className="flex-1 text-[24px] leading-snug text-bloque-foreground">
-          Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida.
-        </p>
-        <a
-          href="https://sbp.juank.tech"
-          target="_blank"
-          rel="noreferrer"
-          className="flex shrink-0 items-center gap-2 text-[24px] font-medium text-brillo underline-offset-4 hover:underline"
-        >
-          <GlobeIcon aria-hidden="true" className="size-6" />
-          sbp.juank.tech
-        </a>
-      </BloqueOscuro>
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 7. Arquitectura
+// 4. Arquitectura
 // ---------------------------------------------------------------------------------------------
 function Caja({ icono: Icono, titulo, texto, className }) {
   return (
@@ -416,7 +215,7 @@ export function Arquitectura() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 8. Pruébalo: el QR en grande para que el jurado entre al sitio público desde el celular
+// 5. Pruébalo: el QR en grande para que el jurado entre al sitio público desde el celular
 // ---------------------------------------------------------------------------------------------
 export function Qr() {
   return (
@@ -445,7 +244,7 @@ export function Qr() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 6. Cierre
+// 3. Cierre
 // ---------------------------------------------------------------------------------------------
 export function Cierre() {
   return (
