@@ -33,3 +33,32 @@ export function ordenDe(pregunta, columna) {
   if (columna === 'Posicion') return menos ? 'desc' : 'asc';
   return menos ? 'asc' : 'desc';
 }
+
+// Columna de la tabla (contrato /api/rankings) → campo de la fila del motor.
+const CAMPO_DEL_MOTOR = {
+  Posicion: 'posicion',
+  Banco: 'banco',
+  Saldo_Actividad: 'saldoActividad',
+  Total_Cartera_Local_Valida: 'totalCartera',
+  Ponderacion_Pct: 'ponderacionE4',
+  Operaciones_Validas: 'operacionesValidas',
+};
+
+/**
+ * Banco que queda arriba al ordenar la tabla como lo haría el usuario: lee las filas que el motor
+ * ya calculó para ese período y ranking y las ordena (en empate, por posición). No calcula valores.
+ * @returns {string|null} código del banco
+ */
+export function bancoArriba(almacen, periodo, ranking, columna, orden) {
+  const filas = almacen.obtener(periodo)?.rankings.find((r) => r.ranking === ranking)?.filas;
+  const campo = CAMPO_DEL_MOTOR[columna];
+  if (!filas?.length || !campo) return null;
+  const signo = orden === 'asc' ? 1 : -1;
+  const comparar = (a, b) => {
+    const x = a[campo];
+    const y = b[campo];
+    const diferencia = typeof x === 'string' ? x.localeCompare(y, 'es') : x - y;
+    return signo * diferencia || a.posicion - b.posicion;
+  };
+  return [...filas].sort(comparar)[0].codigoBanco;
+}
