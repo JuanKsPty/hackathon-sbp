@@ -1,13 +1,16 @@
-import { CheckCircle2Icon, TriangleAlertIcon } from 'lucide-react'
+import { Link } from 'react-router'
+import { ArrowRightIcon, CheckCircle2Icon, TriangleAlertIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 
-// Resumen del período elegido. Todas las cifras salen de GET /api/periodos (R2).
+// Indicadores del período elegido: filas leídas, universo local válido, saldo total y estado de las
+// reconciliaciones. Todas las cifras salen de GET /api/periodos (R2); el detalle está en Calidad de datos.
 export function ResumenPeriodo() {
   const { detallePeriodo, cargando, error, reintentar } = usePeriodo()
 
@@ -38,7 +41,7 @@ export function ResumenPeriodo() {
   const reconciliado = detallePeriodo?.Reconciliaciones_OK
 
   return (
-    <Card>
+    <Card data-guia="panel.indicadores">
       <CardHeader>
         <CardTitle>Resumen del período</CardTitle>
         <CardDescription>
@@ -63,6 +66,14 @@ export function ResumenPeriodo() {
         )}
       </CardHeader>
       <CardContent>{contenido}</CardContent>
+      {detallePeriodo && (
+        <CardFooter>
+          <Link to="/calidad" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+            Ver calidad de los datos
+            <ArrowRightIcon aria-hidden="true" />
+          </Link>
+        </CardFooter>
+      )}
     </Card>
   )
 }
