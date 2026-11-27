@@ -54,7 +54,7 @@ after(() => servidores.forEach((s) => s.close()));
 async function levantar() {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
-  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } }).listen(0);
+  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } }).listen(0, '127.0.0.1');
   servidores.push(servidor);
   await once(servidor, 'listening');
   return `http://127.0.0.1:${servidor.address().port}/api`;

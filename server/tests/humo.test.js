@@ -25,7 +25,7 @@ let raiz;
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
-  servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0);
+  servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen) }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   raiz = `http://127.0.0.1:${servidor.address().port}`;
 });
@@ -57,7 +57,7 @@ test('BASE_URL sirve con o sin /api y con barra al final', () => {
 });
 
 test('si la app no responde, cada control queda como fallido con su motivo', async () => {
-  const cerrado = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, []) }).listen(0);
+  const cerrado = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, []) }).listen(0, '127.0.0.1');
   await once(cerrado, 'listening');
   const url = `http://127.0.0.1:${cerrado.address().port}`;
   cerrado.close();

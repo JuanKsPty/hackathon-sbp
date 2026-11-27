@@ -18,7 +18,7 @@ before(async () => {
   });
   app.use(rutaNoEncontrada);
   app.use(manejarErrores);
-  servidor = app.listen(0);
+  servidor = app.listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}`;
 });

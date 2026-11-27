@@ -16,7 +16,7 @@ before(async () => {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
   app = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } });
-  servidor = app.listen(0);
+  servidor = app.listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
   documento = await (await fetch(`${base}/openapi.json`)).json();

@@ -20,7 +20,7 @@ let cliente;
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
-  api = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } }).listen(0);
+  api = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { apiKey: '' } }).listen(0, '127.0.0.1');
   await once(api, 'listening');
   base = `http://127.0.0.1:${api.address().port}/api`;
 

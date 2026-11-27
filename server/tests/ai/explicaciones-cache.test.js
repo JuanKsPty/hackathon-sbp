@@ -37,7 +37,7 @@ async function levantar(extra = {}) {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
   const { cliente, llamadas } = clienteQueCuenta();
-  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { cliente }, ...extra }).listen(0);
+  const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), opcionesIA: { cliente }, ...extra }).listen(0, '127.0.0.1');
   servidores.push(servidor);
   await once(servidor, 'listening');
   return { base: `http://127.0.0.1:${servidor.address().port}/api`, llamadas };

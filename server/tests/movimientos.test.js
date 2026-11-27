@@ -19,7 +19,7 @@ before(async () => {
   const { catalogos, periodos } = paqueteReal();
   almacen = crearAlmacen(catalogos, periodos);
   const obtenerMovimientos = crearObtenerMovimientos(almacen, { obtenerRegla: () => REGLA });
-  servidor = crearApp({ almacen, obtenerMovimientos }).listen(0);
+  servidor = crearApp({ almacen, obtenerMovimientos }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
 });

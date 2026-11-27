@@ -32,7 +32,7 @@ let base;
 before(async () => {
   const { catalogos, periodos } = paqueteReal();
   const obtenerMovimientos = async () => MOVIMIENTOS_EJEMPLO;
-  servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos), obtenerMovimientos }).listen(0);
+  servidor = crearApp({ almacen: crearAlmacen(catalogos, periodos), obtenerMovimientos }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
   base = `http://127.0.0.1:${servidor.address().port}/api`;
 });
@@ -89,7 +89,7 @@ test('movimientos.csv (entregable 5) aplana la respuesta de /api/movimientos', a
 });
 
 test('sin el cálculo de movimientos conectado, movimientos.csv responde 501', async () => {
-  const sinMovimientos = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, paqueteReal().periodos) }).listen(0);
+  const sinMovimientos = crearApp({ almacen: crearAlmacen(paqueteReal().catalogos, paqueteReal().periodos) }).listen(0, '127.0.0.1');
   await once(sinMovimientos, 'listening');
   try {
     const respuesta = await fetch(`http://127.0.0.1:${sinMovimientos.address().port}/api/exportar/movimientos.csv`, {

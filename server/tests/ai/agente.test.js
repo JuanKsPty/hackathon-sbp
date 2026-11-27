@@ -17,7 +17,7 @@ async function levantar(opcionesIA) {
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
   const obtenerMovimientos = crearObtenerMovimientos(almacen, { obtenerRegla: () => REGLA });
-  const servidor = crearApp({ almacen, obtenerMovimientos, opcionesIA }).listen(0);
+  const servidor = crearApp({ almacen, obtenerMovimientos, opcionesIA }).listen(0, '127.0.0.1');
   servidores.push(servidor);
   await once(servidor, 'listening');
   const base = `http://127.0.0.1:${servidor.address().port}/api`;
@@ -287,7 +287,7 @@ test('#89: un Host falso no desvía las consultas de las herramientas (SSRF)', a
     consultasAlEspia++;
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ rankings: [{ Ranking: 'HIPOTECARIO', bancos: [{ Banco: 'Banco Falso', Saldo_Actividad: 999 }] }] }));
-  }).listen(0);
+  }).listen(0, '127.0.0.1');
   servidores.push(espia);
   await once(espia, 'listening');
 
