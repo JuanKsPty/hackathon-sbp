@@ -9,8 +9,8 @@ import { seccionesVisibles } from './navegacion.js'
 import { MARCA } from './nombres.js'
 import { SesionUsuario } from './SesionUsuario.jsx'
 
-// Menú de secciones dentro del Sheet del encabezado (por debajo de 1280 px; desde ahí las secciones
-// van en línea en la navegación superior). Solo muestra las secciones que el perfil puede usar
+// Menú de secciones dentro del Sheet del encabezado (por debajo de 1280 px en el público y de 1536 px
+// en el interno; desde ahí las secciones van en línea en la navegación superior). Solo muestra las secciones que el perfil puede usar
 // (opciones de GET /api/perfil).
 // `conSesion`: en el sitio interno añade el usuario y Salir bajo las secciones, solo por debajo de
 // 1024 px (desde ahí lo muestra el encabezado). Por debajo de 768 px añade la píldora hacia el otro

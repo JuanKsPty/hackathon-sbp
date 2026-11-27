@@ -16,9 +16,13 @@ import { SelectorTema } from './SelectorTema.jsx'
 
 // Navegación superior (#138): secciones a la izquierda, "RADAR SBP" al centro y, a la derecha,
 // asistente, sesión (interno), período, tema y la píldora hacia el otro sitio.
-// - Desde 1280 px las secciones van en línea. Por debajo, en un menú (Sheet) con la misma lista.
+// - Las secciones van en línea desde 1280 px en el público (5) y desde 1536 px en el interno (7).
+//   Por debajo, en un menú (Sheet) con la misma lista.
 // - Por debajo de 768 px la sesión y el otro sitio van dentro del menú; por debajo de 640 px,
 //   también el nombre. Cada control se monta una sola vez (los del agente usan data-guia).
+const CLASE_MENU = __INTERNO__ ? '2xl:hidden' : 'xl:hidden'
+const CLASE_NAV = __INTERNO__ ? 'hidden min-w-0 2xl:block' : 'hidden min-w-0 xl:block'
+
 export function Encabezado() {
   const [menuAbierto, setMenuAbierto] = useState(false)
   const { puede } = usePerfil()
@@ -28,7 +32,7 @@ export function Encabezado() {
       <div className="flex min-w-0 items-center gap-1">
         <Sheet open={menuAbierto} onOpenChange={setMenuAbierto}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="xl:hidden" aria-label="Abrir menú">
+            <Button variant="ghost" size="icon" className={CLASE_MENU} aria-label="Abrir menú">
               <MenuIcon aria-hidden="true" />
             </Button>
           </SheetTrigger>
@@ -39,7 +43,7 @@ export function Encabezado() {
           </SheetContent>
         </Sheet>
 
-        <nav aria-label="Secciones" className="hidden min-w-0 xl:block">
+        <nav aria-label="Secciones" className={CLASE_NAV}>
           <ul className="flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none]">
             {seccionesVisibles(puede).map((seccion) => (
               <li key={seccion.ruta}>

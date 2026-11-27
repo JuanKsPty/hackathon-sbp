@@ -56,7 +56,6 @@ export function SesionUsuario({ variante = 'menu', className }) {
         <Button variant="outline" size="sm" aria-label={`${quien}, perfil ${nombre}. Abrir menú de la sesión`} data-guia="global.selector-perfil" className={className}>
           <UserIcon aria-hidden="true" />
           <span className="max-w-24 truncate xl:max-w-32">{quien}</span>
-          <span className="hidden text-muted-foreground 2xl:inline">· {nombre}</span>
           <ChevronDownIcon className="text-muted-foreground" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
