@@ -2,7 +2,13 @@
 //   GET /api/parametros        todos los perfiles
 //   PUT /api/parametros        solo admin; cada cambio queda en la bitácora
 //   GET /api/admin/catalogos   solo admin; fuente, archivo, registros y fecha de carga
+//   GET /api/admin/catalogos/:clave   solo admin; el contenido del catálogo (bancos, cinu, sb21 o
+//                                     diccionario), o el CSV original con ?formato=csv
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
+import { leerCsv } from '../engine/csv.js';
 import { requiereOpcion } from '../middleware/perfiles.js';
 import { registrarOperacion } from '../datos/bitacora.js';
 import { ARCHIVOS_CATALOGO } from '../datos/paquete.js';
@@ -16,6 +22,11 @@ import {
 import { ErrorApi } from './errores.js';
 
 const FUENTE_CATALOGOS = 'Paquete del reto (SBP), copia en data/';
+
+// La misma carpeta que procesa servidor.js al arrancar (DATA_DIR o data/ en la raíz del repo).
+const carpetaDatos = () => path.resolve(process.env.DATA_DIR ?? fileURLToPath(new URL('../../../data/', import.meta.url)));
+
+const NOMBRES_CATALOGO = { cinu: 'CINU/SB109', sb21: 'SB21', bancos: 'Bancos', diccionario: 'Diccionario AT03' };
 
 function respuestaDeParametros() {
   return {
@@ -74,6 +85,32 @@ export function rutasDeAdministracion(almacen) {
 
   rutas.get('/admin/catalogos', requiereOpcion('administrar_catalogos'), (req, res) => {
     res.json({ catalogos: estadoDeCatalogos(almacen.catalogos, fechaCarga) });
+  });
+
+  // Contenido de un catálogo, tal como viene en el paquete del reto. Solo lectura: la clasificación
+  // usa únicamente los catálogos suministrados (R3) y el CINU está congelado.
+  rutas.get('/admin/catalogos/:clave', requiereOpcion('administrar_catalogos'), (req, res) => {
+    const clave = String(req.params.clave).toLowerCase();
+    const archivo = ARCHIVOS_CATALOGO[clave];
+    if (!archivo) {
+      throw new ErrorApi(404, 'CATALOGO_NO_ENCONTRADO', `No existe el catálogo "${req.params.clave}" (usa ${Object.keys(ARCHIVOS_CATALOGO).join(', ')}).`);
+    }
+    const texto = fs.readFileSync(path.join(carpetaDatos(), archivo), 'utf8');
+    if (req.query.formato === 'csv') {
+      res.set('Content-Type', 'text/csv; charset=utf-8');
+      res.set('Content-Disposition', `attachment; filename="${archivo}"`);
+      return res.send(texto);
+    }
+    const { encabezados, filas } = leerCsv(texto, archivo);
+    return res.json({
+      catalogo: NOMBRES_CATALOGO[clave],
+      clave,
+      archivo,
+      procedencia: FUENTE_CATALOGOS, // no "fuente": ese campo lo lee el client como la fuente de los datos
+      congelado: clave === 'cinu',
+      columnas: encabezados,
+      filas: filas.map(({ datos }) => datos),
+    });
   });
 
   return rutas;

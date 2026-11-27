@@ -10,7 +10,9 @@
     { "opcion": "cargar_periodo", "nombre": "Cargar o actualizar un período" },
     { "opcion": "administrar_parametros", "nombre": "Parámetros" },
     { "opcion": "administrar_catalogos", "nombre": "Catálogos" },
-    { "opcion": "ver_bitacora", "nombre": "Registro de operaciones" }
+    { "opcion": "ver_bitacora", "nombre": "Registro de operaciones" },
+    { "opcion": "configurar_permisos", "nombre": "Perfiles y permisos" },
+    { "opcion": "gestionar_usuarios", "nombre": "Usuarios" }
   ],
   "perfiles": [
     { "perfil": "publico", "nombre": "Público" },

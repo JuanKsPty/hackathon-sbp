@@ -27,12 +27,13 @@ function periodoAnterior(periodos, periodo) {
 // Solo Analista y Administrador (Público recibe 403). Con `guia` se puede reusar en el Panel
 // (data-guia="panel.explicaciones").
 export function ExplicacionesMovimientos({ guia, className }) {
-  const { perfil } = usePerfil()
+  const { perfil, puede } = usePerfil()
   const { periodos, periodo } = usePeriodo()
   const [ranking, setRanking] = useState('')
 
   const desde = periodoAnterior(periodos, periodo)
-  const permitido = perfil !== 'publico'
+  // /api/explicaciones pide la opción comparar_periodos (configurable por el Administrador).
+  const permitido = puede('comparar_periodos')
   const activa = permitido && Boolean(desde && periodo)
 
   const { datos: ultimosDatos, error, cargando, reintentar } = useConsulta(

@@ -1,0 +1,21 @@
+{
+  "origen": "por_defecto",
+  "perfiles": [
+    { "perfil": "publico", "nombre": "Público" },
+    { "perfil": "analista", "nombre": "Analista" },
+    { "perfil": "admin", "nombre": "Administrador" }
+  ],
+  "opciones": [
+    { "opcion": "consultar_rankings", "nombre": "Consultar rankings, filtros, gráficos y tablas", "perfiles": ["publico", "analista", "admin"], "por_defecto": ["publico", "analista", "admin"], "configurable": false, "motivo": "Es la consulta básica: la tienen todos los perfiles." },
+    { "opcion": "descargar", "nombre": "Descargar reportes", "perfiles": ["publico", "analista", "admin"], "por_defecto": ["publico", "analista", "admin"], "configurable": true, "motivo": null },
+    { "opcion": "comparar_periodos", "nombre": "Comparar períodos", "perfiles": ["analista", "admin"], "por_defecto": ["analista", "admin"], "configurable": true, "motivo": null },
+    { "opcion": "comparar_entidades", "nombre": "Comparar entidades", "perfiles": ["analista", "admin"], "por_defecto": ["analista", "admin"], "configurable": false, "motivo": "Va junto con Comparar períodos: es la misma página." },
+    { "opcion": "reportes_personalizados", "nombre": "Reportes personalizados", "perfiles": ["analista", "admin"], "por_defecto": ["analista", "admin"], "configurable": true, "motivo": null },
+    { "opcion": "cargar_periodo", "nombre": "Cargar o actualizar un período", "perfiles": ["admin"], "por_defecto": ["admin"], "configurable": false, "motivo": "Es una opción de administración: siempre es solo del Administrador." },
+    { "opcion": "administrar_parametros", "nombre": "Parámetros", "perfiles": ["admin"], "por_defecto": ["admin"], "configurable": false, "motivo": "Es una opción de administración: siempre es solo del Administrador." },
+    { "opcion": "administrar_catalogos", "nombre": "Catálogos", "perfiles": ["admin"], "por_defecto": ["admin"], "configurable": false, "motivo": "Es una opción de administración: siempre es solo del Administrador." },
+    { "opcion": "ver_bitacora", "nombre": "Registro de operaciones", "perfiles": ["admin"], "por_defecto": ["admin"], "configurable": false, "motivo": "Es una opción de administración: siempre es solo del Administrador." },
+    { "opcion": "configurar_permisos", "nombre": "Perfiles y permisos", "perfiles": ["admin"], "por_defecto": ["admin"], "configurable": false, "motivo": "Es una opción de administración: siempre es solo del Administrador." },
+    { "opcion": "gestionar_usuarios", "nombre": "Usuarios", "perfiles": ["admin"], "por_defecto": ["admin"], "configurable": false, "motivo": "Es una opción de administración: siempre es solo del Administrador." }
+  ]
+}

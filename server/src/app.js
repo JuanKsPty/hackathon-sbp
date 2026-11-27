@@ -15,6 +15,8 @@ import { rutasDeMcp } from './routes/mcp.js';
 import { rutasDeVerificacion } from './routes/verificacion.js';
 import { rutasDeSuscripciones } from './routes/suscripciones.js';
 import { rutasDeSesion } from './routes/sesion.js';
+import { rutasDePermisos } from './routes/permisos.js';
+import { rutasDeUsuarios } from './routes/usuarios.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { limitarPedidos } from './middleware/limitePedidos.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
@@ -52,6 +54,8 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp,
   app.use('/api', rutasDePerfil());
   app.use('/api', rutasDeBitacora());
   app.use('/api', rutasDeAdministracion(almacen));
+  app.use('/api', rutasDePermisos()); // perfiles y permisos (lámina 6)
+  app.use('/api', rutasDeUsuarios()); // usuarios del sitio interno (lámina 6)
   app.use('/api', rutasDeConsulta(almacen));
   app.use('/api', rutasDeExportacion(almacen, { obtenerMovimientos }));
   if (obtenerMovimientos) app.use('/api', rutasDeMovimientos(obtenerMovimientos));

@@ -57,6 +57,11 @@ Los endpoints de Analista y Administrador responden **403** a los demás perfile
 | `PUT /api/parametros` | `administrar_parametros` | Administrador |
 | `GET /api/admin/catalogos` | `administrar_catalogos` | Administrador |
 | `GET /api/bitacora` | `ver_bitacora` | Administrador |
+| `GET/PUT/DELETE /api/admin/permisos` | `configurar_permisos` | Administrador |
+| `GET/POST /api/admin/usuarios`, `PATCH /api/admin/usuarios/:usuario` | `gestionar_usuarios` | Administrador |
+| `GET /api/exportar/{rankings,subactividades,calidad,excluidas,alertas}.csv` | `descargar` | los 3 (configurable) |
+
+La columna **Perfiles** es la de por defecto: el Administrador puede cambiar las opciones configurables (ver abajo).
 
 Las demás consultas (`/api/rankings`, `/api/subactividades`, `/api/calidad`, `/api/excluidas`, `/api/periodos`, `/api/catalogos`, `/api/parametros` y las descargas de los entregables 2 a 4) están abiertas para los 3 perfiles.
 
@@ -75,6 +80,39 @@ rutas.get('/movimientos', requiereOpcion('comparar_periodos'), consultar); // po
 | :---: | :--- | :--- |
 | 400 | `PARAMETRO_INVALIDO` | `X-Perfil` no es `publico`, `analista` ni `admin` |
 | 403 | `PERFIL_NO_AUTORIZADO` | el perfil no tiene la opción que pide el endpoint |
+
+## Perfiles y permisos · [ejemplo](permisos.json)
+
+El Administrador decide qué perfil puede usar cada opción configurable (lámina 6: *configurar perfiles y permisos*). El cambio aplica de inmediato: `GET /api/perfil` (el menú) y `requiereOpcion()` (los 403) leen la tabla vigente en cada petición.
+
+| Método | Ruta | Cuerpo | Respuesta |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/admin/permisos` | – | `{ origen, perfiles[], opciones[] }` |
+| `PUT` | `/api/admin/permisos` | `{ "opciones": { "comparar_periodos": ["publico", "analista"] } }` | la tabla nueva. 400 `PARAMETRO_INVALIDO` si la opción no es configurable, el perfil no es `publico` ni `analista` o el Público tendría algo que el Analista no tiene |
+| `DELETE` | `/api/admin/permisos` | – | vuelve a los permisos por defecto |
+
+- Cada fila de `opciones[]` trae `perfiles` (vigentes), `por_defecto`, `configurable` y `motivo` (por qué una opción no se puede cambiar).
+- **Configurables:** `descargar`, `comparar_periodos` (y con ella `comparar_entidades`) y `reportes_personalizados`. Las de administración siempre son solo del Administrador, y el Administrador siempre tiene todas.
+- Se guarda en `storage/permisos.json` (no se sube al repo). Sin ese archivo, o si está dañado, valen los de `OPCIONES`.
+- Cada cambio queda en la bitácora (`cambio_permisos`, `restablecer_permisos`) con lo que cambió.
+
+## Usuarios · [ejemplo](usuarios.json)
+
+El Administrador crea los usuarios del sitio interno y cambia su nombre, perfil, estado o contraseña.
+
+| Método | Ruta | Cuerpo | Respuesta |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/admin/usuarios` | – | `{ guardados_en, usuarios[] }`, nunca con contraseñas ni hashes |
+| `POST` | `/api/admin/usuarios` | `{ usuario, nombre?, perfil, clave }` | 201 el usuario. 400 `PARAMETRO_INVALIDO`, 409 `USUARIO_EXISTE` |
+| `PATCH` | `/api/admin/usuarios/:usuario` | `{ nombre?, perfil?, activo?, clave? }` | el usuario. 404 `USUARIO_NO_ENCONTRADO`, 409 `USUARIO_SOLO_LECTURA` u `OPERACION_NO_PERMITIDA` |
+
+- `guardados_en`: `supabase` si hay `DATABASE_URL` (tabla `interno.usuarios`; el rol `sbp_api` necesita [`server/db/002_gestion_usuarios.sql`](../server/db/002_gestion_usuarios.sql), si no: 503 `USUARIOS_SOLO_LECTURA`), o `archivo` (`storage/usuarios.json`, para la demo local sin internet). Solo se guarda el hash scrypt de cada contraseña.
+- Los usuarios de la variable `USUARIOS` del `.env` salen con `origen: "env"` y `editable: false`: se cambian en el `.env`.
+- `perfil` es `analista` o `admin`; `clave`, de 10 caracteres o más; `usuario`, de 2 a 60 caracteres (letras, números, `.`, `-`, `_`).
+- No se borran usuarios: se desactivan (`activo: false`) y ya no pueden iniciar sesión.
+- Nadie puede quitarse a sí mismo el perfil de Administrador ni desactivarse, y siempre queda al menos un Administrador activo (409 `OPERACION_NO_PERMITIDA`).
+- Si cambia el perfil, el estado o la contraseña de alguien, **sus sesiones abiertas se cortan** (`storage/sesiones-cortadas.json`): su próxima petición responde 401 y tiene que volver a entrar. Si el Administrador cambia su propia contraseña, recibe una cookie nueva y sigue.
+- Altas y cambios quedan en la bitácora (`alta_usuario`, `cambio_usuario`), nunca con la contraseña.
 
 ## Probar con curl
 
