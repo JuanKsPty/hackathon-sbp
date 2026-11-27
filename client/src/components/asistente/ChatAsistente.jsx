@@ -190,7 +190,7 @@ export function ChatAsistente({ className, enPanel = false, pie = null }) {
   if (enPanel) {
     return (
       <div className={cn('flex min-h-0 min-w-0 flex-1 flex-col gap-3', className)}>
-        <div className="flex min-h-7 items-center justify-end gap-1">{acciones}</div>
+        {/* Sin fila de acciones: en el chat flotante la basura va en su encabezado (AgenteFlotante). */}
         <AvisoIA estado={estado} />
         {conversacion}
         {formulario}
