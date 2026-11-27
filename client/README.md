@@ -30,7 +30,7 @@ Desde la raíz del repo, `npm run dev` levanta el server y el client juntos.
 | `components/layout/` | `AppShell`, `Encabezado`, `BarraFuente` (siempre visible), `SelectorPerfil` y el menú, que cambia según el perfil. |
 | `components/estados/` | `Cargando`, `Vacio` y `ErrorApi`. |
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
-| `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/admin`. |
+| `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |
 | `styles/tema.css` | Paleta D (SBP): único lugar con colores. Se registran como clases en `index.css`. |
 
 ## Perfiles
