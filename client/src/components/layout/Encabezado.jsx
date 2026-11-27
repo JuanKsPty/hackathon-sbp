@@ -6,7 +6,7 @@ import { Navegacion } from './Navegacion.jsx'
 import { NOMBRE_APP } from './navegacion.js'
 import { PanelAsistente } from './PanelAsistente.jsx'
 import { SelectorPeriodo } from './SelectorPeriodo.jsx'
-import { SelectorPerfil } from './SelectorPerfil.jsx'
+import { SesionUsuario } from './SesionUsuario.jsx'
 import { SelectorTema } from './SelectorTema.jsx'
 
 export function Encabezado() {
@@ -15,7 +15,7 @@ export function Encabezado() {
   return (
     <div className="flex h-14 items-center gap-3 border-b bg-background px-4 lg:px-6">
       {/* Menú en móvil: el mismo de la barra lateral dentro de un Sheet. Por debajo de 640 px el
-          encabezado no tiene sitio para el selector de perfil y va dentro del menú. */}
+          encabezado no tiene sitio para la sesión (sitio interno) y va dentro del menú. */}
       <Sheet open={menuAbierto} onOpenChange={setMenuAbierto}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Abrir menú">
@@ -25,7 +25,7 @@ export function Encabezado() {
         <SheetContent side="left" className="w-72 border-sidebar-border bg-sidebar p-0">
           <SheetTitle className="sr-only">Menú</SheetTitle>
           <SheetDescription className="sr-only">Secciones de la app</SheetDescription>
-          <Navegacion alNavegar={() => setMenuAbierto(false)} conSelectorPerfil />
+          <Navegacion alNavegar={() => setMenuAbierto(false)} conSesion />
         </SheetContent>
       </Sheet>
 
@@ -34,7 +34,7 @@ export function Encabezado() {
 
       <div className="ml-auto flex items-center gap-2">
         <PanelAsistente />
-        <SelectorPerfil className="hidden sm:inline-flex" />
+        {__INTERNO__ && <SesionUsuario className="hidden sm:inline-flex" />}
         <SelectorPeriodo />
         <SelectorTema />
       </div>

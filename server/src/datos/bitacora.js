@@ -17,11 +17,12 @@ export function archivoBitacora() {
 // resultado: "exito", "error" o "rechazado". archivo y detalle son opcionales.
 // Ejemplo: registrarOperacion({ operacion: 'carga_periodo', archivo: 'AT03_sintetico_202610.csv',
 //                               perfil: req.perfil, resultado: 'exito', detalle: 'Período 20261031' })
-export function registrarOperacion({ operacion, archivo = null, perfil, resultado, detalle = null }) {
+export function registrarOperacion({ operacion, archivo = null, perfil, usuario = null, resultado, detalle = null }) {
   if (!operacion || !perfil || !resultado) {
     throw new Error('registrarOperacion necesita operacion, perfil y resultado.');
   }
   const registro = { fecha_hora: new Date().toISOString(), operacion, archivo, perfil, resultado, detalle };
+  if (usuario) registro.usuario = usuario;
   try {
     fs.mkdirSync(carpetaStorage(), { recursive: true });
     fs.appendFileSync(archivoBitacora(), `${JSON.stringify(registro)}\n`, 'utf8');

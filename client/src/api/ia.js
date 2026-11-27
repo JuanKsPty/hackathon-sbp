@@ -2,13 +2,14 @@
 // La IA explica y consulta lo que calcula el motor; nunca calcula. Aquí solo se piden sus respuestas.
 //
 // api/cliente.js solo hace GET y guarda el perfil por dentro, así que este archivo tiene su propio
-// fetch: mismo formato de errores (ApiError), mismo header X-Perfil y mismo registro de fuente y aviso.
-// El perfil llega como opción desde el componente (usePerfil()).
+// fetch: mismo formato de errores (ApiError), mismo header X-Sbp y mismo registro de fuente y aviso.
+// El perfil llega como opción desde el componente (usePerfil()); solo lo usa el modo mock.
 //
 // Modo mock: con `npm run dev` y VITE_USAR_MOCKS=true responde api/mocksIa.js. El build de
 // producción no incluye ese código ni sus textos (regla R2).
 import { ApiError, MENSAJE_API_NO_DISPONIBLE } from './errores.js'
 import { registrarFuente } from './fuente.js'
+import { HEADERS_BASE, siSesionVencida } from './sesion.js'
 
 const BASE = '/api'
 
@@ -69,7 +70,7 @@ async function pedirIA(ruta, { metodo = 'GET', parametros, cuerpo, perfil = 'pub
     return datos
   }
 
-  const headers = { Accept: 'application/json', 'X-Perfil': perfil || 'publico' }
+  const headers = { Accept: 'application/json', ...HEADERS_BASE }
   if (cuerpo !== undefined) headers['Content-Type'] = 'application/json'
 
   let respuesta
@@ -86,7 +87,11 @@ async function pedirIA(ruta, { metodo = 'GET', parametros, cuerpo, perfil = 'pub
   }
 
   const datos = await leerCuerpo(respuesta)
-  if (!respuesta.ok) throw errorDeRespuesta(respuesta, datos)
+  if (!respuesta.ok) {
+    const error = errorDeRespuesta(respuesta, datos)
+    siSesionVencida(error)
+    throw error
+  }
   if (datos === null) {
     throw new ApiError({
       status: respuesta.status,

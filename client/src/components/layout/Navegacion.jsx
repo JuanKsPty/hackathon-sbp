@@ -5,14 +5,14 @@ import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { useInstalarApp } from '@/hooks/useInstalarApp'
 import { cn } from '@/lib/utils'
 import { NOMBRE_APP, seccionesVisibles } from './navegacion.js'
-import { SelectorPerfil } from './SelectorPerfil.jsx'
+import { SesionUsuario } from './SesionUsuario.jsx'
 
 // Menú de secciones. Se usa en la barra lateral (escritorio) y dentro del Sheet (móvil).
 // Solo muestra las secciones que el perfil puede usar (opciones de GET /api/perfil).
-// `conSelectorPerfil`: añade el selector de perfil bajo las secciones, solo por debajo de 640 px
-// (desde ahí lo muestra el encabezado). Abajo muestra "Instalar app" cuando el navegador permite
+// `conSesion`: en el sitio interno añade el usuario y Salir bajo las secciones, solo por debajo de
+// 640 px (desde ahí lo muestra el encabezado). Abajo muestra "Instalar app" cuando el navegador permite
 // instalarla (#8).
-export function Navegacion({ alNavegar, conSelectorPerfil = false }) {
+export function Navegacion({ alNavegar, conSesion = false }) {
   const { disponible, instalar } = useInstalarApp()
   const { puede } = usePerfil()
   return (
@@ -49,7 +49,7 @@ export function Navegacion({ alNavegar, conSelectorPerfil = false }) {
           ))}
         </ul>
       </nav>
-      {conSelectorPerfil && <SelectorPerfil variante="lista" className="sm:hidden" />}
+      {__INTERNO__ && conSesion && <SesionUsuario variante="lista" className="sm:hidden" />}
       {disponible && (
         <div className="mt-auto">
           <Button

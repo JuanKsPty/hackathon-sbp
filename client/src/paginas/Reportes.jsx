@@ -12,7 +12,7 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { NOMBRES_PERFIL, UBICACION_SELECTOR_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { AVISO_ACCESO, NOMBRES_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearPeriodo } from '@/lib/formato.js'
@@ -63,7 +63,8 @@ export default function Reportes() {
   return (
     <Contenedor>
       <DescargasAbiertas periodos={periodos} />
-      {puedeAnalizar(perfil) ? (
+      {/* __INTERNO__: el bundle público no incluye estas descargas (sitio interno). */}
+      {__INTERNO__ && puedeAnalizar(perfil) ? (
         <>
           <DescargaMovimientos periodos={periodos} rankings={rankings} />
           <ReportePersonalizado periodos={periodos} rankings={rankings} bancos={bancos} />
@@ -145,7 +146,7 @@ function DescargasAbiertas({ periodos }) {
   )
 }
 
-// Entregable 5: movimientos entre dos períodos. Exige perfil, así que se pide con fetch (X-Perfil).
+// Entregable 5: movimientos entre dos períodos. Exige sesión de Analista o Administrador (sitio interno).
 function DescargaMovimientos({ periodos, rankings }) {
   const [desde, setDesde] = useState(periodos.at(-2)?.Fecha ?? periodos[0].Fecha)
   const [hasta, setHasta] = useState(periodos.at(-1).Fecha)
@@ -344,7 +345,7 @@ function SoloAnalista({ perfil, que }) {
     <Vacio
       icono={LockIcon}
       titulo="Solo para los perfiles Analista y Administrador"
-      descripcion={`${que} es del Analista y del Administrador. Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. Para usarlo, elige Analista o Administrador en ${UBICACION_SELECTOR_PERFIL}.`}
+      descripcion={`${que} es del Analista y del Administrador. Tu perfil actual es ${NOMBRES_PERFIL[perfil] ?? perfil}. ${AVISO_ACCESO}`}
     />
   )
 }

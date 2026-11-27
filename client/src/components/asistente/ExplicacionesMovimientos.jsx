@@ -7,7 +7,7 @@ import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
 import { ETIQUETA_EXPLICACION, explicaciones } from '@/api/ia.js'
-import { UBICACION_SELECTOR_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { AVISO_ACCESO, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearPeriodo } from '@/lib/formato.js'
@@ -58,7 +58,7 @@ export function ExplicacionesMovimientos({ guia, className }) {
       <Vacio
         icono={LockIcon}
         titulo="Disponible para Analista y Administrador"
-        descripcion={`Elige Analista o Administrador en ${UBICACION_SELECTOR_PERFIL} para ver por qué se movió cada banco. El chat sigue disponible para todos los perfiles.`}
+        descripcion={`Por qué se movió cada banco es del Analista y del Administrador. ${AVISO_ACCESO} El chat sigue disponible para todos.`}
       />
     )
   } else if (!periodo) {

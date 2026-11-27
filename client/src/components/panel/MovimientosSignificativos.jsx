@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Vacio } from '@/components/estados/Vacio.jsx'
-import { UBICACION_SELECTOR_PERFIL, usePerfil } from '@/contexto/PerfilContext.jsx'
+import { AVISO_ACCESO, usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
@@ -38,7 +38,7 @@ export function MovimientosSignificativos() {
   const activa = permitido && Boolean(desde && periodo)
 
   const consulta = useConsulta(
-    // PerfilContext fija el X-Perfil al cambiar de perfil, antes de volver a pedir.
+    // Se vuelve a pedir cuando cambia el perfil de la sesión.
     (opciones) => pedirMovimientos({ desde, hasta: periodo, solo_significativos: true }, opciones),
     [perfil, desde, periodo],
     { activa },
@@ -62,7 +62,7 @@ export function MovimientosSignificativos() {
         <LockIcon aria-hidden="true" />
         <AlertTitle>Opción del Analista</AlertTitle>
         <AlertDescription>
-          Los movimientos entre períodos son una opción del perfil Analista. Para verlos, elige Analista o Administrador en {UBICACION_SELECTOR_PERFIL}.
+          Los movimientos entre períodos son una opción del perfil Analista. {AVISO_ACCESO}
         </AlertDescription>
       </Alert>
     )

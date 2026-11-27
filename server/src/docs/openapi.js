@@ -83,6 +83,18 @@ export function crearDocumentoOpenApi(catalogos) {
       { name: 'Alertas', description: 'Suscripción a las alertas por correo con doble confirmación (#7, contracts/eventos-zapier.md).' },
     ],
     paths: conPerfil({
+      '/sesion': {
+        post: {
+          tags: ['Perfiles y administración'],
+          summary: 'Iniciar sesión en el sitio interno (Analista o Administrador); deja la cookie sbp_sesion',
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['usuario', 'clave'], properties: { usuario: { type: 'string' }, clave: { type: 'string' } } } } },
+          },
+          responses: { 200: { description: 'Sesión iniciada: { usuario, nombre, perfil, nombre_perfil }' }, ...errores(400, 401, 429, 503) },
+        },
+        delete: { tags: ['Perfiles y administración'], summary: 'Cerrar sesión (borra la cookie)', responses: { 204: { description: 'Sesión cerrada' } } },
+      },
       '/perfil': {
         get: { tags: ['Perfiles y administración'], summary: 'Perfil actual y sus opciones (para armar el menú)', responses: { ...jsonOk('Perfil y opciones', 'perfil.json'), ...errores(400) } },
       },

@@ -16,6 +16,8 @@ const apiInternaPorDefecto = urlApiInterna;
 // El perfil va en la URL del conector (?perfil=analista) porque los clientes MCP no siempre permiten
 // headers propios. Sin parámetro, el X-Perfil de la petición (por defecto publico).
 function perfilDe(req) {
+  // En los sitios (nginx) el perfil sale de la sesión o del token MCP, nunca de la URL.
+  if (req.sitio === 'publico' || req.sitio === 'interno') return req.perfil ?? 'publico';
   const valor = req.query.perfil;
   if (valor === undefined) return req.perfil ?? 'publico';
   const perfil = String(valor).trim().toLowerCase();
