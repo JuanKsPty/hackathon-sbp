@@ -1,0 +1,20 @@
+{
+  "perfil": "admin",
+  "nombre": "Administrador",
+  "opciones": [
+    { "opcion": "consultar_rankings", "nombre": "Consultar rankings, filtros, gráficos y tablas" },
+    { "opcion": "descargar", "nombre": "Descargar reportes" },
+    { "opcion": "comparar_periodos", "nombre": "Comparar períodos" },
+    { "opcion": "comparar_entidades", "nombre": "Comparar entidades" },
+    { "opcion": "reportes_personalizados", "nombre": "Reportes personalizados" },
+    { "opcion": "cargar_periodo", "nombre": "Cargar o actualizar un período" },
+    { "opcion": "administrar_parametros", "nombre": "Parámetros" },
+    { "opcion": "administrar_catalogos", "nombre": "Catálogos" },
+    { "opcion": "ver_bitacora", "nombre": "Registro de operaciones" }
+  ],
+  "perfiles": [
+    { "perfil": "publico", "nombre": "Público" },
+    { "perfil": "analista", "nombre": "Analista" },
+    { "perfil": "admin", "nombre": "Administrador" }
+  ]
+}
