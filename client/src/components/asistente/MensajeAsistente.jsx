@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useGuia } from '@/guia/GuiaContext.jsx'
 import { useAgente } from '@/agente/AgenteContext.jsx'
+import { useDemostracion } from '@/agente/DemostracionContext.jsx'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ETIQUETA_RESPUESTA } from '@/api/ia.js'
@@ -168,14 +169,31 @@ function BotonVerGraficos() {
 const pantallasAplicadas = new WeakSet()
 
 function PantallaDelMensaje({ datos }) {
-  const { ejecutarPantalla } = useAgente()
+  const { ejecutarPantalla, deshacerUltima } = useAgente()
+  const { demostrar, demostrando } = useDemostracion()
   const pantalla = datos?.pantalla
+  // Al llegar la respuesta: "ejecutar" se aplica al instante; "demostrar" arranca el cursor.
   useEffect(() => {
-    if (pantalla?.modo !== 'ejecutar' || pantallasAplicadas.has(pantalla)) return
+    if (!pantalla || pantallasAplicadas.has(pantalla)) return
     pantallasAplicadas.add(pantalla)
-    ejecutarPantalla(pantalla)
-  }, [pantalla, ejecutarPantalla])
-  return null
+    if (pantalla.modo === 'ejecutar') ejecutarPantalla(pantalla)
+    else if (pantalla.modo === 'demostrar') demostrar(pantalla)
+  }, [pantalla, ejecutarPantalla, demostrar])
+
+  if (!pantalla?.acciones?.length) return null
+  // "Muéstrame cómo": deshace lo aplicado y lo demuestra paso a paso desde donde estaba el usuario.
+  const mostrarComo = () => {
+    if (pantalla.modo === 'ejecutar') deshacerUltima()
+    demostrar(pantalla)
+  }
+  return (
+    <div>
+      <Button variant="outline" size="sm" onClick={mostrarComo} disabled={demostrando}>
+        <MousePointer2Icon aria-hidden="true" />
+        {pantalla.modo === 'ejecutar' ? 'Muéstrame cómo' : 'Ver de nuevo'}
+      </Button>
+    </div>
+  )
 }
 
 function BotonGuia({ pasos }) {
