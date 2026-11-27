@@ -118,6 +118,17 @@ export function crearDocumentoOpenApi(catalogos) {
       '/admin/catalogos': {
         get: { tags: ['Perfiles y administración'], summary: 'Estado de los catálogos cargados (solo Administrador)', responses: { ...jsonOk('Catálogos', 'catalogos-admin.json'), ...errores(403) } },
       },
+      '/admin/catalogos/{clave}': {
+        get: {
+          tags: ['Perfiles y administración'],
+          summary: 'Contenido de un catálogo del paquete del reto, o su CSV original con ?formato=csv (solo Administrador)',
+          parameters: [
+            { name: 'clave', in: 'path', required: true, schema: { type: 'string', enum: ['cinu', 'sb21', 'bancos', 'diccionario'] } },
+            { name: 'formato', in: 'query', required: false, schema: { type: 'string', enum: ['csv'] } },
+          ],
+          responses: { ...jsonOk('Columnas y filas del catálogo'), ...errores(403, 404) },
+        },
+      },
       '/bitacora': {
         get: { tags: ['Perfiles y administración'], summary: 'Registro de operaciones (solo Administrador)', responses: { ...jsonOk('Operaciones', 'bitacora.json'), ...errores(403) } },
       },
