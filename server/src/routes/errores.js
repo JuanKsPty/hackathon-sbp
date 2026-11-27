@@ -33,12 +33,21 @@ export function manejarErrores(error, req, res, next) {
     return res.status(422).json(cuerpoDeError('ARCHIVO_INVALIDO', error.message, error.detalles));
   }
   if (error.type === 'entity.too.large') {
-    // Archivo más grande que el límite de la carga de períodos (#29)
-    return res.status(413).json(cuerpoDeError('ARCHIVO_MUY_GRANDE', `El archivo supera el límite de ${Math.round(error.limit / 1048576)} MB.`));
+    // Más grande que el límite: 50 MB en la carga de períodos (#29), 1 MB en los cuerpos JSON.
+    const queCosa = req.originalUrl.startsWith('/api/periodos') ? 'El archivo' : 'El cuerpo de la petición';
+    return res.status(413).json(cuerpoDeError('ARCHIVO_MUY_GRANDE', `${queCosa} supera el límite de ${Math.round(error.limit / 1048576)} MB.`));
   }
   if (error.type === 'entity.parse.failed') {
     return res.status(400).json(cuerpoDeError('JSON_INVALIDO', 'El cuerpo de la petición no es JSON válido.'));
   }
+  if (error.type === 'charset.unsupported' || error.type === 'encoding.unsupported') {
+    return res.status(415).json(cuerpoDeError('FORMATO_NO_SOPORTADO', 'El cuerpo debe venir en UTF-8, sin comprimir.'));
+  }
+  if (error.expose && error.status >= 400 && error.status < 500) {
+    // Otros errores de lectura del cuerpo (petición cortada, tamaño inválido...): 4xx sin detalles internos.
+    return res.status(error.status).json(cuerpoDeError('PETICION_INVALIDA', 'No se pudo leer la petición.'));
+  }
+  // Error inesperado: el detalle (y la traza) solo va a la consola del servidor, nunca al cliente.
   console.error(error);
   return res.status(500).json(cuerpoDeError('ERROR_INTERNO', 'Ocurrió un error inesperado en el servidor.'));
 }

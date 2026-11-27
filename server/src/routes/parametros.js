@@ -47,6 +47,9 @@ export function subactividadPedida(almacen, valor) {
 
 export function motivoPedido(valor) {
   if (valor === undefined) return null;
-  if (!(valor in MOTIVOS)) throw invalido(`motivo debe ser uno de ${Object.keys(MOTIVOS).join(', ')}.`);
+  // Object.hasOwn y no `in`: con `in`, motivo=toString o motivo=constructor pasaban la validación.
+  if (typeof valor !== 'string' || !Object.hasOwn(MOTIVOS, valor)) {
+    throw invalido(`motivo debe ser uno de ${Object.keys(MOTIVOS).join(', ')}.`);
+  }
   return valor;
 }
