@@ -117,6 +117,14 @@ export function Portada({ datos }) {
   )
 }
 
+// Los cuatro motivos por los que se quita una fila del archivo (cascada E1 a E4).
+const MOTIVOS = [
+  { campo: 'E1_Duplicados' },
+  { campo: 'E2_Destino_Extranjero' },
+  { campo: 'E3_Saldo_No_Positivo' },
+  { campo: 'E4_Actividad_No_Catalogada' },
+]
+
 // ---------------------------------------------------------------------------------------------
 // 2. El problema, contado por las tres personas que usan la información
 // ---------------------------------------------------------------------------------------------
