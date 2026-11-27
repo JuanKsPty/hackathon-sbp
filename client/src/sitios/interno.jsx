@@ -12,7 +12,6 @@ import NoEncontrada from '@/paginas/NoEncontrada.jsx'
 import PanelInterno from '@/paginas/PanelInterno.jsx'
 import Rankings from '@/paginas/Rankings.jsx'
 import Reportes from '@/paginas/Reportes.jsx'
-import Verificacion from '@/paginas/Verificacion.jsx'
 
 export function RutasDelSitio() {
   return (
@@ -26,7 +25,6 @@ export function RutasDelSitio() {
           <Route path="comparar" element={<Comparar />} />
           <Route path="reportes" element={<Reportes />} />
           <Route path="calidad" element={<Calidad />} />
-          <Route path="verificacion" element={<Verificacion />} />
           <Route path="admin" element={<Admin />} />
           <Route path="asistente" element={<Asistente />} />
           <Route path="*" element={<NoEncontrada />} />

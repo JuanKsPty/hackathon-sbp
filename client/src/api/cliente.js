@@ -151,10 +151,6 @@ export const prestamo = (numero, opciones) => pedir(`/prestamos/${encodeURICompo
 // para elegir uno en cascada. banco y ranking son obligatorios; sin periodo, el último cargado.
 export const prestamos = ({ periodo, banco, ranking } = {}, opciones) => pedir('/prestamos', { periodo, banco, ranking }, opciones)
 
-// contracts/verificacion.json (#63): un dato de cada punto de la sección 11.1 con sus chequeos.
-// periodo (puntos 2 a 5; por defecto el último) y banco acotan los datos; los chequeos usan todos los bancos.
-export const verificacion = ({ periodo, banco } = {}, opciones) => pedir('/verificacion', { periodo, banco }, opciones)
-
 // Regla de movimiento significativo vigente (contracts/administracion.md). La leen los 3 perfiles;
 // solo el Administrador la cambia (api/admin.js). La usa la presentación (/presentacion).
 export const parametros = (opciones) => pedir('/parametros', undefined, opciones)

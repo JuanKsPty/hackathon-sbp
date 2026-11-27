@@ -8,7 +8,6 @@ export const MARCA = 'RADAR SBP'
 const CORTOS = {
   '/comparar': 'Comparar',
   '/calidad': 'Calidad',
-  '/verificacion': 'Verificación',
   '/admin': 'Admin',
 }
 

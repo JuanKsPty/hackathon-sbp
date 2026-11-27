@@ -114,9 +114,6 @@ export function CalidadCorte({ calidad }) {
                   </Badge>
                 )
               })}
-              <Link to="/verificacion" className="ml-auto text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-                Verificación del jurado
-              </Link>
             </div>
           </div>
         )}

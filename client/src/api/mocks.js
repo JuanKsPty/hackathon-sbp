@@ -31,7 +31,6 @@ const ARCHIVOS = {
   '/movimientos': 'movimientos',
   '/indicadores': 'indicadores',
   '/perfil': 'perfil',
-  '/verificacion': 'verificacion',
 }
 
 // /api/movimientos/descomposicion no tiene JSON propio en contracts/: se arma con el ejemplo de

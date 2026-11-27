@@ -13,7 +13,6 @@ export const ELEMENTOS_GUIA = [
   el('global.menu-comparar', null, 'Enlace del menú a Comparar períodos', 'comparar_periodos'),
   el('global.menu-reportes', null, 'Enlace del menú a Reportes'),
   el('global.menu-calidad', null, 'Enlace del menú a Calidad de datos'),
-  el('global.menu-verificacion', null, 'Enlace del menú a Verificación del jurado'),
   el('global.menu-admin', null, 'Enlace del menú a Administración', 'cargar_periodo'),
   // Solo existe en el sitio interno (SesionUsuario): Público no lo ve, como Analista y Administrador.
   el('global.selector-perfil', null, 'Sesión del sitio interno: usuario, perfil y Salir'),
@@ -55,14 +54,6 @@ export const ELEMENTOS_GUIA = [
   el('calidad.reconciliaciones', '/calidad', 'Reconciliaciones 1, 2, 3 y unicidad'),
   el('calidad.alertas', '/calidad', 'Alertas por tipo'),
   el('calidad.excluidas', '/calidad', 'Filas excluidas con su motivo'),
-  // Verificación del jurado
-  el('verificacion.filtros', '/verificacion', 'Filtros de período y banco'),
-  el('verificacion.punto-1', '/verificacion', 'Punto 1: calidad E1–E4 y universo local válido'),
-  el('verificacion.punto-2', '/verificacion', 'Punto 2: rankings obligatorios, posiciones y saldos'),
-  el('verificacion.punto-3', '/verificacion', 'Punto 3: rankings COMERCIO y CONSUMO'),
-  el('verificacion.punto-4', '/verificacion', 'Punto 4: total de cartera y ponderación'),
-  el('verificacion.punto-5', '/verificacion', 'Punto 5: desglose por subactividad con la reclasificación a Tarjeta'),
-  el('verificacion.punto-6', '/verificacion', 'Punto 6: los períodos procesados y las reconciliaciones 1 y 2'),
   // Administración
   el('admin.subir-archivo', '/admin', 'Subir un AT03', 'cargar_periodo'),
   el('admin.resultado-carga', '/admin', 'Resultado de la carga: E1–E4, universo y cambios de ranking', 'cargar_periodo'),
@@ -77,11 +68,11 @@ export const ELEMENTOS_GUIA = [
 
 const POR_GUIA = new Map(ELEMENTOS_GUIA.map((e) => [e.guia, e]));
 
-// Público solo usa el sitio público (sbp.juank.tech), que no tiene Calidad de datos ni Verificación
-// del jurado: la guía no puede señalar ni llevar a esas páginas con ese perfil.
-const RUTAS_SOLO_INTERNAS = ['/calidad', '/verificacion'];
+// Público solo usa el sitio público (sbp.juank.tech), que no tiene Calidad de datos: la guía no puede
+// señalar ni llevar a esa página con ese perfil.
+const RUTAS_SOLO_INTERNAS = ['/calidad'];
 // La sesión (SesionUsuario) solo existe en el sitio interno: no depende de una opción configurable.
-const MENU_SOLO_INTERNO = ['global.menu-calidad', 'global.menu-verificacion', 'global.selector-perfil'];
+const MENU_SOLO_INTERNO = ['global.menu-calidad', 'global.selector-perfil'];
 
 function puedeVer(elemento, perfil) {
   if (perfil === 'publico' && (RUTAS_SOLO_INTERNAS.includes(elemento.ruta) || MENU_SOLO_INTERNO.includes(elemento.guia))) {
