@@ -6,6 +6,7 @@ import {
   nombreDeMotivo,
   ordenarMovimientos,
   ORDEN_INICIAL,
+  partesDeRegla,
   periodosPorDefecto,
   resolverOpcion,
   tendenciaDeCambio,
@@ -96,4 +97,11 @@ test('ordenarMovimientos: una clave desconocida cae en la posición actual', () 
 test('alternarOrden: otro clic invierte; una columna nueva empieza ascendente', () => {
   assert.deepEqual(alternarOrden({ clave: 'Banco', ascendente: true }, 'Banco'), { clave: 'Banco', ascendente: false })
   assert.deepEqual(alternarOrden({ clave: 'Banco', ascendente: false }, 'Var_Saldo'), { clave: 'Var_Saldo', ascendente: true })
+})
+
+test('partesDeRegla usa los umbrales del API y omite los apagados', () => {
+  const regla = { min_cambio_posicion_abs: 2, cambio_lider: true, min_var_saldo_pct_abs: 10 }
+  assert.deepEqual(partesDeRegla(regla), ['sube o baja 2 o más puestos', 'cambia el líder', 'su saldo varía 10 % o más'])
+  assert.deepEqual(partesDeRegla({ ...regla, cambio_lider: false, min_var_saldo_pct_abs: null }), ['sube o baja 2 o más puestos'])
+  assert.deepEqual(partesDeRegla(null), [])
 })
