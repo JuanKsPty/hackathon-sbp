@@ -10,6 +10,8 @@ import { crearEjecutor } from '../ai/herramientas.js';
 import { urlApiInterna } from '../ai/apiInterna.js';
 import { elementosPara } from '../ai/guia.js';
 import { contextoDe, interpretarPregunta } from '../ai/intencion.js';
+import { contextoPantalla } from '../ai/pantalla.js';
+import { pantallaPorReglas } from '../ai/pantallaReglas.js';
 import { MODELO_POR_DEFECTO } from '../ai/redaccionIA.js';
 import { encabezado } from './formato.js';
 import { ErrorApi } from './errores.js';
@@ -100,18 +102,23 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
     const contexto = almacen?.fechas().length ? contextoDe(almacen) : null;
     // Sin IA (o si la IA no propuso gráficos), las reglas producen la misma acción.
     const porReglas = () => (contexto ? interpretarPregunta(pregunta, contexto, req.perfil) : null);
+    const pantallaReglas = () => (contexto ? pantallaPorReglas(pregunta, almacen, req.perfil) : null);
     try {
       const resultado = await preguntarAlAgente(pregunta, {
         ...opcionesIA,
         historial,
         perfil: req.perfil,
         contexto,
+        // Acciones de pantalla (#121): se validan contra los datos cargados en este momento.
+        contextoPantalla: almacen?.fechas().length ? contextoPantalla(almacen) : null,
         catalogos: almacen?.catalogos,
         ejecutar: crearEjecutor(baseUrl, { perfil: req.perfil }),
       });
       // Si la IA respondió con una guía (#72), la pregunta era de cómo usar la app: sin gráficos.
       const accion = resultado.accion ?? (resultado.guia ? null : porReglas());
-      res.json({ ...encabezado(), pregunta, ...resultado, accion });
+      // #121: si la IA no dejó la pantalla lista (o no hay IA), las reglas lo intentan.
+      const pantalla = resultado.pantalla ?? (resultado.guia ? null : pantallaReglas());
+      res.json({ ...encabezado(), pregunta, ...resultado, accion, pantalla });
     } catch (error) {
       console.error('[ia] el agente falló:', error.message);
       res.json({
@@ -124,6 +131,7 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
         consultas: [],
         guia: null,
         accion: porReglas(),
+        pantalla: pantallaReglas(),
       });
     }
   });

@@ -123,7 +123,7 @@ test('responde consultando el motor y verifica los números', async () => {
     ruta: '/rankings?periodo=20260930&ranking=HIPOTECARIO',
   }]);
   // El modelo recibe las 7 herramientas y la instrucción de no calcular.
-  assert.equal(cliente.llamadas[0].tools.length, 9); // 7 de consulta + guiar_usuario + mostrar_graficos (#108)
+  assert.equal(cliente.llamadas[0].tools.length, 10); // 7 de consulta + guiar_usuario + mostrar_graficos (#108) + usar_pantalla (#121)
   assert.match(cliente.llamadas[0].system, /No calcules nada/);
 });
 
@@ -181,7 +181,7 @@ test('perfil Público: sin herramienta de movimientos y sin explicaciones (403)'
   const { cuerpo } = await preguntar(base, { pregunta: '¿Qué puedes consultar?' }, 'publico');
   assert.equal(cuerpo.verificada, true);
   const nombres = cliente.llamadas[0].tools.map((t) => t.name);
-  assert.equal(nombres.length, 8); // 6 de consulta + guiar_usuario + mostrar_graficos (#108)
+  assert.equal(nombres.length, 9); // 6 de consulta + guiar_usuario + mostrar_graficos (#108) + usar_pantalla (#121)
   assert.ok(!nombres.includes('consultar_movimientos'));
 
   const explicacion = await fetch(`${base}/explicaciones`);
@@ -523,4 +523,77 @@ test('prompt de Analista: lo del Administrador es ajeno y comparar períodos es 
   const admin = await promptPara('admin');
   assert.doesNotMatch(admin, /Opciones que su perfil no tiene/);
   assert.match(admin, /el perfil Administrador/);
+});
+
+// ---- Acciones de pantalla (#121) ----
+const PANTALLA_OK = {
+  modo: 'ejecutar',
+  acciones: [
+    { tipo: 'ir', ruta: '/rankings' },
+    { tipo: 'ordenar', control: 'rankings.tabla', columna: 'Operaciones_Validas', orden: 'desc' },
+    { tipo: 'resaltar', control: 'rankings.tabla', fila: '104' },
+  ],
+};
+
+test('#121: ejecutar devuelve la pantalla validada, con la ruta del catálogo', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('usar_pantalla', PANTALLA_OK),
+    (params) => {
+      assert.match(params.messages.at(-1).content[0].content, /Pantalla lista \(ejecutar, 3 acciones\)/);
+      return responder('Te dejé el ranking ordenado por operaciones y resalté al banco con más.')();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuál es el banco con más operaciones?' }, 'publico');
+  assert.equal(cuerpo.verificada, true);
+  assert.equal(cuerpo.pantalla.modo, 'ejecutar');
+  assert.deepEqual(cuerpo.pantalla.acciones.map((a) => [a.tipo, a.ruta]), [['ir', '/rankings'], ['ordenar', '/rankings'], ['resaltar', '/rankings']]);
+  // La herramienta se ofrece con los controles del perfil.
+  const herramienta = cliente.llamadas[0].tools.find((t) => t.name === 'usar_pantalla');
+  assert.ok(herramienta);
+  assert.ok(!herramienta.input_schema.properties.acciones.items.properties.control.enum.includes('admin.bitacora'));
+});
+
+test('#121: una acción inválida vuelve como error y la IA puede corregirla', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('usar_pantalla', { modo: 'ejecutar', acciones: [{ tipo: 'resaltar', control: 'rankings.tabla', fila: '999' }] }),
+    (params) => {
+      const resultado = params.messages.at(-1).content[0];
+      assert.equal(resultado.is_error, true);
+      assert.match(resultado.content, /Acción 1: rankings\.tabla: el banco "999" no existe/);
+      return usarHerramienta('usar_pantalla', PANTALLA_OK)();
+    },
+    responder('Listo, quedó resaltado.'),
+  ]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuál es el banco con más operaciones?' });
+  assert.equal(cuerpo.pantalla.acciones.length, 3);
+});
+
+test('#121: un número inventado en el texto de una acción descarta la pantalla de la IA (quedan las reglas)', async () => {
+  const conCifra = { modo: 'demostrar', acciones: [{ tipo: 'resaltar', control: 'rankings.tabla', fila: '104', texto: 'Tiene 987654 operaciones.' }] };
+  const cliente = clienteGuionado([usarHerramienta('usar_pantalla', conCifra), responder('Listo.'), responder('Listo.')]);
+  const base = await levantar({ cliente });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo el banco con más operaciones?' });
+  assert.equal(cuerpo.verificada, false);
+  // La pantalla de la IA se descartó; la de reglas no trae textos de la IA.
+  assert.ok(cuerpo.pantalla.acciones.every((a) => !a.texto.includes('987654')));
+});
+
+test('#121: sin IA, las reglas dejan la pantalla lista', async () => {
+  const base = await levantar({ apiKey: '' });
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Cuál es el banco con más operaciones en comercio?' });
+  assert.equal(cuerpo.ia_disponible, false);
+  assert.equal(cuerpo.pantalla.modo, 'ejecutar');
+  assert.equal(cuerpo.pantalla.acciones.at(-1).tipo, 'resaltar');
+  const otra = await preguntar(base, { pregunta: 'Hola' });
+  assert.equal(otra.cuerpo.pantalla, null);
+});
+
+test('#121: las instrucciones explican cuándo ejecutar y cuándo demostrar', async () => {
+  const cliente = clienteGuionado([responder('Hola.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: 'Hola' });
+  assert.match(cliente.llamadas[0].system, /usar_pantalla en modo "ejecutar"/);
+  assert.match(cliente.llamadas[0].system, /usar_pantalla en modo "demostrar"/);
 });

@@ -191,7 +191,7 @@ export function construirAccion(pedido, contexto, perfil = 'publico', origen = '
 
 // ---------- Sin IA: por palabras clave ----------
 
-function periodosMencionados(texto, fechas, avisos) {
+export function periodosMencionados(texto, fechas, avisos) {
   const encontrados = new Set();
   const anio = /\b(20\d{2})\b/.exec(texto)?.[1];
   // Fechas exactas: "20260930".
@@ -212,7 +212,7 @@ function periodosMencionados(texto, fechas, avisos) {
   return [...encontrados].sort();
 }
 
-function rankingMencionado(texto, rankings) {
+export function rankingMencionado(texto, rankings) {
   const palabras = new Set(texto.split(' '));
   return (
     rankings.find((r) => {
@@ -222,7 +222,7 @@ function rankingMencionado(texto, rankings) {
   );
 }
 
-function bancoMencionado(texto, bancos) {
+export function bancoMencionado(texto, bancos) {
   // Por código: "banco 108" o "108" (solo si existe en el catálogo).
   for (const [, codigo] of texto.matchAll(/\b(\d{3})\b/g)) {
     if (bancos.has(codigo)) return codigo;

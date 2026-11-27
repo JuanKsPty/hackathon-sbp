@@ -87,3 +87,11 @@ npm run eval:agente -- --confirmar     # evalúa de verdad (requiere ANTHROPIC_A
 ```
 
 El reporte queda en `storage/evals/`. Los tests del calificador (`tests/evals.test.js`) corren sin IA en cada `npm test`.
+
+## Acciones de pantalla (#121)
+
+Además de responder, el agente puede dejar el dashboard listo (modo `ejecutar`) o mostrar con el cursor cómo se hace (modo `demostrar`). Contrato en [`contracts/ia.md`](../../../contracts/ia.md).
+
+- [`pantalla.js`](pantalla.js): catálogo de controles (`CONTROLES`) y la herramienta `usar_pantalla`. `validarPantalla` revisa cada acción contra el catálogo, el perfil y los datos cargados; la ruta la pone el catálogo.
+- [`pantallaReglas.js`](pantallaReglas.js): sin IA, arma la pantalla de las preguntas sobre la tabla de rankings ("¿cuál es el banco con más operaciones en COMERCIO en agosto?"). Lee y ordena las filas del motor como la tabla; no calcula.
+- Los textos de las acciones pasan por el verificador de números. Si la respuesta no se verifica, la pantalla de la IA se descarta.

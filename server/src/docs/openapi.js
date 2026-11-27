@@ -261,6 +261,7 @@ export function crearDocumentoOpenApi(catalogos) {
         post: {
           tags: ['IA'],
           summary: 'Pregunta en lenguaje natural; la IA consulta esta misma API',
+          description: 'Responde en el chat y puede traer `pantalla` (#121): acciones validadas para ejecutar en el dashboard (ir, elegir, ordenar, resaltar) o demostrarlas con el cursor. Sin IA, las reglas arman la pantalla de las preguntas típicas sobre la tabla de rankings. Ver contracts/ia.md.',
           requestBody: {
             required: true,
             content: {
