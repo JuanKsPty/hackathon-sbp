@@ -7,7 +7,7 @@ export const TODOS = 'todos'
 export function FiltrosRanking({ bancos, subactividades, banco, subactividad, alCambiarBanco, alCambiarSubactividad }) {
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <Filtro etiqueta="Banco" valor={banco} alCambiar={alCambiarBanco}>
+      <Filtro etiqueta="Banco" guia="rankings.filtro-banco" valor={banco} alCambiar={alCambiarBanco}>
         <SelectItem value={TODOS}>Todos los bancos</SelectItem>
         {bancos.map((b) => (
           <SelectItem key={b.Codigo_Banco} value={b.Codigo_Banco}>
@@ -15,7 +15,7 @@ export function FiltrosRanking({ bancos, subactividades, banco, subactividad, al
           </SelectItem>
         ))}
       </Filtro>
-      <Filtro etiqueta="Subactividad" valor={subactividad} alCambiar={alCambiarSubactividad}>
+      <Filtro etiqueta="Subactividad" guia="rankings.filtro-subactividad" valor={subactividad} alCambiar={alCambiarSubactividad}>
         <SelectItem value={TODOS}>Todas las subactividades</SelectItem>
         {subactividades.map((s) => (
           <SelectItem key={s} value={s}>
@@ -27,12 +27,13 @@ export function FiltrosRanking({ bancos, subactividades, banco, subactividad, al
   )
 }
 
-function Filtro({ etiqueta, valor, alCambiar, children }) {
+// `guia`: identificador data-guia para el agente guía (contracts/guia.md).
+function Filtro({ etiqueta, guia, valor, alCambiar, children }) {
   return (
     <label className="flex flex-col gap-1 text-xs text-muted-foreground">
       {etiqueta}
       <Select value={valor} onValueChange={alCambiar}>
-        <SelectTrigger aria-label={etiqueta} className="min-w-56 text-foreground">
+        <SelectTrigger aria-label={etiqueta} data-guia={guia} className="min-w-56 text-foreground">
           <SelectValue />
         </SelectTrigger>
         <SelectContent position="popper">{children}</SelectContent>

@@ -33,7 +33,7 @@ export function TablaRanking({ bancos, bancoResaltado }) {
     setOrden((previo) => ({ clave, ascendente: previo.clave === clave ? !previo.ascendente : true }))
 
   return (
-    <Table>
+    <Table data-guia="rankings.tabla">
       <TableHeader>
         <TableRow>
           {COLUMNAS.map(({ clave, titulo }) => {

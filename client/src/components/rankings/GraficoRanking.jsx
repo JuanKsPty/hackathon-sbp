@@ -39,7 +39,7 @@ export function GraficoRanking({ bancos, bancoResaltado, alElegirBanco }) {
           </Button>
         ))}
       </div>
-      <ChartContainer config={config} className="aspect-auto h-[420px] w-full">
+      <ChartContainer config={config} className="aspect-auto h-[420px] w-full" data-guia="rankings.grafico">
         <BarChart data={datos} layout="vertical" margin={{ left: 8, right: 16 }}>
           <CartesianGrid horizontal={false} />
           <XAxis

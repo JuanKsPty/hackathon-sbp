@@ -9,7 +9,7 @@ export function DesgloseSubactividades({ filas, subactividades, bancos, bancoRes
   const ordenados = [...bancos].sort((a, b) => a.Posicion - b.Posicion)
 
   return (
-    <Table>
+    <Table data-guia="rankings.desglose-subactividades">
       <TableHeader>
         <TableRow>
           <TableHead>Banco</TableHead>

@@ -96,7 +96,9 @@ export default function Rankings() {
           <CardTitle>Posición de los bancos</CardTitle>
           <CardDescription>{contexto} · ordena con un clic en cada encabezado</CardDescription>
           <CardAction>
-            <Descarga href={urlDescarga('rankings', { periodo })}>CSV de rankings</Descarga>
+            <Descarga href={urlDescarga('rankings', { periodo })} guia="rankings.descargar">
+              CSV de rankings
+            </Descarga>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -171,9 +173,10 @@ function Estado({ consulta, vacio, children }) {
   return children
 }
 
-function Descarga({ href, children }) {
+// `guia`: identificador data-guia para el agente guía (contracts/guia.md), si el contrato lo define.
+function Descarga({ href, guia, children }) {
   return (
-    <a href={href} download className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+    <a href={href} download data-guia={guia} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
       <DownloadIcon aria-hidden="true" />
       {children}
     </a>
