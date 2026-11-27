@@ -11,6 +11,13 @@ La UI debe mostrar `etiqueta` junto al texto ("Explicación generada con IA · l
 { "ia_disponible": true, "modelo": "claude-opus-5-5" }
 ```
 
+## `GET /api/ia/guia`
+Elementos que el agente guía puede señalar para el perfil del `X-Perfil` (ver [guia.md](guia.md)). El front puede usarlo para comprobar que cada uno tiene su `data-guia` en pantalla.
+```json
+{ "perfil": "publico", "elementos": [{ "guia": "rankings.tabla", "ruta": "/rankings", "descripcion": "Tabla del ranking: posición, saldo, total de cartera y ponderación" }] }
+```
+`ruta: null` significa que el elemento está en todas las páginas (layout o asistente).
+
 ## `GET /api/explicaciones`
 Mismos parámetros que [`/api/movimientos`](movimientos.json) (`desde`, `hasta`, `ranking`). Explica los movimientos significativos y los cambios de líder.
 ```json
@@ -59,6 +66,7 @@ Respuesta (siempre HTTP 200, salvo un 400 si la pregunta es inválida):
   ]
 }
 ```
+- `guia` (#72): `null`, o `{ "pasos": [{ "ruta": "/rankings", "guia": "rankings.selector-ranking", "texto": "Elige COMERCIO aquí." }] }` cuando la pregunta es *cómo* o *dónde* hacer algo en la app. El front mueve el cursor a cada `[data-guia="…"]` en orden (si `ruta` no es `null`, navega primero). Los identificadores salen de [guia.md](guia.md), solo incluyen lo que el perfil puede ver y sus textos pasan por el mismo verificador de números.
 - `consultas`: qué endpoints usó la IA. La UI puede mostrarlos como "fuentes" y enlazar a la vista correspondiente.
 - Si la IA no logra responder solo con números del motor: `respuesta: null`, `verificada: false` y `motivo` explica por qué.
 - Si no hay key o la IA falla: `ia_disponible: false` y `motivo`.

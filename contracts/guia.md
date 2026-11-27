@@ -101,9 +101,9 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `asistente.pregunta` | Campo para escribir la pregunta | todos |
 | `asistente.fuentes` | Consultas que usó la IA | todos |
 
-## Cómo los usa el agente (borrador)
+## Cómo los usa el agente
 
-El agente responde con pasos que solo pueden usar identificadores de esta lista y que el perfil puede ver:
+Cuando el usuario pregunta *cómo* o *dónde* hacer algo, `POST /api/ia/preguntar` devuelve `guia` con pasos ([ia.md](ia.md)). La IA solo puede usar identificadores de esta lista que el perfil pueda ver, y la `ruta` la pone el backend desde el catálogo ([`server/src/ai/guia.js`](../server/src/ai/guia.js); un test verifica que coincide con este documento). `GET /api/ia/guia` lista los elementos de cada perfil.
 
 ```json
 {
