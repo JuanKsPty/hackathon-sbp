@@ -37,10 +37,13 @@ const claseTarjeta = cn(
 function Contenido({ icono: Icono, pregunta, texto, accion }) {
   return (
     <>
-      <span className="grid size-10 place-items-center rounded-md bg-accent text-marca">
-        <Icono aria-hidden="true" className="size-5" />
+      {/* El icono y, a su derecha, la pregunta. */}
+      <span className="flex items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-md bg-accent text-marca">
+          <Icono aria-hidden="true" className="size-5" />
+        </span>
+        <span className="text-base font-semibold">{pregunta}</span>
       </span>
-      <span className="text-base font-semibold">{pregunta}</span>
       <span className="text-sm text-muted-foreground">{texto}</span>
       <span className="mt-auto inline-flex items-center gap-1 pt-1 text-sm font-medium text-primary">
         {accion}
