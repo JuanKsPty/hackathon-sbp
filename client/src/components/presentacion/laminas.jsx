@@ -784,14 +784,14 @@ export function Cierre() {
             Rankings confiables para decisiones mejor informadas.
           </h2>
           <div className="flex flex-wrap gap-4">
-            <Link to="/" className={buttonVariants({ variant: 'claro', size: 'pildora', className: 'h-14 px-7 text-lg' })}>
+            <Link to="/" data-slot="button" className={buttonVariants({ variant: 'claro', size: 'pildora', className: 'h-14 px-7 text-lg' })}>
               Abrir la app
               <ArrowRightIcon aria-hidden="true" />
             </Link>
-            <Link to="/rankings" className={buttonVariants({ variant: 'borde-claro', size: 'pildora', className: 'h-14 px-7 text-lg' })}>
+            <Link to="/rankings" data-slot="button" className={buttonVariants({ variant: 'borde-claro', size: 'pildora', className: 'h-14 border-bloque-foreground/40 px-7 text-lg' })}>
               Ver rankings
             </Link>
-            <Link to="/verificacion" className={buttonVariants({ variant: 'borde-claro', size: 'pildora', className: 'h-14 px-7 text-lg' })}>
+            <Link to="/verificacion" data-slot="button" className={buttonVariants({ variant: 'borde-claro', size: 'pildora', className: 'h-14 border-bloque-foreground/40 px-7 text-lg' })}>
               Verificación del jurado
             </Link>
           </div>

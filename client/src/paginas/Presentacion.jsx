@@ -1,5 +1,6 @@
 // Presentación de la app (/presentacion, sitio público): láminas a pantalla completa, sin el
-// AppShell, con la misma capa de diseño (tokens de styles/tema.css y componentes de marca/).
+// AppShell. Es una página de vitrina, como la landing: va dentro de `.estilo-landing` (base visual
+// #138, client/DISENO.md), así que usa sus tokens y los componentes de marca/. El resto de la app usa E+.
 // Las cifras salen del API en vivo (components/presentacion/useDatosPresentacion.js).
 //
 // Navegación: flechas, Av Pág / Re Pág, espacio, Inicio y Fin; F pone pantalla completa; en el
@@ -120,7 +121,7 @@ export default function Presentacion() {
 
   return (
     <main
-      className="flex h-dvh flex-col overflow-hidden bg-seccion"
+      className="estilo-landing flex h-dvh flex-col overflow-hidden bg-seccion"
       onTouchStart={alEmpezarToque}
       onTouchEnd={alTerminarToque}
     >
