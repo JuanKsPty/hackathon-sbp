@@ -52,7 +52,7 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp,
   // Queda bajo /api/movimientos, así que la restricción de arriba (comparar_periodos) también la cubre.
   app.use('/api', rutasDeDescomposicion(crearObtenerDescomposicion(almacen)));
   app.use('/api', rutasDeCarga(almacen, { obtenerMovimientos })); // POST /api/periodos, solo admin (#29)
-  app.use('/api', rutasDeIA({ obtenerMovimientos, opcionesIA }));
+  app.use('/api', rutasDeIA({ almacen, obtenerMovimientos, opcionesIA })); // con almacen: gráficos del chat (#108)
   app.use('/api', rutasDeDocumentacion(almacen));
   app.use('/api', rutasDeIndicadores(almacen)); // morosidad, vencimientos y concentración: análisis adicional (#35)
   app.use('/api', rutasDeMcp(opcionesMcp)); // MCP remoto por HTTP: /api/mcp (#81)

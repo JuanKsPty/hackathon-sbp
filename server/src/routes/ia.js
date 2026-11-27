@@ -1,11 +1,14 @@
 // Rutas de IA (#2 y #3). La IA solo lee resultados del motor; sin ANTHROPIC_API_KEY responden
 // igual, con la explicación por reglas o avisando que la IA no está disponible.
+// #108: /api/ia/preguntar trae además `accion`, los gráficos que el front muestra en pantalla. La
+// propone la IA (mostrar_graficos) o, sin IA, el intérprete por reglas (ai/intencion.js).
 import { Router } from 'express';
 import { explicarMovimientos } from '../ai/explicaciones.js';
 import { preguntarAlAgente } from '../ai/agente.js';
 import { crearEjecutor } from '../ai/herramientas.js';
 import { urlApiInterna } from '../ai/apiInterna.js';
 import { elementosPara } from '../ai/guia.js';
+import { contextoDe, interpretarPregunta } from '../ai/intencion.js';
 import { MODELO_POR_DEFECTO } from '../ai/redaccionIA.js';
 import { encabezado } from './formato.js';
 import { ErrorApi } from './errores.js';
@@ -29,10 +32,11 @@ function validarPregunta(cuerpo) {
 
 /**
  * @param {object} deps
+ * @param {object} [deps.almacen] períodos cargados y catálogos: con él, las preguntas traen `accion` (#108)
  * @param {Function} [deps.obtenerMovimientos] cálculo de /api/movimientos (#32)
  * @param {object} [deps.opcionesIA] { cliente, apiKey, modelo } (para tests; por defecto el .env)
  */
-export function rutasDeIA({ obtenerMovimientos, opcionesIA = {} } = {}) {
+export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {}) {
   const rutas = Router();
   const apiKey = () => opcionesIA.apiKey ?? process.env.ANTHROPIC_API_KEY;
 
@@ -74,14 +78,21 @@ export function rutasDeIA({ obtenerMovimientos, opcionesIA = {} } = {}) {
     const { pregunta, historial } = validarPregunta(req.body);
     // API interna, no el Host de la petición (#89).
     const baseUrl = urlApiInterna();
+    // Períodos y catálogos de este momento (un Administrador puede cargar un período nuevo).
+    const contexto = almacen?.fechas().length ? contextoDe(almacen) : null;
+    // Sin IA (o si la IA no propuso gráficos), las reglas producen la misma acción.
+    const porReglas = () => (contexto ? interpretarPregunta(pregunta, contexto, req.perfil) : null);
     try {
       const resultado = await preguntarAlAgente(pregunta, {
         ...opcionesIA,
         historial,
         perfil: req.perfil,
+        contexto,
         ejecutar: crearEjecutor(baseUrl, { perfil: req.perfil }),
       });
-      res.json({ ...encabezado(), pregunta, ...resultado });
+      // Si la IA respondió con una guía (#72), la pregunta era de cómo usar la app: sin gráficos.
+      const accion = resultado.accion ?? (resultado.guia ? null : porReglas());
+      res.json({ ...encabezado(), pregunta, ...resultado, accion });
     } catch (error) {
       console.error('[ia] el agente falló:', error.message);
       res.json({
@@ -93,6 +104,7 @@ export function rutasDeIA({ obtenerMovimientos, opcionesIA = {} } = {}) {
         verificada: false,
         consultas: [],
         guia: null,
+        accion: porReglas(),
       });
     }
   });

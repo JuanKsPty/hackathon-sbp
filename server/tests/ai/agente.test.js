@@ -122,7 +122,7 @@ test('responde consultando el motor y verifica los números', async () => {
     ruta: '/rankings?periodo=20260930&ranking=HIPOTECARIO',
   }]);
   // El modelo recibe las 7 herramientas y la instrucción de no calcular.
-  assert.equal(cliente.llamadas[0].tools.length, 8); // 7 de consulta + guiar_usuario
+  assert.equal(cliente.llamadas[0].tools.length, 9); // 7 de consulta + guiar_usuario + mostrar_graficos (#108)
   assert.match(cliente.llamadas[0].system, /No calcules nada/);
 });
 
@@ -180,7 +180,7 @@ test('perfil Público: sin herramienta de movimientos y sin explicaciones (403)'
   const { cuerpo } = await preguntar(base, { pregunta: '¿Qué puedes consultar?' }, 'publico');
   assert.equal(cuerpo.verificada, true);
   const nombres = cliente.llamadas[0].tools.map((t) => t.name);
-  assert.equal(nombres.length, 7); // 6 de consulta + guiar_usuario
+  assert.equal(nombres.length, 8); // 6 de consulta + guiar_usuario + mostrar_graficos (#108)
   assert.ok(!nombres.includes('consultar_movimientos'));
 
   const explicacion = await fetch(`${base}/explicaciones`);
