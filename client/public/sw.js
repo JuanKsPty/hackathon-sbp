@@ -1,7 +1,7 @@
 // Service worker de Rankings de Crédito (#8). Hecho a mano, sin librerías.
 // Guarda la "cáscara" de la app para que abra rápido y se pueda instalar en el celular.
 // Al cambiar lo que se guarda, sube la versión: el nombre nuevo borra la caché vieja.
-const CACHE = 'rankings-publico-v2'
+const CACHE = 'rankings-publico-v3'
 
 // Archivos mínimos para abrir la app.
 const CASCARA = [
