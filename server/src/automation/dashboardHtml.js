@@ -84,11 +84,36 @@ th{background:#eef2f7}.n{text-align:right;font-variant-numeric:tabular-nums}
 @media print{body{background:#fff}section{break-inside:avoid}}
 `;
 
-// Reporte personalizado (Analista y Administrador): una sección por período elegido, solo con los
-// rankings y las filas de los bancos elegidos. Sets vacíos = todos. Con bancos elegidos, además,
-// una tabla por banco con sus posiciones en los rankings elegidos.
+// Barras horizontales genéricas: [{ etiqueta, centavos }] (SVG en línea, relativas al mayor valor).
+function grafico(items, etiquetaAria) {
+  const alto = 22;
+  const etiqueta = 230;
+  const ancho = 720;
+  const maximo = Math.max(...items.map((i) => i.centavos), 1);
+  const util = ancho - etiqueta - 130;
+  const corta = (t) => (t.length > 34 ? `${t.slice(0, 33)}…` : t);
+  const renglones = items
+    .map((item, i) => {
+      const largo = Math.max((item.centavos / maximo) * util, item.centavos > 0 ? 1 : 0);
+      return `<g transform="translate(0,${i * alto})"><text x="0" y="15" class="b-et"><title>${escapar(item.etiqueta)}</title>${escapar(corta(item.etiqueta))}</text>`
+        + `<rect x="${etiqueta}" y="4" width="${largo.toFixed(1)}" height="14" rx="2" class="b-bar"/>`
+        + `<text x="${(etiqueta + largo + 6).toFixed(1)}" y="15" class="b-val">${monto(item.centavos)}</text></g>`;
+    })
+    .join('');
+  return `<svg viewBox="0 0 ${ancho} ${Math.max(items.length, 1) * alto}" width="100%" role="img" aria-label="${escapar(etiquetaAria)}">${renglones}</svg>`;
+}
+
+const tarjetas = (pares) =>
+  `<div class="tarjetas">${pares.map(([t, v]) => `<div class="tarjeta"><span>${escapar(t)}</span><b>${escapar(v)}</b></div>`).join('')}</div>`;
+
+// Reporte personalizado (Analista y Administrador), enfocado en los bancos: por cada período elegido,
+// un comparativo de los bancos, una ficha por banco (posición, saldo, ponderación y operaciones por
+// ranking, y su saldo por subactividad) y cada ranking elegido con solo esos bancos.
+// Sets vacíos = todos. Todo sale del motor (rankings y desglose); nada fijado a mano (R2).
 export function dashboardPersonalizadoHtml({ periodos, rankings = new Set(), bancos = new Set(), catalogos }) {
   const nombre = (codigo) => catalogos?.bancos?.get(codigo) ?? codigo;
+  const enRanking = (r) => rankings.size === 0 || rankings.has(r);
+  const enBanco = (codigo) => bancos.size === 0 || bancos.has(codigo);
   const filtros = [
     `Períodos: ${periodos.map((p) => fechaLegible(p.fecha)).join(', ')}`,
     rankings.size > 0 ? `Rankings: ${[...rankings].join(', ')}` : 'Todos los rankings',
@@ -98,37 +123,74 @@ export function dashboardPersonalizadoHtml({ periodos, rankings = new Set(), ban
 
   const cuerpo = periodos
     .map((periodo) => {
-      const c = periodo.calidad;
-      const elegidos = periodo.rankings
-        .filter((r) => rankings.size === 0 || rankings.has(r.ranking))
-        .map((r) => ({ ...r, filas: r.filas.filter((f) => bancos.size === 0 || bancos.has(f.codigoBanco)) }));
-      const tarjetas = [
-        ['Cartera local válida', monto(c.saldoTotalValido)],
-        ['Universo local válido', `${c.universoValido} operaciones`],
-        ['Filas leídas', String(c.filasLeidas)],
-      ]
-        .map(([t, v]) => `<div class="tarjeta"><span>${escapar(t)}</span><b>${escapar(v)}</b></div>`)
+      const fecha = fechaLegible(periodo.fecha);
+      const elegidos = periodo.rankings.filter((r) => enRanking(r.ranking));
+      // Una ficha por banco, ordenadas por su saldo total en los rankings elegidos.
+      const codigos = [...new Set(elegidos.flatMap((r) => r.filas.map((f) => f.codigoBanco)))].filter(enBanco);
+      const fichas = codigos
+        .map((codigo) => {
+          const porRanking = elegidos.map((r) => ({ ranking: r.ranking, de: r.filas.length, fila: r.filas.find((f) => f.codigoBanco === codigo) }));
+          const conDatos = porRanking.filter((x) => x.fila);
+          const saldo = conDatos.reduce((s, x) => s + x.fila.saldoActividad, 0);
+          const operaciones = conDatos.reduce((s, x) => s + x.fila.operacionesValidas, 0);
+          const mejor = conDatos.reduce((m, x) => (m === null || x.fila.posicion < m.fila.posicion ? x : m), null);
+          const subactividades = periodo.desglose
+            .filter((d) => d.codigoBanco === codigo && enRanking(d.ranking) && d.saldo > 0)
+            .sort((a, b) => b.saldo - a.saldo);
+          return { codigo, banco: nombre(codigo), porRanking, saldo, operaciones, mejor, subactividades };
+        })
+        .sort((a, b) => b.saldo - a.saldo);
+      const mejorTexto = (f) => (f.mejor ? `${f.mejor.fila.posicion}º en ${f.mejor.ranking}` : '—');
+
+      const comparativo = `<section><h2>Bancos · ${escapar(fecha)}</h2>`
+        + grafico(fichas.map((f) => ({ etiqueta: f.banco, centavos: f.saldo })), 'Saldo por banco en los rankings elegidos')
+        + '<table><thead><tr><th>Código</th><th>Banco</th><th class="n">Saldo</th><th class="n">Operaciones</th><th>Mejor posición</th></tr></thead><tbody>'
+        + fichas.map((f) => `<tr><td>${escapar(f.codigo)}</td><td>${escapar(f.banco)}</td><td class="n">${monto(f.saldo)}</td><td class="n">${escapar(f.operaciones)}</td><td>${escapar(mejorTexto(f))}</td></tr>`).join('')
+        + '</tbody></table></section>';
+
+      const detalle = fichas
+        .map((f) => `<section><h2>${escapar(f.banco)} (${escapar(f.codigo)}) · ${escapar(fecha)}</h2>`
+          + tarjetas([
+            ['Saldo en los rankings elegidos', monto(f.saldo)],
+            ['Operaciones', String(f.operaciones)],
+            ['Mejor posición', mejorTexto(f)],
+          ])
+          + '<h3>Saldo por ranking</h3>'
+          + grafico(f.porRanking.map((x) => ({ etiqueta: `${x.ranking}${x.fila ? ` · ${x.fila.posicion}º de ${x.de}` : ''}`, centavos: x.fila?.saldoActividad ?? 0 })), `Saldo de ${f.banco} por ranking`)
+          + '<table><thead><tr><th>Ranking</th><th>Posición</th><th class="n">Saldo</th><th class="n">Ponderación %</th><th class="n">Operaciones</th></tr></thead><tbody>'
+          + f.porRanking.map((x) => (x.fila
+            ? `<tr><td>${escapar(x.ranking)}</td><td>${escapar(x.fila.posicion)} de ${x.de}</td><td class="n">${monto(x.fila.saldoActividad)}</td><td class="n">${formatearE4(x.fila.ponderacionE4)}</td><td class="n">${escapar(x.fila.operacionesValidas)}</td></tr>`
+            : `<tr><td>${escapar(x.ranking)}</td><td colspan="4">Sin cartera en este ranking</td></tr>`)).join('')
+          + '</tbody></table>'
+          + (f.subactividades.length > 0
+            ? '<h3>Saldo por subactividad</h3>'
+              + grafico(f.subactividades.map((d) => ({ etiqueta: d.subactividad, centavos: d.saldo })), `Saldo de ${f.banco} por subactividad`)
+              + '<table><thead><tr><th>Ranking</th><th>Subactividad</th><th class="n">Saldo</th></tr></thead><tbody>'
+              + f.subactividades.map((d) => `<tr><td>${escapar(d.ranking)}</td><td>${escapar(d.subactividad)}</td><td class="n">${monto(d.saldo)}</td></tr>`).join('')
+              + '</tbody></table>'
+            : '')
+          + '</section>')
         .join('');
-      const porBanco = [...bancos]
-        .map((codigo) => seccionBanco({ ...periodo, rankings: periodo.rankings.filter((r) => rankings.size === 0 || rankings.has(r.ranking)) }, codigo, nombre(codigo)))
+
+      const porRanking = elegidos
+        .map((r) => ({ ranking: r.ranking, filas: r.filas.filter((f) => enBanco(f.codigoBanco)) }))
+        .map(({ ranking: r, filas }) => `<section><h2>Ranking ${escapar(r)} · ${escapar(fecha)}</h2>${filas.length > 0 ? barras(filas) : ''}${tablaRanking(filas)}</section>`)
         .join('');
-      const secciones = elegidos
-        .map(({ ranking: r, filas }) => `<section><h2>Ranking ${escapar(r)} · ${escapar(fechaLegible(periodo.fecha))}</h2>${filas.length > 0 ? barras(filas) : ''}${tablaRanking(filas)}</section>`)
-        .join('');
-      return `<h2 class="periodo">Período ${escapar(fechaLegible(periodo.fecha))}</h2><div class="tarjetas">${tarjetas}</div>${porBanco}${secciones}${seccionCalidad(c)}`;
+
+      return `<h2 class="periodo">Período ${escapar(fecha)}</h2>${comparativo}${detalle}${porRanking}`;
     })
     .join('');
 
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Reporte personalizado</title><style>${ESTILOS}.periodo{margin:28px 0 0;font-size:19px}</style></head>
+<title>Reporte personalizado</title><style>${ESTILOS}.periodo{margin:28px 0 0;font-size:19px}h3{font-size:14px;margin:16px 0 6px;color:var(--suave)}</style></head>
 <body><main>
-<header><h1>Reporte personalizado · Dashboard</h1>
+<header><h1>Reporte personalizado · Bancos</h1>
 <p class="meta">${escapar(encabezado)}</p>
 <p class="meta">Filtros: ${escapar(filtros.join(' · '))}</p>
 <span class="aviso">${escapar(AVISO)}</span></header>
 ${cuerpo}
-<footer>${escapar(encabezado)}<br>${escapar(AVISO)}. Montos en balboas con 2 decimales; ponderación en % con 4 decimales. Mismos datos que personalizado.csv.</footer>
+<footer>${escapar(encabezado)}<br>${escapar(AVISO)}. Montos en balboas con 2 decimales; ponderación en % con 4 decimales. Saldos por ranking y por subactividad calculados por el motor (entregables 2 y 3).</footer>
 </main></body></html>
 `;
 }

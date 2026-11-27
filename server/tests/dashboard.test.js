@@ -95,8 +95,17 @@ test('personalizado.html (Analista): un período, un ranking y dos bancos', asyn
   assert.ok(html.includes(escapar(AVISO)));
   assert.ok(html.includes(escapar(FUENTE)));
   for (const f of [a, b]) {
-    assert.ok(html.includes(`${escapar(f.banco)} (${f.codigoBanco}) en los`), `falta la sección de ${f.banco}`);
+    assert.ok(html.includes(`<h2>${escapar(f.banco)} (${f.codigoBanco}) · `), `falta la ficha de ${f.banco}`);
     assert.ok(html.includes(conMiles(formatearCentavos(f.saldoActividad))));
+    assert.ok(html.includes(formatearE4(f.ponderacionE4)));
+    // Su saldo por subactividad (desglose del motor, entregable 3).
+    for (const d of periodo.desglose.filter((x) => x.codigoBanco === f.codigoBanco && x.ranking === ranking && x.saldo > 0)) {
+      assert.ok(html.includes(`<td>${escapar(d.subactividad)}</td><td class="n">${conMiles(formatearCentavos(d.saldo))}</td>`), `falta ${d.subactividad} de ${f.banco}`);
+    }
+  }
+  // Enfocado en los bancos: sin los totales de calidad del período.
+  for (const texto of ['Universo local válido', 'Filas leídas', 'Cartera local válida', 'E1–E4']) {
+    assert.ok(!html.includes(texto), `sobra "${texto}"`);
   }
   for (const f of filas.slice(2)) assert.ok(!html.includes(`<td>${f.codigoBanco}</td>`), `sobra ${f.banco}`);
   for (const otro of periodo.rankings.slice(1)) assert.ok(!html.includes(`Ranking ${escapar(otro.ranking)} ·`), `sobra ${otro.ranking}`);
