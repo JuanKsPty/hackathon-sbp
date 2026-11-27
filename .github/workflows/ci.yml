@@ -1,5 +1,5 @@
 # Integración continua (issue #70): en cada pull request y en cada push a main
-# corre las pruebas del server y el build del client.
+# corre las pruebas del server y, en el client, sus pruebas y el build.
 # No usa secretos (R5): las pruebas no necesitan ANTHROPIC_API_KEY; sin llave, la IA
 # responde por reglas.
 name: CI
@@ -36,7 +36,7 @@ jobs:
       - run: npm test
 
   client:
-    name: Client · npm run build
+    name: Client · npm test y npm run build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -50,4 +50,5 @@ jobs:
           cache: npm
           cache-dependency-path: client/package-lock.json
       - run: npm ci
+      - run: npm test # motor del cursor guía (src/guia/motor.test.js), sin navegador
       - run: npm run build
