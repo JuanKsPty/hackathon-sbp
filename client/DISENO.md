@@ -1,13 +1,14 @@
 # Guía visual del Radar SBP (#138)
 
-Base común de los dos sitios (`SITIO=publico` y `SITIO=interno`). Toma el lenguaje visual de una landing de banca digital, no su marca: ni logo ni nombre de la SBP.
+Base común de los dos sitios (`SITIO=publico` y `SITIO=interno`). Toma el lenguaje visual de una landing de banca digital, no su marca. El logo sí es el oficial de la SBP (pedido de Juan): el emblema en el menú, el favicon y los íconos, y el logo completo en Entrar (`public/marca/`).
 
 ## Reglas que no se rompen
 
 - La fuente, el período y el aviso "Datos ficticios · Uso informativo, no opinión formal de la SBP" se ven en todas las pantallas.
 - Todos los `data-guia` de `contracts/guia.md` siguen en su lugar. Los componentes de `marca/` pasan `...props`, así que `data-guia` se les puede poner directo.
 - Ninguna cifra se escribe a mano (R2): `Cifra`, títulos y gráficos reciben valores que salen de los datos.
-- Modo oscuro, 360 px, PWA, agente flotante abajo a la derecha, perfiles y modo mocks (`VITE_USAR_MOCKS=true`).
+- Modo oscuro, 360 px, PWA, perfiles y modo mocks (`VITE_USAR_MOCKS=true`).
+- Arriba a la derecha del encabezado solo va el botón del agente ("Asistente IA"). Abre el chat flotante debajo de él. El cursor y los resaltados del agente usan el token `agente` (naranja).
 - Solo clases de tokens (`bg-background`, `text-sube`, …). Nada de colores sueltos en los componentes.
 
 ## Tokens (`src/styles/tema.css`)

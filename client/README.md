@@ -49,7 +49,7 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 | `components/estados/` | `Cargando`, `Vacio` y `ErrorApi`. |
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
 | `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |
-| `styles/tema.css` | Paleta E+ (azul institucional claro): único lugar con colores. Se registran como clases en `index.css`. |
+| `styles/tema.css` | Tokens de la base visual (#138, ver [`DISENO.md`](DISENO.md)): único lugar con colores. Se registran como clases en `index.css`. |
 
 ## Perfiles
 
