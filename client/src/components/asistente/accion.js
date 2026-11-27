@@ -11,27 +11,12 @@ export function nombreMes(fecha) {
   return MESES[Number(String(fecha ?? '').slice(4, 6)) - 1] ?? String(fecha ?? '')
 }
 
-// Si la pregunta pide ver algo gráfico (un gráfico, un informe, una comparación, la evolución, la
-// calidad): entonces los gráficos se muestran solos. Si no, solo al tocar "Ver gráficos".
-export function pideGraficos(pregunta = '') {
-  const texto = String(pregunta).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-  return /\b(grafic\w*|informe\w*|reporte\w*|compar\w*|evolucion|tendencia\w*|historic\w*|visualiz\w*|calidad|dashboard|tablero)\b/.test(texto)
-}
-
-// Gráficos que se ven ahora: los de la respuesta que el usuario pidió con "Ver gráficos" (`elegido`)
-// o, si no, los de la última respuesta cuando su pregunta los pedía. Al mandar otra pregunta la
-// última ya no es una respuesta y no queda nada: no se ven los gráficos de la anterior.
+// Gráficos que se ven ahora: solo los de la respuesta en la que el usuario tocó "Ver gráficos"
+// (`elegido`). Nunca aparecen solos, y con cada pregunta nueva se ocultan (elegido vuelve a null).
 export function ultimaAccion(mensajes = [], elegido = null) {
-  const conGraficos = (m) => m?.rol === 'asistente' && m.datos?.accion?.graficos?.length > 0
-  const deAccion = (m) => ({ id: m.id, ...m.datos.accion })
-  if (elegido != null) {
-    const mensaje = mensajes.find((m) => m.id === elegido)
-    return conGraficos(mensaje) ? deAccion(mensaje) : null
-  }
-  const ultimo = mensajes.at(-1)
-  if (!conGraficos(ultimo)) return null
-  const anterior = mensajes.at(-2)
-  return anterior?.rol === 'usuario' && pideGraficos(anterior.texto) ? deAccion(ultimo) : null
+  if (elegido == null) return null
+  const mensaje = mensajes.find((m) => m.id === elegido)
+  return mensaje?.rol === 'asistente' && mensaje.datos?.accion?.graficos?.length > 0 ? { id: mensaje.id, ...mensaje.datos.accion } : null
 }
 
 // Preguntas de ejemplo con los períodos cargados. Público no compara períodos (contracts/perfiles.md).
