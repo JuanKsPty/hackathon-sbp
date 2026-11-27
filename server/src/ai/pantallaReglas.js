@@ -111,6 +111,9 @@ export function pantallaPorReglas(pregunta, almacen, perfil = 'publico') {
   return validacion.ok ? validacion.pantalla : null;
 }
 
+// Cargar un período ("¿cómo cargo…?", "subir el AT03"): solo lo hace el Administrador.
+const PATRON_CARGA = /\b(subir|subo|suba|cargo|cargar|carga|cargas|cargue|archivo|at03)\b/;
+
 // "Cómo hago X" sobre la app (#121): palabras → elemento de la guía, de lo más específico a lo general.
 const ELEMENTO_POR_PALABRAS = [
   [/\b(reporte\w* personalizad\w*|personaliz\w*)\b/, 'reportes.personalizado'],
@@ -122,7 +125,7 @@ const ELEMENTO_POR_PALABRAS = [
   [/\b(reconcilia\w*|unicidad)\b/, 'calidad.reconciliaciones'],
   [/\balerta\w*\b/, 'calidad.alertas'],
   [/\b(calidad|e1|e2|e3|e4)\b/, 'calidad.cascada'],
-  [/\b(subir|cargar|carga|archivo|at03)\b/, 'admin.subir-archivo'],
+  [PATRON_CARGA, 'admin.subir-archivo'],
   [/\b(subactividad\w*|tarjeta\w*|desglose)\b/, 'rankings.desglose-subactividades'],
   [/\b(filtr\w*|busc\w*)\b.*\bbanco\w*\b|\bbanco\w*\b.*\bfiltr\w*\b/, 'rankings.filtro-banco'],
   [/\bgrafic\w*\b/, 'rankings.grafico'],
@@ -142,6 +145,11 @@ const NOMBRE_PAGINA = { '/': 'Panel', '/rankings': 'Rankings', '/comparar': 'Com
 export function demostracionPorReglas(pregunta, almacen, perfil = 'publico') {
   if (modoDe(pregunta) !== 'demostrar') return null;
   const texto = normalizar(pregunta);
+  // Si lo primero que pide es cargar un período y su perfil no puede, no se le señala otra cosa (por
+  // ejemplo, el selector de período): la respuesta explica que es del Administrador. "Descargar el
+  // archivo" coincide antes con la descarga, así que sigue teniendo su demostración.
+  const primero = ELEMENTO_POR_PALABRAS.find(([patron]) => patron.test(texto))?.[1];
+  if (primero === 'admin.subir-archivo' && !perfilVeElemento(primero, perfil)) return null;
   const id = ELEMENTO_POR_PALABRAS.find(([patron, guia]) => patron.test(texto) && perfilVeElemento(guia, perfil))?.[1];
   if (!id) return null;
   const elemento = elementoGuia(id);

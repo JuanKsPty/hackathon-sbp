@@ -109,4 +109,13 @@ test('"¿cómo hago X?" en la app: entra a la página y señala el elemento', ()
   // Calidad de datos no existe en el sitio público: a Público no se le lleva a /calidad.
   assert.notEqual(demostracionPorReglas('¿cómo veo las filas excluidas?', almacen, 'publico')?.acciones?.[0]?.ruta, '/calidad');
   assert.equal(demostracionPorReglas('dame el top 5', almacen), null);
+  // "¿Cómo cargo un nuevo período?": el Administrador va a subir el archivo; los demás no reciben otra demostración.
+  const carga = demostracionPorReglas('¿Cómo cargo un nuevo período?', almacen, 'admin');
+  assert.deepEqual(carga.acciones.map((a) => [a.tipo, a.tipo === 'ir' ? a.ruta : a.control]), [['ir', '/admin'], ['señalar', 'admin.subir-archivo']]);
+  assert.equal(demostracionPorReglas('¿Cómo cargo un nuevo período?', almacen, 'analista'), null);
+  assert.equal(demostracionPorReglas('¿Cómo cargo un nuevo período?', almacen, 'publico'), null);
+  // "Archivo" en una descarga no es cargar: Público sigue teniendo su demostración.
+  assert.equal(demostracionPorReglas('¿Cómo descargo el archivo de rankings?', almacen, 'publico')?.acciones.at(-1).control, 'rankings.descargar');
+  // "Cargaron" no es la intención de cargar un período.
+  assert.equal(demostracionPorReglas('¿Cómo veo los bancos que se cargaron en el ranking?', almacen, 'analista')?.acciones.at(-1).control, 'rankings.selector-ranking');
 });
