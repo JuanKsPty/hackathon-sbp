@@ -31,7 +31,7 @@ export function IndicadoresAdicionales() {
       <CardHeader>
         <CardTitle>Indicadores adicionales</CardTitle>
         <CardDescription>
-          {periodo ? `Morosidad, vencimientos y concentración al ${formatearPeriodo(periodo)}` : 'Período seleccionado en el encabezado'}
+          {periodo ? `Morosidad, vencimientos y concentración al ${formatearPeriodo(periodo)}` : 'Período elegido junto al título'}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

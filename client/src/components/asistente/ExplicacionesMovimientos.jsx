@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import { EtiquetaIA, FuenteExplicacion } from './EtiquetaIA.jsx'
 import { PieFuente } from './PieFuente.jsx'
 
-// Período anterior al elegido en el encabezado (los períodos llegan como AAAAMMDD).
+// Período anterior al elegido en «Período de los datos» (los períodos llegan como AAAAMMDD).
 function periodoAnterior(periodos, periodo) {
   const fechas = periodos.map((p) => p.Fecha).filter(Boolean).sort()
   const indice = fechas.indexOf(periodo)
@@ -63,13 +63,13 @@ export function ExplicacionesMovimientos({ guia, className }) {
       />
     )
   } else if (!periodo) {
-    contenido = <Vacio icono={CalendarRangeIcon} titulo="No hay un período elegido" descripcion="Elige un período en el encabezado." />
+    contenido = <Vacio icono={CalendarRangeIcon} titulo="No hay un período elegido" descripcion="Elige un período en «Período de los datos», junto al título del Panel." />
   } else if (!desde) {
     contenido = (
       <Vacio
         icono={CalendarRangeIcon}
         titulo="Se necesitan dos períodos"
-        descripcion={`${formatearPeriodo(periodo)} no tiene un período anterior cargado para comparar. Elige otro período en el encabezado.`}
+        descripcion={`${formatearPeriodo(periodo)} no tiene un período anterior cargado para comparar. Elige otro en «Período de los datos», junto al título del Panel.`}
       />
     )
   } else if (cargando) {

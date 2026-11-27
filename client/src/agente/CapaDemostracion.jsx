@@ -1,4 +1,4 @@
-// Capa visual de la demostración (#123): cursor celeste que se desliza entre los elementos, onda
+// Capa visual de la demostración (#123): cursor naranja que se desliza entre los elementos, onda
 // al "tocar" y globo con el texto del paso. Aparece y desaparece con animación (tw-animate-css).
 // Aspecto provisional hasta el diseño final de @JuanKsPty; el recorrido está en DemostracionContext.
 import { CursorGuia } from '@/guia/CursorGuia.jsx'
@@ -24,7 +24,7 @@ export function CapaDemostracion() {
       {fase === 'tocando' && (
         <span
           aria-hidden="true"
-          className="absolute size-10 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-sky-400/50"
+          className="absolute size-10 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-agente/50"
           style={{ top: pos.top, left: pos.left }}
         />
       )}
@@ -38,7 +38,7 @@ export function CapaDemostracion() {
       {texto && !saliendo && (
         <p
           role="status"
-          className="absolute rounded-lg border border-sky-400/40 bg-popover px-3 py-2 text-sm text-popover-foreground shadow-lg transition-all duration-700 ease-in-out motion-reduce:transition-none"
+          className="absolute rounded-lg border border-agente/40 bg-popover px-3 py-2 text-sm text-popover-foreground shadow-lg transition-all duration-700 ease-in-out motion-reduce:transition-none"
           style={{ ...globo, width: ANCHO_GLOBO }}
         >
           {texto}

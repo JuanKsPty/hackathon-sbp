@@ -4,18 +4,19 @@ import { LideresRankings } from '@/components/panel/LideresRankings.jsx'
 import { MovimientosSignificativos } from '@/components/panel/MovimientosSignificativos.jsx'
 import { ResumenPeriodo } from '@/components/panel/ResumenPeriodo.jsx'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
+import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Pagina } from './Pagina.jsx'
 
 
 // Panel (#60): indicadores del período, líder de cada ranking, movimientos significativos con su
-// explicación (Analista y Administrador) e indicadores adicionales. El período se elige en el encabezado.
+// explicación (Analista y Administrador) e indicadores adicionales. El período se elige junto al título (PeriodoDePagina).
 export default function Panel() {
   // Comparar períodos es configurable por el Administrador (perfiles y permisos): se pregunta por la opción.
   const { puede } = usePerfil()
   const analiza = puede('comparar_periodos')
 
   return (
-    <Pagina titulo="Panel" descripcion="Vista general del período: cartera válida, líderes y movimientos destacados.">
+    <Pagina titulo="Panel" descripcion="Vista general del período: cartera válida, líderes y movimientos destacados." acciones={<PeriodoDePagina />}>
       <ResumenPeriodo />
       <LideresRankings />
       {/* Movimientos y explicaciones comparan dos períodos: solo Analista y Administrador. */}

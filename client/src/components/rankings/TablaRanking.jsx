@@ -85,7 +85,7 @@ export function TablaRanking({ bancos, bancoResaltado, orden: ordenDePagina, alO
             data-fila-banco={fila.Codigo_Banco}
             data-state={fila.Codigo_Banco === bancoResaltado ? 'selected' : undefined}
             data-resaltada-agente={fila.Codigo_Banco === delAgente ? '' : undefined}
-            className={fila.Codigo_Banco === delAgente ? 'bg-sky-400/15 [&_td:nth-child(2)_span:first-child]:underline [&_td:nth-child(2)_span:first-child]:decoration-sky-400 [&_td:nth-child(2)_span:first-child]:decoration-2 [&_td:nth-child(2)_span:first-child]:underline-offset-4' : undefined}
+            className={fila.Codigo_Banco === delAgente ? 'bg-agente/15 [&_td:nth-child(2)_span:first-child]:underline [&_td:nth-child(2)_span:first-child]:decoration-agente [&_td:nth-child(2)_span:first-child]:decoration-2 [&_td:nth-child(2)_span:first-child]:underline-offset-4' : undefined}
           >
             {COLUMNAS.map(({ clave, formato }) =>
               clave === 'Banco' ? (

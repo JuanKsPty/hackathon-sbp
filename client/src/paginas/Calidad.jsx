@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearPeriodo } from '@/lib/formato.js'
+import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
 import { Pagina } from './Pagina.jsx'
 
 // Calidad de datos (#65): cascada E1-E4 de todos los períodos y, del período elegido en el
@@ -30,7 +31,7 @@ export default function Calidad() {
   else contenido = <Contenido periodos={datos.periodos} periodoElegido={periodo} />
 
   return (
-    <Pagina titulo="Calidad de datos" descripcion="Cascada de exclusiones, reconciliaciones y alertas del archivo AT03.">
+    <Pagina titulo="Calidad de datos" descripcion="Cascada de exclusiones, reconciliaciones y alertas del archivo AT03." acciones={<PeriodoDePagina />}>
       {contenido}
     </Pagina>
   )

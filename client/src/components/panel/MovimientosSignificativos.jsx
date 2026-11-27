@@ -72,7 +72,7 @@ export function MovimientosSignificativos() {
       <Vacio
         icono={CalendarRangeIcon}
         titulo="No hay un período anterior para comparar"
-        descripcion={`${formatearPeriodo(periodo)} es el primer período cargado. Elige uno posterior en el encabezado para ver sus movimientos.`}
+        descripcion={`${formatearPeriodo(periodo)} es el primer período cargado. Elige uno posterior en «Período de los datos», arriba junto al título, para ver sus movimientos.`}
       />
     )
   } else {
@@ -128,7 +128,7 @@ export function MovimientosSignificativos() {
     <Card data-guia="panel.movimientos" className="min-w-0">
       <CardHeader>
         <CardTitle>Movimientos significativos</CardTitle>
-        <CardDescription>{tramo ?? 'Cambios frente al período anterior al elegido en el encabezado'}</CardDescription>
+        <CardDescription>{tramo ?? 'Cambios frente al período anterior al elegido'}</CardDescription>
         {permitido && (
           <CardAction className="flex flex-col items-end gap-2">
             {datos && total > 0 && (

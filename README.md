@@ -197,8 +197,8 @@ Sin `ANTHROPIC_API_KEY`, la app funciona igual: usa las explicaciones por reglas
 
 ## Identidad visual
 
-- **Paleta D:** índigo y dorado, inspirada en el sitio de la SBP, con tipografía Roboto. Está en `client/src/styles/tema.css`, con los nombres de tokens de shadcn/ui más los propios: `sube`, `baja`, `igual`, `destacado` y `aviso`. Cumple contraste 4.5:1 en modo claro y en oscuro.
-- **Logo y assets:** el logo, las ilustraciones, la imagen para compartir y los fondos de la presentación se hicieron con Higgsfield. La app no usa el logo ni la marca de la SBP.
+- **Base visual (#138):** blanco y negro con acento verde, secciones gris muy claro y modo oscuro negro, sin violeta. Tipografía Inter. La guía está en [`client/DISENO.md`](client/DISENO.md) y los tokens en `client/src/styles/tema.css`: los de shadcn/ui más los propios (`sube`, `baja`, `igual`, `destacado`, `aviso`, `marca`, `agente`…). Contraste 4.5:1 en texto y 3:1 en marcas de gráfico.
+- **Logo y assets:** el menú, el favicon, los íconos de instalación, la pantalla de Entrar y la imagen para compartir usan el logo oficial de la SBP (tomado de superbancos.gob.pa), porque la app se presenta en su hackathon. La app sigue mostrando siempre "Datos ficticios · Uso informativo, no opinión formal de la SBP". Las ilustraciones de estados vacíos y de error y los fondos de la presentación se hicieron con Higgsfield.
 
 ## Cómo contribuir
 

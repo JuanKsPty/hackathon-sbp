@@ -5,13 +5,14 @@ El chat siempre responde. Además, si la respuesta de `POST /api/ia/preguntar` t
 | Modo | Pregunta típica | Qué pasa |
 | :--- | :--- | :--- |
 | `ejecutar` | "¿Cuál es el banco con más operaciones?" | Se aplica **al instante**, sin cursor y con el chat abierto: va a Rankings, ordena por Operaciones y resalta el banco. Aparece **"Muéstrame cómo"**: deshace y lo demuestra. |
-| `demostrar` | "¿Cómo veo el banco con más operaciones?" | El chat se minimiza y el **cursor celeste** sale de su botón. Recorre cada paso (si es otra página pasa por el menú, y si el elemento está fuera de pantalla hace scroll) y lo "toca". Al final vuelve, desaparece y el chat se reabre. |
+| `demostrar` | "¿Cómo veo el banco con más operaciones?" | El chat se minimiza y el **cursor naranja** (token `--agente`) sale de su botón. Recorre cada paso (si es otra página pasa por el menú, y si el elemento está fuera de pantalla hace scroll) y lo "toca". Al final vuelve, desaparece y el chat se reabre. |
 
 ## Archivos
 
 | Archivo | Qué hace |
 | :--- | :--- |
-| [`AgenteFlotante.jsx`](AgenteFlotante.jsx) | Botón abajo a la derecha y chat sobre la pantalla. |
+| [`BotonAgente.jsx`](BotonAgente.jsx) | Botón "Asistente IA" arriba a la derecha del encabezado: única entrada al agente; su posición es el origen del cursor. |
+| [`AgenteFlotante.jsx`](AgenteFlotante.jsx) | Chat sobre la pantalla, debajo del botón, con los gráficos de la última pregunta. |
 | [`AgenteContext.jsx`](AgenteContext.jsx) | Chat abierto o cerrado, posición del botón, registro de controles, `ejecutarPantalla` y `deshacerUltima`. |
 | [`registro.js`](registro.js) | Registro de controles: registrar, obtener y esperar a que aparezca uno (después de navegar). Tests en `registro.test.js`. |
 | [`useControlGuia.js`](useControlGuia.js) | Hook para que un componente registre su control mientras está montado. |

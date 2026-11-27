@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { formatearPeriodo } from '@/lib/formato.js'
 
-// Filtros del modo verificación: período (el mismo del encabezado) y banco (los del catálogo).
+// Filtros del modo verificación: período (el mismo de Panel, Rankings y Calidad) y banco (los del catálogo).
 // El período solo cambia los puntos 2 a 5; los puntos 1 y 6 traen siempre todos los períodos.
 export function FiltrosVerificacion({ periodos, periodo, alCambiarPeriodo, bancos, banco, alCambiarBanco }) {
   return (
@@ -11,7 +11,7 @@ export function FiltrosVerificacion({ periodos, periodo, alCambiarPeriodo, banco
       <CardHeader>
         <CardTitle>Filtros</CardTitle>
         <CardDescription>
-          El período sigue al del encabezado y cambia los puntos 2 a 5. Los puntos 1 y 6 muestran todos los períodos y los
+          El período es el mismo de Panel, Rankings y Calidad y cambia los puntos 2 a 5. Los puntos 1 y 6 muestran todos los períodos y los
           chequeos usan siempre todos los bancos.
         </CardDescription>
       </CardHeader>
