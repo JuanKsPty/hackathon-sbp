@@ -1,6 +1,6 @@
 // Orden de las láminas de /presentacion. `titulo` va al lector de pantalla y al título de la pestaña.
-// La historia va por roles: problema, propuesta, Público, Analista, Administrador, confianza y
-// cierre. Después del cierre, el anexo técnico, solo para las preguntas del jurado.
+// La historia: problema, propuesta, Público, lo que nos diferencia, confianza y cierre.
+// Después del cierre, el anexo técnico, solo para las preguntas del jurado.
 import {
   Anexo,
   Arquitectura,
@@ -8,13 +8,11 @@ import {
   Cierre,
   Confianza,
   Decisiones,
+  Diferencia,
   Flujo,
-  Lideres,
   Portada,
   Problema,
   Propuesta,
-  RolAdministrador,
-  RolAnalista,
   RolPublico,
 } from './laminas.jsx'
 
@@ -23,9 +21,7 @@ export const LAMINAS = [
   { id: 'problema', titulo: 'El problema', Componente: Problema },
   { id: 'propuesta', titulo: 'La propuesta', Componente: Propuesta },
   { id: 'publico', titulo: 'Público', Componente: RolPublico },
-  { id: 'lideres', titulo: 'Lo que ve el público', Componente: Lideres },
-  { id: 'analista', titulo: 'Analista', Componente: RolAnalista },
-  { id: 'administrador', titulo: 'Administrador', Componente: RolAdministrador },
+  { id: 'diferencia', titulo: 'Lo que nos diferencia', Componente: Diferencia },
   { id: 'confianza', titulo: 'Por qué confiar en los números', Componente: Confianza },
   { id: 'cierre', titulo: 'Cierre', Componente: Cierre },
   { id: 'anexo', titulo: 'Anexo técnico', Componente: Anexo },

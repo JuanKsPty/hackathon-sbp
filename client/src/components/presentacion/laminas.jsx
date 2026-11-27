@@ -5,12 +5,11 @@
 // mientras no llegan se ve "—".
 import { Link } from 'react-router'
 import {
-  ArrowLeftRightIcon,
   ArrowRightIcon,
   BellRingIcon,
+  BotIcon,
   CalculatorIcon,
   CheckCircle2Icon,
-  ClipboardCheckIcon,
   CreditCardIcon,
   CrownIcon,
   DatabaseIcon,
@@ -26,15 +25,12 @@ import {
   MonitorIcon,
   MousePointerClickIcon,
   RadarIcon,
-  RefreshCwIcon,
   ScaleIcon,
   SearchIcon,
   ServerIcon,
   ShieldCheckIcon,
-  SlidersHorizontalIcon,
   SparklesIcon,
   TagsIcon,
-  TrendingUpIcon,
   TriangleAlertIcon,
   UploadIcon,
   UsersIcon,
@@ -42,7 +38,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { BloqueOscuro, Etiqueta, SeccionGris } from '@/components/marca'
-import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
+import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
 import { EncabezadoLamina, IconoCirculo, Lamina, SinDatos, Tarjeta } from './piezas.jsx'
 
@@ -291,71 +287,48 @@ export function RolPublico() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 6. Analista
+// 5. Lo que nos diferencia
 // ---------------------------------------------------------------------------------------------
-export function RolAnalista() {
+export function Diferencia() {
+  const puntos = [
+    { icono: SparklesIcon, titulo: 'IA que no inventa', texto: 'Si la IA cita un número que el motor no dio, se descarta y queda la explicación por reglas.' },
+    { icono: SearchIcon, titulo: 'Explica por qué cambió', texto: 'Cada movimiento trae su frase, y el saldo se separa en préstamos nuevos, salidas y pagos.' },
+    { icono: MousePointerClickIcon, titulo: 'Te enseña a usarla', texto: 'Preguntas “¿cómo…?” y un cursor recorre la app señalando dónde tocar.' },
+    { icono: UploadIcon, titulo: 'El mes nuevo, en segundos', texto: 'Se sube el archivo, todo se recalcula y los suscriptores reciben el aviso por correo.' },
+    { icono: ShieldCheckIcon, titulo: 'Funciona sin IA', texto: 'Sin llave de IA la app responde igual, por reglas. Nada depende de un tercero.' },
+    { icono: BotIcon, titulo: 'Conectada a Claude', texto: 'Se consulta desde Claude por MCP, de solo lectura y con el perfil que corresponde.' },
+  ]
   return (
-    <LaminaRol
-      icono={UsersIcon}
-      etiqueta="Analista · con usuario"
-      fuerte="Entender qué cambió"
-      suave="y por qué cambió."
-      quien="Quien sigue el mercado bancario mes a mes."
-      pregunta="¿Qué cambió de agosto a septiembre?"
-      funciones={[
-        { icono: ArrowLeftRightIcon, titulo: 'Comparar dos meses', texto: 'Qué bancos subieron o bajaron de puesto y quién es el nuevo líder.' },
-        { icono: TrendingUpIcon, titulo: 'Lo importante, marcado', texto: 'La app señala los movimientos significativos de cada ranking.' },
-        { icono: MessageSquareTextIcon, titulo: 'Una frase por cambio', texto: 'Cada movimiento viene explicado en lenguaje claro.' },
-        { icono: SearchIcon, titulo: 'Por qué cambió el saldo', texto: 'Cuánto vino de préstamos nuevos, de los que salieron y de lo que se pagó.' },
-        { icono: ScaleIcon, titulo: 'Dos bancos lado a lado', texto: 'Su posición y su saldo, uno junto al otro.' },
-        { icono: FileSpreadsheetIcon, titulo: 'Reportes a la medida', texto: 'Los meses, sectores y bancos que quiera, listos para descargar.' },
-      ]}
-      pie="Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida."
-    />
+    <Lamina>
+      <EncabezadoLamina
+        icono={RadarIcon}
+        etiqueta="Lo que nos diferencia"
+        fuerte="No es otro tablero de rankings."
+        suave="Explica, enseña y se comprueba."
+      />
+      <ul className="grid flex-1 grid-cols-3 grid-rows-2 gap-5">
+        {puntos.map(({ icono, titulo, texto }) => (
+          <li key={titulo}>
+            <Tarjeta className="h-full gap-4 p-7">
+              <IconoCirculo icono={icono} />
+              <h3 className="text-[28px] leading-tight font-medium tracking-tight">{titulo}</h3>
+              <p className="text-[20px] leading-snug text-muted-foreground">{texto}</p>
+            </Tarjeta>
+          </li>
+        ))}
+      </ul>
+      <BloqueOscuro className="flex items-center gap-5 px-8 py-6 sm:px-8 sm:py-6">
+        <CheckCircle2Icon aria-hidden="true" className="size-8 shrink-0 text-brillo" />
+        <p className="text-[24px] leading-snug text-bloque-foreground">
+          Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida.
+        </p>
+      </BloqueOscuro>
+    </Lamina>
   )
 }
 
 // ---------------------------------------------------------------------------------------------
-// 7. Administrador
-// ---------------------------------------------------------------------------------------------
-export function RolAdministrador({ datos }) {
-  const { regla } = datos
-  // La regla vigente, en palabras: llega de GET /api/parametros.
-  const criterios = regla
-    ? [
-        regla.min_cambio_posicion_abs != null && `sube o baja ${regla.min_cambio_posicion_abs} puestos o más`,
-        regla.cambio_lider && 'cambia el líder',
-        regla.min_var_saldo_pct_abs != null && `el saldo varía ${regla.min_var_saldo_pct_abs} % o más`,
-      ].filter(Boolean)
-    : []
-
-  return (
-    <LaminaRol
-      icono={KeyRoundIcon}
-      etiqueta="Administrador · con usuario"
-      fuerte="Publicar el mes"
-      suave="sin trabajo manual."
-      quien="Quien publica la información cada mes."
-      pregunta="¿Cómo publico el mes sin errores?"
-      funciones={[
-        { icono: UploadIcon, titulo: 'Subir el archivo del mes', texto: 'La app reconoce el mes sola y recalcula todo en segundos.' },
-        { icono: RefreshCwIcon, titulo: 'Ver qué cambió', texto: 'Muestra los nuevos líderes y los cambios de puesto, y avisa a los suscriptores.' },
-        { icono: ShieldCheckIcon, titulo: 'Errores, aparte', texto: 'Las filas con problemas quedan fuera, cada una con su motivo.' },
-        { icono: SlidersHorizontalIcon, titulo: 'Decidir qué es importante', texto: 'Ajusta cuándo se marca un movimiento, sin programar nada.' },
-        { icono: LockIcon, titulo: 'Quién entra y qué ve', texto: 'Crea usuarios y decide qué puede hacer cada perfil.' },
-        { icono: ClipboardCheckIcon, titulo: 'Registro de todo', texto: 'Qué archivo se cargó, cuándo, quién y con qué resultado.' },
-      ]}
-      pie={
-        criterios.length > 0
-          ? `Hoy se marca un movimiento si ${criterios.join(', o ')}.`
-          : 'El mes nuevo se publica en segundos, no en días.'
-      }
-    />
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// 8. Por qué confiar en los números (lo técnico, en palabras simples)
+// 6. Por qué confiar en los números (lo técnico, en palabras simples)
 // ---------------------------------------------------------------------------------------------
 const MOTIVOS = [
   { campo: 'E1_Duplicados', nombre: 'Repetidas', color: 'bg-chart-3' },
@@ -604,65 +577,6 @@ export function Flujo({ datos }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 5. Líderes en vivo: lo que ve el público
-// ---------------------------------------------------------------------------------------------
-export function Lideres({ datos }) {
-  const { rankings, ultimo } = datos
-  return (
-    <Lamina className="gap-8">
-      <EncabezadoLamina
-        icono={CrownIcon}
-        etiqueta={ultimo ? `Lo que ve el público · ${formatearPeriodo(ultimo)}` : 'Lo que ve el público'}
-        fuerte="Seis rankings, doce bancos."
-        suave="Así queda el primer lugar de cada uno."
-      />
-      {rankings.length === 0 ? (
-        <SinDatos cargando={datos.cargando && !datos.sinApi} />
-      ) : (
-        <div className="grid flex-1 grid-cols-3 grid-rows-2 gap-5">
-          {rankings.map((r) => {
-            const bancos = [...(r.bancos ?? [])].sort((a, b) => a.Posicion - b.Posicion)
-            const lider = bancos[0]
-            const tope = lider?.Saldo_Actividad || 1
-            return (
-              <Tarjeta key={r.Ranking} className="justify-between gap-4 p-6">
-                <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-sm font-medium tracking-wide text-muted-foreground">
-                    <CrownIcon aria-hidden="true" className="size-4 text-destacado" />
-                    {r.Ranking}
-                  </span>
-                  <span className="truncate text-[26px] font-medium tracking-tight">{lider?.Banco ?? '—'}</span>
-                  <span className="cifra text-lg text-muted-foreground">
-                    {formatearMonto(lider?.Saldo_Actividad)} · {formatearPorcentaje(lider?.Ponderacion_Pct)}
-                  </span>
-                </div>
-                {/* Los tres primeros, con barra proporcional al saldo del líder. */}
-                <ul className="flex flex-col gap-2">
-                  {bancos.slice(0, 3).map((b) => (
-                    <li key={b.Codigo_Banco} className="grid grid-cols-[24px_1fr] items-center gap-2 text-sm">
-                      <span className="cifra text-muted-foreground">{b.Posicion}</span>
-                      <div className="flex flex-col gap-1">
-                        <span className="truncate">{b.Banco}</span>
-                        <div className="h-2 rounded-full bg-muted">
-                          <div
-                            className={cn('h-2 rounded-full', b.Posicion === 1 ? 'bg-chart-1' : 'bg-chart-4')}
-                            style={{ width: `${Math.max(2, (b.Saldo_Actividad / tope) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </Tarjeta>
-            )
-          })}
-        </div>
-      )}
-    </Lamina>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
 // Anexo 3. Arquitectura
 // ---------------------------------------------------------------------------------------------
 function Caja({ icono: Icono, titulo, texto, className }) {
@@ -768,7 +682,7 @@ export function Decisiones() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 9. Cierre
+// 7. Cierre
 // ---------------------------------------------------------------------------------------------
 export function Cierre() {
   return (
