@@ -2,6 +2,7 @@ import { Outlet } from 'react-router'
 import { BarraFuente } from './BarraFuente.jsx'
 import { Encabezado } from './Encabezado.jsx'
 import { Navegacion } from './Navegacion.jsx'
+import { AgenteFlotante } from '@/agente/AgenteFlotante.jsx'
 
 // Estructura de todas las páginas: barra lateral (>= 1024 px), encabezado y barra de fuente fijos arriba.
 export function AppShell() {
@@ -21,6 +22,8 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+      {/* Agente flotante abajo a la derecha (#119): chat encima de la pantalla actual. */}
+      <AgenteFlotante />
     </div>
   )
 }

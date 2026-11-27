@@ -6,6 +6,7 @@ import { PerfilProvider } from '@/contexto/PerfilContext.jsx'
 import { TemaProvider } from '@/contexto/TemaContext.jsx'
 import { GuiaProvider } from '@/guia/GuiaContext.jsx'
 import { CapaGuia } from '@/guia/CapaGuia.jsx'
+import { AgenteProvider } from '@/agente/AgenteContext.jsx'
 import Admin from '@/paginas/Admin.jsx'
 import Asistente from '@/paginas/Asistente.jsx'
 import Calidad from '@/paginas/Calidad.jsx'
@@ -25,6 +26,7 @@ export default function App() {
             <BrowserRouter>
               {/* Cursor guía (#72): necesita el router para cambiar de página entre pasos. */}
               <GuiaProvider>
+              <AgenteProvider>
               <Routes>
                 <Route element={<AppShell />}>
                   <Route index element={<Panel />} />
@@ -39,6 +41,7 @@ export default function App() {
                 </Route>
               </Routes>
               <CapaGuia />
+              </AgenteProvider>
               </GuiaProvider>
             </BrowserRouter>
           </TooltipProvider>
