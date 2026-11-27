@@ -1,3 +1,4 @@
+import { AyudaTermino } from '@/components/glosario/AyudaTermino.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
@@ -12,7 +13,9 @@ export function CascadaPeriodos({ periodos, periodoElegido }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cascada de exclusiones por período</CardTitle>
+        <CardTitle className="flex items-center gap-1.5">
+          Cascada de exclusiones por período <AyudaTermino clave="cascada" />
+        </CardTitle>
         <CardDescription>
           Reporte oficial: cada fila excluida cuenta solo en el primer filtro que incumple (E1, luego E2, E3 y E4).
         </CardDescription>
@@ -23,13 +26,19 @@ export function CascadaPeriodos({ periodos, periodoElegido }) {
           <TableHeader>
             <TableRow>
               <TableHead>Período</TableHead>
-              <TableHead className="text-right">Filas leídas</TableHead>
+              <TableHead className="text-right">
+                <ConAyuda clave="filas_leidas">Filas leídas</ConAyuda>
+              </TableHead>
               {MOTIVOS.map((m) => (
                 <TableHead key={m.codigo} className="text-right" title={m.nombre}>
-                  {m.codigo} · {m.nombre}
+                  <ConAyuda clave={m.codigo}>
+                    {m.codigo} · {m.nombre}
+                  </ConAyuda>
                 </TableHead>
               ))}
-              <TableHead className="text-right">Universo local válido</TableHead>
+              <TableHead className="text-right">
+                <ConAyuda clave="universo">Universo local válido</ConAyuda>
+              </TableHead>
               <TableHead className="text-right">Saldo total válido</TableHead>
               <TableHead>Cuadre</TableHead>
             </TableRow>
@@ -59,6 +68,16 @@ export function CascadaPeriodos({ periodos, periodoElegido }) {
         {elegido && <Verificacion periodo={elegido} />}
       </CardContent>
     </Card>
+  )
+}
+
+// Encabezado con el ícono ⓘ del glosario (#129).
+function ConAyuda({ clave, children }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {children}
+      <AyudaTermino clave={clave} />
+    </span>
   )
 }
 
