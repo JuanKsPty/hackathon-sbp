@@ -113,7 +113,7 @@ export function ReglaSignificativo({ alCambiar }) {
               placeholder="Vacío = criterio desactivado"
               value={formulario[campo]}
               onChange={(e) => setFormulario({ ...formulario, [campo]: e.target.value })}
-              className="h-8 w-full max-w-48 rounded-md border bg-background px-2 text-sm cifra"
+              className="h-8 w-full max-w-48 rounded-md border border-input bg-background px-2 text-sm cifra"
             />
             <p className="text-xs text-muted-foreground">
               {ayuda} Por defecto: {datos.por_defecto[campo] ?? 'desactivado'}.
