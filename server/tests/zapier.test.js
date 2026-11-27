@@ -191,3 +191,30 @@ test('enviado_en va en hora de Panamá (UTC-5)', async () => {
   assert.equal(ahoraEnPanama(new Date('2026-11-27T16:43:04.213Z')), '2026-11-27T11:43:04.213-05:00');
   assert.match(eventoSuscripcion(suscriptor(), 'alta').enviado_en, /-05:00$/);
 });
+
+test('los enlaces de los correos usan APP_URL; sin ella, localhost para desarrollo', async () => {
+  const { enlaceDeBaja, enlaceDeConfirmacion } = await import('../src/automation/zapier.js');
+  const anterior = process.env.APP_URL;
+  try {
+    process.env.APP_URL = 'https://radar.ejemplo.com/';
+    assert.equal(enlaceDeBaja('t 1'), 'https://radar.ejemplo.com/api/suscripciones/baja?token=t%201');
+    assert.equal(enlaceDeConfirmacion('c-2'), 'https://radar.ejemplo.com/api/suscripciones/confirmar?token=c-2');
+    delete process.env.APP_URL;
+    assert.match(enlaceDeBaja('t-1'), /^http:\/\/localhost:\d+\/api\/suscripciones\/baja\?token=t-1$/);
+  } finally {
+    if (anterior === undefined) delete process.env.APP_URL;
+    else process.env.APP_URL = anterior;
+  }
+});
+
+test('confirmacion_suscripcion trae el enlace de confirmación y los campos del contrato', async () => {
+  const { eventoConfirmacion } = await import('../src/automation/zapier.js');
+  const evento = eventoConfirmacion({
+    correo: 'equipo@ejemplo.com',
+    confirmacion: { token: 'c-9', bancos: ['104'], rankings: [], solicitado_en: '2026-11-27T15:00:00Z' },
+  });
+  assert.equal(evento.evento, 'confirmacion_suscripcion');
+  assert.match(evento.enlace_confirmacion, /\/api\/suscripciones\/confirmar\?token=c-9$/);
+  assert.deepEqual(evento.bancos, ['104']);
+  assert.deepEqual(Object.keys(evento).sort(), Object.keys(leerContrato('evento-confirmacion-suscripcion.json')).sort());
+});
