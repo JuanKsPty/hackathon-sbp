@@ -16,9 +16,10 @@ import {
   ultimaSolicitud,
   sinToken,
 } from '../automation/suscripciones.js';
-import { eventoConfirmacion, eventoSuscripcion, enviarEvento } from '../automation/zapier.js';
+import { eventoConfirmacion, eventoReporteSolicitado, eventoSuscripcion, enviarEvento } from '../automation/zapier.js';
+import { crearObtenerMovimientos } from './movimientos.js';
 import { ErrorApi } from './errores.js';
-import { encabezado, AVISO, FUENTE } from './formato.js';
+import { encabezado, calidadDePeriodo, AVISO, FUENTE } from './formato.js';
 
 // Límite de pedidos: por IP (protege de un script que mande muchos correos de confirmación)
 // y por correo (no se reenvía la confirmación al mismo correo antes de esperaMismoCorreoMs).
@@ -90,6 +91,32 @@ export function rutasDeSuscripciones(almacen, { enviar = enviarEvento, limite = 
         ? 'Te enviamos un correo para confirmar la suscripción. Abre el enlace en las próximas 48 horas.'
         : 'No pudimos enviar el correo de confirmación en este momento. Inténtalo de nuevo en unos minutos.',
       suscripcion: sinToken(suscripcion),
+    });
+  });
+
+  // Enviar el reporte de un corte a un correo (cualquier perfil). Zapier manda el mismo correo de la
+  // alerta, con todos los movimientos significativos del corte frente al anterior. Sin periodo: el último.
+  rutas.post('/reportes/correo', limitarPorIp(limite, ahora), async (req, res) => {
+    const correo = normalizarCorreo(req.body?.correo);
+    const fechas = almacen.fechas();
+    const fecha = req.body?.periodo ? String(req.body.periodo) : fechas.at(-1);
+    const periodo = fecha ? almacen.obtener(fecha) : null;
+    if (!periodo) throw new ErrorApi(404, 'PERIODO_NO_ENCONTRADO', `No hay un período publicado con fecha ${fecha}.`);
+    const indice = fechas.indexOf(fecha);
+    const comparacion = indice > 0 ? crearObtenerMovimientos(almacen)({ desde: fechas[indice - 1], hasta: fecha }) : null;
+    const evento = eventoReporteSolicitado(
+      { fecha, comparacion, calidad: calidadDePeriodo(periodo), periodo },
+      { catalogos: almacen.catalogos, correo },
+    );
+    const envio = await enviar(evento, { perfil: req.perfil });
+    const enviado = envio.estado === 'ENVIADO';
+    res.json({
+      ...encabezado(),
+      enviado,
+      periodo: fecha,
+      mensaje: enviado
+        ? `Enviamos el reporte del corte del ${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)} a ${correo}. Llega en uno o dos minutos.`
+        : 'No pudimos enviar el reporte en este momento. Inténtalo de nuevo en unos minutos.',
     });
   });
 

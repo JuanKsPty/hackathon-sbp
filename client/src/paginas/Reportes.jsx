@@ -6,6 +6,7 @@ import {
   parametrosPersonalizado,
   urlDescarga,
 } from '@/api/cliente.js'
+import { CorreoReportes } from '@/components/alertas/CorreoReportes.jsx'
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
@@ -35,7 +36,7 @@ const DESCARGAS_ABIERTAS = [
 // Todas las cifras salen del API (R2); aquí solo se eligen filtros y se piden los CSV.
 export default function Reportes() {
   const { perfil, puede, opcionesListas } = usePerfil()
-  const { periodos, cargando, error, reintentar } = usePeriodo()
+  const { periodo, periodos, cargando, error, reintentar } = usePeriodo()
   const catalogo = useConsulta(pedirCatalogos)
 
   if (cargando || catalogo.cargando) {
@@ -61,6 +62,7 @@ export default function Reportes() {
 
   return (
     <Contenedor>
+      <CorreoReportes periodo={periodo} />
       {/* Las tres opciones son configurables por el Administrador (perfiles y permisos). */}
       {!opcionesListas || puede('descargar') ? (
         <DescargasAbiertas periodos={periodos} />
