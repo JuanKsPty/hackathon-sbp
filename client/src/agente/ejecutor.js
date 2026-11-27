@@ -30,9 +30,14 @@ export async function ejecutarAcciones(acciones, { registro, navegar, rutaActual
 
   for (const accion of acciones) {
     if (signal?.aborted) break
-    if (accion.ruta && necesitaNavegar(accion, rutaActual())) navegar(accion.ruta)
+    // Cambiar de página: antes, la demostración lleva el cursor al menú (también si la navegación
+    // está implícita en una acción de otra página).
+    if (accion.ruta && necesitaNavegar(accion, rutaActual())) {
+      await antesDe?.(accion.tipo === 'ir' ? accion : { tipo: 'ir', ruta: accion.ruta, texto: '' }, null)
+      if (signal?.aborted) break
+      navegar(accion.ruta)
+    }
     if (accion.tipo === 'ir') {
-      await antesDe?.(accion, null)
       aplicadas.push(accion)
       continue
     }

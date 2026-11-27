@@ -86,3 +86,16 @@ test('antesDe se espera antes de cada acción (para animar el cursor) y se puede
   assert.equal(e.tabla.orden.columna, 'Posicion') // cancelado antes de ordenar
   assert.equal(r.aplicadas.length, 2)
 })
+
+test('antesDe se llama antes de navegar (el cursor toca el menú), también si la navegación es implícita', async () => {
+  const e = escenario()
+  const orden = []
+  await ejecutarAcciones(ACCIONES.slice(1, 2), {
+    ...e,
+    antesDe: async (accion) => {
+      orden.push(`${accion.tipo}:${e.rutaActual()}`)
+    },
+  })
+  // La acción "elegir" es de /rankings: primero un "ir" implícito (todavía en /), después elegir (ya en /rankings).
+  assert.deepEqual(orden, ['ir:/', 'elegir:/rankings'])
+})
