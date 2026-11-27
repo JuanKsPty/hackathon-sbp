@@ -8,10 +8,12 @@ Calcula los rankings de crédito desde los CSV del reto. Todo sale de los archiv
 cd server
 npm install
 npm test            # pruebas: cascada, SB21, rankings, reconciliaciones, exportaciones y API
+npm run test:cobertura   # las mismas pruebas con reporte de cobertura (falla si baja de 90 % de líneas)
 npm start           # API en http://localhost:3001/api (procesa ../data al arrancar)
 npm run dev         # igual, reiniciando al guardar cambios
 npm run procesar    # procesa ../data y escribe server/salidas/*.csv
 npm run procesar -- --datos ../data --salida salidas
+BASE_URL=https://mi-app.ejemplo npm run humo   # prueba de humo contra la app desplegada (por defecto localhost:3001)
 ```
 
 Variables de entorno opcionales: `PORT` (por defecto `3001`) y `DATA_DIR` (por defecto `../data`).
@@ -23,6 +25,19 @@ Salidas del script:
 - `excluidas.csv` (exclusión auditable) y `alertas.csv`.
 
 La descomposición está en `src/automation/descomposicion.js` y su endpoint es `GET /api/movimientos/descomposicion` (ver `contracts/consulta.md`).
+
+## Pruebas
+
+Las pruebas usan `node:test` y corren sin red ni base de datos: procesan los CSV de `data/`. Las cifras de control (`tests/referencia/`) solo viven en las pruebas, nunca en el código de la app (R2).
+
+- **`npm run test:cobertura`:** corre todas las pruebas con `--experimental-test-coverage` e imprime la cobertura por archivo, sin contar `tests/`. Falla si baja de 90 % de líneas, 85 % de ramas o 90 % de funciones.
+- **Contratos (`tests/contratos.test.js`):** cada ejemplo JSON de `/contracts` se compara con la respuesta real de la API, pedida con el perfil que corresponde (`X-Perfil`). Se comparan claves y tipos en todos los niveles, no valores. Si se agrega un ejemplo sin su prueba, el test falla.
+- **Entregable 7 (`tests/entregable7.test.js`):** la app arranca con julio y agosto, el Administrador carga septiembre por `POST /api/periodos` y la respuesta trae los cambios de ranking, sin editar código.
+- **Prueba de humo (`scripts/humo.js`):** `npm run humo` revisa una app levantada o desplegada.
+  - Toma la URL de `BASE_URL`: la raíz de la app, con o sin `/api`.
+  - Revisa `/api/salud`, `/api/rankings`, `/api/calidad`, `/api/docs`, `/api/mcp` (initialize) y el 403 de Público.
+  - Solo hace lecturas y sale con código 1 si algún control falla.
+  - `tests/humo.test.js` la corre contra la app local en cada `npm test`.
 
 ## API
 

@@ -76,6 +76,8 @@ export const HERRAMIENTAS = [
 ];
 
 const POR_NOMBRE = new Map(HERRAMIENTAS.map((h) => [h.name, h]));
+// Tiempo máximo de cada consulta de herramienta a la API.
+const TIMEOUT_MS = 15_000;
 
 const permitida = (herramienta, perfil) =>
   !herramienta.opcion || OPCIONES.find((o) => o.opcion === herramienta.opcion)?.perfiles.includes(perfil);
@@ -113,9 +115,17 @@ export function crearEjecutor(baseUrl, { perfil = 'publico', fetchImpl = fetch }
       Object.entries(entrada).filter(([clave, valor]) => clave in herramienta.input_schema.properties && valor !== '' && valor != null),
     );
     const url = `${baseUrl}${herramienta.ruta}${parametros.size ? `?${parametros}` : ''}`;
-    const respuesta = await fetchImpl(url, { headers: { 'X-Perfil': perfil } });
-    const cuerpo = await respuesta.json();
-    if (!respuesta.ok) return { ok: false, error: cuerpo.error?.mensaje ?? `HTTP ${respuesta.status}` };
+    // Un fallo de red, un timeout o una respuesta que no es JSON vuelve como error de la herramienta
+    // (el modelo lo recibe con is_error y puede seguir o explicarlo), no tumba al agente (#90).
+    let respuesta;
+    let cuerpo;
+    try {
+      respuesta = await fetchImpl(url, { headers: { 'X-Perfil': perfil }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+      cuerpo = await respuesta.json();
+    } catch (error) {
+      return { ok: false, error: `No se pudo consultar la API: ${error.message}` };
+    }
+    if (!respuesta.ok) return { ok: false, error: cuerpo?.error?.mensaje ?? `HTTP ${respuesta.status}` };
     return { ok: true, datos: recortar(cuerpo, herramienta.limite ?? 400), ruta: url.slice(baseUrl.length) };
   };
 }

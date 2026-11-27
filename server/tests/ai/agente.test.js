@@ -19,7 +19,9 @@ async function levantar(opcionesIA) {
   const servidor = crearApp({ almacen, obtenerMovimientos, opcionesIA }).listen(0);
   servidores.push(servidor);
   await once(servidor, 'listening');
-  return `http://127.0.0.1:${servidor.address().port}/api`;
+  const base = `http://127.0.0.1:${servidor.address().port}/api`;
+  process.env.API_INTERNA = base; // en el despliegue es http://127.0.0.1:$PORT/api (#89)
+  return base;
 }
 
 async function preguntar(base, cuerpo, perfil = 'analista') {
@@ -273,4 +275,76 @@ test('si la IA falla, la respuesta trae guia: null', async () => {
   const base = await levantar({ cliente });
   const { cuerpo } = await preguntar(base, { pregunta: '¿Cómo veo los rankings?' });
   assert.equal(cuerpo.guia, null);
+});
+
+test('#89: un Host falso no desvía las consultas de las herramientas (SSRF)', async () => {
+  const { request } = await import('node:http');
+  // Servidor espía: si el agente le consultara, devolvería cifras falsas.
+  const { createServer } = await import('node:http');
+  let consultasAlEspia = 0;
+  const espia = createServer((req, res) => {
+    consultasAlEspia++;
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ rankings: [{ Ranking: 'HIPOTECARIO', bancos: [{ Banco: 'Banco Falso', Saldo_Actividad: 999 }] }] }));
+  }).listen(0);
+  servidores.push(espia);
+  await once(espia, 'listening');
+
+  const cliente = clienteGuionado([
+    usarHerramienta('consultar_rankings', { periodo: '20260930', ranking: 'HIPOTECARIO' }),
+    (params) => {
+      const datos = ultimoResultado(params);
+      return responder(`Lidera ${datos.rankings[0].bancos[0].Banco}.`)();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  const { port } = new URL(base);
+  const cuerpo = await new Promise((resolver, rechazar) => {
+    const req = request(
+      {
+        host: '127.0.0.1',
+        port,
+        path: '/api/ia/preguntar',
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'X-Perfil': 'analista', Host: `127.0.0.1:${espia.address().port}` },
+      },
+      (res) => {
+        let texto = '';
+        res.on('data', (c) => (texto += c));
+        res.on('end', () => resolver(JSON.parse(texto)));
+      },
+    );
+    req.on('error', rechazar);
+    req.end(JSON.stringify({ pregunta: '¿Quién lidera HIPOTECARIO?' }));
+  });
+  assert.equal(consultasAlEspia, 0);
+  assert.equal(cuerpo.consultas[0].ok, true);
+  assert.doesNotMatch(cuerpo.respuesta, /Banco Falso/);
+});
+
+test('#90: un fallo de red o una respuesta que no es JSON vuelve como error de herramienta', async () => {
+  const caida = await crearEjecutor('http://127.0.0.1:9/api')('listar_periodos', {});
+  assert.equal(caida.ok, false);
+  assert.match(caida.error, /No se pudo consultar la API/);
+
+  const noJson = await crearEjecutor('http://x/api', { fetchImpl: async () => new Response('<html>502</html>', { status: 502 }) })('listar_periodos', {});
+  assert.equal(noJson.ok, false);
+  assert.match(noJson.error, /No se pudo consultar la API/);
+});
+
+test('#90: si una herramienta falla, el agente sigue y responde', async () => {
+  const cliente = clienteGuionado([
+    usarHerramienta('listar_periodos', {}),
+    (params) => {
+      const resultado = params.messages.at(-1).content[0];
+      assert.equal(resultado.is_error, true);
+      return responder('No pude consultar los períodos en este momento.')();
+    },
+  ]);
+  const base = await levantar({ cliente });
+  process.env.API_INTERNA = 'http://127.0.0.1:9/api'; // API interna caída
+  const { cuerpo } = await preguntar(base, { pregunta: '¿Qué períodos hay?' });
+  assert.equal(cuerpo.ia_disponible, true);
+  assert.equal(cuerpo.verificada, true);
+  assert.equal(cuerpo.consultas[0].ok, false);
 });

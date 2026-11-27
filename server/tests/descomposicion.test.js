@@ -68,10 +68,20 @@ test('la evidencia lista los préstamos de cada pieza y suma lo mismo', () => {
 const periodosReales = () => paqueteReal().periodos;
 const pares = () => [[0, 1], [1, 2], [0, 2]].map(([a, b]) => [periodosReales()[a], periodosReales()[b]]);
 
+// Continuidad esperada, contada aparte con conjuntos de Numero_Prestamo (sin cifras a mano, R2).
+function continuidadEsperada(anterior, actual) {
+  const antes = new Set(anterior.operaciones.map((op) => op.numeroPrestamo));
+  const despues = new Set(actual.operaciones.map((op) => op.numeroPrestamo));
+  const continuan = [...despues].filter((p) => antes.has(p)).length;
+  return { continuan, entran: despues.size - continuan, salen: antes.size - continuan };
+}
+
 test('datos reales: continuidad de préstamos entre meses', () => {
-  const [julio, agosto, septiembre] = periodosReales();
-  assert.deepEqual(descomponer(julio, agosto).continuidad, { continuan: 21123, entran: 5287, salen: 2881 });
-  assert.deepEqual(descomponer(agosto, septiembre).continuidad, { continuan: 23240, entran: 5562, salen: 3170 });
+  for (const [anterior, actual] of pares()) {
+    const esperada = continuidadEsperada(anterior, actual);
+    assert.ok(esperada.continuan > 0 && esperada.entran > 0 && esperada.salen > 0);
+    assert.deepEqual(descomponer(anterior, actual).continuidad, esperada);
+  }
 });
 
 test('datos reales: las tres piezas suman Var_Saldo de /api/movimientos al centavo (3 x 72)', () => {
@@ -133,7 +143,9 @@ test('GET /api/movimientos/descomposicion sin parámetros: último período cont
   assert.equal(status, 200);
   assert.deepEqual([cuerpo.periodo_anterior, cuerpo.periodo_actual], ['20260831', '20260930']);
   assert.match(cuerpo.aviso, /Datos ficticios/);
-  assert.deepEqual(cuerpo.Continuidad, { Continuan: 23240, Entran: 5562, Salen: 3170 });
+  const [, agosto, septiembre] = periodosReales();
+  const { continuan, entran, salen } = continuidadEsperada(agosto, septiembre);
+  assert.deepEqual(cuerpo.Continuidad, { Continuan: continuan, Entran: entran, Salen: salen });
   assert.equal(cuerpo.descomposicion.length, 6 * 12);
   const centavos = (n) => Math.round(n * 100);
   for (const d of cuerpo.descomposicion) {

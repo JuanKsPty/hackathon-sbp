@@ -17,14 +17,16 @@ Los puntos 1 y 6 traen siempre todos los períodos. **Los chequeos usan siempre 
 
 ## Los 6 puntos
 
-| `punto` | Qué muestra (`datos`) | Chequeos |
-| :---: | :--- | :--- |
-| 1 | Por período: filas leídas, E1, E2, E3, E4 y universo local válido | leídas = E1+E2+E3+E4+universo; ningún préstamo repetido |
-| 2 | HIPOTECARIO, CONSTRUCCION, INDUSTRIA y AGROPECUARIO: posición, banco y saldo | 12 bancos con posiciones 1 a 12 sin huecos |
-| 3 | COMERCIO y CONSUMO: posición, banco y saldo | ídem |
-| 4 | Por banco: total de cartera local válida y ponderación en cada uno de los 6 rankings | mismo denominador en los 6 rankings; las 6 ponderaciones suman 100 (con el redondeo) |
-| 5 | CONSUMO por banco: Crédito personal, Automóvil y Tarjeta, y cuántas operaciones movió la regla SB21 | CONSUMO tiene Tarjeta; la suma de subactividades = saldo de la actividad en cada ranking y banco |
-| 6 | Por período: archivo y reconciliaciones R1, R2 y R3 | al menos 3 períodos; R1 y R2 cuadran al centavo |
+`puntos` es un objeto con una clave por punto, porque cada uno tiene datos de forma distinta. Cada valor trae `punto` (1 a 6), `titulo`, `datos` y `chequeos`.
+
+| Clave (`punto`) | Qué muestra (`datos`) | Chequeos |
+| :--- | :--- | :--- |
+| `calidad` (1) | Por período: filas leídas, E1, E2, E3, E4 y universo local válido | leídas = E1+E2+E3+E4+universo; ningún préstamo repetido |
+| `rankings_obligatorios` (2) | HIPOTECARIO, CONSTRUCCION, INDUSTRIA y AGROPECUARIO: posición, banco y saldo | 12 bancos con posiciones 1 a 12 sin huecos |
+| `rankings_adicionales` (3) | COMERCIO y CONSUMO: posición, banco y saldo | ídem |
+| `ponderacion` (4) | Por banco: total de cartera local válida y ponderación en cada uno de los 6 rankings | mismo denominador en los 6 rankings; las 6 ponderaciones suman 100 (con el redondeo) |
+| `subactividades` (5) | CONSUMO por banco: Crédito personal, Automóvil y Tarjeta, y cuántas operaciones movió la regla SB21 | CONSUMO tiene Tarjeta; la suma de subactividades = saldo de la actividad en cada ranking y banco |
+| `periodos` (6) | Por período: archivo y reconciliaciones R1, R2 y R3 | al menos 3 períodos; R1 y R2 cuadran al centavo |
 
 Cada chequeo es `{ "nombre": "...", "ok": true }`, y `todo_ok` es `true` si pasan todos. La UI puede mostrar ✓ o ✗ junto a cada punto.
 

@@ -15,8 +15,9 @@ test('arma los 6 puntos de la sección 11.1 y todos los chequeos pasan con los d
   const v = armarVerificacion(almacen, almacen.obtener(almacen.ultimaFecha()));
   assert.equal(v.periodo, '20260930');
   assert.deepEqual(v.periodos, ['20260731', '20260831', '20260930']);
-  assert.deepEqual(v.puntos.map((p) => p.punto), [1, 2, 3, 4, 5, 6]);
-  for (const p of v.puntos) {
+  assert.deepEqual(Object.keys(v.puntos), ['calidad', 'rankings_obligatorios', 'rankings_adicionales', 'ponderacion', 'subactividades', 'periodos']);
+  assert.deepEqual(Object.values(v.puntos).map((p) => p.punto), [1, 2, 3, 4, 5, 6]);
+  for (const p of Object.values(v.puntos)) {
     assert.ok(p.chequeos.length > 0, `punto ${p.punto}`);
     for (const c of p.chequeos) assert.equal(c.ok, true, `punto ${p.punto}: ${c.nombre}`);
   }
@@ -27,7 +28,7 @@ test('los datos coinciden con los resultados del motor', () => {
   const almacen = almacenReal();
   const periodo = almacen.obtener('20260831');
   const v = armarVerificacion(almacen, periodo);
-  const [p1, p2, p3, p4, p5] = v.puntos;
+  const [p1, p2, p3, p4, p5] = Object.values(v.puntos);
 
   const julio = almacen.obtener('20260731').calidad;
   assert.equal(p1.datos.periodos[0].Universo_Local_Valido, julio.universoValido);
@@ -55,12 +56,12 @@ test('con banco, acota los datos a ese banco pero conserva su posición real', (
   const periodo = almacen.obtener('20260930');
   const v = armarVerificacion(almacen, periodo, '108');
   assert.deepEqual(v.banco, { Codigo_Banco: '108', Banco: 'Banco Capital' });
-  const comercio = v.puntos[2].datos.rankings.find((r) => r.Ranking === 'COMERCIO');
+  const comercio = v.puntos.rankings_adicionales.datos.rankings.find((r) => r.Ranking === 'COMERCIO');
   assert.equal(comercio.bancos.length, 1);
   const real = periodo.rankings.find((r) => r.ranking === 'COMERCIO').filas.find((f) => f.codigoBanco === '108');
   assert.equal(comercio.bancos[0].Posicion, real.posicion);
-  assert.equal(v.puntos[3].datos.bancos.length, 1);
-  assert.equal(v.puntos[4].datos.consumo.length, 1);
+  assert.equal(v.puntos.ponderacion.datos.bancos.length, 1);
+  assert.equal(v.puntos.subactividades.datos.consumo.length, 1);
   assert.equal(v.todo_ok, true); // los chequeos siguen usando todos los bancos
 });
 
@@ -74,7 +75,7 @@ test('los chequeos detectan datos que no cuadran', () => {
   roto.rankings[1].filas.pop(); // ranking con un banco menos
   const almacen = crearAlmacen(catalogos, [...periodos.slice(0, -1), roto]);
   const v = armarVerificacion(almacen, roto);
-  const fallidos = v.puntos.flatMap((p) => p.chequeos.filter((c) => !c.ok).map((c) => `${p.punto}: ${c.nombre}`));
+  const fallidos = Object.values(v.puntos).flatMap((p) => p.chequeos.filter((c) => !c.ok).map((c) => `${p.punto}: ${c.nombre}`));
   assert.equal(v.todo_ok, false);
   assert.ok(fallidos.some((f) => f.startsWith('1: Filas leídas')));
   assert.ok(fallidos.some((f) => f.startsWith('2: Cada ranking')));
@@ -94,7 +95,7 @@ test('GET /api/verificacion: último período por defecto, filtros y errores', a
     assert.equal(r.periodo, '20260930');
     assert.equal(r.todo_ok, true);
     assert.match(r.aviso, /Datos ficticios/);
-    assert.equal(r.puntos.length, 6);
+    assert.equal(Object.keys(r.puntos).length, 6);
 
     const filtrado = await (await fetch(`${base}/verificacion?periodo=20260731&banco=104`)).json();
     assert.equal(filtrado.periodo, '20260731');
