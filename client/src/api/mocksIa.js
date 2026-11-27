@@ -1,6 +1,7 @@
 // Modo mock de los endpoints de IA (contracts/ia.md). Solo lo carga api/ia.js con import() cuando
 // corre `npm run dev` con VITE_USAR_MOCKS=true; el build de producción no lo incluye (regla R2).
-// Los textos y números son ilustrativos (los del ejemplo del contrato): sirven para maquetar.
+// Valores ilustrativos de modo mock, no son resultados del motor (R2): bancos "Banco Ejemplo A/B/C",
+// códigos EJ-* y cifras redondas, solo para maquetar los estados de la pantalla.
 //
 // Para ver el aviso "IA no disponible": VITE_MOCK_IA=false en el .env de la raíz del repo
 // (vite.config.js lee el .env de la raíz).
@@ -35,19 +36,20 @@ function mockExplicaciones({ desde = '20260831', hasta = '20260930', ranking } =
     })
   }
   const disponible = iaDisponible()
+  // Valores ilustrativos de modo mock, no son resultados del motor (R2).
   const items = [
     {
-      id: 'COMERCIO:lider', Ranking: 'COMERCIO', Codigo_Banco: '112', tipo: 'cambio_lider',
-      texto: 'Banco Solidez pasa a liderar COMERCIO y desplaza a Banco Regional.', fuente: 'reglas',
+      id: 'COMERCIO:lider', Ranking: 'COMERCIO', Codigo_Banco: 'EJ-A', tipo: 'cambio_lider',
+      texto: 'Banco Ejemplo A pasa a liderar COMERCIO y desplaza a Banco Ejemplo B (texto de ejemplo).', fuente: 'reglas',
     },
     {
-      id: 'COMERCIO:108', Ranking: 'COMERCIO', Codigo_Banco: '108', tipo: 'movimiento',
-      texto: 'Banco Capital sube 4 posiciones en COMERCIO (del 7.º al 3.º), con una variación de saldo de +21.07%.',
+      id: 'COMERCIO:EJ-C', Ranking: 'COMERCIO', Codigo_Banco: 'EJ-C', tipo: 'movimiento',
+      texto: 'Banco Ejemplo C sube 2 posiciones en COMERCIO (del 5.º al 3.º), con una variación de saldo de +10.00% (texto de ejemplo).',
       fuente: disponible ? 'ia' : 'reglas',
     },
     {
-      id: 'HIPOTECARIO:101', Ranking: 'HIPOTECARIO', Codigo_Banco: '101', tipo: 'movimiento',
-      texto: 'Banco Istmo baja 2 posiciones en HIPOTECARIO (del 2.º al 4.º).', fuente: 'reglas',
+      id: 'HIPOTECARIO:EJ-B', Ranking: 'HIPOTECARIO', Codigo_Banco: 'EJ-B', tipo: 'movimiento',
+      texto: 'Banco Ejemplo B baja 1 posición en HIPOTECARIO (del 2.º al 3.º) (texto de ejemplo).', fuente: 'reglas',
     },
   ].filter((item) => !ranking || item.Ranking === ranking)
   return {
@@ -99,8 +101,9 @@ function mockPreguntar({ pregunta = '' } = {}) {
     ...base,
     ia_disponible: true,
     motivo: null,
+    // Valores ilustrativos de modo mock, no son resultados del motor (R2).
     respuesta:
-      'Respuesta de ejemplo (modo mock). En el período 20260930 lidera **HIPOTECARIO** Banco Solidez.\n' +
+      'Respuesta de ejemplo (modo mock). En **HIPOTECARIO** lidera el Banco Ejemplo A (valor ilustrativo).\n' +
       'Con el API encendido, aquí llega la respuesta de la IA verificada contra el motor.',
     verificada: true,
     consultas: [
