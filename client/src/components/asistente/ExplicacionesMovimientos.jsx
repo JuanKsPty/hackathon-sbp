@@ -35,12 +35,14 @@ export function ExplicacionesMovimientos({ guia, className }) {
   const permitido = perfil !== 'publico'
   const activa = permitido && Boolean(desde && periodo)
 
-  const { datos, error, cargando, reintentar } = useConsulta(
+  const { datos: ultimosDatos, error, cargando, reintentar } = useConsulta(
     (opciones) => explicaciones({ desde, hasta: periodo }, { ...opciones, perfil }),
     [perfil, desde, periodo],
     { activa },
   )
 
+  // useConsulta conserva la última respuesta aunque la consulta quede inactiva (Público, primer período).
+  const datos = activa ? ultimosDatos : null
   const items = useMemo(() => (Array.isArray(datos?.items) ? datos.items : []), [datos])
   const rankings = useMemo(() => [...new Set(items.map((item) => item.Ranking).filter(Boolean))], [items])
   const visibles = ranking && rankings.includes(ranking) ? items.filter((item) => item.Ranking === ranking) : items
