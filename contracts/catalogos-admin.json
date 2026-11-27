@@ -1,0 +1,22 @@
+{
+  "catalogos": [
+    {
+      "catalogo": "CINU/SB109",
+      "archivo": "Catalogo_CINU_SB109_reto.csv",
+      "fuente": "Paquete del reto (SBP), copia en data/",
+      "fecha_carga": "2026-11-27T15:30:01.004Z",
+      "registros": 22,
+      "congelado": true,
+      "nota": "Congelado: es la única versión válida (sección 2). No se modifica."
+    },
+    {
+      "catalogo": "SB21",
+      "archivo": "Tabla_SB21_simplificada.csv",
+      "fuente": "Paquete del reto (SBP), copia en data/",
+      "fecha_carga": "2026-11-27T15:30:01.004Z",
+      "registros": 6,
+      "congelado": false,
+      "nota": "Solo lectura: viene del paquete del reto."
+    }
+  ]
+}
