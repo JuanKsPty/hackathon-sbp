@@ -18,6 +18,7 @@ import { rutasDeSesion } from './routes/sesion.js';
 import { rutasDePermisos } from './routes/permisos.js';
 import { rutasDeUsuarios } from './routes/usuarios.js';
 import { rutasDeDashboard } from './routes/dashboard.js';
+import { rutasDePrestamos } from './routes/prestamos.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { limitarPedidos } from './middleware/limitePedidos.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
@@ -71,6 +72,7 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp,
   app.use('/api', rutasDeVerificacion(almacen)); // un dato de cada punto de la sección 11.1 (#63)
   app.use('/api', rutasDeSuscripciones(almacen)); // alertas por correo con Zapier (#7)
   app.use('/api', rutasDeDashboard(almacen)); // dashboard HTML descargable, junto a los CSV
+  app.use('/api', rutasDePrestamos(almacen)); // ficha e informe de cada préstamo (Analista y Admin)
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.
 
   app.use(rutaNoEncontrada);

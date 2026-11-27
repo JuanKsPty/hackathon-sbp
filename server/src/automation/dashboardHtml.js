@@ -232,3 +232,6 @@ ${seccionCalidad(c)}
 </main></body></html>
 `;
 }
+
+// Piezas compartidas con otros reportes HTML (ficha de préstamo).
+export { escapar, monto, fechaLegible, ESTILOS };

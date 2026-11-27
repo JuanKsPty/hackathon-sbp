@@ -138,6 +138,11 @@ export const indicadores = ({ periodo, ranking } = {}, opciones) =>
 export const movimientosDescomposicion = ({ desde, hasta, ranking, banco, evidencia } = {}, opciones) =>
   pedir('/movimientos/descomposicion', { desde, hasta, ranking, banco, evidencia: evidencia ? 'true' : undefined }, opciones)
 
+// Ficha de un préstamo en todos los períodos (Analista y Administrador): banco, ranking, saldo, peso
+// en la cartera del banco, exclusiones, alertas y campos del AT03. Su informe HTML se baja con
+// descargarArchivo('/exportar/prestamo.html', { numero }).
+export const prestamo = (numero, opciones) => pedir(`/prestamos/${encodeURIComponent(numero)}`, undefined, opciones)
+
 // contracts/verificacion.json (#63): un dato de cada punto de la sección 11.1 con sus chequeos.
 // periodo (puntos 2 a 5; por defecto el último) y banco acotan los datos; los chequeos usan todos los bancos.
 export const verificacion = ({ periodo, banco } = {}, opciones) => pedir('/verificacion', { periodo, banco }, opciones)
