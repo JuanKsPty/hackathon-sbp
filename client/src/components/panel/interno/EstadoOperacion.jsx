@@ -24,6 +24,9 @@ import { Tarjeta } from './Tarjeta.jsx'
 
 const ULTIMAS = 3
 
+// Operaciones de sesión (PR #120) que aún no tienen nombre en admin/formato.js.
+const OPERACIONES = { inicio_sesion: 'Inicio de sesión', cierre_sesion: 'Cierre de sesión', ...NOMBRES_OPERACION }
+
 // Estado de la operación, solo para el Administrador (#140): último corte cargado con su cascada
 // E1–E4 y las reconciliaciones, la regla de movimiento significativo vigente y las últimas entradas
 // de la bitácora. Usa GET /api/calidad, GET /api/parametros y GET /api/bitacora (los dos últimos
@@ -179,7 +182,7 @@ function UltimasOperaciones({ consulta }) {
             {operaciones.map((o, i) => (
               <li key={`${o.fecha_hora}-${i}`} className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-medium">{NOMBRES_OPERACION[o.operacion] ?? o.operacion}</span>
+                  <span className="text-sm font-medium">{OPERACIONES[o.operacion] ?? o.operacion}</span>
                   <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', COLOR_RESULTADO[o.resultado] ?? 'bg-muted')}>
                     {NOMBRES_RESULTADO[o.resultado] ?? o.resultado}
                   </span>
