@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from 
 import { IndicadorPerfil } from './IndicadorPerfil.jsx'
 import { Navegacion } from './Navegacion.jsx'
 import { NOMBRE_APP } from './navegacion.js'
+import { PanelAsistente } from './PanelAsistente.jsx'
 import { SelectorPeriodo } from './SelectorPeriodo.jsx'
 import { SelectorTema } from './SelectorTema.jsx'
 
@@ -31,6 +32,7 @@ export function Encabezado() {
       <p className="truncate font-semibold lg:hidden">{NOMBRE_APP}</p>
 
       <div className="ml-auto flex items-center gap-2">
+        <PanelAsistente />
         <IndicadorPerfil />
         <SelectorPeriodo />
         <SelectorTema />

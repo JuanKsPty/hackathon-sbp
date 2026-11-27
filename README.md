@@ -72,12 +72,20 @@ docker compose up --build   # app en http://localhost:8080
 
 ### En Dokploy
 
-Se usa el mismo `docker-compose.yml`:
+La app está desplegada en **https://sbp.juank.tech** (proyecto `hackathon-sbp`, servicio Compose `sbp-app`). Usa el mismo `docker-compose.yml`:
 
-1. Crea un servicio **Compose** desde el repo de GitHub, con la rama `main` y la ruta `./docker-compose.yml`.
-2. En **Environment**, define solo lo que uses, por ejemplo `ANTHROPIC_API_KEY`. Nunca van en el repo (R5).
-3. En **Domains**, apunta el dominio al servicio `sbp-client`, puerto `80`, con HTTPS.
-4. Despliega. El volumen `sbp-storage` persiste entre redeploys mientras el servicio no se recree con nombres aleatorios.
+1. Servicio **Compose** desde el repo de GitHub, rama `main` y ruta `./docker-compose.yml`. Cada push a `main` (cada PR que se mezcla) lo vuelve a desplegar solo.
+2. En **Environment** van solo las variables que se usan: `ANTHROPIC_API_KEY` (y si se quiere `AI_MODEL`) para la IA, y `ZAPIER_WEBHOOK_URL` para las alertas. Nunca van en el repo (R5).
+3. En **Domains**, el dominio apunta al servicio `sbp-client`, puerto `80`, con HTTPS (Let's Encrypt).
+4. El volumen `sbp-storage` (períodos cargados, bitácora y parámetros) persiste entre redeploys: el servicio no usa nombres aleatorios (`randomize` apagado).
+
+Prueba rápida después de desplegar:
+
+```bash
+curl https://sbp.juank.tech/api/salud                                  # ok y los períodos cargados
+curl https://sbp.juank.tech/api/ia/estado                              # ia_disponible: true si hay llave
+curl -o /dev/null -w '%{http_code}\n' https://sbp.juank.tech/api/exportar/movimientos.csv   # 403 para Público
+```
 
 ## Variables de entorno
 
@@ -87,7 +95,7 @@ Todas están en [`.env.example`](.env.example), vacías y con su valor por defec
 | :--- | :--- |
 | Server | `PORT` (3001), `DATA_DIR` (`data/`), `STORAGE_DIR` (`storage/`), `PARAMETROS_FILE` (regla de movimientos) |
 | IA | `ANTHROPIC_API_KEY`, `AI_MODEL` |
-| Correo | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` |
+| Alertas | `ZAPIER_WEBHOOK_URL` (webhook de Zapier, #7) |
 | Client | `VITE_USAR_MOCKS`, `API_URL` (destino del proxy en desarrollo) |
 | Docker | `CLIENT_PORT` (8080) |
 

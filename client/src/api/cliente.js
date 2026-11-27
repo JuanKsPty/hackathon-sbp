@@ -137,3 +137,36 @@ export function urlDescarga(tipo, parametros = {}) {
   }
   return `${BASE}/exportar/${tipo}.csv${construirQuery(parametros)}`
 }
+
+// Descarga con fetch (sí manda X-Perfil), para las descargas que exigen perfil: movimientos.csv
+// (entregable 5) y personalizado.csv. Si el API responde error, lanza ApiError como pedir().
+export async function descargarArchivo(ruta, parametros = {}) {
+  let respuesta
+  try {
+    respuesta = await fetch(`${BASE}${ruta}${construirQuery(parametros)}`, { headers: { 'X-Perfil': perfilActual } })
+  } catch {
+    throw new ApiError({ status: 0, codigo: 'API_NO_DISPONIBLE', mensaje: MENSAJE_API_NO_DISPONIBLE })
+  }
+  if (!respuesta.ok) {
+    const cuerpo = await leerCuerpo(respuesta)
+    throw errorDeRespuesta(respuesta, cuerpo)
+  }
+  const blob = await respuesta.blob()
+  const disposicion = respuesta.headers.get('Content-Disposition') ?? ''
+  const nombre = /filename="?([^";]+)"?/i.exec(disposicion)?.[1] ?? ruta.split('/').at(-1)
+  const url = URL.createObjectURL(blob)
+  const enlace = document.createElement('a')
+  enlace.href = url
+  enlace.download = nombre
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+  URL.revokeObjectURL(url)
+}
+
+// Parámetros del reporte personalizado: cada lista va separada por comas; una lista vacía no se
+// manda (el API entiende "todos").
+export function parametrosPersonalizado({ periodos = [], rankings = [], bancos = [] } = {}) {
+  const unir = (lista) => (lista.length > 0 ? lista.join(',') : undefined)
+  return { periodos: unir(periodos), rankings: unir(rankings), bancos: unir(bancos) }
+}

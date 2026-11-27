@@ -12,6 +12,7 @@ Entregables 2 a 5 de la sección 10. Los archivos son UTF-8, separados por coma,
 | `GET /api/exportar/excluidas.csv` | exclusión auditable | `Fecha, Fila_Archivo, Numero_Prestamo, Codigo_Banco, Motivo, Detalle` |
 | `GET /api/exportar/alertas.csv` | alertas de calidad | `Fecha, Fila_Archivo, Numero_Prestamo, Tipo, Detalle` |
 | `GET /api/exportar/movimientos.csv` | 5 | Ver la tabla de abajo |
+| `GET /api/exportar/personalizado.csv` | reporte personalizado | Las mismas de `rankings.csv` (ver abajo) |
 
 ## Columnas de `calidad.csv`
 | Columnas | Qué traen |
@@ -31,6 +32,16 @@ Entregables 2 a 5 de la sección 10. Los archivos son UTF-8, separados por coma,
 - **`Significativo`:** vale `SI` o `NO`.
 - **`Motivos`:** se separan con ` | `.
 - **Mientras falte el cálculo de movimientos (#32):** el endpoint responde `501 NO_DISPONIBLE`. Para conectarlo hay que pasar la función `obtenerMovimientos(query)` a `crearApp({ almacen, obtenerMovimientos })`. Esa función devuelve el mismo objeto que `/api/movimientos`.
+
+## Reporte personalizado (`personalizado.csv`)
+Las mismas columnas que `rankings.csv` (entregable 2), solo con los períodos, rankings y bancos elegidos. El archivo se llama `reporte_personalizado.csv`.
+
+- **Parámetros** (todos opcionales; cada uno es una lista separada por comas; si falta o viene vacío, entran todos):
+  - `periodos`: fechas `AAAAMMDD` cargadas (`20260831,20260930`).
+  - `rankings`: valores de `Ranking` del catálogo (`/api/catalogos`).
+  - `bancos`: `Codigo_Banco` del catálogo.
+- **Perfil:** solo Analista y Administrador (opción `reportes_personalizados`); Público recibe `403 PERFIL_NO_AUTORIZADO` ([perfiles.md](perfiles.md)).
+- **Errores:** un valor que no existe responde `400 PARAMETRO_INVALIDO`; un período sin datos, `404 PERIODO_SIN_DATOS`.
 
 ## Errores
 Si un parámetro es inválido, la respuesta es JSON con el formato común (ver [`consulta.md`](consulta.md#errores)), no un CSV.

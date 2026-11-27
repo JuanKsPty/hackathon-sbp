@@ -13,7 +13,7 @@ export function SelectorPeriodo() {
 
   return (
     <Select value={periodo ?? undefined} onValueChange={cambiarPeriodo} disabled={cargando || sinOpciones}>
-      <SelectTrigger aria-label="Período" className="min-w-36">
+      <SelectTrigger aria-label="Período" className="min-w-36" data-guia="global.selector-periodo">
         <SelectValue placeholder={marcador} />
       </SelectTrigger>
       <SelectContent position="popper">
