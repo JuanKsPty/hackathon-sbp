@@ -42,10 +42,14 @@ export function TablaRanking({ bancos, bancoResaltado, orden: ordenDePagina, alO
   const ordenarPor = (clave) =>
     setOrden((previo) => ({ clave, ascendente: previo.clave === clave ? !previo.ascendente : true }))
 
-  // La fila resaltada por el agente se lleva a la vista.
+  // La fila resaltada por el agente se lleva a la vista solo si está fuera de la pantalla. En una
+  // demostración el cursor ya la dejó a la vista: moverla otra vez dejaba el cursor apuntando a nada.
   useEffect(() => {
     if (!delAgente) return
-    cuerpo.current?.querySelector(`[data-fila-banco="${delAgente}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    const fila = cuerpo.current?.querySelector(`[data-fila-banco="${delAgente}"]`)
+    if (!fila) return
+    const { top, bottom } = fila.getBoundingClientRect()
+    if (top < 0 || bottom > window.innerHeight) fila.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }, [delAgente])
 
   return (
