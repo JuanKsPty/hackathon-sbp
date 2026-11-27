@@ -6,6 +6,7 @@ import { Route, Routes } from 'react-router'
 import { AppShell } from '@/components/layout/AppShell.jsx'
 import Asistente from '@/paginas/Asistente.jsx'
 import Calidad from '@/paginas/Calidad.jsx'
+import Inicio from '@/paginas/Inicio.jsx'
 import NoEncontrada from '@/paginas/NoEncontrada.jsx'
 import Panel from '@/paginas/Panel.jsx'
 import Rankings from '@/paginas/Rankings.jsx'
@@ -28,7 +29,9 @@ export function RutasDelSitio() {
         }
       />
       <Route element={<AppShell />}>
-        <Route index element={<Panel />} />
+        {/* Landing con el dashboard del período (#139). El Panel anterior queda en /panel. */}
+        <Route index element={<Inicio />} />
+        <Route path="panel" element={<Panel />} />
         <Route path="rankings" element={<Rankings />} />
         <Route path="reportes" element={<Reportes />} />
         <Route path="calidad" element={<Calidad />} />

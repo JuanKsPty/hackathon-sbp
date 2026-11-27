@@ -2,6 +2,7 @@ import {
   ArrowLeftRightIcon,
   ClipboardCheckIcon,
   FileDownIcon,
+  HouseIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
   SettingsIcon,
@@ -21,9 +22,21 @@ export const SECCIONES = [
   { ruta: '/admin', nombre: 'Administración', icono: SettingsIcon, guia: 'global.menu-admin', opcion: 'cargar_periodo' },
 ]
 
+// Menú del sitio público (#139): la ruta / es la landing (Inicio) y no hay secciones de Analista ni
+// de Administrador. Mantiene los mismos data-guia que SECCIONES.
+export const SECCIONES_PUBLICO = [
+  { ruta: '/', nombre: 'Inicio', icono: HouseIcon, guia: 'global.menu-panel' },
+  ...SECCIONES.filter((s) => s.ruta !== '/' && !s.opcion),
+]
+
+// __INTERNO__ lo define Vite (vite.config.js); en las pruebas de node no existe.
+const ES_INTERNO = typeof __INTERNO__ !== 'undefined' && __INTERNO__
+
 // Secciones que el perfil puede usar. `puede(opcion)` viene de usePerfil(); mientras las opciones
 // cargan (o si el API falla) `puede` es siempre falso y quedan solo las secciones públicas.
-export function seccionesVisibles(puede) {
+// `interno` elige el menú del sitio (por defecto, el del bundle que se construye).
+export function seccionesVisibles(puede, { interno = ES_INTERNO } = {}) {
+  if (!interno) return SECCIONES_PUBLICO
   return SECCIONES.filter(({ opcion }) => !opcion || puede(opcion))
 }
 
