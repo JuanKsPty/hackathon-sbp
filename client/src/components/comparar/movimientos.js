@@ -12,6 +12,17 @@ export const MOTIVOS = {
 
 export const nombreDeMotivo = (motivo) => MOTIVOS[motivo] ?? motivo
 
+// Partes de la regla de movimiento significativo (`regla_significativo` de /api/movimientos), con los
+// umbrales que manda el API. La configura el Administrador; un umbral null está apagado.
+export function partesDeRegla(regla) {
+  if (!regla) return []
+  const partes = []
+  if (regla.min_cambio_posicion_abs != null) partes.push(`sube o baja ${regla.min_cambio_posicion_abs} o más puestos`)
+  if (regla.cambio_lider) partes.push('cambia el líder')
+  if (regla.min_var_saldo_pct_abs != null) partes.push(`su saldo varía ${regla.min_var_saldo_pct_abs} % o más`)
+  return partes
+}
+
 // Qué pasó con la posición: Cambio_Posicion > 0 sube, < 0 baja, 0 se mantiene.
 // Es null cuando el banco no estaba en el período anterior ('sin_dato').
 export function tendenciaDeCambio(cambio) {

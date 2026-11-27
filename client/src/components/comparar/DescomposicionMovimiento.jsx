@@ -7,6 +7,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
 import { Estado } from './Estado.jsx'
+import { EvidenciaPrestamos } from './EvidenciaPrestamos.jsx'
 
 // Las tres piezas del API (contracts/consulta.md) con su explicación. Suman Var_Saldo exacto.
 const PIEZAS = [
@@ -21,12 +22,13 @@ const compacto = new Intl.NumberFormat('es-PA', { notation: 'compact', maximumFr
 const claseDeSigno = (valor) => (valor > 0 ? 'text-sube' : valor < 0 ? 'text-baja' : 'text-igual')
 const conSigno = (valor) => (typeof valor === 'number' && valor > 0 ? `+${formatearMonto(valor)}` : formatearMonto(valor))
 
-// Por qué cambió el saldo de un banco entre dos períodos (GET /api/movimientos/descomposicion).
+// Por qué cambió el saldo de un banco entre dos períodos (GET /api/movimientos/descomposicion),
+// con la evidencia préstamo por préstamo (evidencia=true).
 // Sin banco elegido, invita a hacer clic en una fila de la tabla de movimientos.
 export function DescomposicionMovimiento({ desde, hasta, ranking, banco, activa }) {
   const pedir = Boolean(activa && banco && ranking)
   const consulta = useConsulta(
-    (opciones) => pedirDescomposicion({ desde, hasta, ranking, banco }, opciones),
+    (opciones) => pedirDescomposicion({ desde, hasta, ranking, banco, evidencia: true }, opciones),
     [desde, hasta, ranking, banco],
     { activa: pedir },
   )
@@ -50,7 +52,12 @@ export function DescomposicionMovimiento({ desde, hasta, ranking, banco, activa 
       tituloVacio="Sin descomposición"
       descripcionVacio="El API no devolvió datos para ese banco en este ranking y estos períodos."
     >
-      {fila && <Detalle fila={fila} continuidad={consulta.datos.Continuidad} desde={desde} hasta={hasta} />}
+      {fila && (
+        <div className="flex flex-col gap-6">
+          <Detalle fila={fila} continuidad={consulta.datos.Continuidad} desde={desde} hasta={hasta} />
+          <EvidenciaPrestamos evidencia={consulta.datos.evidencia} />
+        </div>
+      )}
     </Estado>
   )
 }
