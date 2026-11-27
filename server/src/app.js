@@ -3,6 +3,7 @@ import express from 'express';
 import { rutasDeConsulta } from './routes/consulta.js';
 import { rutasDeExportacion } from './routes/exportaciones.js';
 import { rutasDeMovimientos } from './routes/movimientos.js';
+import { crearObtenerDescomposicion, rutasDeDescomposicion } from './routes/descomposicion.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
 
 // obtenerMovimientos (opcional): cálculo de /api/movimientos (#32, crearObtenerMovimientos en
@@ -16,6 +17,8 @@ export function crearApp({ almacen, obtenerMovimientos }) {
   app.use('/api', rutasDeConsulta(almacen));
   app.use('/api', rutasDeExportacion(almacen, { obtenerMovimientos }));
   if (obtenerMovimientos) app.use('/api', rutasDeMovimientos(obtenerMovimientos));
+  // Descomposición de cada movimiento por préstamo (nuevos, salen, amortización) y su evidencia.
+  app.use('/api', rutasDeDescomposicion(crearObtenerDescomposicion(almacen)));
   // Aquí se montan las demás rutas (perfiles y administración #28-#31),
   // siempre ANTES de los dos manejadores de abajo.
 

@@ -16,7 +16,13 @@ npm run procesar -- --datos ../data --salida salidas
 
 Variables de entorno opcionales: `PORT` (por defecto `3001`) y `DATA_DIR` (por defecto `../data`).
 
-Salidas del script: `rankings.csv` (entregable 2), `desglose_subactividades.csv` (3), `calidad.csv` (4), `excluidas.csv` (exclusión auditable) y `alertas.csv`.
+Salidas del script:
+- `rankings.csv` (entregable 2), `desglose_subactividades.csv` (3) y `calidad.csv` (4).
+- `movimientos.csv` (5): julio → agosto y agosto → septiembre, con la misma función que `/api/movimientos`.
+- `descomposicion_movimientos.csv`: de dónde sale cada `Var_Saldo` (préstamos nuevos, los que salen y la amortización).
+- `excluidas.csv` (exclusión auditable) y `alertas.csv`.
+
+La descomposición está en `src/automation/descomposicion.js` y su endpoint es `GET /api/movimientos/descomposicion` (ver `contracts/consulta.md`).
 
 ## API
 

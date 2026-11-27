@@ -11,7 +11,7 @@ import { reconciliar } from './reconciliaciones.js';
 export { cargarCatalogos } from './catalogos.js';
 export { ErrorDeDatos } from './csv.js';
 export { formatearCentavos, formatearE4 } from './montos.js';
-export { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovimientos, COLUMNAS } from './exportar.js';
+export { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovimientos, csvDescomposicion, COLUMNAS } from './exportar.js';
 
 // Lee un AT03 completo y lo separa por período. El período sale del campo Fecha,
 // no del nombre del archivo, así que un archivo puede traer más de un período.
