@@ -21,17 +21,29 @@ export const SECCIONES = [
   { ruta: '/admin', nombre: 'Administración', icono: SettingsIcon, guia: 'global.menu-admin', opcion: 'cargar_periodo' },
 ]
 
+// Páginas que existen solo en el sitio interno: el sitio público (sbp.juank.tech) no muestra Calidad de
+// datos ni Verificación del jurado (decisión de Jesús). Sus descargas CSV siguen en Reportes.
+export const RUTAS_SOLO_INTERNAS = ['/calidad', '/verificacion']
+
 // Menú del sitio público: la ruta / es la landing (paginas/Inicio.jsx, a pantalla completa y fuera
 // del menú) y el Panel con los datos está en /panel. No hay secciones de Analista ni de
-// Administrador. Mantiene los mismos data-guia que SECCIONES.
+// Administrador, ni las páginas solo internas. Mantiene los mismos data-guia que SECCIONES.
 export const RUTA_PANEL_PUBLICO = '/panel'
 export const SECCIONES_PUBLICO = [
   { ruta: RUTA_PANEL_PUBLICO, nombre: 'Panel', icono: LayoutDashboardIcon, guia: 'global.menu-panel' },
-  ...SECCIONES.filter((s) => s.ruta !== '/' && !s.opcion),
+  ...SECCIONES.filter((s) => s.ruta !== '/' && !s.opcion && !RUTAS_SOLO_INTERNAS.includes(s.ruta)),
 ]
 
 // __INTERNO__ lo define Vite (vite.config.js); en las pruebas de node no existe.
 const ES_INTERNO = typeof __INTERNO__ !== 'undefined' && __INTERNO__
+
+// ¿La página existe en este sitio? Sirve para no mostrar enlaces a páginas que el sitio público no
+// tiene (por ejemplo, desde el asistente, que es el mismo en los dos sitios).
+export function rutaDisponible(ruta, { interno = ES_INTERNO } = {}) {
+  if (interno || !ruta) return true
+  const base = String(ruta).split('?')[0]
+  return !RUTAS_SOLO_INTERNAS.includes(base)
+}
 
 // Secciones que el perfil puede usar. `puede(opcion)` viene de usePerfil(); mientras las opciones
 // cargan (o si el API falla) `puede` es siempre falso y quedan solo las secciones públicas.

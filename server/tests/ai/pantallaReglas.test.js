@@ -91,13 +91,14 @@ test('"¿cómo hago X?" en la app: entra a la página y señala el elemento', ()
   const { catalogos, periodos } = paqueteReal();
   const almacen = crearAlmacen(catalogos, periodos);
   const casos = [
-    ['muéstrame cómo descargar el ranking en CSV', 'rankings.descargar', '/rankings'],
-    ['¿cómo veo las filas excluidas?', 'calidad.excluidas', '/calidad'],
-    ['muéstrame cómo hacer un reporte', 'reportes.descarga-rankings', '/reportes'],
-    ['¿cómo filtro por banco?', 'rankings.filtro-banco', '/rankings'],
+    ['muéstrame cómo descargar el ranking en CSV', 'rankings.descargar', '/rankings', 'publico'],
+    // Calidad de datos solo existe en el sitio interno: la demostración es para Analista.
+    ['¿cómo veo las filas excluidas?', 'calidad.excluidas', '/calidad', 'analista'],
+    ['muéstrame cómo hacer un reporte', 'reportes.descarga-rankings', '/reportes', 'publico'],
+    ['¿cómo filtro por banco?', 'rankings.filtro-banco', '/rankings', 'publico'],
   ];
-  for (const [q, control, ruta] of casos) {
-    const p = demostracionPorReglas(q, almacen);
+  for (const [q, control, ruta, perfil] of casos) {
+    const p = demostracionPorReglas(q, almacen, perfil);
     assert.equal(p.modo, 'demostrar', q);
     assert.deepEqual(p.acciones.map((a) => a.tipo), ['ir', 'señalar'], q);
     assert.equal(p.acciones[1].control, control, q);
@@ -105,5 +106,7 @@ test('"¿cómo hago X?" en la app: entra a la página y señala el elemento', ()
   }
   // Comparar períodos no es del perfil Público.
   assert.equal(demostracionPorReglas('muéstrame cómo comparar períodos', almacen, 'publico')?.acciones.at(-1).control === 'comparar.selector-desde', false);
+  // Calidad de datos no existe en el sitio público: a Público no se le lleva a /calidad.
+  assert.notEqual(demostracionPorReglas('¿cómo veo las filas excluidas?', almacen, 'publico')?.acciones?.[0]?.ruta, '/calidad');
   assert.equal(demostracionPorReglas('dame el top 5', almacen), null);
 });

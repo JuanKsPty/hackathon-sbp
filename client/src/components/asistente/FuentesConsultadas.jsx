@@ -1,6 +1,7 @@
 import { ArrowUpRightIcon, CheckCircle2Icon, CircleAlertIcon, DatabaseIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
+import { rutaDisponible } from '@/components/layout/navegacion.js'
 import { formatearPeriodo } from '@/lib/formato.js'
 
 // Herramientas del agente (server/src/ai/herramientas.js): nombre legible y vista de la app
@@ -30,9 +31,11 @@ const PARAMETROS_FECHA = new Set(['periodo', 'desde', 'hasta'])
 function describir(consulta) {
   const conocida = HERRAMIENTAS[consulta.herramienta]
   const base = String(consulta.ruta ?? '').split('?')[0]
+  const vista = conocida ? conocida.vista : (VISTA_POR_RUTA[base] ?? null)
   return {
     nombre: conocida?.nombre ?? consulta.herramienta ?? 'Consulta',
-    vista: conocida ? conocida.vista : (VISTA_POR_RUTA[base] ?? null),
+    // Sin enlace a una página que este sitio no tiene (Calidad no existe en el sitio público).
+    vista: vista && rutaDisponible(vista) ? vista : null,
   }
 }
 

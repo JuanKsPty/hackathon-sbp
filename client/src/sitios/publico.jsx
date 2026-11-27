@@ -1,19 +1,18 @@
 // Rutas del sitio público (sbp.juank.tech): sin inicio de sesión y sin las páginas de Analista ni de
 // Administrador. La ruta / es la landing (Inicio, a pantalla completa, sin el menú) y lleva a los
-// datos: el Panel del público está en /panel, dentro del AppShell.
+// datos: el Panel del público está en /panel, dentro del AppShell. Calidad de datos y Verificación
+// del jurado viven solo en el sitio interno (RUTAS_SOLO_INTERNAS en navegacion.js).
 // Vite apunta `#sitio` a este archivo cuando SITIO=publico (vite.config.js), así que
 // el código de sitios/interno.jsx no entra en este bundle.
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router'
 import { AppShell } from '@/components/layout/AppShell.jsx'
 import Asistente from '@/paginas/Asistente.jsx'
-import Calidad from '@/paginas/Calidad.jsx'
 import Inicio from '@/paginas/Inicio.jsx'
 import NoEncontrada from '@/paginas/NoEncontrada.jsx'
 import PanelPublico from '@/paginas/PanelPublico.jsx'
 import Rankings from '@/paginas/Rankings.jsx'
 import Reportes from '@/paginas/Reportes.jsx'
-import Verificacion from '@/paginas/Verificacion.jsx'
 
 // Presentación de la app para la demo (/presentacion): URL privada, solo para presentar; ningún
 // botón ni enlace de la app lleva aquí. Pantalla completa, sin el AppShell. Se carga
@@ -38,8 +37,6 @@ export function RutasDelSitio() {
         <Route path="panel" element={<PanelPublico />} />
         <Route path="rankings" element={<Rankings />} />
         <Route path="reportes" element={<Reportes />} />
-        <Route path="calidad" element={<Calidad />} />
-        <Route path="verificacion" element={<Verificacion />} />
         <Route path="asistente" element={<Asistente />} />
         <Route path="*" element={<NoEncontrada />} />
       </Route>

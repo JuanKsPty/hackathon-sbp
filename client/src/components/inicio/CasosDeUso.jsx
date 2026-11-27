@@ -1,14 +1,5 @@
 import { Link } from 'react-router'
-import {
-  ArrowRightIcon,
-  BotIcon,
-  ClipboardCheckIcon,
-  CompassIcon,
-  FileDownIcon,
-  FilterIcon,
-  ShieldCheckIcon,
-  TrophyIcon,
-} from 'lucide-react'
+import { ArrowRightIcon, BotIcon, CompassIcon, FileDownIcon, FilterIcon, TrophyIcon } from 'lucide-react'
 import { useAgente } from '@/agente/AgenteContext.jsx'
 import { Etiqueta, TituloDosTonos } from '@/components/marca'
 import { cn } from '@/lib/utils'
@@ -36,20 +27,6 @@ const CASOS = [
     texto: 'Descarga en CSV los rankings, las subactividades y la calidad de cada período.',
     accion: 'Ir a Reportes',
     ruta: '/reportes',
-  },
-  {
-    icono: ShieldCheckIcon,
-    pregunta: '¿De dónde salen las cifras?',
-    texto: 'Qué filas del AT03 se excluyeron y por qué (E1 a E4), y cómo cuadran los totales.',
-    accion: 'Ver la calidad',
-    ruta: '/calidad',
-  },
-  {
-    icono: ClipboardCheckIcon,
-    pregunta: 'Quiero comprobarlo',
-    texto: 'La verificación punto por punto, con filtros por período y por banco.',
-    accion: 'Ir a Verificación',
-    ruta: '/verificacion',
   },
   {
     icono: BotIcon,

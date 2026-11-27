@@ -2,6 +2,7 @@ import { BotOffIcon, RotateCwIcon, TriangleAlertIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { rutaDisponible } from '@/components/layout/navegacion.js'
 
 // Aviso cuando el servidor no tiene IA (GET /api/ia/estado con ia_disponible: false) o no se pudo
 // consultar su estado. La app sigue funcionando: todo lo demás sale del motor determinista.
@@ -37,8 +38,13 @@ export function AvisoIA({ estado }) {
         </p>
         <p>
           El chat sigue funcionando por reglas: pide un informe, un ranking, una comparación o cómo va un banco y te
-          muestra sus gráficos. También puedes ir a <Link to="/rankings">Rankings</Link> o{' '}
-          <Link to="/calidad">Calidad de datos</Link>.
+          muestra sus gráficos. También puedes ir a <Link to="/rankings">Rankings</Link>
+          {rutaDisponible('/calidad') && (
+            <>
+              {' '}o <Link to="/calidad">Calidad de datos</Link>
+            </>
+          )}
+          .
         </p>
       </AlertDescription>
     </Alert>

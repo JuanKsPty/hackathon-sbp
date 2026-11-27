@@ -44,8 +44,8 @@ export default function Inicio() {
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold tracking-tight">Todos los datos del período, en un solo lugar</h2>
             <p className="text-sm text-muted-foreground">
-              El Panel resume la cartera, los líderes de cada ranking, la calidad del archivo y los indicadores
-              adicionales. Desde ahí vas a Rankings, Reportes, Calidad y la Verificación.
+              El Panel resume la cartera, los líderes de cada ranking y los indicadores adicionales. Desde ahí
+              vas a Rankings y a Reportes.
             </p>
           </div>
           <Button asChild size="lg" className="shrink-0">

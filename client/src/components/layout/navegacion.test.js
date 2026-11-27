@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { SECCIONES, SECCIONES_PUBLICO, rutaEnElSitio, seccionesVisibles } from './navegacion.js'
+import { SECCIONES, SECCIONES_PUBLICO, rutaDisponible, rutaEnElSitio, seccionesVisibles } from './navegacion.js'
 
 const rutas = (puede, sitio = { interno: true }) => seccionesVisibles(puede, sitio).map((s) => s.ruta)
 const conOpciones = (...opciones) => (opcion) => opciones.includes(opcion)
@@ -28,7 +28,8 @@ test('cada sección restringida pide una opción y todas llevan data-guia', () =
 
 test('el menú del sitio público empieza en el Panel (/panel) y nunca muestra secciones de Analista ni de Administrador', () => {
   const todas = () => true
-  assert.deepEqual(rutas(todas, { interno: false }), ['/panel', '/rankings', '/reportes', '/calidad', '/verificacion'])
+  // Calidad de datos y Verificación del jurado solo están en el sitio interno.
+  assert.deepEqual(rutas(todas, { interno: false }), ['/panel', '/rankings', '/reportes'])
   assert.equal(seccionesVisibles(todas, { interno: false })[0].nombre, 'Panel')
   assert.equal(SECCIONES_PUBLICO[0].guia, 'global.menu-panel')
   assert.ok(SECCIONES_PUBLICO.every((s) => !s.opcion && s.guia?.startsWith('global.menu-')))
@@ -39,4 +40,13 @@ test('rutaEnElSitio: en el público / (Panel del catálogo) es /panel; en el int
   assert.equal(rutaEnElSitio('/rankings', { interno: false }), '/rankings')
   assert.equal(rutaEnElSitio('/', { interno: true }), '/')
   assert.equal(rutaEnElSitio(null, { interno: false }), null)
+})
+
+test('rutaDisponible: Calidad y Verificación no existen en el sitio público, sí en el interno', () => {
+  assert.equal(rutaDisponible('/calidad', { interno: false }), false)
+  assert.equal(rutaDisponible('/calidad?periodo=20260930', { interno: false }), false)
+  assert.equal(rutaDisponible('/verificacion', { interno: false }), false)
+  assert.equal(rutaDisponible('/rankings', { interno: false }), true)
+  assert.equal(rutaDisponible('/calidad', { interno: true }), true)
+  assert.equal(rutaDisponible('/verificacion', { interno: true }), true)
 })
