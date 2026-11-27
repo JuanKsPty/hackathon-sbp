@@ -9,7 +9,7 @@ import { definicionGraficos, validarAccion, NOMBRE_HERRAMIENTA_GRAFICOS } from '
 import { definicionPantalla, validarPantalla, NOMBRE_HERRAMIENTA_PANTALLA } from './pantalla.js';
 import { verificarNumeros } from './verificador.js';
 import { crearCliente, MODELO_POR_DEFECTO } from './redaccionIA.js';
-import { OPCIONES, NOMBRES_PERFIL } from '../middleware/perfiles.js';
+import { NOMBRES_PERFIL, permisosVigentes } from '../middleware/perfiles.js';
 
 const ETIQUETA_AGENTE =
   'Respuesta generada con IA · los cálculos provienen del motor determinista';
@@ -41,8 +41,10 @@ Reglas estrictas:
 // responder que la app no lo tiene o de armarlo por otra vía.
 function seccionPerfil(perfil) {
   const quienes = (opcion) => opcion.perfiles.map((p) => NOMBRES_PERFIL[p]).join(' o ');
-  const propias = OPCIONES.filter((o) => o.perfiles.includes(perfil)).map((o) => o.nombre);
-  const ajenas = OPCIONES.filter((o) => !o.perfiles.includes(perfil)).map((o) => `${o.nombre} (solo ${quienes(o)})`);
+  // Tabla vigente (por defecto más lo que guardó el Administrador, #145): la IA describe lo que el API permite hoy.
+  const tabla = permisosVigentes();
+  const propias = tabla.filter((o) => o.perfiles.includes(perfil)).map((o) => o.nombre);
+  const ajenas = tabla.filter((o) => !o.perfiles.includes(perfil)).map((o) => `${o.nombre} (solo ${quienes(o)})`);
   // La consulta pública no menciona el sitio interno: a Público solo se le dice que esa opción no es suya.
   const publico = perfil === 'publico';
   const lineas = [

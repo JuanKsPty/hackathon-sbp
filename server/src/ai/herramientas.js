@@ -3,7 +3,7 @@
 // solo lee resultados ya calculados (sección 9 de las indicaciones).
 // Respeta los perfiles (#28): cada consulta lleva el X-Perfil del usuario y una herramienta con
 // `opcion` solo se ofrece a los perfiles que la tienen (por ejemplo, comparar períodos).
-import { OPCIONES } from '../middleware/perfiles.js';
+import { perfilesConOpcion } from '../middleware/perfiles.js';
 import { MOTIVOS } from '../engine/cascada.js';
 
 const texto = (description) => ({ type: 'string', description });
@@ -104,7 +104,7 @@ const POR_NOMBRE = new Map(HERRAMIENTAS.map((h) => [h.name, h]));
 const TIMEOUT_MS = 15_000;
 
 const permitida = (herramienta, perfil) =>
-  !herramienta.opcion || OPCIONES.find((o) => o.opcion === herramienta.opcion)?.perfiles.includes(perfil);
+  !herramienta.opcion || perfilesConOpcion(herramienta.opcion).includes(perfil);
 
 // Definiciones para la API de Claude (sin los campos internos ruta, limite y opcion).
 // `catalogos` (opcional): el catálogo cargado, para que las descripciones nombren los rankings y bancos reales.

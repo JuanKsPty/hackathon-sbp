@@ -1,7 +1,7 @@
 // Catálogo del agente guía (#72): elementos de la app que la IA puede señalar con el cursor.
 // Es la misma lista de contracts/guia.md (un test verifica que coincidan). Cada elemento sabe en qué
 // ruta está y, si es de un perfil en particular, qué opción de perfil necesita (middleware/perfiles.js).
-import { OPCIONES } from '../middleware/perfiles.js';
+import { perfilesConOpcion } from '../middleware/perfiles.js';
 import { extraerNumeros } from './verificador.js';
 
 const el = (guia, ruta, descripcion, opcion = null) => ({ guia, ruta, descripcion, opcion });
@@ -16,7 +16,7 @@ export const ELEMENTOS_GUIA = [
   el('global.menu-verificacion', null, 'Enlace del menú a Verificación del jurado'),
   el('global.menu-admin', null, 'Enlace del menú a Administración', 'cargar_periodo'),
   // Solo existe en el sitio interno (SesionUsuario): Público no lo ve, como Analista y Administrador.
-  el('global.selector-perfil', null, 'Sesión del sitio interno: usuario, perfil y Salir', 'comparar_periodos'),
+  el('global.selector-perfil', null, 'Sesión del sitio interno: usuario, perfil y Salir'),
   el('global.selector-periodo', null, 'Período de los datos (mes), junto al título de Panel, Rankings y Calidad'),
   el('global.selector-tema', null, 'Tema claro, oscuro o sistema'),
   el('global.barra-fuente', null, 'Fuente, período y aviso de datos ficticios, al pie de la página'),
@@ -80,14 +80,16 @@ const POR_GUIA = new Map(ELEMENTOS_GUIA.map((e) => [e.guia, e]));
 // Público solo usa el sitio público (sbp.juank.tech), que no tiene Calidad de datos ni Verificación
 // del jurado: la guía no puede señalar ni llevar a esas páginas con ese perfil.
 const RUTAS_SOLO_INTERNAS = ['/calidad', '/verificacion'];
-const MENU_SOLO_INTERNO = ['global.menu-calidad', 'global.menu-verificacion'];
+// La sesión (SesionUsuario) solo existe en el sitio interno: no depende de una opción configurable.
+const MENU_SOLO_INTERNO = ['global.menu-calidad', 'global.menu-verificacion', 'global.selector-perfil'];
 
 function puedeVer(elemento, perfil) {
   if (perfil === 'publico' && (RUTAS_SOLO_INTERNAS.includes(elemento.ruta) || MENU_SOLO_INTERNO.includes(elemento.guia))) {
     return false;
   }
   if (!elemento.opcion) return true;
-  return OPCIONES.find((o) => o.opcion === elemento.opcion)?.perfiles.includes(perfil) ?? false;
+  // Permisos vigentes: los por defecto más lo que guardó el Administrador (perfiles y permisos, #145).
+  return perfilesConOpcion(elemento.opcion).includes(perfil);
 }
 
 /** Elemento del catálogo por su data-guia, o null si no existe. */
