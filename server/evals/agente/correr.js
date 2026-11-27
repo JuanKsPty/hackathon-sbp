@@ -47,7 +47,11 @@ async function levantarApi() {
   const sinLimite = { maximo: Number.POSITIVE_INFINITY, maximoGlobal: Number.POSITIVE_INFINITY };
   const servidor = crearApp({ almacen, obtenerMovimientos: crearObtenerMovimientos(almacen), limiteIA: sinLimite }).listen(0, '127.0.0.1');
   await once(servidor, 'listening');
-  return { base: `http://127.0.0.1:${servidor.address().port}/api`, cerrar: () => servidor.close() };
+  const base = `http://127.0.0.1:${servidor.address().port}/api`;
+  // Las herramientas de la IA consultan esta misma API en memoria. Sin esto irían a 127.0.0.1:3001
+  // (el valor por defecto) y evaluarían lo que haya corriendo ahí, o fallarían si no hay nada.
+  process.env.API_INTERNA = base;
+  return { base, cerrar: () => servidor.close() };
 }
 
 const { base, cerrar } = await levantarApi();
