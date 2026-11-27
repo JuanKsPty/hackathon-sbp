@@ -12,6 +12,7 @@ import { rutasDeIA } from './routes/ia.js';
 import { rutasDeDocumentacion } from './routes/docs.js';
 import { rutasDeIndicadores } from './routes/indicadores.js';
 import { rutasDeMcp } from './routes/mcp.js';
+import { rutasDeVerificacion } from './routes/verificacion.js';
 import { leerPerfil, requiereOpcion } from './middleware/perfiles.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
 
@@ -46,6 +47,7 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp 
   app.use('/api', rutasDeDocumentacion(almacen));
   app.use('/api', rutasDeIndicadores(almacen)); // morosidad, vencimientos y concentración: análisis adicional (#35)
   app.use('/api', rutasDeMcp(opcionesMcp)); // MCP remoto por HTTP: /api/mcp (#81)
+  app.use('/api', rutasDeVerificacion(almacen)); // un dato de cada punto de la sección 11.1 (#63)
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.
 
   app.use(rutaNoEncontrada);

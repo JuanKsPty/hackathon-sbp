@@ -82,3 +82,27 @@ test('los chequeos detectan datos que no cuadran', () => {
   assert.ok(fallidos.some((f) => f.startsWith('5: En cada ranking')));
   assert.ok(fallidos.some((f) => f.startsWith('6: Reconciliaciones')));
 });
+
+test('GET /api/verificacion: último período por defecto, filtros y errores', async () => {
+  const { crearApp } = await import('../src/app.js');
+  const { once } = await import('node:events');
+  const servidor = crearApp({ almacen: almacenReal(), opcionesIA: { apiKey: '' } }).listen(0);
+  await once(servidor, 'listening');
+  const base = `http://127.0.0.1:${servidor.address().port}/api`;
+  try {
+    const r = await (await fetch(`${base}/verificacion`)).json(); // perfil Público
+    assert.equal(r.periodo, '20260930');
+    assert.equal(r.todo_ok, true);
+    assert.match(r.aviso, /Datos ficticios/);
+    assert.equal(r.puntos.length, 6);
+
+    const filtrado = await (await fetch(`${base}/verificacion?periodo=20260731&banco=104`)).json();
+    assert.equal(filtrado.periodo, '20260731');
+    assert.equal(filtrado.banco.Codigo_Banco, '104');
+
+    assert.equal((await fetch(`${base}/verificacion?periodo=20261031`)).status, 404);
+    assert.equal((await fetch(`${base}/verificacion?banco=999`)).status, 400);
+  } finally {
+    servidor.close();
+  }
+});
