@@ -27,6 +27,7 @@ const PETICIONES = {
   'calidad.json': { ruta: '/calidad' },
   'excluidas.json': { ruta: '/excluidas' },
   'indicadores.json': { ruta: '/indicadores' },
+  'verificacion.json': { ruta: '/verificacion?banco=101' }, // el ejemplo está acotado a un banco
   'parametros.json': { ruta: '/parametros' },
   'movimientos.json': { ruta: '/movimientos', perfil: 'analista' },
   'perfil.json': { ruta: '/perfil', perfil: 'admin' },
