@@ -2,6 +2,7 @@
 // Basta con un selector de perfil: la UI manda el perfil elegido en el header X-Perfil.
 // Sin header, el perfil es "publico". No hay contraseñas (R5).
 import { ErrorApi } from '../routes/errores.js';
+import { registrarOperacion } from '../datos/bitacora.js';
 
 export const NOMBRES_PERFIL = {
   publico: 'Público',
@@ -46,10 +47,17 @@ export function leerPerfil(req, res, next) {
 }
 
 // Middleware de una ruta: solo deja pasar a los perfiles indicados; a los demás, 403.
+// El intento rechazado queda en la bitácora (#31).
 // Ejemplo: router.post('/periodos', requierePerfil('admin'), cargarPeriodo)
 export function requierePerfil(...permitidos) {
   return (req, res, next) => {
     if (permitidos.includes(req.perfil)) return next();
+    registrarOperacion({
+      operacion: 'acceso_denegado',
+      perfil: req.perfil,
+      resultado: 'rechazado',
+      detalle: `${req.method} ${req.originalUrl}`,
+    });
     const quienes = permitidos.map((perfil) => NOMBRES_PERFIL[perfil]).join(' o ');
     const mensaje = `Esta opción es solo para el perfil ${quienes}. Tu perfil es ${NOMBRES_PERFIL[req.perfil]}.`;
     return next(new ErrorApi(403, 'PERFIL_NO_AUTORIZADO', mensaje));

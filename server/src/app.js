@@ -2,6 +2,7 @@
 import express from 'express';
 import { rutasDeConsulta } from './routes/consulta.js';
 import { rutasDePerfil } from './routes/perfil.js';
+import { rutasDeBitacora } from './routes/bitacora.js';
 import { leerPerfil } from './middleware/perfiles.js';
 import { rutaNoEncontrada, manejarErrores } from './routes/errores.js';
 
@@ -14,6 +15,7 @@ export function crearApp({ almacen }) {
 
   app.get('/api/salud', (req, res) => res.json({ ok: true, periodos: almacen.fechas() }));
   app.use('/api', rutasDePerfil());
+  app.use('/api', rutasDeBitacora());
   app.use('/api', rutasDeConsulta(almacen));
   // Aquí se montan las demás rutas (perfiles y administración #28-#31, movimientos #32),
   // siempre ANTES de los dos manejadores de abajo.

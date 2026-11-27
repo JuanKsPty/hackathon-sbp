@@ -1,0 +1,9 @@
+{
+  "total": 4,
+  "operaciones": [
+    { "fecha_hora": "2026-11-27T15:42:10.512Z", "operacion": "carga_periodo", "archivo": "AT03_sintetico_202610.csv", "perfil": "admin", "resultado": "exito", "detalle": "Período 20261031" },
+    { "fecha_hora": "2026-11-27T15:40:03.087Z", "operacion": "acceso_denegado", "archivo": null, "perfil": "publico", "resultado": "rechazado", "detalle": "POST /api/periodos" },
+    { "fecha_hora": "2026-11-27T15:31:55.240Z", "operacion": "cambio_parametros", "archivo": null, "perfil": "admin", "resultado": "error", "detalle": "min_var_saldo_pct_abs debe ser un número mayor o igual a 0" },
+    { "fecha_hora": "2026-11-27T15:30:01.004Z", "operacion": "carga_inicial", "archivo": "AT03_sintetico_202607.csv", "perfil": "sistema", "resultado": "exito", "detalle": "Período 20260731" }
+  ]
+}
