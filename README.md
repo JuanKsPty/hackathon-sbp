@@ -34,6 +34,18 @@ Todo lo que entregó la SBP está en [`info/`](info/):
 
 Los CSV se guardan sin conversión de fin de línea (`.gitattributes`): abrirlos en Excel borra los ceros a la izquierda de los códigos (`07` → `7`), así que impórtalos siempre como texto.
 
+## Cómo correrlo
+
+Requiere Node.js 22 o superior.
+
+```bash
+cp .env.example .env   # opcional: todo vacío usa los valores por defecto
+npm install            # instala la raíz, server/ y client/
+npm run dev            # API en http://localhost:3001 y client en http://localhost:5173
+```
+
+Otros scripts de la raíz: `npm start` (solo el server), `npm test` (pruebas del server) y `npm run build` (build del client).
+
 ## Cómo contribuir
 
 Una rama por issue (`feat/<n>-descripcion`), un PR que cierra el issue (`Closes #n`) y merge a `main`. Nunca subas contraseñas, tokens ni llaves (regla R5).
