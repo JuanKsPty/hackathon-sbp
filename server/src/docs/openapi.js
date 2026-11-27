@@ -142,6 +142,15 @@ export function crearDocumentoOpenApi(catalogos) {
           responses: { ...jsonOk('Sin periodo devuelve todos los períodos', 'calidad.json'), ...errores(400, 404) },
         },
       },
+      '/verificacion': {
+        get: {
+          tags: ['Consulta'],
+          summary: 'Un dato de cada punto de la sección 11.1, con chequeos automáticos (modo verificación del jurado)',
+          description: 'Puntos: 1 calidad E1–E4 y universo, 2 rankings obligatorios, 3 COMERCIO y CONSUMO, 4 total de cartera y ponderación, 5 desglose con Tarjeta, 6 períodos y reconciliaciones. Con `banco` se acotan los datos; los chequeos usan siempre todos los bancos.',
+          parameters: [ref('periodo'), ref('banco')],
+          responses: { ...jsonOk('Los 6 puntos con sus datos y chequeos', 'verificacion.json'), ...errores(400, 404) },
+        },
+      },
       '/excluidas': {
         get: {
           tags: ['Consulta'],

@@ -21,3 +21,7 @@ Automatizaciones de la lámina 8 y la sección 8 de las indicaciones:
 
   Un umbral en `null` desactiva ese criterio. El Administrador la edita desde la app: [`contracts/administracion.md`](../../../contracts/administracion.md).
 - La misma función alimenta la exportación del entregable 5 (`/api/exportar/movimientos.csv`).
+
+## Verificación del jurado (#63)
+
+`GET /api/verificacion` ([contrato](../../../contracts/verificacion.md)) junta un dato de cada punto de la sección 11.1 (calidad, rankings, ponderación, subactividades con Tarjeta y reconciliaciones), con chequeos automáticos de la sección 12. [`verificacion.js`](verificacion.js) no recalcula: ordena los resultados del motor y los compara entre sí en centavos. Con `?banco=` se acota a un banco; los chequeos usan siempre todos.
