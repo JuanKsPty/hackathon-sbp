@@ -5,7 +5,8 @@
 import { useSyncExternalStore } from 'react'
 import { MAX_HISTORIAL, preguntar } from '@/api/ia.js'
 
-let estado = { mensajes: [], pendiente: false }
+// `graficos`: id de la respuesta cuyos gráficos pidió el usuario con "Ver gráficos" (null: ninguna).
+let estado = { mensajes: [], pendiente: false, graficos: null }
 let siguienteId = 1
 let control = null
 const suscriptores = new Set()
@@ -41,7 +42,8 @@ export async function enviarPregunta(pregunta, perfil) {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event(NUEVA_PREGUNTA))
   const historial = historialDe(estado.mensajes)
   agregar({ rol: 'usuario', texto: limpia })
-  publicar({ ...estado, pendiente: true })
+  // Pregunta nueva: dejan de verse los gráficos de la anterior.
+  publicar({ ...estado, pendiente: true, graficos: null })
 
   const propio = new AbortController()
   control = propio
@@ -71,7 +73,7 @@ export function reintentarUltima(perfil) {
 export function borrarConversacion() {
   control?.abort()
   control = null
-  publicar({ mensajes: [], pendiente: false })
+  publicar({ mensajes: [], pendiente: false, graficos: null })
 }
 
 function suscribir(avisar) {
@@ -81,4 +83,9 @@ function suscribir(avisar) {
 
 export function useConversacion() {
   return useSyncExternalStore(suscribir, () => estado)
+}
+
+/** "Ver gráficos" de una respuesta: muestra los gráficos de esa respuesta. */
+export function verGraficosDe(id) {
+  publicar({ ...estado, graficos: id })
 }

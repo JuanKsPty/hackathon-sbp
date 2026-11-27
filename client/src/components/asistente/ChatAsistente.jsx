@@ -134,7 +134,7 @@ export function ChatAsistente({ className, enPanel = false, pie = null }) {
           )
         }
         return (
-          <MensajeAsistente key={mensaje.id} datos={mensaje.datos} />
+          <MensajeAsistente key={mensaje.id} id={mensaje.id} datos={mensaje.datos} />
         )
       })}
 
