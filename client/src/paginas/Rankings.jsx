@@ -199,7 +199,7 @@ export default function Rankings() {
       {/* Título y pestañas en la misma línea; si no caben, las pestañas bajan. */}
       <Card>
         <CardContent className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <CardTitle>Ranking</CardTitle>
+          <CardTitle>Actividad económica</CardTitle>
           <div className="min-w-0 max-w-full">
             <SelectorRanking rankings={listaRankings} valor={ranking} alCambiar={cambiarRanking} />
           </div>
