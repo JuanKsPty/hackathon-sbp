@@ -6,11 +6,12 @@ import { Router } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { crearServidorMcp } from '../mcp/servidor.js';
 import { crearEjecutor } from '../ai/herramientas.js';
+import { urlApiInterna } from '../ai/apiInterna.js';
 import { PERFILES } from '../middleware/perfiles.js';
 import { ErrorApi } from './errores.js';
 
 // API que consultan las herramientas: la del propio server (mismo contenedor), no la URL pública.
-const apiInternaPorDefecto = () => process.env.MCP_API_INTERNA || `http://127.0.0.1:${process.env.PORT ?? 3001}/api`;
+const apiInternaPorDefecto = urlApiInterna;
 
 // El perfil va en la URL del conector (?perfil=analista) porque los clientes MCP no siempre permiten
 // headers propios. Sin parámetro, el X-Perfil de la petición (por defecto publico).

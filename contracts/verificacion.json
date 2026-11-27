@@ -13,8 +13,8 @@
     "Banco": "Banco Istmo"
   },
   "todo_ok": true,
-  "puntos": [
-    {
+  "puntos": {
+    "calidad": {
       "punto": 1,
       "titulo": "Reporte de calidad: E1–E4 y universo local válido",
       "datos": {
@@ -59,7 +59,7 @@
         }
       ]
     },
-    {
+    "rankings_obligatorios": {
       "punto": 2,
       "titulo": "Rankings obligatorios: posiciones y saldos",
       "datos": {
@@ -84,7 +84,7 @@
         }
       ]
     },
-    {
+    "rankings_adicionales": {
       "punto": 3,
       "titulo": "Rankings COMERCIO y CONSUMO: posiciones y saldos",
       "datos": {
@@ -120,7 +120,7 @@
         }
       ]
     },
-    {
+    "ponderacion": {
       "punto": 4,
       "titulo": "Total de cartera local válida y ponderación",
       "datos": {
@@ -151,7 +151,7 @@
         }
       ]
     },
-    {
+    "subactividades": {
       "punto": 5,
       "titulo": "Desglose por subactividad (CONSUMO con la reclasificación SB21 a Tarjeta)",
       "datos": {
@@ -180,7 +180,7 @@
         }
       ]
     },
-    {
+    "periodos": {
       "punto": 6,
       "titulo": "Períodos procesados y reconciliaciones",
       "datos": {
@@ -219,5 +219,5 @@
         }
       ]
     }
-  ]
+  }
 }

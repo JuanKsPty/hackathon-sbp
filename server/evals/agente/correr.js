@@ -98,6 +98,7 @@ function resumir(esperado) {
   const corto = { ...esperado };
   if (corto.contiene) corto.contiene = corto.contiene.map((v) => (Array.isArray(v) ? v[0] : v));
   if (corto.noContiene?.length > 3) corto.noContiene = [...corto.noContiene.slice(0, 3), '…'];
+  if (corto.contienePatron) corto.contienePatron = corto.contienePatron.map(String);
   return corto;
 }
 

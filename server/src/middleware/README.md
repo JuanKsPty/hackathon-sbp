@@ -17,3 +17,15 @@ Tres perfiles (`publico`, `analista`, `admin`), cada uno con opciones distintas 
 Contrato y ejemplos: [`contracts/perfiles.md`](../../../contracts/perfiles.md).
 
 Basta con el selector de perfil: no hay contraseñas. Si algún día se agregan usuarios con contraseña, se crean desde variables de entorno: nunca contraseñas en el repo (R5).
+
+## `limitePedidos.js` (#84)
+
+Límite de pedidos para los endpoints que gastan la llave de IA: `POST /api/ia/preguntar` y `GET /api/explicaciones`. Así nadie puede consumir la `ANTHROPIC_API_KEY` en un ciclo.
+
+- **Por IP:** 10 pedidos por minuto.
+- **Global:** 300 pedidos por hora, entre todos.
+- Al pasarse responde **429** `DEMASIADOS_PEDIDOS`, con el header `Retry-After` en segundos.
+- Va después del control de perfil, así que un 403 no gasta cupo.
+- Los contadores viven en memoria y se reinician con el servidor.
+- `app.js` fija `trust proxy` solo para redes locales y privadas. Así `req.ip` es la IP real del usuario que llega en `X-Forwarded-For` desde nginx y el proxy de Dokploy, y un cliente no puede falsificarla.
+- En las pruebas, `crearApp({ ..., limiteIA })` cambia los valores.

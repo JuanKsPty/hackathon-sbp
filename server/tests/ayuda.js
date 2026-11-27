@@ -1,9 +1,18 @@
 // Utilidades compartidas por las pruebas.
+import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parse } from 'csv-parse/sync';
 import { procesarCarpeta, leerCatalogosDeCarpeta } from '../src/datos/paquete.js';
 
 export const CARPETA_DATOS = fileURLToPath(new URL('../../data/', import.meta.url));
 export const CARPETA_REFERENCIA = fileURLToPath(new URL('./referencia/', import.meta.url));
+
+// Filas de un CSV de tests/referencia (cálculo de control propio, no la clave oficial), como texto.
+// Las pruebas comparan contra estos archivos en lugar de escribir cifras a mano (R2).
+export function leerReferencia(archivo) {
+  return parse(fs.readFileSync(path.join(CARPETA_REFERENCIA, archivo), 'utf8'), { columns: true });
+}
 
 // Los tres períodos reales se procesan una sola vez por archivo de prueba.
 let paquete;
