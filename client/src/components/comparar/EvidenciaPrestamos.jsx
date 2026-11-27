@@ -56,7 +56,8 @@ export function EvidenciaPrestamos({ evidencia }) {
   )
 }
 
-function BuscarPrestamo({ alBuscar }) {
+// Buscador por Numero_Prestamo: lo usan esta lista y la tarjeta "Buscar préstamo" de Reportes.
+export function BuscarPrestamo({ alBuscar }) {
   const [texto, setTexto] = useState('')
   const enviar = (evento) => {
     evento.preventDefault()
