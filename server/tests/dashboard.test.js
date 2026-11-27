@@ -80,3 +80,35 @@ test('dashboard.html es autocontenido: sin scripts ni URLs externas', async () =
   assert.ok(!html.includes('http://'));
   assert.ok(!/<link/i.test(html));
 });
+
+test('personalizado.html (Analista): un período, un ranking y dos bancos', async () => {
+  const fecha = almacen.ultimaFecha();
+  const periodo = almacen.obtener(fecha);
+  const { ranking, filas } = periodo.rankings[0];
+  const [a, b] = filas;
+  const consulta = `periodos=${fecha}&rankings=${encodeURIComponent(ranking)}&bancos=${a.codigoBanco},${b.codigoBanco}`;
+  const respuesta = await fetch(`${base}/exportar/personalizado.html?${consulta}`, { headers: { 'X-Perfil': 'analista' } });
+  assert.equal(respuesta.status, 200);
+  assert.match(respuesta.headers.get('content-type'), /^text\/html; charset=utf-8/);
+  assert.match(respuesta.headers.get('content-disposition'), /^attachment;/);
+  const html = await respuesta.text();
+  assert.ok(html.includes(escapar(AVISO)));
+  assert.ok(html.includes(escapar(FUENTE)));
+  for (const f of [a, b]) {
+    assert.ok(html.includes(`${escapar(f.banco)} (${f.codigoBanco}) en los`), `falta la sección de ${f.banco}`);
+    assert.ok(html.includes(conMiles(formatearCentavos(f.saldoActividad))));
+  }
+  for (const f of filas.slice(2)) assert.ok(!html.includes(`<td>${f.codigoBanco}</td>`), `sobra ${f.banco}`);
+  for (const otro of periodo.rankings.slice(1)) assert.ok(!html.includes(`Ranking ${escapar(otro.ranking)} ·`), `sobra ${otro.ranking}`);
+  assert.ok(!/<script/i.test(html) && !html.includes('https://'));
+});
+
+test('personalizado.html: 403 para el perfil Público y 400 con un parámetro inválido', async () => {
+  const publico = await fetch(`${base}/exportar/personalizado.html`);
+  assert.equal(publico.status, 403);
+  for (const consulta of ['periodos=2026', 'rankings=NO_EXISTE', 'bancos=999999']) {
+    const respuesta = await fetch(`${base}/exportar/personalizado.html?${consulta}`, { headers: { 'X-Perfil': 'analista' } });
+    assert.equal(respuesta.status, 400, consulta);
+    assert.equal((await respuesta.json()).error.codigo, 'PARAMETRO_INVALIDO', consulta);
+  }
+});

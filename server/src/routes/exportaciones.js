@@ -5,6 +5,7 @@ import { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovi
 import { periodosPedidos, periodoPedido, rankingPedido, bancoPedido } from './parametros.js';
 import { ErrorApi } from './errores.js';
 import { requiereOpcion } from '../middleware/perfiles.js';
+import { dashboardPersonalizadoHtml } from '../automation/dashboardHtml.js';
 
 const DESCARGAS = {
   'rankings.csv': csvRankings, // entregable 2
@@ -54,6 +55,17 @@ export function rutasDeExportacion(almacen, { obtenerMovimientos } = {}) {
         .map((r) => ({ ...r, filas: r.filas.filter((f) => bancos.size === 0 || bancos.has(f.codigoBanco)) })),
     }));
     enviarCsv(res, 'reporte_personalizado.csv', csvRankings(filtrados));
+  });
+
+  // Mismo reporte personalizado, como dashboard HTML autocontenido (mismos parámetros y permiso).
+  rutas.get('/exportar/personalizado.html', requiereOpcion('reportes_personalizados'), (req, res) => {
+    const fechas = lista(req.query.periodos);
+    const periodos = fechas.length > 0 ? fechas.map((f) => periodoPedido(almacen, f)) : periodosPedidos(almacen);
+    const rankings = new Set(lista(req.query.rankings).map((r) => rankingPedido(almacen, r)));
+    const bancos = new Set(lista(req.query.bancos).map((b) => bancoPedido(almacen, b)));
+    res.attachment('reporte_personalizado.html');
+    res.type('text/html; charset=utf-8');
+    res.send(dashboardPersonalizadoHtml({ periodos, rankings, bancos, catalogos: almacen.catalogos }));
   });
 
   return rutas;
