@@ -1,9 +1,11 @@
 // Motor del reto: JavaScript puro, sin Express ni acceso a disco. Recibe textos CSV y devuelve resultados.
-// Flujo por período: leer -> validar -> cascada E1-E4 -> clasificar (CINU + SB21) -> (siguiente: agregación, rankings)
+// Flujo por período: leer -> validar -> cascada E1-E4 -> clasificar (CINU + SB21) -> agregar -> rankings
 import { leerCsv, ErrorDeDatos } from './csv.js';
 import { validarEsquema, validarTipos, revisarIntegridad } from './validacion.js';
 import { aplicarCascada, conteosIndependientes } from './cascada.js';
 import { clasificarOperaciones } from './clasificacion.js';
+import { agregar } from './agregacion.js';
+import { construirRankings, construirDesglose } from './rankings.js';
 
 export { cargarCatalogos } from './catalogos.js';
 export { ErrorDeDatos } from './csv.js';
@@ -47,18 +49,24 @@ export function procesarPeriodo(filas, catalogos, opciones = {}) {
   const operaciones = clasificacion.operaciones;
   const alertas = [...alertasIntegridad, ...clasificacion.alertas, ...alertasTipo];
 
+  const agregado = agregar(operaciones);
+  const rankings = construirRankings(agregado, catalogos); // [{ ranking, filas: [12 bancos] }]
+  const desglose = construirDesglose(agregado, catalogos); // [{ ranking, subactividad, codigoBanco, saldo }]
+
   return {
     fecha,
     nombreArchivo,
-    calidad: resumenDeCalidad(filas, cascada, operaciones, alertas, catalogos),
+    calidad: resumenDeCalidad(filas, cascada, operaciones, agregado, alertas, catalogos),
+    rankings,
+    desglose,
     operaciones, // universo local válido ya clasificado (un registro por préstamo)
     excluidas: cascada.excluidas,
     alertas,
   };
 }
 
-// Reporte de calidad del período (entregable 4).
-function resumenDeCalidad(filas, cascada, operaciones, alertas, catalogos) {
+// Reporte de calidad del período (entregable 4). Montos en centavos.
+function resumenDeCalidad(filas, cascada, operaciones, agregado, alertas, catalogos) {
   const { E1, E2, E3, E4 } = cascada.conteos;
   const universoValido = operaciones.length;
   return {
@@ -68,6 +76,7 @@ function resumenDeCalidad(filas, cascada, operaciones, alertas, catalogos) {
     e3SaldoNoPositivo: E3,
     e4ActividadNoCatalogada: E4,
     universoValido,
+    saldoTotalValido: agregado.saldoTotal,
     cascadaCuadra: filas.length === E1 + E2 + E3 + E4 + universoValido,
     reclasificadasTarjeta: operaciones.filter((op) => op.reclasificada).length,
     ...contarAlertas(alertas),
