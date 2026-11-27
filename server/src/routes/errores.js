@@ -32,6 +32,10 @@ export function manejarErrores(error, req, res, next) {
     // Archivo AT03 o catálogo inválido (lo usa la carga de períodos)
     return res.status(422).json(cuerpoDeError('ARCHIVO_INVALIDO', error.message, error.detalles));
   }
+  if (error.type === 'entity.too.large') {
+    // Archivo más grande que el límite de la carga de períodos (#29)
+    return res.status(413).json(cuerpoDeError('ARCHIVO_MUY_GRANDE', `El archivo supera el límite de ${Math.round(error.limit / 1048576)} MB.`));
+  }
   if (error.type === 'entity.parse.failed') {
     return res.status(400).json(cuerpoDeError('JSON_INVALIDO', 'El cuerpo de la petición no es JSON válido.'));
   }

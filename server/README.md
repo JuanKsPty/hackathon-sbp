@@ -24,6 +24,8 @@ Endpoints de consulta y formatos JSON en [`contracts/consulta.md`](../contracts/
 
 - **`src/app.js`:** arma la app de Express con `crearApp({ almacen })`. Las rutas nuevas se montan ahí, antes de los manejadores de errores.
 - **`src/datos/almacen.js`:** guarda en memoria los períodos procesados. La carga de un período nuevo solo llama a `almacen.guardar(procesarPeriodo(filas, catalogos))`.
+- **`src/datos/cargaPeriodo.js`:** carga de un período nuevo (#29). Valida y procesa el AT03, guarda una copia en `storage/periodos/` y lo publica en el almacén. Al arrancar, `servidor.js` recarga esas copias después de `data/`. El endpoint es `POST /api/periodos`, solo para admin, y su contrato está en [`contracts/carga.md`](../contracts/carga.md). Variable opcional: `STORAGE_DIR`, que por defecto es `../storage`.
+- **`src/automation/publicacion.js`:** gancho `alPublicarPeriodo(resultado)`, que se llama después de cada carga. Ahí se conectan las alertas por correo (#7).
 - **`src/routes/`:**
   - `consulta.js`: los endpoints.
   - `parametros.js`: validación de filtros.
