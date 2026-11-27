@@ -184,6 +184,19 @@ export function crearDocumentoOpenApi(catalogos) {
         },
       },
       '/ia/estado': { get: { tags: ['IA'], summary: 'Si la IA está disponible y con qué modelo', responses: jsonOk('Estado de la IA') } },
+      '/ia/guia': {
+        get: { tags: ['IA'], summary: 'Elementos que el agente guía puede señalar para el perfil (data-guia)', responses: jsonOk('Elementos de la guía') },
+      },
+      '/mcp': {
+        post: {
+          tags: ['IA'],
+          summary: 'MCP remoto (Streamable HTTP, sin estado): conectar Claude u otro cliente MCP por URL',
+          description: 'Mensajes JSON-RPC del protocolo MCP. Expone las mismas herramientas de solo lectura que el servidor MCP local. Perfil con `?perfil=publico|analista|admin` (por defecto publico). Instrucciones en `server/src/mcp/README.md`.',
+          parameters: [{ name: 'perfil', in: 'query', required: false, schema: { type: 'string', enum: ['publico', 'analista', 'admin'] } }],
+          requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' }, example: { jsonrpc: '2.0', id: 1, method: 'tools/list' } } } },
+          responses: { ...jsonOk('Respuesta JSON-RPC'), ...errores(400) },
+        },
+      },
       '/explicaciones': {
         get: {
           tags: ['IA'],

@@ -44,3 +44,11 @@ Tests: `cd server && npm test`.
 - La respuesta incluye `consultas`, con qué endpoints usó la IA, para mostrarlos como fuentes.
 
 `GET /api/explicaciones` expone la explicación de movimientos (#2) y `GET /api/ia/estado` indica si la IA está disponible.
+
+## Agente guía (#72)
+
+Si el usuario pregunta *cómo* o *dónde* hacer algo en la app, el agente usa la herramienta `guiar_usuario` y `POST /api/ia/preguntar` devuelve `guia.pasos` (`{ ruta, guia, texto }`), para que el front mueva un cursor por la pantalla.
+
+- [`guia.js`](guia.js): catálogo de elementos (`data-guia`) con su ruta y el permiso de perfil que necesitan. Es la misma lista de [`contracts/guia.md`](../../../contracts/guia.md); un test verifica que coincidan.
+- La herramienta solo admite los identificadores del perfil (lista cerrada en el esquema) y el backend vuelve a validar cada paso. La ruta la pone el catálogo, no la IA. Los textos de los pasos pasan por el verificador de números.
+- `GET /api/ia/guia` lista los elementos de cada perfil.

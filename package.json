@@ -12,7 +12,8 @@
     "dev": "concurrently -k -n api,web -c blue,magenta \"node scripts/con-env.mjs dev\" \"npm run dev --prefix client\"",
     "start": "node scripts/con-env.mjs start",
     "test": "npm test --prefix server",
-    "build": "npm run build --prefix client"
+    "build": "npm run build --prefix client",
+    "eval:agente": "node scripts/con-env.mjs eval:agente"
   },
   "devDependencies": {
     "concurrently": "^10.0.7"
