@@ -18,7 +18,7 @@ Registro básico de lo que pasa en la plataforma: qué archivo se cargó, cuánd
 
 | `operacion` | Quién la registra |
 | :--- | :--- |
-| `carga_inicial` | `server/src/servidor.js`, una por archivo AT03 de `data/` al arrancar |
+| `carga_inicial` | `server/src/servidor.js`, una por arranque con los archivos AT03 de `data/` (separados por coma) y sus períodos |
 | `carga_periodo` | la carga o actualización de un período (#29) |
 | `cambio_parametros` | `PUT /api/parametros` (#30) |
 | `acceso_denegado` | `requierePerfil` cada vez que responde 403; `detalle` trae el método y la ruta |
