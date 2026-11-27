@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { ArrowRightIcon, BotIcon, CompassIcon, FileDownIcon, FilterIcon, TrophyIcon } from 'lucide-react'
+import { ArrowRightIcon, BotIcon, CompassIcon, FileDownIcon, TrophyIcon } from 'lucide-react'
 import { useAgente } from '@/agente/AgenteContext.jsx'
 import { Etiqueta, TituloDosTonos } from '@/components/marca'
 import { cn } from '@/lib/utils'
@@ -12,13 +12,6 @@ const CASOS = [
     pregunta: '¿Quién lidera cada sector?',
     texto: 'La posición de cada banco en cada ranking, con su saldo y su ponderación.',
     accion: 'Ver rankings',
-    ruta: '/rankings',
-  },
-  {
-    icono: FilterIcon,
-    pregunta: '¿Cómo le va a un banco?',
-    texto: 'Filtra por banco y por subactividad, y míralo en la tabla y en el gráfico.',
-    accion: 'Filtrar por banco',
     ruta: '/rankings',
   },
   {
