@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { crearApp } from './app.js';
 import { almacenDesdeCarpeta } from './datos/almacen.js';
+import { crearObtenerMovimientos } from './routes/movimientos.js';
 import { registrarOperacion } from './datos/bitacora.js';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
@@ -23,7 +24,8 @@ try {
       detalle: `Período ${periodo.fecha}`,
     });
   }
-  crearApp({ almacen }).listen(puerto, () => {
+  const obtenerMovimientos = crearObtenerMovimientos(almacen);
+  crearApp({ almacen, obtenerMovimientos }).listen(puerto, () => {
     console.log(`API lista en http://localhost:${puerto}/api · períodos: ${almacen.fechas().join(', ') || 'ninguno'}`);
   });
 } catch (error) {
