@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CalendarRangeIcon, CrownIcon, LockIcon, MinusIcon } from 'lucide-react'
-import { fijarPerfilDePeticiones, movimientos as pedirMovimientos } from '@/api/cliente.js'
+import { movimientos as pedirMovimientos } from '@/api/cliente.js'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -38,12 +38,8 @@ export function MovimientosSignificativos() {
   const activa = permitido && Boolean(desde && periodo)
 
   const consulta = useConsulta(
-    (opciones) => {
-      // Los efectos de un hijo corren antes que los del PerfilProvider: al cambiar de perfil, el header
-      // X-Perfil global aún tendría el anterior (y el API respondería 403). Se fija aquí con el actual.
-      fijarPerfilDePeticiones(perfil)
-      return pedirMovimientos({ desde, hasta: periodo, solo_significativos: true }, opciones)
-    },
+    // PerfilContext fija el X-Perfil al cambiar de perfil, antes de volver a pedir.
+    (opciones) => pedirMovimientos({ desde, hasta: periodo, solo_significativos: true }, opciones),
     [perfil, desde, periodo],
     { activa },
   )
