@@ -37,11 +37,11 @@ SALIDA = AQUI / "deck.pptx"
 # y `cd server && npm run test:cobertura`. Si cambian, se actualizan aquí y se vuelve a generar.
 # ---------------------------------------------------------------------------------------------
 CIFRAS = {
-    "pruebas_server": "353",
-    "pruebas_client": "43",
-    "cobertura_lineas": "96 %",
-    "cobertura_ramas": "91 %",
-    "cobertura_funciones": "96 %",
+    "pruebas_server": "366",
+    "pruebas_client": "73",
+    "cobertura_lineas": "93 %",
+    "cobertura_ramas": "90 %",
+    "cobertura_funciones": "93 %",
     "casos_eval_agente": "18",
 }
 URL_PUBLICA = "https://sbp.juank.tech"

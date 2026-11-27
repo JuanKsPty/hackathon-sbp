@@ -59,9 +59,9 @@ El deck **no tiene cifras de resultados** (saldos, posiciones ni ganadores): esa
 
 | Cifra | Cómo se mide |
 | :--- | :--- |
-| 353 pruebas del server | `cd server && npm test` |
-| 43 pruebas del client | `cd client && npm test` |
-| Cobertura del server: 96 % de líneas, 91 % de ramas y 96 % de funciones (línea "all files") | `cd server && npm run test:cobertura` |
+| 366 pruebas del server | `cd server && npm test` |
+| 73 pruebas del client | `cd client && npm test` |
+| Cobertura del server: 93 % de líneas, 90 % de ramas y 93 % de funciones (línea "all files") | `cd server && npm run test:cobertura` |
 | 18 casos de evaluación del agente | `server/evals/agente/casos.js` |
 
 Si cambian, se actualiza el bloque `CIFRAS` y se vuelve a generar. Las URL del sitio público, del interno y del repositorio están en `URL_PUBLICA`, `URL_INTERNA` y `URL_REPO`.
@@ -100,4 +100,4 @@ La app son dos sitios: el **público** (http://localhost:5173), sin login, y el 
 - **Acciones de pantalla (#131 y #137):** el server las valida y el front las ejecuta en dos modos. **Ejecutar** deja la pantalla lista al instante, con "Muéstrame cómo" para deshacer y demostrar. **Demostrar** mueve el cursor paso a paso, con "Ver de nuevo" y Esc para cerrar. En el ensayo, probar las preguntas de los pasos 9.2 y 9.4 del guion para saber qué modo sale.
 - **Rediseño en curso (`feat/ux-actores`, todavía sin PR):** si entra antes de la demo, cambian varias cosas que el guion nombra. La paleta pasa a azul claro y llega el logo oficial de la SBP. Arriba a la derecha queda solo el botón "Asistente IA", que abre el chat flotante debajo, sin burbuja ni panel lateral. El período, el perfil y el tema van al pie del menú lateral. Desaparece "Instalar app", y Rankings trae el período entre sus filtros. Si se mergea, actualizar los pasos 1, 5 y 9 del guion.
 - **Alertas por correo (#7):** ya están en `main`. Mostrarlas en vivo solo si la máquina de la demo tiene `ZAPIER_WEBHOOK_URL` en el `.env`.
-- **Cifras de pruebas:** volver a medirlas (tabla de arriba) el día de la presentación. La cobertura del server bajó de 99 % a 96 % de líneas porque el inicio de sesión (`server/src/auth/`, `routes/sesion.js` y la parte de sesión de `middleware/perfiles.js`) aún no tiene pruebas propias; si se agregan, la cifra sube.
+- **Cifras de pruebas:** volver a medirlas (tabla de arriba) el día de la presentación. La cobertura del server bajó de 99 % a 93 % de líneas porque el inicio de sesión (`server/src/auth/`, `routes/sesion.js` y la parte de sesión de `middleware/perfiles.js`) aún no tiene pruebas propias; si se agregan, la cifra sube.
