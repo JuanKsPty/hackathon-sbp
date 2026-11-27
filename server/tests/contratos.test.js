@@ -33,6 +33,8 @@ const PETICIONES = {
   'catalogos-admin.json': { ruta: '/admin/catalogos', perfil: 'admin' },
   'bitacora.json': { ruta: '/bitacora', perfil: 'admin' },
   'carga.json': { carga: true },
+  // Verificación del jurado (#63, #87): para los 3 perfiles; el ejemplo viene acotado a un banco.
+  'verificacion.json': { ruta: '/verificacion?banco=101' },
 };
 
 let servidor;
@@ -71,13 +73,16 @@ async function pedir({ ruta, perfil = 'publico' }) {
 
 // Diferencias de forma entre el ejemplo y la respuesta real: claves y tipos, no valores.
 // - null es "sin valor" (por ejemplo Var_Saldo_Pct o Comparacion): no se compara su tipo.
-// - En un arreglo, cada elemento del ejemplo se compara con el primero de la respuesta.
+// - Arreglos del mismo largo se comparan elemento por elemento (sirve cuando cada elemento tiene
+//   otra forma, como los puntos de verificacion.json). Si el ejemplo abrevia el arreglo, cada
+//   elemento del ejemplo se compara con el primero de la respuesta.
 function diferenciasDeForma(ejemplo, real, ruta = '$') {
   if (ejemplo === null || real === null) return [];
   if (Array.isArray(ejemplo) || Array.isArray(real)) {
     if (!Array.isArray(ejemplo) || !Array.isArray(real)) return [`${ruta}: solo uno de los dos es un arreglo`];
     if (ejemplo.length === 0 || real.length === 0) return [];
-    return ejemplo.flatMap((elemento, i) => diferenciasDeForma(elemento, real[0], `${ruta}[${i}]`));
+    const pareja = (i) => (ejemplo.length === real.length ? real[i] : real[0]);
+    return ejemplo.flatMap((elemento, i) => diferenciasDeForma(elemento, pareja(i), `${ruta}[${i}]`));
   }
   if (typeof ejemplo !== typeof real) return [`${ruta}: ${typeof ejemplo} en el ejemplo y ${typeof real} en la API`];
   if (typeof ejemplo !== 'object') return [];
@@ -112,4 +117,7 @@ test('el comparador de forma detecta claves y tipos distintos', () => {
   assert.deepEqual(diferenciasDeForma({ a: 1, b: 2 }, { a: 1 }), ['$.b: no está en la API']);
   assert.deepEqual(diferenciasDeForma({ a: [1] }, { a: 1 }), ['$.a: solo uno de los dos es un arreglo']);
   assert.deepEqual(diferenciasDeForma({ a: null }, { a: { b: 1 } }), []);
+  // Mismo largo: elemento por elemento (cada punto puede tener otra forma).
+  assert.deepEqual(diferenciasDeForma([{ a: 1 }, { b: 'x' }], [{ a: 2 }, { b: 'y' }]), []);
+  assert.deepEqual(diferenciasDeForma([{ a: 1 }, { b: 1 }], [{ a: 2 }, { b: 'y' }]), ['$[1].b: number en el ejemplo y string en la API']);
 });
