@@ -81,6 +81,7 @@ Las pruebas usan `node:test` y corren sin red ni base de datos: procesan los CSV
 | | `GET /api/movimientos/descomposicion` (nuevos, salen, amortización) | analista, admin | `src/routes/descomposicion.js` |
 | Descargas | `GET /api/exportar/{rankings,subactividades,calidad,excluidas,alertas}.csv` | todos | [exportaciones.md](../contracts/exportaciones.md) |
 | | `GET /api/exportar/movimientos.csv` (entregable 5) | analista, admin | [exportaciones.md](../contracts/exportaciones.md) |
+| | `GET /api/exportar/personalizado.csv` (reporte personalizado: períodos, rankings y bancos elegidos) | analista, admin | [exportaciones.md](../contracts/exportaciones.md) |
 | Administración | `GET /api/perfil`, `GET /api/parametros` | todos | [perfiles.md](../contracts/perfiles.md), [administracion.md](../contracts/administracion.md) |
 | | `PUT /api/parametros`, `GET /api/admin/catalogos`, `GET /api/bitacora` | admin | [administracion.md](../contracts/administracion.md), [bitacora.md](../contracts/bitacora.md) |
 | | `POST /api/periodos` (cargar o actualizar un período; cuerpo: CSV) | admin | [carga.md](../contracts/carga.md) |
