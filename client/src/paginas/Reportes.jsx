@@ -165,6 +165,24 @@ function DescargasAbiertas({ periodos }) {
               </CardContent>
             </Card>
           ))}
+          {/* Dashboard HTML autocontenido (no reemplaza a los CSV). Sin período, usa el último cargado. */}
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>Dashboard</CardTitle>
+              <CardDescription>Reporte HTML</CardDescription>
+              <CardAction>
+                <Descarga
+                  href={`/api/exportar/dashboard.html${periodo === TODOS ? '' : `?periodo=${encodeURIComponent(periodo)}`}`}
+                  titulo="Descargar dashboard"
+                >
+                  Descargar dashboard
+                </Descarga>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Gráficos y tablas de los rankings con calidad E1–E4; se abre sin internet.</p>
+            </CardContent>
+          </Card>
         </div>
       </CardContent>
     </Card>
