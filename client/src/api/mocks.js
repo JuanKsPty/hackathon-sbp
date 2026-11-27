@@ -29,6 +29,7 @@ const ARCHIVOS = {
   '/calidad': 'calidad',
   '/excluidas': 'excluidas',
   '/movimientos': 'movimientos',
+  '/indicadores': 'indicadores',
   '/perfil': 'perfil',
 }
 

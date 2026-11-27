@@ -24,6 +24,7 @@ export const ELEMENTOS_GUIA = [
   el('panel.lideres', '/', 'Líder de cada ranking'),
   el('panel.movimientos', '/', 'Movimientos significativos del último período', 'comparar_periodos'),
   el('panel.explicaciones', '/', 'Explicación de los movimientos', 'comparar_periodos'),
+  el('panel.indicadores-adicionales', '/', 'Indicadores adicionales: morosidad, vencimientos y concentración'),
   // Rankings
   el('rankings.selector-ranking', '/rankings', 'Selector de los 6 rankings'),
   el('rankings.filtro-banco', '/rankings', 'Filtro por banco'),

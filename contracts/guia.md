@@ -40,6 +40,7 @@ El agente guía mueve un cursor por la app y señala elementos con un globo de t
 | `panel.lideres` | Líder de cada ranking | todos |
 | `panel.movimientos` | Movimientos significativos del último período | analista, admin |
 | `panel.explicaciones` | Explicación de los movimientos (IA o reglas) | analista, admin |
+| `panel.indicadores-adicionales` | Indicadores adicionales (morosidad, vencimientos y concentración; análisis fuera de los 6 rankings) | todos |
 
 ## Rankings (`/rankings`)
 

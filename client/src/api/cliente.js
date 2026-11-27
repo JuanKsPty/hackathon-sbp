@@ -118,6 +118,11 @@ export const excluidas = ({ periodo, motivo, banco } = {}, opciones) =>
 export const movimientos = ({ desde, hasta, ranking, solo_significativos } = {}, opciones) =>
   pedir('/movimientos', { desde, hasta, ranking, solo_significativos }, opciones)
 
+// contracts/indicadores.md (#35): morosidad, vencimientos y concentración. Análisis adicional: no forma
+// parte de los 6 rankings oficiales. Abierto a los 3 perfiles.
+export const indicadores = ({ periodo, ranking } = {}, opciones) =>
+  pedir('/indicadores', { periodo, ranking }, opciones)
+
 // Perfil actual, sus opciones y la lista de perfiles (contracts/perfiles.md, #28). Lo usa PerfilContext
 // para armar el selector y el menú.
 export const perfil = (opciones) => pedir('/perfil', undefined, opciones)
