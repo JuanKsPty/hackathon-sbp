@@ -37,7 +37,7 @@ export function SesionUsuario({ variante = 'menu', className }) {
 
   if (variante === 'lista') {
     return (
-      <div data-guia="global.selector-perfil" className={cn('flex flex-col gap-2 rounded-md border border-sidebar-border px-2 py-2 text-sm', className)}>
+      <div data-guia="global.selector-perfil" className={cn('flex flex-col gap-2 rounded-tarjeta border border-sidebar-border p-3 text-sm', className)}>
         <span className="flex flex-col gap-0.5">
           <span className="font-medium">{quien}</span>
           <span className="text-xs">Perfil {nombre}</span>
@@ -55,8 +55,8 @@ export function SesionUsuario({ variante = 'menu', className }) {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" aria-label={`${quien}, perfil ${nombre}. Abrir menú de la sesión`} data-guia="global.selector-perfil" className={className}>
           <UserIcon aria-hidden="true" />
-          <span className="max-w-32 truncate">{quien}</span>
-          <span className="text-muted-foreground">· {nombre}</span>
+          <span className="max-w-24 truncate xl:max-w-32">{quien}</span>
+          <span className="hidden text-muted-foreground 2xl:inline">· {nombre}</span>
           <ChevronDownIcon className="text-muted-foreground" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>

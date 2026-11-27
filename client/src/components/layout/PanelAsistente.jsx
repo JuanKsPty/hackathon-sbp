@@ -27,7 +27,7 @@ export function PanelAsistente() {
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" aria-label="Abrir asistente IA" data-guia="global.abrir-asistente">
           <BotIcon aria-hidden="true" />
-          <span className="hidden sm:inline">Asistente</span>
+          <span className="hidden 2xl:inline">Asistente</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
