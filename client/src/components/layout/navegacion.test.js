@@ -6,7 +6,7 @@ const rutas = (puede) => seccionesVisibles(puede).map((s) => s.ruta)
 const conOpciones = (...opciones) => (opcion) => opciones.includes(opcion)
 
 test('sin opciones (cargando o API caída) quedan solo las secciones públicas', () => {
-  assert.deepEqual(rutas(() => false), ['/', '/rankings', '/reportes', '/calidad'])
+  assert.deepEqual(rutas(() => false), ['/', '/rankings', '/reportes', '/calidad', '/verificacion'])
 })
 
 test('Analista ve Comparar períodos pero no Administración', () => {
