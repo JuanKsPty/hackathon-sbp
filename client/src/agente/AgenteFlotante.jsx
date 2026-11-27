@@ -5,8 +5,9 @@
 // gráficos de la última pregunta (#108).
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { ExternalLinkIcon, MinusIcon } from 'lucide-react'
+import { ExternalLinkIcon, MinusIcon, Trash2Icon } from 'lucide-react'
 import { ChatAsistente } from '@/components/asistente/ChatAsistente.jsx'
+import { borrarConversacion, useConversacion } from '@/components/asistente/conversacion.js'
 import { GraficosAsistente } from '@/components/asistente/GraficosAsistente.jsx'
 import { Button } from '@/components/ui/button'
 import { useGuia } from '@/guia/GuiaContext.jsx'
@@ -15,6 +16,7 @@ import { useAgente } from './AgenteContext.jsx'
 export function AgenteFlotante() {
   const { abierto, cerrar } = useAgente()
   const { estado } = useGuia()
+  const { mensajes } = useConversacion()
   const [guiaAntes, setGuiaAntes] = useState(estado.activa)
 
   // Al empezar una guía o demostración, el chat se minimiza para no tapar la pantalla.
@@ -37,6 +39,11 @@ export function AgenteFlotante() {
       <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-2">
         <p className="text-sm font-semibold">Asistente IA</p>
         <div className="flex items-center gap-1">
+          {mensajes.length > 0 && (
+            <Button variant="ghost" size="icon-sm" onClick={borrarConversacion} aria-label="Borrar la conversación" title="Borrar la conversación">
+              <Trash2Icon aria-hidden="true" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon-sm" asChild>
             <Link to="/asistente" onClick={cerrar} aria-label="Abrir en página completa" title="Abrir en página completa">
               <ExternalLinkIcon aria-hidden="true" />
