@@ -6,6 +6,8 @@ import {
   parametrosPersonalizado,
   urlDescarga,
 } from '@/api/cliente.js'
+import { DetallePrestamo } from '@/components/comparar/DetallePrestamo.jsx'
+import { BuscarPrestamo } from '@/components/comparar/EvidenciaPrestamos.jsx'
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
@@ -104,10 +106,34 @@ export default function Reportes() {
           </CardContent>
         </Card>
       )}
+      {/* Acceso directo a la ficha de un préstamo (la misma de Comparar): solo sitio interno, con el
+          permiso que piden /api/prestamos y /exportar/prestamo.html. */}
+      {__INTERNO__ && puede('comparar_periodos') && <TarjetaBuscarPrestamo />}
       {/* Abierta a los 3 perfiles y a los dos sitios: no depende de las opciones del perfil. */}
       <AlertasPorCorreo bancos={bancos} rankings={rankings} />
       <ReportePorCorreo periodo={periodo} />
     </Contenedor>
+  )
+}
+
+// Busca un préstamo por su número y abre su ficha lateral con "Descargar informe". Si el número no
+// existe, la ficha muestra el error del API (404 PRESTAMO_NO_ENCONTRADO) sin romper la página.
+function TarjetaBuscarPrestamo() {
+  const [numero, setNumero] = useState(null)
+  return (
+    <Card data-guia="reportes.buscar-prestamo">
+      <CardHeader>
+        <CardTitle>Buscar préstamo</CardTitle>
+        <CardDescription>
+          Ficha de un préstamo en todos los períodos e informe descargable. El número sale de la evidencia de Comparar
+          períodos (préstamos de respaldo) o del CSV de filas excluidas.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <BuscarPrestamo alBuscar={setNumero} />
+      </CardContent>
+      <DetallePrestamo numero={numero} alCerrar={() => setNumero(null)} />
+    </Card>
   )
 }
 
