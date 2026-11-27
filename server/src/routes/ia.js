@@ -35,12 +35,12 @@ function validarPregunta(cuerpo) {
  * @param {object} [deps.almacen] períodos cargados y catálogos: con él, las preguntas traen `accion` (#108)
  * @param {Function} [deps.obtenerMovimientos] cálculo de /api/movimientos (#32)
  * @param {object} [deps.opcionesIA] { cliente, apiKey, modelo } (para tests; por defecto el .env)
+ * @param {object} [deps.almacen] almacén de períodos: de su catálogo salen los rankings y bancos que nombran las herramientas de la IA
  */
 export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {}) {
   const rutas = Router();
   const apiKey = () => opcionesIA.apiKey ?? process.env.ANTHROPIC_API_KEY;
 
-  // Para que la UI sepa si mostrar el chat o el aviso "IA no disponible".
   // #72: elementos que el agente guía puede señalar para este perfil (contracts/guia.md).
   // El front lo usa para comprobar que cada uno tiene su data-guia en pantalla.
   rutas.get('/ia/guia', (req, res) => {
@@ -50,6 +50,7 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
     });
   });
 
+  // Para que la UI sepa si mostrar el chat o el aviso "IA no disponible".
   rutas.get('/ia/estado', (req, res) => {
     const disponible = Boolean(apiKey() || opcionesIA.cliente);
     res.json({
@@ -88,6 +89,7 @@ export function rutasDeIA({ almacen, obtenerMovimientos, opcionesIA = {} } = {})
         historial,
         perfil: req.perfil,
         contexto,
+        catalogos: almacen?.catalogos,
         ejecutar: crearEjecutor(baseUrl, { perfil: req.perfil }),
       });
       // Si la IA respondió con una guía (#72), la pregunta era de cómo usar la app: sin gráficos.

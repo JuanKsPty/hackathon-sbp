@@ -9,7 +9,7 @@ import { definicionGraficos, validarAccion, NOMBRE_HERRAMIENTA_GRAFICOS } from '
 import { verificarNumeros } from './verificador.js';
 import { crearCliente, MODELO_POR_DEFECTO } from './redaccionIA.js';
 
-export const ETIQUETA_AGENTE =
+const ETIQUETA_AGENTE =
   'Respuesta generada con IA · los cálculos provienen del motor determinista';
 
 const MAX_VUELTAS = 8;
@@ -36,6 +36,7 @@ Reglas estrictas:
  * @param {object} opciones
  * @param {(nombre: string, entrada: object) => Promise<object>} opciones.ejecutar ejecutor de herramientas
  * @param {string} [opciones.perfil] perfil del usuario: define qué herramientas se ofrecen
+ * @param {object} [opciones.catalogos] catálogo cargado: las descripciones de las herramientas nombran sus rankings y bancos
  * @param {Array<{rol: 'usuario'|'asistente', texto: string}>} [opciones.historial] turnos anteriores (solo texto)
  * @param {object} [opciones.cliente] cliente de Anthropic (para tests)
  * @param {string} [opciones.apiKey] por defecto ANTHROPIC_API_KEY
@@ -47,6 +48,7 @@ export async function preguntarAlAgente(pregunta, opciones) {
   const {
     ejecutar,
     perfil = 'publico',
+    catalogos,
     historial = [],
     apiKey = process.env.ANTHROPIC_API_KEY,
     modelo = process.env.AI_MODEL || MODELO_POR_DEFECTO,
@@ -88,7 +90,7 @@ export async function preguntarAlAgente(pregunta, opciones) {
   const fuentes = { resultados: [], catalogo: [] };
   let reintento = false;
   let guia = null; // pasos del cursor guía (#72), ya validados contra el catálogo
-  const herramientas = [...definicionesPara(perfil), definicionGuia(perfil)];
+  const herramientas = [...definicionesPara(perfil, catalogos), definicionGuia(perfil)];
   if (contexto?.fechas?.length) herramientas.push(definicionGraficos(contexto));
 
   for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {

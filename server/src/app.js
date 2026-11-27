@@ -55,7 +55,7 @@ export function crearApp({ almacen, obtenerMovimientos, opcionesIA, opcionesMcp,
   app.use('/api', rutasDeIA({ almacen, obtenerMovimientos, opcionesIA })); // con almacen: gráficos del chat (#108)
   app.use('/api', rutasDeDocumentacion(almacen));
   app.use('/api', rutasDeIndicadores(almacen)); // morosidad, vencimientos y concentración: análisis adicional (#35)
-  app.use('/api', rutasDeMcp(opcionesMcp)); // MCP remoto por HTTP: /api/mcp (#81)
+  app.use('/api', rutasDeMcp({ ...opcionesMcp, almacen })); // MCP remoto por HTTP: /api/mcp (#81)
   app.use('/api', rutasDeVerificacion(almacen)); // un dato de cada punto de la sección 11.1 (#63)
   app.use('/api', rutasDeSuscripciones(almacen)); // alertas por correo con Zapier (#7)
   // Las demás rutas se montan aquí, siempre ANTES de los dos manejadores de abajo.

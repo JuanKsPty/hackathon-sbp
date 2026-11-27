@@ -13,15 +13,16 @@ Indica siempre el período (AAAAMMDD) y que los datos son ficticios y no constit
  * @param {object} deps
  * @param {(nombre: string, entrada: object) => Promise<{ ok, datos?, error? }>} deps.ejecutar ejecutor de herramientas
  * @param {string} [deps.perfil] perfil con el que consulta (#28): solo se listan sus herramientas
+ * @param {object} [deps.catalogos] catálogo cargado (solo en el MCP remoto, que corre junto a la API); sin él las descripciones remiten a consultar_catalogos
  */
-export function crearServidorMcp({ ejecutar, perfil = 'publico' }) {
+export function crearServidorMcp({ ejecutar, perfil = 'publico', catalogos }) {
   const servidor = new Server(
     { name: 'rankings-credito-sbp', version: '0.1.0' },
     { capabilities: { tools: {} }, instructions: INSTRUCCIONES },
   );
 
   servidor.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: definicionesPara(perfil).map(({ name, description, input_schema }) => ({
+    tools: definicionesPara(perfil, catalogos).map(({ name, description, input_schema }) => ({
       name,
       description,
       inputSchema: input_schema,

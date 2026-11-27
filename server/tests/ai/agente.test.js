@@ -449,3 +449,12 @@ test('#86 (B5): un stop_reason desconocido sigue siendo un fallo de la IA', asyn
   const { cuerpo } = await preguntar(base, { pregunta: 'Hola' });
   assert.equal(cuerpo.ia_disponible, false);
 });
+
+test('#86 (C4): el modelo recibe las herramientas con los rankings y bancos del catálogo cargado', async () => {
+  const cliente = clienteGuionado([responder('Puedo consultar los rankings.')]);
+  const base = await levantar({ cliente });
+  await preguntar(base, { pregunta: '¿Qué puedes consultar?' });
+  const catalogos = await (await fetch(`${base}/catalogos`)).json();
+  const rankings = cliente.llamadas[0].tools.find((t) => t.name === 'consultar_rankings').input_schema.properties.ranking.description;
+  for (const { Ranking } of catalogos.rankings) assert.ok(rankings.includes(Ranking), Ranking);
+});

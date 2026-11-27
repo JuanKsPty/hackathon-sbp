@@ -25,13 +25,13 @@ function perfilDe(req) {
   return perfil;
 }
 
-/** @param {{ apiInterna?: string }} [opciones] base de la API para las herramientas (para tests) */
-export function rutasDeMcp({ apiInterna } = {}) {
+/** @param {{ apiInterna?: string, almacen?: object }} [opciones] base de la API para las herramientas (para tests) y almacén, de cuyo catálogo salen las descripciones */
+export function rutasDeMcp({ apiInterna, almacen } = {}) {
   const rutas = Router();
 
   rutas.post('/mcp', async (req, res) => {
     const perfil = perfilDe(req);
-    const servidor = crearServidorMcp({ ejecutar: crearEjecutor(apiInterna ?? apiInternaPorDefecto(), { perfil }), perfil });
+    const servidor = crearServidorMcp({ ejecutar: crearEjecutor(apiInterna ?? apiInternaPorDefecto(), { perfil }), perfil, catalogos: almacen?.catalogos });
     const transporte = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     res.on('close', () => {
       transporte.close();
