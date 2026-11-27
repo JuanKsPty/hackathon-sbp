@@ -319,9 +319,18 @@ export function Diferencia() {
       </ul>
       <BloqueOscuro className="flex items-center gap-5 px-8 py-6 sm:px-8 sm:py-6">
         <CheckCircle2Icon aria-hidden="true" className="size-8 shrink-0 text-brillo" />
-        <p className="text-[24px] leading-snug text-bloque-foreground">
+        <p className="flex-1 text-[24px] leading-snug text-bloque-foreground">
           Lo que antes eran horas cruzando hojas, ahora es un clic, con la explicación incluida.
         </p>
+        <a
+          href="https://sbp.juank.tech"
+          target="_blank"
+          rel="noreferrer"
+          className="flex shrink-0 items-center gap-2 text-[24px] font-medium text-brillo underline-offset-4 hover:underline"
+        >
+          <GlobeIcon aria-hidden="true" className="size-6" />
+          sbp.juank.tech
+        </a>
       </BloqueOscuro>
     </Lamina>
   )
