@@ -21,7 +21,7 @@ export function extraerNumeros(texto) {
  * numéricos que vienen como texto ("101"). De las fechas AAAAMMDD se admiten también
  * el año y el día, para poder escribir "30 de septiembre de 2026".
  */
-export function valoresCitables(datos) {
+function valoresCitables(datos) {
   const valores = [];
   const recorrer = (nodo) => {
     if (typeof nodo === 'number') {
