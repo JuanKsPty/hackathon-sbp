@@ -11,9 +11,11 @@ import { COLOR_BANCO_A, COLOR_BANCO_B, COLOR_BANCO_ELEGIDO } from '@/components/
 import { ComparacionBancos } from '@/components/comparar/ComparacionBancos.jsx'
 import { DescomposicionMovimiento } from '@/components/comparar/DescomposicionMovimiento.jsx'
 import { Estado } from '@/components/comparar/Estado.jsx'
+import { ExplicacionesPar } from '@/components/comparar/ExplicacionesPar.jsx'
 import { GraficoPosiciones } from '@/components/comparar/GraficoPosiciones.jsx'
 import { ordenarMovimientos, periodosPorDefecto, resolverOpcion, validarRango } from '@/components/comparar/movimientos.js'
 import { Selector } from '@/components/comparar/Selector.jsx'
+import { ReglaVigente } from '@/components/comparar/ReglaVigente.jsx'
 import { elegirParDeBancos } from '@/components/comparar/series.js'
 import { SoloAnalista } from '@/components/comparar/SoloAnalista.jsx'
 import { TablaMovimientos } from '@/components/comparar/TablaMovimientos.jsx'
@@ -44,7 +46,7 @@ export default function Comparar() {
   if (!permitido) {
     return (
       <Contenedor>
-        <Card data-guia="comparar.bancos">
+        <Card>
           <CardHeader>
             <CardTitle>Comparación entre períodos y bancos</CardTitle>
             <CardDescription>Movimientos, evolución de posiciones y comparación de 2 bancos</CardDescription>
@@ -222,6 +224,7 @@ function Comparacion({ periodos, rankings, bancos }) {
           {rangoValido ? (
             <>
               <AvisoCambioLider ranking={datosRanking} />
+              <ReglaVigente regla={consultaMovimientos.datos?.regla_significativo} />
               <Estado
                 consulta={consultaMovimientos}
                 activa={rangoValido && Boolean(ranking)}
@@ -253,6 +256,23 @@ function Comparacion({ periodos, rankings, bancos }) {
         <CardContent>
           {rangoValido ? (
             <DescomposicionMovimiento desde={desde} hasta={hasta} ranking={ranking} banco={bancoElegido} activa={rangoValido} />
+          ) : (
+            <Vacio icono={CalendarRangeIcon} titulo="Elige un rango válido" descripcion={errorRango} />
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Por qué se movieron</CardTitle>
+          <CardDescription>
+            {ranking}
+            {tramo && ` · ${tramo}`} · movimientos significativos y cambio de líder explicados
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {rangoValido ? (
+            <ExplicacionesPar desde={desde} hasta={hasta} ranking={ranking} activa={rangoValido} />
           ) : (
             <Vacio icono={CalendarRangeIcon} titulo="Elige un rango válido" descripcion={errorRango} />
           )}

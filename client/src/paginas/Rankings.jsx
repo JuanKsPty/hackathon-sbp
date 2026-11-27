@@ -1,6 +1,7 @@
 import { useControlGuia } from '@/agente/useControlGuia.js'
-import { useState } from 'react'
-import { DownloadIcon, InfoIcon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router'
+import { CheckIcon, DownloadIcon, InfoIcon, LinkIcon } from 'lucide-react'
 import {
   calidad as pedirCalidad,
   catalogos as pedirCatalogos,
@@ -11,15 +12,17 @@ import {
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
+import { AyudaTermino } from '@/components/glosario/AyudaTermino.jsx'
 import { DesgloseSubactividades } from '@/components/rankings/DesgloseSubactividades.jsx'
 import { FiltrosRanking, TODOS } from '@/components/rankings/FiltrosRanking.jsx'
 import { GraficoRanking } from '@/components/rankings/GraficoRanking.jsx'
 import { SelectorRanking } from '@/components/rankings/SelectorRanking.jsx'
 import { TablaRanking } from '@/components/rankings/TablaRanking.jsx'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
+import { escribirFiltros, leerFiltros } from '@/lib/filtrosUrl.js'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { Pagina } from './Pagina.jsx'
 
@@ -28,17 +31,44 @@ const RANKING_CON_REGLA_SB21 = 'CONSUMO'
 
 // Página Rankings (#64): período (encabezado), los 6 rankings, tabla ordenable, gráfico,
 // filtros por banco y subactividad, y desglose por subactividad. Todas las cifras vienen del API (R2).
+// Los filtros viven en la URL (#129): la vista se recarga igual y se puede compartir.
 export default function Rankings() {
-  const { periodo, cargando: cargandoPeriodos, error: errorPeriodos } = usePeriodo()
+  const { periodos, periodo, cambiarPeriodo, cargando: cargandoPeriodos, error: errorPeriodos } = usePeriodo()
   const catalogo = useConsulta(pedirCatalogos)
   const listaRankings = catalogo.datos?.rankings ?? []
   const listaBancos = catalogo.datos?.bancos ?? []
 
-  const [elegido, setElegido] = useState(null)
-  const [banco, setBanco] = useState(TODOS)
-  const [subactividad, setSubactividad] = useState(TODOS)
-  const ranking = elegido ?? listaRankings[0]?.Ranking ?? null
+  const [parametros, setParametros] = useSearchParams()
+  const filtros = leerFiltros(parametros, { periodos: periodos.map((p) => p.Fecha), rankings: listaRankings, bancos: listaBancos })
+  const ranking = filtros.ranking ?? listaRankings[0]?.Ranking ?? null
+  const banco = filtros.banco ?? TODOS
+  const subactividad = filtros.subactividad ?? TODOS
   const subactividadesDelRanking = listaRankings.find((r) => r.Ranking === ranking)?.Subactividades ?? []
+
+  // Cambia uno o más filtros en la URL sin crear una entrada nueva en el historial.
+  const actualizar = (cambios) =>
+    setParametros(
+      escribirFiltros({ periodo, ranking: filtros.ranking, banco: filtros.banco, subactividad: filtros.subactividad, ...cambios }),
+      { replace: true },
+    )
+  const setBanco = (valor) => actualizar({ banco: valor === TODOS ? null : valor })
+  const setSubactividad = (valor) => actualizar({ subactividad: valor === TODOS ? null : valor })
+
+  // Período: al abrir un enlace manda el de la URL; después, el del encabezado se copia a la URL.
+  const listoCatalogo = !catalogo.cargando && !cargandoPeriodos && periodos.length > 0
+  const sincronizado = useRef(false)
+  useEffect(() => {
+    if (!listoCatalogo) return
+    if (!sincronizado.current) {
+      sincronizado.current = true
+      if (filtros.periodo && filtros.periodo !== periodo) {
+        cambiarPeriodo(filtros.periodo)
+        return
+      }
+    }
+    if (periodo && parametros.get('periodo') !== periodo) actualizar({ periodo })
+    // Solo reacciona a que el catálogo esté listo y al período del encabezado.
+  }, [listoCatalogo, periodo]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const listo = Boolean(periodo && ranking)
   const consultaRanking = useConsulta((o) => pedirRankings({ periodo, ranking }, o), [periodo, ranking], { activa: listo })
@@ -46,28 +76,40 @@ export default function Rankings() {
   const conReglaSB21 = ranking === RANKING_CON_REGLA_SB21
   const consultaCalidad = useConsulta((o) => pedirCalidad({ periodo }, o), [periodo], { activa: Boolean(periodo) && conReglaSB21 })
 
-  const cambiarRanking = (nuevo) => {
-    setElegido(nuevo)
-    setSubactividad(TODOS) // las subactividades cambian con el ranking
-  }
+  // Las subactividades cambian con el ranking: al cambiarlo se quita ese filtro.
+  const cambiarRanking = (nuevo) => actualizar({ ranking: nuevo, subactividad: null })
 
   // Acciones de pantalla del agente (#125). Van antes de los returns tempranos (reglas de los hooks).
+  // El agente puede aplicar varias acciones seguidas antes de que la página se vuelva a dibujar: por
+  // eso cada una parte de la URL más reciente (actualización funcional), no de los filtros del render.
+  const cambiarEnUrl = (cambios) =>
+    setParametros(
+      (previos) => {
+        const nuevos = new URLSearchParams(previos)
+        for (const [nombre, valor] of Object.entries(cambios)) {
+          if (valor) nuevos.set(nombre, valor)
+          else nuevos.delete(nombre)
+        }
+        return nuevos
+      },
+      { replace: true },
+    )
+  // El backend usa "todos"/"todas" para quitar el filtro.
+  const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' || valor === TODOS ? null : valor)
   useControlGuia('rankings.selector-ranking', {
-    elegir: (valor) => cambiarRanking(valor),
-    estado: () => elegido,
-    restaurar: (anterior) => setElegido(anterior),
+    elegir: (valor) => cambiarEnUrl({ ranking: valor, subactividad: null }),
+    estado: () => ({ ranking: filtros.ranking, subactividad: filtros.subactividad }),
+    restaurar: (anterior) => cambiarEnUrl({ ranking: anterior?.ranking, subactividad: anterior?.subactividad }),
   })
-  // Filtros: el backend usa "todos"/"todas" para quitar el filtro; aquí ambos son TODOS.
-  const sinFiltro = (valor) => (valor === 'todos' || valor === 'todas' ? TODOS : valor)
   useControlGuia('rankings.filtro-banco', {
-    elegir: (valor) => setBanco(sinFiltro(valor)),
-    estado: () => banco,
-    restaurar: (anterior) => setBanco(anterior),
+    elegir: (valor) => cambiarEnUrl({ banco: sinFiltro(valor) }),
+    estado: () => filtros.banco,
+    restaurar: (anterior) => cambiarEnUrl({ banco: anterior }),
   })
   useControlGuia('rankings.filtro-subactividad', {
-    elegir: (valor) => setSubactividad(sinFiltro(valor)),
-    estado: () => subactividad,
-    restaurar: (anterior) => setSubactividad(anterior),
+    elegir: (valor) => cambiarEnUrl({ subactividad: sinFiltro(valor) }),
+    estado: () => filtros.subactividad,
+    restaurar: (anterior) => cambiarEnUrl({ subactividad: anterior }),
   })
 
   if (catalogo.cargando || cargandoPeriodos) {
@@ -96,7 +138,10 @@ export default function Rankings() {
       <Card>
         <CardHeader>
           <CardTitle>Ranking y filtros</CardTitle>
-          <CardDescription>El período se elige en el encabezado.</CardDescription>
+          <CardDescription>El período se elige en el encabezado. La dirección de la página guarda esta vista.</CardDescription>
+          <CardAction>
+            <CopiarEnlace />
+          </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <SelectorRanking rankings={listaRankings} valor={ranking} alCambiar={cambiarRanking} />
@@ -146,7 +191,9 @@ export default function Rankings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Desglose por subactividad</CardTitle>
+          <CardTitle className="flex items-center gap-1.5">
+            Desglose por subactividad <AyudaTermino clave="subactividad" />
+          </CardTitle>
           <CardDescription>{contexto}</CardDescription>
           <CardAction>
             <Descarga href={urlDescarga('subactividades', { periodo })}>CSV de subactividades</Descarga>
@@ -161,6 +208,7 @@ export default function Rankings() {
                 {typeof reclasificadas === 'number' && ` En este período se reclasificaron ${formatearEntero(reclasificadas)} operaciones.`}
                 {' '}El total de la actividad no cambia.
               </span>
+              <AyudaTermino clave="regla_sb21" className="mt-0.5" />
             </p>
           )}
           <Estado consulta={consultaDesglose} vacio={bancosVisibles.length === 0}>
@@ -191,6 +239,49 @@ function Estado({ consulta, vacio, children }) {
   if (consulta.error) return <ErrorApi error={consulta.error} alReintentar={consulta.reintentar} />
   if (vacio) return <Vacio titulo="Sin datos" descripcion="No hay datos para los filtros elegidos." />
   return children
+}
+
+// Copia la dirección de la vista actual (con sus filtros) para compartirla (#129).
+function CopiarEnlace() {
+  const [estado, setEstado] = useState('listo') // listo | copiado | error
+
+  const copiar = async () => {
+    setEstado((await copiarTexto(window.location.href)) ? 'copiado' : 'error')
+    setTimeout(() => setEstado('listo'), 2500)
+  }
+
+  if (estado === 'error') {
+    return <span className="text-xs text-muted-foreground">No se pudo copiar: usa la dirección del navegador.</span>
+  }
+  return (
+    <Button variant="outline" size="sm" onClick={copiar} aria-live="polite">
+      {estado === 'copiado' ? <CheckIcon aria-hidden="true" /> : <LinkIcon aria-hidden="true" />}
+      {estado === 'copiado' ? 'Enlace copiado' : 'Copiar enlace'}
+    </Button>
+  )
+}
+
+// El portapapeles moderno solo existe en https o localhost; si no está (por ejemplo, al abrir la app
+// por la IP de la red local), se usa una caja de texto oculta.
+async function copiarTexto(texto) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(texto)
+      return true
+    }
+  } catch {
+    // sigue con el método de respaldo
+  }
+  const caja = document.createElement('textarea')
+  caja.value = texto
+  caja.setAttribute('readonly', '')
+  caja.style.position = 'fixed'
+  caja.style.opacity = '0'
+  document.body.appendChild(caja)
+  caja.select()
+  const copiado = document.execCommand('copy')
+  caja.remove()
+  return copiado
 }
 
 // `guia`: identificador data-guia para el agente guía (contracts/guia.md), si el contrato lo define.
