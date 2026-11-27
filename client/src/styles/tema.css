@@ -1,100 +1,122 @@
 /*
- * Paleta D · SBP — elegida por el equipo (canvas "Rankings SBP · Paletas").
- * Índigo y dorado tomados del logo y del sitio superbancos.gob.pa; tipografía Roboto.
+ * Tema Radar SBP · base monocromática con acento verde (#138).
+ * Lenguaje visual tomado de una landing de banca digital (sin su marca): fondo blanco,
+ * secciones gris muy claro, bloques negros con cuadrícula y brillo menta, píldoras.
  * La app NO usa el logo ni el nombre de la SBP como marca y siempre muestra
  * "Datos ficticios · Uso informativo, no opinión formal de la SBP".
- * Todo el texto cumple contraste 4.5:1 y los colores de gráficos 3:1 sobre card.
+ *
+ * Contraste: todo texto 4.5:1 sobre su fondo; marcas de gráfico 3:1 sobre card.
+ * El verde #1F9D63 solo da 3.5:1 sobre blanco, así que va en íconos y marcas
+ * (--marca, --chart-1); el texto verde usa #157A4C (--accent-foreground, --sube).
+ * El brillo menta (--brillo) nunca va debajo de texto.
  *
  * Tokens con los nombres de shadcn/ui, más los propios del reto:
  *   sube / baja / igual  -> cambio de posición entre períodos
- *   destacado            -> movimientos significativos (dorado)
- *   aviso                -> franja de datos ficticios
+ *   destacado            -> movimientos significativos (ámbar)
+ *   aviso                -> franja de datos ficticios (ámbar)
+ *   marca / brillo       -> verde de íconos y brillo menta de los bloques oscuros
+ *   bloque               -> fondo de BloqueOscuro y su texto
+ *   seccion              -> fondo de SeccionGris
  */
 :root {
-  --background: #F6F4FE;
-  --foreground: #1F2340;
+  --background: #FFFFFF;
+  --foreground: #0B0B0C;
   --card: #FFFFFF;
-  --card-foreground: #1F2340;
+  --card-foreground: #0B0B0C;
   --popover: #FFFFFF;
-  --popover-foreground: #1F2340;
-  --primary: #2E2B86;
+  --popover-foreground: #0B0B0C;
+  --primary: #0B0B0C;
   --primary-foreground: #FFFFFF;
-  --secondary: #ECEAF8;
-  --secondary-foreground: #211E75;
-  --muted: #EEEDF7;
-  --muted-foreground: #55566F;
-  --accent: #ECEAF8;
-  --accent-foreground: #211E75;
+  --secondary: #F4F4F5;
+  --secondary-foreground: #0B0B0C;
+  --muted: #F4F4F5;
+  --muted-foreground: #6B6B70;
+  --accent: #E7F6EE;
+  --accent-foreground: #157A4C;
   --destructive: #B42318;
-  --border: #DBDBE4;
-  --input: #DBDBE4;
-  --ring: #3643A1;
-  --chart-1: #2E2B86;
-  --chart-2: #A7843A;
-  --chart-3: #4A8BD6;
-  --chart-4: #304254;
-  --chart-5: #9191A6;
-  --sidebar: #211E75;
-  --sidebar-foreground: #D3D2EC;
-  --sidebar-primary: #D2B26A;
-  --sidebar-primary-foreground: #211E75;
-  --sidebar-accent: #2E2B86;
-  --sidebar-accent-foreground: #D2B26A;
-  --sidebar-border: #2E2B86;
-  --sidebar-ring: #D2B26A;
-  --sube: #136B45;
-  --sube-fondo: #E3F2EA;
+  --border: #E7E7EA;
+  --input: #E7E7EA;
+  --ring: #1F9D63;
+  --chart-1: #1F9D63;
+  --chart-2: #0B0B0C;
+  --chart-3: #B7791F;
+  --chart-4: #6B6B70;
+  --chart-5: #8E8E95;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #6B6B70;
+  --sidebar-primary: #0B0B0C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F4F4F5;
+  --sidebar-accent-foreground: #0B0B0C;
+  --sidebar-border: #E7E7EA;
+  --sidebar-ring: #1F9D63;
+  --sube: #157A4C;
+  --sube-fondo: #E7F6EE;
   --baja: #B42318;
-  --baja-fondo: #FBEAE8;
-  --igual: #55566F;
-  --igual-fondo: #EEEDF7;
-  --destacado: #6E5520;
-  --destacado-fondo: #F6EEDC;
-  --aviso: #6E5520;
-  --aviso-fondo: #F6EEDC;
-  --radius: 0.375rem;
+  --baja-fondo: #FDECEA;
+  --igual: #6B6B70;
+  --igual-fondo: #F4F4F5;
+  --destacado: #8A5A00;
+  --destacado-fondo: #FDF3DC;
+  --aviso: #8A5A00;
+  --aviso-fondo: #FDF3DC;
+  --marca: #1F9D63;
+  --marca-fondo: #E7F6EE;
+  --brillo: #6EE7B7;
+  --bloque: #0B0B0C;
+  --bloque-foreground: #FFFFFF;
+  --bloque-muted: #A1A1A8;
+  --seccion: #F4F4F5;
+  --radius: 0.625rem;
 }
 
 .dark {
-  --background: #0F0E2E;
-  --foreground: #ECEBF8;
-  --card: #17163F;
-  --card-foreground: #ECEBF8;
-  --popover: #17163F;
-  --popover-foreground: #ECEBF8;
-  --primary: #D2B26A;
-  --primary-foreground: #1A1440;
-  --secondary: #23215A;
-  --secondary-foreground: #ECEBF8;
-  --muted: #1F1E4D;
-  --muted-foreground: #A6A5C8;
-  --accent: #23215A;
-  --accent-foreground: #ECEBF8;
-  --destructive: #F0786B;
-  --border: #2C2A63;
-  --input: #2C2A63;
-  --ring: #8E8AD0;
-  --chart-1: #8E8AD0;
-  --chart-2: #D2B26A;
-  --chart-3: #519BEA;
-  --chart-4: #C9C8E6;
-  --chart-5: #6E6D99;
-  --sidebar: #0B0A24;
-  --sidebar-foreground: #A6A5C8;
-  --sidebar-primary: #D2B26A;
-  --sidebar-primary-foreground: #0B0A24;
-  --sidebar-accent: #23215A;
-  --sidebar-accent-foreground: #D2B26A;
-  --sidebar-border: #2C2A63;
-  --sidebar-ring: #D2B26A;
-  --sube: #4CC38A;
-  --sube-fondo: #10302A;
-  --baja: #F28B7F;
-  --baja-fondo: #3A1A1D;
-  --igual: #A6A5C8;
-  --igual-fondo: #1F1E4D;
-  --destacado: #E6C987;
-  --destacado-fondo: #3A2F14;
-  --aviso: #E6C987;
-  --aviso-fondo: #3A2F14;
+  --background: #0B0B0C;
+  --foreground: #F4F4F5;
+  --card: #141416;
+  --card-foreground: #F4F4F5;
+  --popover: #141416;
+  --popover-foreground: #F4F4F5;
+  --primary: #FFFFFF;
+  --primary-foreground: #0B0B0C;
+  --secondary: #1C1C1F;
+  --secondary-foreground: #F4F4F5;
+  --muted: #1C1C1F;
+  --muted-foreground: #A1A1A8;
+  --accent: #0F2A1F;
+  --accent-foreground: #34D399;
+  --destructive: #F87171;
+  --border: #26262A;
+  --input: #26262A;
+  --ring: #34D399;
+  --chart-1: #34D399;
+  --chart-2: #F4F4F5;
+  --chart-3: #F5B54A;
+  --chart-4: #A1A1A8;
+  --chart-5: #6B6B70;
+  --sidebar: #0B0B0C;
+  --sidebar-foreground: #A1A1A8;
+  --sidebar-primary: #FFFFFF;
+  --sidebar-primary-foreground: #0B0B0C;
+  --sidebar-accent: #1C1C1F;
+  --sidebar-accent-foreground: #F4F4F5;
+  --sidebar-border: #26262A;
+  --sidebar-ring: #34D399;
+  --sube: #34D399;
+  --sube-fondo: #0F2A1F;
+  --baja: #F87171;
+  --baja-fondo: #2A1414;
+  --igual: #A1A1A8;
+  --igual-fondo: #1C1C1F;
+  --destacado: #FBBF24;
+  --destacado-fondo: #2A2110;
+  --aviso: #FBBF24;
+  --aviso-fondo: #2A2110;
+  --marca: #34D399;
+  --marca-fondo: #0F2A1F;
+  --brillo: #6EE7B7;
+  --bloque: #141416;
+  --bloque-foreground: #FFFFFF;
+  --bloque-muted: #A1A1A8;
+  --seccion: #111113;
 }
