@@ -81,7 +81,7 @@ function mockAccion(pregunta, perfil) {
     banco_nombre: null,
     graficos: publico ? ['rankings', 'calidad'] : ['rankings', 'movimientos', 'calidad'],
     avisos: publico ? ['Movimientos entre períodos: solo para los perfiles Analista y Administrador.'] : [],
-    resumen: 'Este es el informe de septiembre de 2026 (modo mock): los 6 rankings, los movimientos y la calidad de datos.',
+    resumen: 'Aquí está el informe de septiembre de 2026 (modo mock).',
   }
 }
 
