@@ -37,14 +37,15 @@ SALIDA = AQUI / "deck.pptx"
 # y `cd server && npm run test:cobertura`. Si cambian, se actualizan aquí y se vuelve a generar.
 # ---------------------------------------------------------------------------------------------
 CIFRAS = {
-    "pruebas_server": "331",
+    "pruebas_server": "353",
     "pruebas_client": "43",
-    "cobertura_lineas": "99 %",
+    "cobertura_lineas": "96 %",
     "cobertura_ramas": "91 %",
-    "cobertura_funciones": "98 %",
+    "cobertura_funciones": "96 %",
     "casos_eval_agente": "18",
 }
 URL_PUBLICA = "https://sbp.juank.tech"
+URL_INTERNA = "https://interno.sbp.juank.tech"
 URL_REPO = "github.com/JuanKsPty/hackathon-sbp"
 AVISO = "Datos ficticios · Uso informativo, no opinión formal de la SBP"
 
@@ -528,7 +529,7 @@ def lamina_criterios(prs, d):
         ("2. Funcionalidad de la plataforma", "15", "Panel, Rankings, Comparar, Reportes y 3 perfiles con menú propio"),
         ("3. Automatización y comparación", "15", "Cargar un período y recalcular, regla configurable, explicación y correo con Zapier"),
         ("4. Usabilidad y experiencia", "15", "Fuente, período y aviso de datos ficticios siempre visibles; errores claros"),
-        ("5. Calidad técnica", "10", "React + Node.js, 403 por perfil, pruebas con node:test, CI y README"),
+        ("5. Calidad técnica", "10", "React + Node.js, login y 403 por perfil, pruebas con node:test, CI y README"),
         ("6. Innovación", "10", "Morosidad, concentración y vencimientos; cursor guía; MCP remoto; PWA"),
         ("7. Presentación y demostración", "10", "Demo en vivo, guion de la demo y todos explican el código"),
     ]
@@ -554,7 +555,7 @@ Esta lámina es nuestro mapa contra la planilla del jurado: los mismos siete cri
 
 Lo más pesado es la exactitud, 25 puntos: por eso hicimos una página de Calidad con E1 a E4 y las reconciliaciones, y un Modo verificación que muestra un dato de cada uno de los seis puntos de la sección 11.1.
 
-En funcionalidad están los módulos de la lámina 5 del reto y los tres perfiles. En automatización, la carga de un período nuevo y la comparación. En calidad técnica, pruebas, CI y control de acceso por perfil.
+En funcionalidad están los módulos de la lámina 5 del reto y los tres perfiles. En automatización, la carga de un período nuevo y la comparación. En calidad técnica, pruebas, CI, el login del sitio interno y el control de acceso por perfil en el servidor.
 
 Abajo, los requisitos mínimos R1 a R6: se ejecuta local, los rankings salen de los archivos, la clasificación usa solo los catálogos, el README está, no hay credenciales en el repositorio, y los tres explicamos el código.
 """)
@@ -562,56 +563,72 @@ Abajo, los requisitos mínimos R1 a R6: se ejecuta local, los rankings salen de 
 
 
 def lamina_arquitectura(prs, d):
-    L = Lamina(prs, d["contenido"], 5, "Arquitectura: React, Express y un motor puro", "arquitectura")
-    # Docker Compose / Dokploy envuelve client y server.
-    L.caja(2.3, 1.2, 8.35, 4.45, relleno=None, borde=ORO_TEXTO, radio=0.18, discontinua=True, grosor=1.5,
+    L = Lamina(prs, d["contenido"], 5, "Arquitectura: dos sitios, un server y un motor puro", "arquitectura")
+    # Docker Compose / Dokploy envuelve los dos sitios (nginx) y el server.
+    L.caja(2.15, 1.2, 8.5, 4.45, relleno=None, borde=ORO_TEXTO, radio=0.18, discontinua=True, grosor=1.5,
            nombre="Docker Compose en Dokploy")
-    L.texto(2.5, 1.27, 4.5, 0.3, "Docker Compose en Dokploy", size=13, bold=True, color=ORO_TEXTO, nombre="Etiqueta Docker")
+    L.texto(2.35, 1.27, 3.2, 0.3, "Docker Compose en Dokploy", size=13, bold=True, color=ORO_TEXTO, nombre="Etiqueta Docker")
+    L.texto(5.2, 1.27, 5.25, 0.3, "El mismo código React 19 + Vite genera los dos sitios", size=12, color=APAGADO,
+            align="r", nombre="Etiqueta código")
     # Navegador
-    L.caja_texto(0.6, 2.95, 1.45, 1.3, [P("Navegador", bold=True, size=16, align="c", after=2),
+    L.caja_texto(0.6, 2.2, 1.45, 2.55, [P("Navegador", bold=True, size=15, align="c", after=2),
                                          P("PWA instalable", size=13, align="c")],
                  relleno=INDIGO2, borde=None, color=BLANCO, anchor="m", margen=0.1, nombre="Navegador")
-    L.flecha(2.05, 3.6, 2.65, 3.6, nombre="Navegador a client")
-    # client
-    L.caja_texto(2.65, 2.0, 2.65, 3.2, [
-        P("client", size=20, bold=True, color=INDIGO, after=4),
-        P("React 19 + Vite", size=15, bold=True, after=3),
-        P("shadcn/ui, Tailwind y Recharts", size=14, after=3),
-        P("nginx sirve la app en producción", size=14),
-    ], relleno=LAVANDA, borde=INDIGO2, grosor=1.5, anchor="m", margen=0.2, nombre="client")
-    L.texto(5.3, 3.0, 0.95, 0.3, "/api", size=13, bold=True, color=INDIGO, align="c", nombre="Etiqueta api")
-    L.flecha(5.3, 3.6, 6.25, 3.6, doble=True, nombre="client a server")
-    L.texto(5.3, 3.7, 0.95, 0.3, "X-Perfil", size=12, color=APAGADO, align="c", nombre="Etiqueta perfil")
+    L.flecha(2.05, 2.5, 2.4, 2.5, nombre="Navegador a sitio público")
+    L.flecha(2.05, 4.45, 2.4, 4.45, nombre="Navegador a sitio interno")
+    # Sitio público e interno (cada uno con su nginx)
+    L.caja_texto(2.4, 1.65, 2.55, 1.7, [
+        P("Sitio público", size=17, bold=True, color=INDIGO, after=3),
+        P("sbp.juank.tech", size=13, bold=True, after=3),
+        P("Sin login: siempre Público", size=12, after=2),
+        P("nginx: solo rutas públicas", size=12),
+    ], relleno=LAVANDA, borde=INDIGO2, grosor=1.5, anchor="m", margen=0.14, nombre="Sitio público")
+    L.caja_texto(2.4, 3.6, 2.55, 1.7, [
+        P("Sitio interno", size=17, bold=True, color=INDIGO, after=3),
+        P("interno.sbp.juank.tech", size=12.5, bold=True, after=3),
+        P("Login: Analista y Admin", size=12, after=2),
+        P("nginx: todo el API", size=12),
+    ], relleno=LAVANDA, borde=INDIGO2, grosor=1.5, anchor="m", margen=0.14, nombre="Sitio interno")
+    L.texto(4.95, 2.1, 1.5, 0.3, "/api", size=13, bold=True, color=INDIGO, align="c", nombre="Etiqueta api público")
+    L.flecha(4.95, 2.5, 6.45, 2.5, doble=True, nombre="sitio público a server")
+    L.texto(4.95, 2.58, 1.5, 0.3, "X-Sitio: publico", size=11, color=APAGADO, align="c", nombre="Etiqueta sitio público")
+    L.texto(4.95, 4.05, 1.5, 0.3, "/api", size=13, bold=True, color=INDIGO, align="c", nombre="Etiqueta api interno")
+    L.flecha(4.95, 4.45, 6.45, 4.45, doble=True, nombre="sitio interno a server")
+    L.texto(4.95, 4.53, 1.5, 0.5, ["X-Sitio: interno", "y cookie de sesión"], size=11, color=APAGADO, align="c",
+            nombre="Etiqueta sitio interno")
     # server
-    L.caja(6.25, 1.65, 4.2, 3.85, relleno=LAVANDA, borde=INDIGO2, grosor=1.5, nombre="server")
-    L.texto(6.45, 1.75, 3.8, 0.4, "server · Node.js + Express", size=17, bold=True, color=INDIGO, nombre="Título server")
-    L.caja_texto(6.45, 2.25, 3.8, 0.85, "API: consulta, descargas, perfiles (403), bitácora y carga de períodos",
-                 relleno=BLANCO, size=14, anchor="m", margen=0.12, nombre="API")
-    L.caja_texto(6.45, 3.2, 3.8, 1.05, [P("Motor determinista", bold=True, size=15, color=BLANCO, after=2),
+    L.caja(6.45, 1.65, 4.0, 3.85, relleno=LAVANDA, borde=INDIGO2, grosor=1.5, nombre="server")
+    L.texto(6.65, 1.75, 3.6, 0.4, "server · Node.js + Express", size=17, bold=True, color=INDIGO, nombre="Título server")
+    L.caja_texto(6.65, 2.25, 3.6, 0.85, "API: consulta, sesión, perfiles (403), bitácora y carga de períodos",
+                 relleno=BLANCO, size=13, anchor="m", margen=0.12, nombre="API")
+    L.caja_texto(6.65, 3.2, 3.6, 1.05, [P("Motor determinista", bold=True, size=15, color=BLANCO, after=2),
                                          P("E1–E4, CINU, SB21, rankings, reconciliaciones", size=13, color=BLANCO)],
                  relleno=INDIGO, borde=None, anchor="m", margen=0.14, nombre="Motor")
-    L.caja_texto(6.45, 4.4, 1.8, 0.95, [P("data/", bold=True, size=14, after=1), P("CSV AT03 y catálogos", size=12)],
+    L.caja_texto(6.65, 4.4, 1.7, 0.95, [P("data/", bold=True, size=14, after=1), P("CSV AT03 y catálogos", size=12)],
                  relleno=BLANCO, anchor="m", margen=0.1, nombre="data")
-    L.caja_texto(8.4, 4.4, 1.85, 0.95, [P("storage/", bold=True, size=14, after=1), P("períodos, bitácora", size=12)],
+    L.caja_texto(8.45, 4.4, 1.8, 0.95, [P("storage/", bold=True, size=14, after=1), P("períodos, bitácora", size=12)],
                  relleno=BLANCO, anchor="m", margen=0.1, nombre="storage")
-    # Servicios externos
+    # Servicios externos: (y de la caja, título, subtítulo, sentido de la flecha)
     externos = [
-        (1.85, "IA · Claude", "consulta y explica", False),
-        (3.2, "Zapier", "alertas por correo", False),
-        (4.55, "Cliente MCP", "Claude Desktop", True),
+        (1.55, "IA · Claude", "consulta y explica", "sale"),
+        (2.6, "Zapier", "alertas por correo", "sale"),
+        (3.65, "Cliente MCP", "Claude, de solo lectura", "entra"),
+        (4.7, "Supabase", "usuarios del interno", "ambos"),
     ]
-    for y, titulo, sub, entra in externos:
-        L.caja_texto(11.2, y, 1.55, 1.0, [P(titulo, bold=True, size=14, align="c", after=1), P(sub, size=12, align="c")],
-                     relleno=BLANCO, borde=ORO_TEXTO, anchor="m", margen=0.08, nombre=titulo)
-        ymid = y + 0.5
-        if entra:
+    for y, titulo, sub, sentido in externos:
+        L.caja_texto(11.2, y, 1.55, 0.9, [P(titulo, bold=True, size=14, align="c", after=1), P(sub, size=11, align="c")],
+                     relleno=BLANCO, borde=ORO_TEXTO, anchor="m", margen=0.06, nombre=titulo)
+        ymid = y + 0.45
+        if sentido == "entra":
             L.flecha(11.2, ymid, 10.45, ymid, color=ORO_TEXTO, nombre=f"{titulo} a server")
+        elif sentido == "ambos":
+            L.flecha(10.45, ymid, 11.2, ymid, color=ORO_TEXTO, doble=True, nombre=f"server y {titulo}")
         else:
             L.flecha(10.45, ymid, 11.2, ymid, color=ORO_TEXTO, nombre=f"server a {titulo}")
     # Cinta inferior
     chips = [
-        ("Local (R1)", "npm run dev: server y client juntos"),
-        ("Docker Compose", "2 servicios y el volumen sbp-storage"),
+        ("Local (R1)", "npm run dev: API y los dos sitios"),
+        ("Docker Compose", "3 servicios y el volumen sbp-storage"),
         ("Dokploy", "se redespliega con cada push a main"),
     ]
     for i, (t, s) in enumerate(chips):
@@ -619,13 +636,13 @@ def lamina_arquitectura(prs, d):
         L.caja_texto(x, 5.95, 3.95, 0.9, [P(t, bold=True, size=15, color=INDIGO, after=1), P(s, size=14)],
                      relleno=BLANCO, anchor="m", margen=0.16, nombre=f"Chip {t}")
     L.pie()
-    L.notas("""
-[Juan: client, Docker y Dokploy · 30 s. Jesús: server y motor · 25 s]
-Juan: el navegador habla con el client, una app React con Vite, shadcn/ui, Tailwind y Recharts. En producción lo sirve nginx, que también pasa /api al server. Cada petición lleva el header X-Perfil con el perfil elegido.
+    L.notas(f"""
+[Juan: sitios, Docker y Dokploy · 40 s. Jesús: server y motor · 25 s]
+Juan: el navegador habla con dos sitios que salen del mismo código React con Vite, shadcn/ui, Tailwind y Recharts. El sitio público, {URL_PUBLICA}, no pide login y siempre es perfil Público. El sitio interno, {URL_INTERNA}, es para Analista y Administrador y pide iniciar sesión. Cada sitio tiene su nginx, que pasa /api al server y le avisa de qué sitio viene con el header X-Sitio: el público solo deja pasar las rutas públicas y descarta cookies; el interno pasa todo el API.
 
-Jesús: el server es Node.js con Express. Adentro está el motor, que es JavaScript puro: recibe los textos de los CSV y devuelve objetos, sin Express ni disco. Eso lo hace determinista y fácil de probar. Los CSV viven en data/ y lo que se carga, la bitácora y los parámetros, en storage/.
+Jesús: el server es Node.js con Express. Adentro está el motor, que es JavaScript puro: recibe los textos de los CSV y devuelve objetos, sin Express ni disco. Eso lo hace determinista y fácil de probar. Los datos del reto siguen siendo archivos: los CSV viven en data/ y lo que se carga, la bitácora y los parámetros, en storage/. El perfil lo decide el server con X-Sitio: en el público siempre es Público; en el interno sale de la sesión, una cookie HttpOnly firmada, o de un token Bearer si es un cliente MCP. Solo los usuarios del interno están en Postgres, en Supabase, con respaldo en la variable USUARIOS del .env para una demo sin internet.
 
-Juan: la lámina 7 del reto pide que funcione en local, y así es: npm run dev levanta todo (R1). Además hay un docker-compose con dos servicios y un volumen que se despliega en Dokploy con cada push a main. A los lados, los servicios opcionales: la IA con Claude, Zapier para los correos y un MCP para consultar desde Claude Desktop. Si no están, la app sigue funcionando.
+Juan: la lámina 7 del reto pide que funcione en local, y así es: npm run dev levanta todo, la API y los dos sitios (R1). Además hay un docker-compose con tres servicios, el server y los dos sitios, y un volumen, que se despliega en Dokploy con cada push a main. A los lados, los servicios externos: la IA con Claude, Zapier para los correos, un cliente MCP para consultar desde Claude y Supabase para los usuarios. Si la IA o Zapier no están, la app sigue funcionando; sin Supabase entra el respaldo local.
 """)
     return L
 
@@ -635,7 +652,7 @@ def lamina_demo(prs, d):
     L.slide.placeholders[1].text = "Local (R1), con julio y agosto cargados. Septiembre se carga en vivo."
     L.slide.placeholders[1].name = "Subtítulo"
     pasos = [
-        ("Perfiles", "Público frente a Administrador"),
+        ("Perfiles y login", "Sitio público y sitio interno"),
         ("Cargar septiembre", "De julio y agosto a tres períodos"),
         ("Panel", "Líderes, movimientos e indicadores"),
         ("Rankings", "Filtros, gráfico y regla SB21"),
@@ -658,7 +675,7 @@ def lamina_demo(prs, d):
 [Todos · 9 a 10 min. El guion con los clics exactos está en presentacion/guion.md]
 Aquí pasamos al navegador. Antes de esta lámina, la app ya está corriendo en local con solo julio y agosto cargados (R1).
 
-Orden: perfiles; cargar septiembre y ver cómo cambian los rankings; Panel; Rankings con filtros y gráfico; Calidad; Comparar; Modo verificación; Asistente IA con el cursor guía; y Reportes con las descargas.
+Orden: perfiles, con el sitio público y el sitio interno con login; cargar septiembre en el interno y ver cómo cambian los rankings; Panel; Rankings con filtros y gráfico; Calidad; Comparar; Modo verificación; Asistente IA con el cursor guía; y Reportes con las descargas.
 
 Plan B si falla la red o la IA: seguimos en local y usamos las exportaciones CSV (guion, sección Plan B).
 """)
@@ -790,7 +807,7 @@ def lamina_automatizacion(prs, d):
     L.pie()
     L.notas("""
 [Jesús: pasos 1 a 4 · 35 s. Agustín: pasos 5 y 6 · 25 s]
-Jesús: esta es la automatización de la lámina 8 del reto, de punta a punta. El Administrador sube un AT03 desde la app; el período se toma del campo Fecha, no del nombre del archivo. El motor recalcula cascada, rankings y reconciliaciones en el momento, compara contra el período anterior y marca los movimientos significativos.
+Jesús: esta es la automatización de la lámina 8 del reto, de punta a punta. El Administrador sube un AT03 desde la app, en el sitio interno; el período se toma del campo Fecha, no del nombre del archivo. El motor recalcula cascada, rankings y reconciliaciones en el momento, compara contra el período anterior y marca los movimientos significativos.
 
 La regla no está fija en el código: vive en un archivo de parámetros y el Administrador la cambia desde Administración. Por defecto es significativo un cambio de dos o más posiciones, un cambio de líder, o una variación de saldo de 10 por ciento o más.
 
@@ -806,11 +823,11 @@ Agustín: cada movimiento significativo tiene su explicación, por plantillas o 
 def lamina_perfiles(prs, d):
     L = Lamina(prs, d["contenido"], 10, "Tres perfiles con opciones distintas", "perfiles")
     perfiles = [
-        ("01", "Público", "Consulta", ["Rankings, filtros, gráficos y tablas", "Descarga de los entregables 2 a 4",
+        ("01", "Público", "Consulta · sin login", ["Rankings, filtros, gráficos y tablas", "Descarga de los entregables 2 a 4",
                                        "No ve Comparar ni Administración"]),
-        ("02", "Analista", "Análisis", ["Todo lo de Público", "Compara períodos y entidades",
+        ("02", "Analista", "Análisis · con login", ["Todo lo de Público", "Compara períodos y entidades",
                                          "Reportes personalizados y entregable 5"]),
-        ("03", "Administrador", "Control", ["Todo lo de Analista", "Carga o actualiza un período",
+        ("03", "Administrador", "Control · con login", ["Todo lo de Analista", "Carga o actualiza un período",
                                              "Parámetros, catálogos y registro de operaciones"]),
     ]
     ancho = 3.95
@@ -821,20 +838,20 @@ def lamina_perfiles(prs, d):
         L.texto(x + 1.05, 1.38, ancho - 1.2, 0.4, nombre, size=22, bold=True, color=INDIGO, nombre=f"Nombre {nombre}")
         L.texto(x + 1.05, 1.82, ancho - 1.2, 0.3, rol.upper(), size=13, bold=True, color=ORO_TEXTO, nombre=f"Rol {nombre}")
         L.texto(x + 0.25, 2.35, ancho - 0.5, 2.7, [P(t, bullet=True) for t in items], size=17, after=12, nombre=f"Opciones {nombre}")
-    L.caja_texto(0.6, 5.5, 12.15, 1.4, [
-        P("Un selector de perfil, sin contraseñas (R5): el perfil viaja en el header X-Perfil.", size=17, bold=True,
-          color=BLANCO, after=4),
-        P("La UI oculta lo que no corresponde y el servidor responde 403 PERFIL_NO_AUTORIZADO aunque se llame al API directo.",
-          size=15, color=PALIDO),
+    L.caja_texto(0.6, 5.4, 12.15, 1.5, [
+        P("Dos sitios: el público no pide login; el interno sí, y el perfil sale de la cuenta.",
+          size=17, bold=True, color=BLANCO, after=4),
+        P("Sin contraseñas en el repo (R5). La UI oculta lo que no corresponde y el servidor responde "
+          "403 PERFIL_NO_AUTORIZADO aunque se llame al API directo.", size=15, color=PALIDO),
     ], relleno=INDIGO, borde=None, anchor="m", margen=0.3, nombre="Control de acceso")
     L.pie()
     L.notas("""
 [Agustín: lo que ve cada perfil en la UI · 30 s. Jesús: el control de acceso del servidor · 20 s]
-Agustín: son los tres perfiles de la lámina 6 del reto y cada uno ve opciones distintas. Público consulta, filtra, ve gráficos y tablas y descarga los entregables 2 a 4; no ve Comparar ni Administración. Analista, además, compara períodos y entidades y genera reportes personalizados. Administrador, además, carga o actualiza un período, administra parámetros y catálogos y consulta el registro de operaciones.
+Agustín: son los tres perfiles de la lámina 6 del reto y cada uno ve opciones distintas. Público consulta, filtra, ve gráficos y tablas y descarga los entregables 2 a 4; no ve Comparar ni Administración, y su sitio no pide login. Analista, además, compara períodos y entidades y genera reportes personalizados. Administrador, además, carga o actualiza un período, administra parámetros y catálogos y consulta el registro de operaciones.
 
-Jesús: como basta un selector de perfil, no hay contraseñas en el repositorio (R5). El perfil viaja en el header X-Perfil, y la UI esconde lo que no corresponde, pero lo importante es que el servidor responde 403 PERFIL_NO_AUTORIZADO aunque alguien llame al API directo, sin pasar por la pantalla. La tabla de opciones por perfil está en un solo lugar: server/src/middleware/perfiles.js. Los intentos rechazados quedan en la bitácora.
+Jesús: son dos sitios. El público no pide login y siempre es Público. El interno sí: usuario y contraseña en /entrar, y el perfil sale de la cuenta, no de lo que elija el navegador. Va en una cookie HttpOnly firmada, y los cambios llevan además un header X-Sbp contra CSRF. Las cuentas están en Supabase, con respaldo en la variable USUARIOS del .env; ninguna contraseña está en el repositorio (R5). La UI esconde lo que no corresponde, pero lo importante es que el servidor responde 403 PERFIL_NO_AUTORIZADO aunque alguien llame al API directo, sin pasar por la pantalla. La tabla de opciones por perfil está en un solo lugar: server/src/middleware/perfiles.js, y el login en server/src/auth/. Los intentos rechazados quedan en la bitácora.
 
-Esto lo vimos en la demo: como Público no se puede cargar un período; como Administrador sí.
+Esto lo vimos en la demo: en el sitio público no se puede cargar un período; en el interno, como Administrador, sí.
 """)
     return L
 
@@ -942,8 +959,8 @@ def lamina_innovacion(prs, d):
     tarjetas = [
         ("Indicadores extra", "Morosidad, concentración (HHI y top 3) y vencimientos. Rotulados como análisis adicional."),
         ("Descomposición", "De dónde sale cada variación de saldo: préstamos nuevos, los que salen y la amortización."),
-        ("Cursor guía y gráficos", "La IA señala cada paso con un cursor, y el chat dibuja los gráficos de lo que se pregunta."),
-        ("MCP remoto", f"Conecta Claude por URL: {URL_PUBLICA}/api/mcp"),
+        ("Cursor guía y gráficos", "El chat flota sobre la pantalla. Un cursor señala cada paso y el chat dibuja los gráficos de lo preguntado."),
+        ("MCP remoto", "Conecta Claude por URL, de solo lectura. Público sin clave; interno con token Bearer."),
         ("App instalable (PWA)", "Manifest y service worker: se instala en el celular."),
         ("API documentada", "Swagger UI en /api/docs y el documento OpenAPI en /api/openapi.json."),
     ]
@@ -965,11 +982,13 @@ Indicadores: morosidad, concentración con el índice HHI y la participación de
 
 Descomposición: para cada variación de saldo entre períodos, de dónde viene: préstamos nuevos, préstamos que salen y amortización. Suma exacta.
 
-Cursor guía, que ya vimos en la IA.
+Cursor guía y chat flotante: el asistente es un botón abajo a la derecha que abre el chat encima de la pantalla, sin cambiar de página, y el cursor guía y los gráficos salen de ahí.
 
-MCP remoto: se pega la URL {URL_PUBLICA}/api/mcp en Claude, como conector, y se pueden hacer las mismas consultas de solo lectura, con el perfil como parámetro. No hace falta instalar nada.
+MCP remoto: se pega la URL {URL_PUBLICA}/api/mcp en Claude, como conector, y se hacen las mismas consultas de solo lectura; el sitio público siempre responde como Público, por URL, sin clave. El del sitio interno, {URL_INTERNA}/api/mcp, exige un token Bearer y responde como Analista. No hace falta instalar nada.
 
 PWA: la app se puede instalar en el celular. Y la API está documentada con Swagger en /api/docs.
+
+(Solo si preguntan: el server ya valida acciones de pantalla para el agente, #131, con ir, elegir, ordenar, resaltar y señalar, cada una contra el catálogo y el perfil. El front todavía no las ejecuta, así que no se muestran en la demo.)
 """)
     return L
 
@@ -979,8 +998,8 @@ def lamina_decisiones(prs, d):
     filas = [
         ("Motor puro, sin Express ni disco", "Es determinista y se prueba solo con textos de CSV."),
         ("Centavos enteros y BigInt", "Sumas exactas al centavo y ponderación sin errores de flotante."),
-        ("Archivos CSV y storage/ local", "Corre en local (R1) y todo resultado sale de los archivos (R2)."),
-        ("Perfil por header X-Perfil", "Basta un selector (R5, sin contraseñas); el 403 vive en el servidor."),
+        ("Datos en archivos; usuarios en Supabase", "Todo resultado sale de archivos (R1, R2). Solo las cuentas del interno van en Supabase, con respaldo local."),
+        ("Login y dos sitios", "El perfil sale de la cuenta (cookie firmada), sin contraseñas en el repo (R5); el 403 vive en el servidor."),
         ("IA de solo lectura con verificador", "La sección 9 prohíbe que calcule; cada número debe existir en el motor."),
         ("Contratos JSON en contracts/", "Front, IA y motor avanzan en paralelo y las pruebas detectan los cambios."),
         ("Docker y Dokploy sobre lo local", "Hay demo pública sin perder la ejecución local."),
@@ -999,13 +1018,13 @@ def lamina_decisiones(prs, d):
 [Los tres, un turno cada uno · 60 s. Jesús: 1, 2 y 4. Juan: 3 y 7. Agustín: 5 y 6]
 Esta lámina es para la parte de justificar decisiones y para R6: cada uno explica las suyas.
 
-Jesús: el motor es puro, sin Express ni disco: es determinista y se prueba solo con textos de CSV. Usamos centavos enteros y BigInt para sumar exacto al centavo. El perfil va en un header porque el reto acepta un selector, y el 403 está en el servidor.
+Jesús: el motor es puro, sin Express ni disco: es determinista y se prueba solo con textos de CSV. Usamos centavos enteros y BigInt para sumar exacto al centavo. El perfil sale de la cuenta: el sitio público no pide login y el interno sí, con una cookie firmada, y el 403 está en el servidor. No hay contraseñas en el repositorio.
 
-Juan: usamos archivos CSV y una carpeta storage local, sin base de datos, porque la lámina 7 del reto pide que corra en local y el resultado debe salir de los archivos. Encima, Docker y Dokploy dan una demo pública sin perder la ejecución local.
+Juan: los datos del reto siguen siendo archivos CSV y una carpeta storage local, porque la lámina 7 del reto pide que corra en local y el resultado debe salir de los archivos. Lo único que va en base de datos son los usuarios del sitio interno, en Supabase, con un respaldo en el .env para una demo sin internet. Encima, Docker y Dokploy dan una demo pública sin perder la ejecución local.
 
 Agustín: la IA es de solo lectura y tiene verificador porque la sección 9 no deja que calcule. Los contratos JSON nos dejaron avanzar front, IA y motor en paralelo, con pruebas que avisan si cambia un formato.
 
-Si preguntan por base de datos o TypeScript: la lámina 7 del reto pide JavaScript, React y Node.js, y los datos son archivos.
+Si preguntan por base de datos o TypeScript: la lámina 7 del reto pide JavaScript, React y Node.js, y los datos son archivos; la base solo guarda los usuarios del sitio interno.
 """)
     return L
 
@@ -1022,17 +1041,19 @@ def lamina_cierre(prs, d):
     L.slide.placeholders[1].name = "Subtítulo"
     L.imagen(ASSETS / "logo-1024.png", 0.8, 0.65, 1.0, 1.0, "Logo de la app: una escalera dorada en un ícono índigo")
     L.texto(0.8, 1.72, 7.6, 0.4, "HACKATHON SBP 2026", size=18, color=ORO, bold=True, nombre="Evento")
-    L.texto(0.8, 4.85, 7.7, 0.7, URL_PUBLICA, size=34, color=ORO, bold=True, nombre="URL pública")
-    L.texto(0.8, 5.65, 7.7, 0.95, [
+    L.texto(0.8, 4.8, 7.7, 0.7, URL_PUBLICA, size=34, color=ORO, bold=True, nombre="URL pública")
+    L.texto(0.8, 5.5, 7.7, 0.4, f"Interno, con login: {URL_INTERNA.removeprefix('https://')}", size=18, color=ORO,
+            bold=True, nombre="URL interna")
+    L.texto(0.8, 6.0, 7.7, 0.6, [
         P(f"Código: {URL_REPO}", after=3),
-        P("Swagger: /api/docs  ·  MCP: /api/mcp?perfil=analista", after=3),
+        P("Swagger: /api/docs  ·  MCP: /api/mcp (el interno, con token Bearer)", after=3),
     ], size=15, color=BLANCO, nombre="Enlaces")
     L.texto(0.8, 6.65, 7.6, 0.35, AVISO, size=12, color=PALIDO, nombre="Aviso")
     L.notas(f"""
 [Juan · 20 s, y después preguntas de los tres]
-Para cerrar: la app está publicada en {URL_PUBLICA}, y el código está en {URL_REPO}, con el README de instalación y de reglas. Corre en local con npm run dev o con docker compose.
+Para cerrar: la app está publicada en {URL_PUBLICA}, que es el sitio público y no pide login, y en {URL_INTERNA}, el sitio interno para Analista y Administrador, que pide iniciar sesión. El código está en {URL_REPO}, con el README de instalación y de reglas. Corre en local con npm run dev o con docker compose.
 
-Recordatorio de lo que vieron: rankings calculados desde los archivos con un motor determinista, comparación entre períodos con una regla configurable, tres perfiles con control de acceso en el servidor, una IA que explica y consulta pero nunca calcula, y un modo para que el jurado verifique los seis puntos.
+Recordatorio de lo que vieron: rankings calculados desde los archivos con un motor determinista, comparación entre períodos con una regla configurable, tres perfiles con login en el sitio interno y control de acceso en el servidor, una IA que explica y consulta pero nunca calcula, y un modo para que el jurado verifique los seis puntos.
 
 Todos los datos son ficticios y el uso es informativo, no una opinión formal de la SBP. Gracias, y quedamos atentos a las preguntas.
 
