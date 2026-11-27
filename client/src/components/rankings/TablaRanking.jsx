@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react'
 import { ArrowDownIcon, ArrowUpIcon, ArrowUpDownIcon } from 'lucide-react'
+import { AyudaTermino } from '@/components/glosario/AyudaTermino.jsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatearEntero, formatearMonto, formatearPorcentaje } from '@/lib/formato.js'
 
 // Columnas del entregable 2. Los valores llegan calculados por el API: aquí solo se ordenan y formatean.
+// `ayuda`: término del glosario que explica la columna al perfil Público (#129).
 const COLUMNAS = [
-  { clave: 'Posicion', titulo: 'Posición', formato: formatearEntero },
+  { clave: 'Posicion', titulo: 'Posición', formato: formatearEntero, ayuda: 'posicion' },
   { clave: 'Banco', titulo: 'Banco' },
-  { clave: 'Saldo_Actividad', titulo: 'Saldo de la actividad', formato: formatearMonto },
-  { clave: 'Total_Cartera_Local_Valida', titulo: 'Total cartera válida', formato: formatearMonto },
-  { clave: 'Ponderacion_Pct', titulo: 'Ponderación', formato: formatearPorcentaje },
-  { clave: 'Operaciones_Validas', titulo: 'Operaciones', formato: formatearEntero },
+  { clave: 'Saldo_Actividad', titulo: 'Saldo de la actividad', formato: formatearMonto, ayuda: 'saldo_actividad' },
+  { clave: 'Total_Cartera_Local_Valida', titulo: 'Total cartera válida', formato: formatearMonto, ayuda: 'total_cartera' },
+  { clave: 'Ponderacion_Pct', titulo: 'Ponderación', formato: formatearPorcentaje, ayuda: 'ponderacion' },
+  { clave: 'Operaciones_Validas', titulo: 'Operaciones', formato: formatearEntero, ayuda: 'operaciones' },
 ]
 
 function comparar(a, b, clave) {
@@ -36,7 +38,7 @@ export function TablaRanking({ bancos, bancoResaltado }) {
     <Table data-guia="rankings.tabla">
       <TableHeader>
         <TableRow>
-          {COLUMNAS.map(({ clave, titulo }) => {
+          {COLUMNAS.map(({ clave, titulo, ayuda }) => {
             const activa = orden.clave === clave
             const Icono = !activa ? ArrowUpDownIcon : orden.ascendente ? ArrowUpIcon : ArrowDownIcon
             return (
@@ -45,14 +47,17 @@ export function TablaRanking({ bancos, bancoResaltado }) {
                 aria-sort={activa ? (orden.ascendente ? 'ascending' : 'descending') : 'none'}
                 className={clave === 'Banco' ? '' : 'text-right'}
               >
-                <button
-                  type="button"
-                  onClick={() => ordenarPor(clave)}
-                  className="inline-flex items-center gap-1 rounded-sm hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                >
-                  {titulo}
-                  <Icono className={`size-3.5 ${activa ? '' : 'text-muted-foreground'}`} aria-hidden="true" />
-                </button>
+                <span className="inline-flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => ordenarPor(clave)}
+                    className="inline-flex items-center gap-1 rounded-sm hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  >
+                    {titulo}
+                    <Icono className={`size-3.5 ${activa ? '' : 'text-muted-foreground'}`} aria-hidden="true" />
+                  </button>
+                  {ayuda && <AyudaTermino clave={ayuda} />}
+                </span>
               </TableHead>
             )
           })}
