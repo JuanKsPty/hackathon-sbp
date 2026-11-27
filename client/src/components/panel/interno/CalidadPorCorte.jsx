@@ -4,6 +4,7 @@ import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { EJE } from './graficos.js'
 import { GloboGrafico, MarcoGrafico } from './MarcoGrafico.jsx'
+import { NotaSistemaCompleto } from './NotaSistemaCompleto.jsx'
 
 // Las cuatro exclusiones de la cascada (sección 7). Cada una con su propia escala: E2 suele ser
 // mucho mayor que las demás y en un solo gráfico las aplastaría.
@@ -15,7 +16,8 @@ const EXCLUSIONES = [
 ]
 
 // Filas excluidas E1–E4 en cada corte (GET /api/calidad sin período: todos los cortes).
-// El corte elegido va en naranja y los demás en gris.
+// El corte elegido va en naranja y los demás en gris. GET /api/calidad no trae el detalle por banco:
+// con un banco elegido (#204) se avisa que el bloque es del sistema completo.
 export function CalidadPorCorte({ consulta }) {
   const { periodo } = usePeriodo()
   const cortes = [...(consulta.datos?.periodos ?? [])].sort((a, b) => a.Fecha.localeCompare(b.Fecha))
@@ -24,6 +26,7 @@ export function CalidadPorCorte({ consulta }) {
     <MarcoGrafico
       titulo="Exclusiones por corte"
       descripcion="Filas que la cascada E1 → E4 deja fuera del universo válido, en cada corte."
+      nota={<NotaSistemaCompleto />}
       consulta={consulta}
       alto={170}
       vacio={cortes.length === 0}

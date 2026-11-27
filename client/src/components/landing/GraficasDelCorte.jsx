@@ -19,13 +19,24 @@ const OPACIDADES = [1, 0.78, 0.6, 0.45, 0.32, 0.2, 0.12]
 const pct1 = new Intl.NumberFormat('es-PA', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const hhi = new Intl.NumberFormat('es-PA', { maximumFractionDigits: 0 })
 
-export function ComposicionCartera({ indicadores }) {
-  const filas = composicionCartera(indicadores.datos?.concentracion)
+// Con un banco elegido (#204), la composición es la de la cartera de ese banco: saldo de cada ranking y
+// su ponderación (bloque `banco` de GET /api/productos), en lugar de la del sistema.
+export function ComposicionCartera({ indicadores, productos, nombreBanco }) {
+  const delBanco = nombreBanco ? productos?.datos?.banco : null
+  const filas = delBanco
+    ? [...delBanco.rankings].map((r) => ({ ranking: r.Ranking, saldo: r.Saldo_Actividad, pct: r.Ponderacion_Pct })).sort((a, b) => b.saldo - a.saldo)
+    : composicionCartera(indicadores.datos?.concentracion)
   const config = Object.fromEntries(filas.map((f) => [f.ranking, { label: f.ranking, color: 'var(--chart-1)' }]))
+  const consulta = nombreBanco ? productos : indicadores
 
   return (
-    <TarjetaGrafico id="titulo-composicion" fuerte="Composición de la cartera" suave="por macroactividad" pie="Saldo de cada ranking sobre la suma de los rankings del corte.">
-      <EstadoBloque consulta={indicadores} alto={170} vacio={filas.length === 0} tituloVacio="Sin datos de composición">
+    <TarjetaGrafico
+      id="titulo-composicion"
+      fuerte={nombreBanco ? `Composición de la cartera de ${nombreBanco}` : 'Composición de la cartera'}
+      suave="por macroactividad"
+      pie={nombreBanco ? 'Saldo del banco en cada ranking y su ponderación sobre su cartera local válida.' : 'Saldo de cada ranking sobre la suma de los rankings del corte.'}
+    >
+      <EstadoBloque consulta={consulta} alto={170} vacio={filas.length === 0} tituloVacio="Sin datos de composición">
         <div className="grid items-center gap-4 sm:grid-cols-[170px_1fr]">
           <ChartContainer config={config} className="mx-auto aspect-square w-full max-w-[170px]">
             <PieChart>
@@ -122,19 +133,35 @@ export function CalidadCorte({ calidad }) {
   )
 }
 
-export function Concentracion({ indicadores }) {
-  const filas = (indicadores.datos?.concentracion ?? []).map((c) => ({
-    ranking: c.Ranking,
-    top3: c.Participacion_Top3_Pct,
-    hhi: c.HHI,
-    lideres: (c.Top3 ?? []).map((b) => b.Banco).join(', '),
-  }))
-  const config = { top3: { label: 'Top 3', color: 'var(--chart-1)' } }
+// La concentración es del sistema completo. Con un banco elegido (#204) se agrega su parte en cada
+// ranking (participación y puesto, del bloque `banco` de GET /api/productos) junto a la de los 3 primeros.
+export function Concentracion({ indicadores, productos, nombreBanco }) {
+  const delBanco = nombreBanco ? (productos?.datos?.banco?.rankings ?? []) : []
+  const filas = (indicadores.datos?.concentracion ?? []).map((c) => {
+    const propio = delBanco.find((r) => r.Ranking === c.Ranking)
+    return {
+      ranking: c.Ranking,
+      top3: c.Participacion_Top3_Pct,
+      hhi: c.HHI,
+      lideres: (c.Top3 ?? []).map((b) => b.Banco).join(', '),
+      banco: propio?.Participacion_Pct ?? null,
+      puesto: propio?.Posicion ?? null,
+    }
+  })
+  const config = {
+    top3: { label: 'Top 3', color: 'var(--chart-1)' },
+    banco: { label: nombreBanco ?? 'Banco', color: 'var(--chart-2)' },
+  }
 
   return (
-    <TarjetaGrafico id="titulo-concentracion" fuerte="Concentración" suave="participación de los 3 primeros" pie="HHI: índice Herfindahl-Hirschman del ranking (0 a 10 000; más alto, más concentrado).">
+    <TarjetaGrafico
+      id="titulo-concentracion"
+      fuerte="Concentración"
+      suave={nombreBanco ? `top 3 y la parte de ${nombreBanco}` : 'participación de los 3 primeros'}
+      pie={`HHI: índice Herfindahl-Hirschman del ranking (0 a 10 000; más alto, más concentrado).${nombreBanco ? ` Del sistema completo; la barra naranja es la participación de ${nombreBanco}.` : ''}`}
+    >
       <EstadoBloque consulta={indicadores} alto={260} vacio={filas.length === 0} tituloVacio="Sin datos de concentración">
-        <ChartContainer config={config} className="aspect-auto h-[260px] w-full">
+        <ChartContainer config={config} className="aspect-auto w-full" style={{ height: nombreBanco ? 340 : 260 }}>
           <BarChart data={filas} layout="vertical" margin={{ left: 0, right: 64 }} barCategoryGap={8}>
             <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis type="number" domain={[0, 100]} tickLine={false} axisLine={false} tickFormatter={(v) => `${v} %`} />
@@ -143,13 +170,19 @@ export function Concentracion({ indicadores }) {
               cursor={{ fillOpacity: 0.15 }}
               content={
                 <ChartTooltipContent
-                  formatter={(v, _n, item) => (
-                    <div className="flex flex-col gap-0.5">
-                      <span className="cifra font-medium">Top 3: {formatearPorcentaje(v)}</span>
-                      <span className="cifra text-muted-foreground">HHI {hhi.format(item?.payload?.hhi ?? 0)}</span>
-                      <span className="text-muted-foreground">{item?.payload?.lideres}</span>
-                    </div>
-                  )}
+                  formatter={(v, nombre, item) =>
+                    nombre === 'banco' ? (
+                      <span className="cifra font-medium">
+                        {nombreBanco}: {formatearPorcentaje(v)} · puesto {formatearEntero(item?.payload?.puesto)}
+                      </span>
+                    ) : (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="cifra font-medium">Top 3: {formatearPorcentaje(v)}</span>
+                        <span className="cifra text-muted-foreground">HHI {hhi.format(item?.payload?.hhi ?? 0)}</span>
+                        <span className="text-muted-foreground">{item?.payload?.lideres}</span>
+                      </div>
+                    )
+                  }
                 />
               }
             />
@@ -160,6 +193,15 @@ export function Concentracion({ indicadores }) {
               radius={[0, 8, 8, 0]}
               label={{ position: 'right', fontSize: 11, formatter: (v) => `${pct1.format(v)} %` }}
             />
+            {nombreBanco && (
+              <Bar
+                dataKey="banco"
+                fill="var(--color-banco)"
+                fillOpacity={0.85}
+                radius={[0, 8, 8, 0]}
+                label={{ position: 'right', fontSize: 11, formatter: (v) => (v === null ? '' : `${pct1.format(v)} %`) }}
+              />
+            )}
           </BarChart>
         </ChartContainer>
       </EstadoBloque>
@@ -167,11 +209,14 @@ export function Concentracion({ indicadores }) {
   )
 }
 
-export function Morosidad({ indicadores }) {
+// Con un banco elegido (#204), sus barras quedan plenas, las demás se atenúan y el pie da sus cifras.
+export function Morosidad({ indicadores, banco = null, nombreBanco = null }) {
   const total = indicadores.datos?.morosidad?.total
   const filas = [...(indicadores.datos?.morosidad?.bancos ?? [])]
-    .map((b) => ({ banco: b.Banco, mora: b.Pct_Saldo_En_Mora, vencido: b.Pct_Vencido }))
+    .map((b) => ({ codigo: b.Codigo_Banco, banco: b.Banco, mora: b.Pct_Saldo_En_Mora, vencido: b.Pct_Vencido }))
     .sort((a, b) => (b.mora ?? 0) - (a.mora ?? 0))
+  const delBanco = banco ? filas.find((f) => f.codigo === banco) : null
+  const opacidad = (f, base) => (!banco || f.codigo === banco ? base : 0.25)
   const config = {
     mora: { label: '% del saldo en mora', color: 'var(--chart-3)' },
     vencido: { label: '% del saldo vencido', color: 'var(--chart-2)' },
@@ -183,9 +228,10 @@ export function Morosidad({ indicadores }) {
       fuerte="Morosidad"
       suave="por banco"
       pie={
-        total
+        (delBanco ? `${nombreBanco}: ${formatearPorcentaje(delBanco.mora)} del saldo en mora y ${formatearPorcentaje(delBanco.vencido)} vencido. ` : '') +
+        (total
           ? `Sistema: ${formatearPorcentaje(total.Pct_Saldo_En_Mora)} del saldo en mora y ${formatearPorcentaje(total.Pct_Vencido)} vencido. Análisis adicional, fuera de los 6 rankings.`
-          : 'Análisis adicional, fuera de los 6 rankings.'
+          : 'Análisis adicional, fuera de los 6 rankings.')
       }
     >
       {/* 12 bancos: 12 × 30 + 40 px de gráfico, más la leyenda. */}
@@ -196,8 +242,16 @@ export function Morosidad({ indicadores }) {
             <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} %`} />
             <YAxis type="category" dataKey="banco" width={130} tickLine={false} axisLine={false} interval={0} tick={{ fontSize: 11 }} />
             <ChartTooltip cursor={{ fillOpacity: 0.15 }} content={<ChartTooltipContent formatter={(v, n) => <span className="cifra">{config[n]?.label}: {formatearPorcentaje(v)}</span>} />} />
-            <Bar dataKey="mora" fill="var(--color-mora)" fillOpacity={0.85} radius={[0, 6, 6, 0]} />
-            <Bar dataKey="vencido" fill="var(--color-vencido)" fillOpacity={0.7} radius={[0, 6, 6, 0]} />
+            <Bar dataKey="mora" fill="var(--color-mora)" fillOpacity={0.85} radius={[0, 6, 6, 0]}>
+              {filas.map((f) => (
+                <Cell key={f.codigo} fillOpacity={opacidad(f, 0.85)} />
+              ))}
+            </Bar>
+            <Bar dataKey="vencido" fill="var(--color-vencido)" fillOpacity={0.7} radius={[0, 6, 6, 0]}>
+              {filas.map((f) => (
+                <Cell key={f.codigo} fillOpacity={opacidad(f, 0.7)} />
+              ))}
+            </Bar>
           </BarChart>
         </ChartContainer>
         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">

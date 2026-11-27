@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CreditCardIcon, FileDownIcon, CarIcon, HouseIcon, WalletIcon } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, XAxis, YAxis } from 'recharts'
 import { productos as pedirProductos, urlInformePdf } from '@/api/cliente.js'
 import { TarjetaGrafico } from '@/components/landing/TarjetaGrafico.jsx'
 import { montoCompacto } from '@/components/landing/formatoLanding.js'
@@ -8,6 +8,7 @@ import { EstadoBloque } from '@/components/panel/EstadoBloque.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useBancoPanel } from '@/contexto/BancoPanelContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
 import { alPeriodo, formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import {
@@ -20,6 +21,7 @@ import {
   evolucionDeProducto,
   opcionesProducto,
   PRODUCTO_INICIAL,
+  productoDelBanco,
 } from './datosProductos.js'
 
 const ICONOS = { tarjetas: CreditCardIcon, automovil: CarIcon, vivienda: HouseIcon }
@@ -30,25 +32,37 @@ const esFecha = (valor) => /^\d{8}$/.test(String(valor ?? ''))
 // (tarjetas de crédito al abrir), el saldo de cada banco y CONSUMO por producto, de GET /api/productos.
 // Va en el Panel público y en el interno. `fechas` (solo Analista y Administrador) agrega la evolución
 // por corte: el Público no compara períodos. Ninguna cifra se calcula aquí (R2).
-export function ProductosCredito({ periodo, fechas = [] }) {
-  const consulta = useConsulta((o) => pedirProductos({ periodo }, o), [periodo], { activa: Boolean(periodo) })
+// Filtro por banco (#204, useBancoPanel): las tarjetas son de ese banco, sus barras se resaltan y la
+// evolución es la suya. `consulta` (opcional) reutiliza la de la página para no pedir dos veces.
+export function ProductosCredito({ periodo, fechas = [], consulta: consultaDePagina = null }) {
+  const { banco, nombreBanco } = useBancoPanel()
+  const propia = useConsulta((o) => pedirProductos({ periodo, banco: banco ?? undefined }, o), [periodo, banco], {
+    activa: Boolean(periodo) && !consultaDePagina,
+  })
+  const consulta = consultaDePagina ?? propia
   const datos = consulta.datos
+  const delBanco = nombreBanco ? (datos?.banco ?? null) : null
   const [elegido, setElegido] = useState(PRODUCTO_INICIAL)
   const producto = buscarProducto(datos, elegido) ?? buscarProducto(datos, PRODUCTO_INICIAL) ?? datos?.productos?.[0] ?? null
   const clave = producto ? claveProducto(producto) : elegido
   const sinDatos = !datos?.productos?.length
+  const propioDelProducto = delBanco && producto ? productoDelBanco(datos, clave) : null
 
   return (
     <div className="flex min-w-0 flex-col gap-4" data-guia="panel.productos">
       <TarjetaGrafico
         id="titulo-productos"
-        fuerte="Saldo y productos de crédito"
+        fuerte={nombreBanco ? `Saldo y productos de ${nombreBanco}` : 'Saldo y productos de crédito'}
         suave={alPeriodo(periodo)}
         accion={<BotonInforme periodo={periodo} />}
-        pie="Saldos del universo local válido. Tarjetas incluye los créditos personales con facilidad 07 (regla SB21)."
+        pie={
+          delBanco
+            ? 'Saldos del banco en el universo local válido; el puesto es entre los 12 bancos. El informe PDF es del sistema completo.'
+            : 'Saldos del universo local válido. Tarjetas incluye los créditos personales con facilidad 07 (regla SB21).'
+        }
       >
         <EstadoBloque consulta={consulta} filas={2} vacio={sinDatos} tituloVacio="Sin productos en este período">
-          <TarjetasIndicadores datos={datos} />
+          {delBanco ? <TarjetasDelBanco datos={datos} /> : <TarjetasIndicadores datos={datos} />}
         </EstadoBloque>
       </TarjetaGrafico>
 
@@ -58,27 +72,79 @@ export function ProductosCredito({ periodo, fechas = [] }) {
           fuerte={producto ? producto.Subactividad : 'Producto'}
           suave={producto ? `por banco · ${producto.Ranking}` : 'por banco'}
           accion={<SelectorProducto datos={datos} valor={clave} alCambiar={setElegido} />}
-          pie="De mayor a menor saldo. Elige otro producto en el selector."
+          pie={
+            propioDelProducto
+              ? `${nombreBanco}: puesto ${formatearEntero(propioDelProducto.Posicion)} con ${formatearMonto(propioDelProducto.Saldo)} (${formatearPorcentaje(propioDelProducto.Participacion_Pct)} del producto).`
+              : 'De mayor a menor saldo. Elige otro producto en el selector.'
+          }
         >
           <EstadoBloque consulta={consulta} alto={340} vacio={sinDatos}>
-            <BarrasHorizontales filas={barrasDeProducto(producto)} color="var(--chart-1)" etiqueta={producto?.Subactividad ?? 'Saldo'} />
+            <BarrasHorizontales filas={barrasDeProducto(producto)} color="var(--chart-1)" etiqueta={producto?.Subactividad ?? 'Saldo'} resaltado={banco} />
           </EstadoBloque>
         </TarjetaGrafico>
 
-        <TarjetaGrafico id="titulo-saldo-bancos" fuerte="Saldo total" suave="por banco" pie="Cartera local válida de cada banco: la suma de sus 6 actividades.">
+        <TarjetaGrafico
+          id="titulo-saldo-bancos"
+          fuerte="Saldo total"
+          suave="por banco"
+          pie={
+            delBanco
+              ? `${nombreBanco}: puesto ${formatearEntero(delBanco.Posicion_Cartera)} con ${formatearPorcentaje(delBanco.Participacion_Pct)} del sistema.`
+              : 'Cartera local válida de cada banco: la suma de sus 6 actividades.'
+          }
+        >
           <EstadoBloque consulta={consulta} alto={340} vacio={!datos?.bancos?.length}>
-            <BarrasHorizontales filas={barrasDeCartera(datos)} color="var(--chart-3)" etiqueta="Saldo total" />
+            <BarrasHorizontales filas={barrasDeCartera(datos)} color="var(--chart-3)" etiqueta="Saldo total" resaltado={banco} />
           </EstadoBloque>
         </TarjetaGrafico>
       </div>
 
-      <TarjetaGrafico id="titulo-consumo-bancos" fuerte="Consumo" suave="por producto y banco" pie="Crédito personal, automóvil y tarjetas de cada banco, ya con la regla SB21.">
+      <TarjetaGrafico
+        id="titulo-consumo-bancos"
+        fuerte="Consumo"
+        suave="por producto y banco"
+        pie={`Crédito personal, automóvil y tarjetas de cada banco, ya con la regla SB21.${nombreBanco ? ` Resaltado: ${nombreBanco}.` : ''}`}
+      >
         <EstadoBloque consulta={consulta} alto={300} vacio={sinDatos}>
-          <BarrasApiladas datos={datos} ranking="CONSUMO" />
+          <BarrasApiladas datos={datos} ranking="CONSUMO" resaltado={banco} />
         </EstadoBloque>
       </TarjetaGrafico>
 
-      {fechas.length > 1 && producto && <EvolucionProducto fechas={fechas} clave={clave} nombre={producto.Subactividad} />}
+      {fechas.length > 1 && producto && (
+        <EvolucionProducto fechas={fechas} clave={clave} nombre={producto.Subactividad} banco={banco} nombreBanco={nombreBanco} />
+      )}
+    </div>
+  )
+}
+
+// Con banco elegido: su cartera y sus productos destacados, con su puesto entre los 12 bancos.
+function TarjetasDelBanco({ datos }) {
+  const b = datos.banco
+  return (
+    <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <Indicador
+        icono={WalletIcon}
+        titulo={`Cartera de ${b.Banco}`}
+        valor={formatearMonto(b.Total_Cartera_Local_Valida)}
+        detalle={`${formatearPorcentaje(b.Participacion_Pct)} del sistema · ${formatearEntero(b.Operaciones_Validas)} préstamos válidos`}
+        lider={`Puesto ${formatearEntero(b.Posicion_Cartera)} por cartera`}
+      />
+      {DESTACADOS.map((d) => {
+        const p = productoDelBanco(datos, claveProducto(d))
+        if (!p) return null
+        const detalles = [`${formatearPorcentaje(p.Pct_Del_Ranking)} de su ${p.Ranking}`]
+        if (typeof p.Operaciones === 'number') detalles.push(`${formatearEntero(p.Operaciones)} operaciones`)
+        return (
+          <Indicador
+            key={d.clave}
+            icono={ICONOS[d.clave]}
+            titulo={d.titulo}
+            valor={formatearMonto(p.Saldo)}
+            detalle={detalles.join(' · ')}
+            lider={`Puesto ${formatearEntero(p.Posicion)} · ${formatearPorcentaje(p.Participacion_Pct)} del producto`}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -165,7 +231,8 @@ function SelectorProducto({ datos, valor, alCambiar }) {
 }
 
 // Barras horizontales de los 12 bancos (saldo), con el monto exacto y las operaciones en el tooltip.
-function BarrasHorizontales({ filas, color, etiqueta }) {
+// `resaltado`: código del banco elegido; su barra queda plena y las demás se atenúan (#204).
+function BarrasHorizontales({ filas, color, etiqueta, resaltado = null }) {
   const config = { saldo: { label: etiqueta, color } }
   return (
     <ChartContainer config={config} className="aspect-auto w-full" style={{ height: Math.max(220, filas.length * 26 + 40) }}>
@@ -188,14 +255,18 @@ function BarrasHorizontales({ filas, color, etiqueta }) {
             />
           }
         />
-        <Bar dataKey="saldo" fill="var(--color-saldo)" fillOpacity={0.85} radius={[0, 6, 6, 0]} />
+        <Bar dataKey="saldo" fill="var(--color-saldo)" fillOpacity={0.85} radius={[0, 6, 6, 0]}>
+          {filas.map((f) => (
+            <Cell key={f.codigo} fillOpacity={!resaltado || f.codigo === resaltado ? 0.9 : 0.25} />
+          ))}
+        </Bar>
       </BarChart>
     </ChartContainer>
   )
 }
 
 // Barras apiladas de un ranking: un color por producto, una barra por banco.
-function BarrasApiladas({ datos, ranking }) {
+function BarrasApiladas({ datos, ranking, resaltado = null }) {
   const { filas: porBanco, series } = apiladoPorBanco(datos, ranking)
   // Claves sin espacios (s0, s1…) para las variables de color del gráfico; el nombre va en `label`.
   const claves = series.map((_, i) => `s${i}`)
@@ -218,7 +289,11 @@ function BarrasApiladas({ datos, ranking }) {
         />
         <ChartLegend content={<ChartLegendContent />} />
         {claves.map((clave, i) => (
-          <Bar key={clave} dataKey={clave} stackId="producto" fill={`var(--color-${clave})`} radius={i === claves.length - 1 ? [4, 4, 0, 0] : 0} />
+          <Bar key={clave} dataKey={clave} stackId="producto" fill={`var(--color-${clave})`} radius={i === claves.length - 1 ? [4, 4, 0, 0] : 0}>
+            {filas.map((f) => (
+              <Cell key={f.codigo} fillOpacity={!resaltado || f.codigo === resaltado ? 1 : 0.3} />
+            ))}
+          </Bar>
         ))}
       </BarChart>
     </ChartContainer>
@@ -226,17 +301,27 @@ function BarrasApiladas({ datos, ranking }) {
 }
 
 // Analista y Administrador: saldo del producto elegido en cada corte (un GET /api/productos por corte).
-function EvolucionProducto({ fechas, clave, nombre }) {
+// Con banco elegido (#204), el saldo de ese banco en el producto.
+function EvolucionProducto({ fechas, clave, nombre, banco = null, nombreBanco = null }) {
   const consulta = useConsulta(
-    (o) => Promise.all(fechas.map((fecha) => pedirProductos({ periodo: fecha }, o))),
-    [fechas.join(',')],
+    (o) => Promise.all(fechas.map((fecha) => pedirProductos({ periodo: fecha, banco: banco ?? undefined }, o))),
+    [fechas.join(','), banco],
     { activa: fechas.length > 0 },
   )
-  const filas = evolucionDeProducto(consulta.datos, clave).map((f) => ({ ...f, corte: formatearPeriodo(f.periodo) }))
-  const config = { saldo: { label: nombre, color: 'var(--chart-1)' } }
+  const filas = evolucionDeProducto(consulta.datos, clave, Boolean(banco)).map((f) => ({ ...f, corte: formatearPeriodo(f.periodo) }))
+  const config = { saldo: { label: nombreBanco ? `${nombre} · ${nombreBanco}` : nombre, color: 'var(--chart-1)' } }
 
   return (
-    <TarjetaGrafico id="titulo-evolucion-producto" fuerte={nombre} suave="corte a corte" pie="Saldo del producto elegido en cada corte cargado (Analista y Administrador).">
+    <TarjetaGrafico
+      id="titulo-evolucion-producto"
+      fuerte={nombre}
+      suave={nombreBanco ? `de ${nombreBanco}, corte a corte` : 'corte a corte'}
+      pie={
+        nombreBanco
+          ? `Saldo de ${nombreBanco} en el producto elegido, en cada corte cargado (Analista y Administrador).`
+          : 'Saldo del producto elegido en cada corte cargado (Analista y Administrador).'
+      }
+    >
       <EstadoBloque consulta={consulta} alto={220} vacio={filas.length === 0}>
         <ChartContainer config={config} className="aspect-auto h-[220px] w-full">
           <LineChart data={filas} margin={{ left: 0, right: 16, top: 8 }}>

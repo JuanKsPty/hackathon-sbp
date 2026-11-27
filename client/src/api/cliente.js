@@ -134,7 +134,8 @@ export const indicadores = ({ periodo, ranking } = {}, opciones) =>
 
 // contracts/productos.md (#200): totales de cada producto de crédito (las 22 subactividades) del período,
 // con su detalle por banco, y la cartera válida de cada banco. Los suma el motor. Abierto a los 3 perfiles.
-export const productos = ({ periodo } = {}, opciones) => pedir('/productos', { periodo }, opciones)
+// Con banco (#204) agrega el bloque `banco`: su cartera, participación, posición por ranking y sus productos.
+export const productos = ({ periodo, banco } = {}, opciones) => pedir('/productos', { periodo, banco }, opciones)
 
 // Por qué se movió el saldo de cada banco entre dos períodos: préstamos nuevos, que salen y
 // amortización (contracts/consulta.md, #61). Como /movimientos, es de Analista y Administrador.

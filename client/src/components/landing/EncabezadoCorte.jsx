@@ -1,10 +1,10 @@
 import { Link } from 'react-router'
 import { DownloadIcon, RadarIcon } from 'lucide-react'
 import { urlDescarga } from '@/api/cliente.js'
-import { PeriodoDePagina } from '@/components/layout/PeriodoDePagina.jsx'
+import { FiltrosDelPanel } from '@/components/layout/FiltrosDelPanel.jsx'
 import { Cifra, Etiqueta, TituloDosTonos } from '@/components/marca'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
-import { formatearEntero, formatearMonto, formatearPeriodo } from '@/lib/formato.js'
+import { formatearEntero, formatearMonto, formatearPeriodo, formatearPorcentaje } from '@/lib/formato.js'
 import { contarBancos } from './datosLanding.js'
 import { montoCompacto } from './formatoLanding.js'
 
@@ -22,10 +22,24 @@ const enlace = 'inline-flex items-center gap-1 font-medium text-primary underlin
 // la portada del Inicio, por eso es una sección clara con h2 y no otro bloque oscuro.
 export function EncabezadoCorte({ datos }) {
   const { cargando, error } = usePeriodo()
-  const { periodo, detallePeriodo: p, rankings } = datos
+  const { periodo, detallePeriodo: p, rankings, nombreBanco } = datos
   const lista = rankings.datos?.rankings
+  // Con un banco elegido (#204), las 3 cifras son de ese banco (bloque `banco` de GET /api/productos).
+  const b = nombreBanco ? datos.productos?.datos?.banco : null
 
-  const cifras = [
+  const cifras = b ? [
+    {
+      etiqueta: `Cartera de ${b.Banco}`,
+      valor: montoCompacto(b.Total_Cartera_Local_Valida),
+      detalle: `Saldo ${formatearMonto(b.Total_Cartera_Local_Valida)} · ${formatearPorcentaje(b.Participacion_Pct)} del sistema`,
+    },
+    { etiqueta: 'Operaciones válidas del banco', valor: formatearEntero(b.Operaciones_Validas), detalle: `Puesto ${formatearEntero(b.Posicion_Cartera)} por cartera` },
+    {
+      etiqueta: 'Rankings que lidera',
+      valor: formatearEntero(b.Rankings_Liderados),
+      detalle: `de ${formatearEntero(b.rankings?.length ?? 0)} rankings de crédito`,
+    },
+  ] : [
     { etiqueta: 'Cartera local válida', valor: montoCompacto(p?.Saldo_Total_Valido), detalle: p ? `Saldo ${formatearMonto(p.Saldo_Total_Valido)}` : null },
     { etiqueta: 'Operaciones válidas', valor: formatearEntero(p?.Universo_Local_Valido), detalle: p ? `de ${formatearEntero(p.Filas_Leidas)} filas leídas` : null },
     {
@@ -45,7 +59,7 @@ export function EncabezadoCorte({ datos }) {
             fuerte="El crédito local en cifras"
             suave="por banco y macroactividad"
           />
-          <PeriodoDePagina />
+          <FiltrosDelPanel />
         </div>
 
         {error ? (

@@ -6,6 +6,7 @@ import { Vacio } from '@/components/estados/Vacio.jsx'
 import { buttonVariants } from '@/components/ui/button'
 import { formatearEntero, formatearPeriodo } from '@/lib/formato.js'
 import { cn } from '@/lib/utils'
+import { NotaSistemaCompleto } from './NotaSistemaCompleto.jsx'
 import { Tarjeta } from './Tarjeta.jsx'
 
 // Tipos de alerta del reporte de calidad (los mismos de components/calidad/AlertasPorTipo.jsx).
@@ -18,7 +19,8 @@ const TIPOS = [
 ]
 
 // Alertas de calidad del período elegido (GET /api/calidad?periodo): total, conteo por tipo y estado de
-// las reconciliaciones. El detalle está en la página Calidad de datos.
+// las reconciliaciones. El detalle está en la página Calidad de datos. No trae el detalle por banco:
+// con un banco elegido (#204) se avisa que el bloque es del sistema completo.
 export function AlertasCalidad({ consulta }) {
   const calidad = consulta.datos?.periodos?.[0] ?? null
 
@@ -76,6 +78,7 @@ export function AlertasCalidad({ consulta }) {
             Alertas de calidad
           </h3>
           <p className="text-xs text-muted-foreground">Se reportan, pero no excluyen la fila del cálculo.</p>
+          <NotaSistemaCompleto className="mt-1" />
         </div>
       </div>
       {contenido}
