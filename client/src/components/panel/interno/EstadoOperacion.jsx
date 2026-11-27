@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 import { Etiqueta, SeccionGris, TituloDosTonos } from '@/components/marca'
 import { Tarjeta } from './Tarjeta.jsx'
 
-const ULTIMAS = 5
+const ULTIMAS = 3
 
 // Estado de la operación, solo para el Administrador (#140): último corte cargado con su cascada
 // E1–E4 y las reconciliaciones, la regla de movimiento significativo vigente y las últimas entradas
@@ -45,19 +45,17 @@ export function EstadoOperacion() {
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-2">
           <Etiqueta icono={ServerCogIcon}>Administración</Etiqueta>
-          <TituloDosTonos fuerte={<span id="titulo-operacion">Estado de la operación</span>} suave="del último corte" />
+          <TituloDosTonos como="h3" fuerte={<span id="titulo-operacion">Estado de la operación</span>} suave="del último corte" />
         </div>
         <Link to="/admin" className={buttonVariants({ size: 'pildora', className: 'w-fit' })}>
           <FileUpIcon aria-hidden="true" />
           Cargar período
         </Link>
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-3">
         <UltimoCorte consulta={consultaCalidad} ultimo={ultimo} />
-        <div className="flex flex-col gap-4">
-          <ReglaActual consulta={consultaRegla} />
-          <UltimasOperaciones consulta={consultaBitacora} />
-        </div>
+        <ReglaActual consulta={consultaRegla} />
+        <UltimasOperaciones consulta={consultaBitacora} />
       </div>
     </SeccionGris>
   )
@@ -105,11 +103,11 @@ function UltimoCorte({ consulta, ultimo }) {
                 <dt className="text-muted-foreground">Saldo total válido</dt>
                 <dd className="cifra">{formatearMonto(c.Saldo_Total_Valido)}</dd>
               </dl>
-              <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <dl className="grid grid-cols-2 gap-2">
                 {cascada.map(([nombre, valor]) => (
                   <div key={nombre} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-seccion px-3 py-2">
                     <dt className="text-[11px] text-muted-foreground">{nombre}</dt>
-                    <dd className="cifra text-lg font-medium">{formatearEntero(valor)}</dd>
+                    <dd className="cifra text-base font-medium">{formatearEntero(valor)}</dd>
                   </div>
                 ))}
               </dl>
