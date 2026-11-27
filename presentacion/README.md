@@ -61,7 +61,7 @@ El deck **no tiene cifras de resultados** (saldos, posiciones ni ganadores): esa
 | Cifra | Cómo se mide |
 | :--- | :--- |
 | 374 pruebas del server | `cd server && npm test` |
-| 103 pruebas del client | `cd client && npm test` |
+| 105 pruebas del client | `cd client && npm test` |
 | Cobertura del server: 93 % de líneas, 90 % de ramas y 93 % de funciones (línea "all files") | `cd server && npm run test:cobertura` |
 | 18 casos de evaluación del agente | `server/evals/agente/casos.js` |
 

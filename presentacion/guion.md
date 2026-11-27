@@ -77,7 +77,7 @@ Reparto por tema (R6: **todos** deben poder explicar el código, no solo su part
 
 ### Presentación web (alternativa al .pptx, #156)
 
-El sitio público trae su propia presentación en `http://localhost:5173/presentacion` (también el botón "Ver la presentación" del Inicio y la tarjeta "Presentación" del menú lateral): 14 láminas, con la historia por roles (problema, propuesta, Público, Analista, Administrador, confianza y cierre) y un anexo técnico. Flechas, espacio o deslizar para avanzar, `F` para pantalla completa, `?lamina=N` para abrir una lámina, y "Ir al inicio" para pasar a la app.
+El sitio público trae su propia presentación en `http://localhost:5173/presentacion`. Es una URL privada, solo para presentar: ningún botón ni enlace de la app lleva ahí, así que hay que escribir la dirección. Tiene 14 láminas, con la historia por roles (problema, propuesta, Público, Analista, Administrador, confianza y cierre) y un anexo técnico. Flechas, espacio o deslizar para avanzar, `F` para pantalla completa, `?lamina=N` para abrir una lámina, y "Ir al inicio" para pasar a la app.
 
 - **Qué evaluamos:** queda como **alternativa, no como plan A**. El `deck.pptx` sigue siendo el archivo que se presenta porque trae las notas del orador, el reparto por tiempos y las láminas del motor, de las que cuelgan las preguntas del jurado; y el PDF del deck funciona aunque la app no arranque (plan B del proyector). La presentación web no trae notas ni reparto y necesita el API corriendo.
 - **Cuándo conviene:** para evitar el salto de PowerPoint al navegador, o para el cierre y las preguntas (el anexo técnico, láminas 10 a 14: flujo, cascada, arquitectura y decisiones). La lámina 9, "Demo en vivo", hace de puente con enlaces a la app.
@@ -87,13 +87,13 @@ El sitio público trae su propia presentación en `http://localhost:5173/present
 
 ### 1. Apertura (0:00–0:40) · Juan
 
-- **Clics:** ninguno. La pestaña 1 es el **sitio público** (`localhost:5173`): está en `/` (Inicio), sin iniciar sesión, con perfil Público y el último período cargado (agosto de 2026).
+- **Clics:** ninguno. La pestaña 1 es el **sitio público** (`localhost:5173`). Está en `/`, la landing a pantalla completa y sin menú lateral, sin iniciar sesión, con perfil Público.
 - **Decir:** "Esto corre en local, en esta máquina (R1): fíjense en la barra de direcciones. Este es el sitio público: no pide login y siempre es perfil Público. Abajo siempre están la fuente, el período y el aviso de datos ficticios; es lo que pide la lámina 9 del reto. Este dashboard es del corte vigente: no compara períodos ni muestra movimientos. Ahora tenemos cargados julio y agosto; septiembre lo vamos a cargar en vivo."
-- **Debe verse:** `localhost:5173`, el menú lateral (Inicio, Rankings, Reportes, Calidad de datos y Verificación del jurado, más la tarjeta "Presentación"), la portada "¿Qué banco le presta más a cada sector?", los casos de uso y, más abajo, el dashboard "El crédito local en cifras", con el selector "Período de los datos" y dos meses. Al pie, la barra con "Datos ficticios · Uso informativo, no opinión formal de la SBP".
+- **Debe verse:** `localhost:5173`, con la portada "¿Qué banco le presta más a cada sector?", los casos de uso y, arriba a la derecha, "Rankings" y **"Ver los datos"**, que lleva al Panel (`/panel`). En el Panel está el dashboard "El crédito local en cifras", con el selector "Período de los datos" y dos meses, y el menú lateral **Panel, Rankings y Reportes**. Al pie, la barra con "Datos ficticios · Uso informativo, no opinión formal de la SBP".
 
 ### 2. Perfiles (0:40–1:40) · Agustín y Jesús
 
-1. **Agustín.** En el sitio público (5173), señala el menú lateral: Inicio, Rankings, Reportes, Calidad de datos y Verificación del jurado. **No aparecen** "Comparar períodos" ni "Administración", y arriba a la derecha solo está el botón "Asistente IA". Al pie del menú dice "Consulta pública · Abierta, sin cuenta": no hay inicio de sesión, el público siempre es Público.
+1. **Agustín.** En el sitio público (5173), clic en **"Ver los datos"** y señala el menú lateral: **Panel, Rankings y Reportes**. **No aparecen** "Comparar períodos", "Administración", "Calidad de datos" ni "Verificación del jurado": esas páginas son del sitio interno, y arriba a la derecha solo está el botón "Asistente IA". Al pie del menú dice "Consulta pública · Abierta, sin cuenta": no hay inicio de sesión, el público siempre es Público.
 2. Escribe `localhost:5173/admin` en la barra de direcciones. Cae en **"Página no encontrada"** (Error 404): el sitio público no tiene esa ruta. "El sitio interno, en cambio, pide iniciar sesión."
 3. **Jesús.** "La pantalla es una comodidad. Lo que protege es el servidor." En una terminal (ya abierta, lista para pegar):
 
@@ -101,7 +101,7 @@ El sitio público trae su propia presentación en `http://localhost:5173/present
    curl -i -X POST http://localhost:5173/api/periodos
    ```
 
-   Debe responder `403` con `PERFIL_NO_AUTORIZADO` ("Esta opción es solo para el perfil Administrador. Tu perfil es Público."): el proxy del sitio público agrega `X-Sitio: publico` y el rechazo queda en la bitácora. Opcional: el mismo `POST` a `http://localhost:5174/api/periodos`, sin sesión, responde `401 SESION_REQUERIDA`. "La tabla de opciones por perfil está en un solo lugar: `server/src/middleware/perfiles.js`, y la sesión en `server/src/auth/`."
+   Debe responder `403` con `PERFIL_NO_AUTORIZADO` ("Esta opción es solo para el perfil Administrador. Tu perfil es Público."): el proxy del sitio público agrega `X-Sitio: publico` y el rechazo queda en la bitácora. Opcional: el mismo `POST` a `http://localhost:5174/api/periodos`, sin sesión, responde `401 SESION_REQUERIDA`. "Los permisos por defecto están en `server/src/middleware/perfiles.js`; el Administrador los ajusta en Perfiles y permisos (#145). La sesión está en `server/src/auth/`."
 4. **Agustín.** Pasa a la pestaña 2, el **sitio interno** (`localhost:5174`). Sin sesión, redirige a `/entrar`; si la sesión ya estaba iniciada, abre el bloque del perfil al pie del menú lateral y elige **Salir** (vuelve a `/entrar`). Inicia sesión como **admin**. Al pie del menú se ve el usuario y su perfil ("admin", "Perfil Administrador") y, al abrirlo, la descripción del perfil, "Ir al sitio público" y "Salir". Ahora el menú tiene "Comparar períodos" y "Administración".
    - **Comparar Analista con Administrador:** Salir y entrar con la cuenta de analista (tiene "Comparar períodos", pero no "Administración"); después volver a admin. Si falta tiempo, omitirlo y decirlo.
 - **En pantallas angostas** (por debajo de 1024 px) el menú lateral se abre con el botón de la izquierda, y el usuario, el perfil, "Ir al sitio público" y "Salir" están al pie de ese menú.
@@ -117,7 +117,8 @@ Es el **entregable 7**: procesar un período nuevo sin tocar código. **Solo en 
    - Señala la tabla de cambios y deja que la pantalla hable. En `server/tests/entregable7.test.js` está la prueba que cubre este mismo flujo (julio y agosto, y luego septiembre como Administrador).
 5. Abre el **selector "Período de los datos"** (en Panel, Rankings o Calidad): ahora hay **3 meses** y "Septiembre 2026" es el último, con la marca "Más reciente" (y el que queda elegido).
 6. Baja a **"Registro de operaciones"** (o usa el índice de arriba): queda la carga ("Carga de período", archivo, resultado y hora). "Esto es el registro básico del entregable 8." La columna "Quién" trae el perfil y, debajo, el **usuario** que la hizo (también en el campo `usuario` de `GET /api/bitacora`). Si no hay Zapier, la fila de arriba es el aviso por correo pendiente (ver T–30): se dice tal cual.
-7. **Opcional, 20 s (issue #7):** si Zapier está activo, mostrar el correo o la fila nueva en la hoja del equipo. "Zapier solo reparte; la app decide qué es significativo."
+7. **Opcional, 15 s (lámina 6: "Configurar perfiles y permisos"):** en el índice, **"Usuarios y permisos"**. Muestra la tabla de usuarios (**"Nuevo usuario"**, perfil, activar o desactivar) y la matriz **"Perfiles y permisos"** con sus candados, sin guardar nada.
+8. **Opcional, 20 s (issue #7):** si Zapier está activo, mostrar el correo o la fila nueva en la hoja del equipo. "Zapier solo reparte; la app decide qué es significativo."
 
 ### 4. Panel (3:10–4:00) · Agustín
 
@@ -130,12 +131,12 @@ Es el **entregable 7**: procesar un período nuevo sin tocar código. **Solo en 
   5. "Concentración y morosidad": los indicadores adicionales, rotulados como análisis adicional.
   6. "Calidad de los datos corte a corte" y "Evolución de posiciones por ranking" (la lista de bancos, con el líder primero).
   7. Solo el **Administrador**: "Estado de la operación" (último corte cargado, regla vigente y últimas operaciones). El Analista ve lo mismo sin este bloque.
-- **Lo de Público, en la pestaña 1 (5173), 10 s:** el Inicio es solo el corte vigente: gráficas de saldo por banco, composición, calidad, concentración y morosidad, y el líder de cada ranking, sin movimientos ni comparación. Vuelve a la pestaña 2.
+- **Lo de Público, en la pestaña 1 (5173), 10 s:** el Panel público (`/panel`; la landing está en `/`) es solo el corte vigente: gráficas de saldo por banco, composición, calidad, concentración y morosidad, y el líder de cada ranking, sin movimientos ni comparación. Vuelve a la pestaña 2.
 - **Decir:** "Los rankings oficiales son 6. Estos indicadores salen del mismo universo válido, pero no los sustituyen; por eso están rotulados aparte."
 
 ### 5. Rankings (4:00–5:00) · Agustín y Jesús
 
-Sigue en la pestaña 2 (5174). Rankings, Calidad y Verificación son iguales en los dos sitios.
+Sigue en la pestaña 2 (5174). Rankings es igual en los dos sitios; Calidad y Verificación son solo del sitio interno (en el público dan 404).
 
 1. Menú → **Rankings**. El **período** se elige a la derecha del título. En la tarjeta "Ranking y filtros", elige la pestaña **CONSUMO**.
 2. **Filtros:** en el filtro de banco elige uno. Después clic en otra barra del gráfico **"Saldos por banco"** (un clic en una barra filtra ese banco; otro clic lo quita). El gráfico alterna entre "Saldo de la actividad" y "Ponderación". El botón "Copiar enlace" guarda la vista: el período, el ranking y los filtros van en la dirección de la página.
@@ -167,7 +168,7 @@ Sigue en la pestaña 2 (5174). Rankings, Calidad y Verificación son iguales en 
 
 ### 8. Verificación del jurado (7:00–7:50) · Jesús
 
-- **Clic:** menú → **Verificación del jurado** (o `/verificacion` en la barra de direcciones). Está para los 3 perfiles, en el sitio público y en el interno. Arriba dice "Todos los chequeos cumplen · 6 de 6 puntos" cuando están los 3 períodos (con 2, el punto 6 no cumple).
+- **Clic:** menú → **Verificación del jurado** (o `/verificacion` en la barra de direcciones). Es solo del sitio interno (Analista y Administrador); en el público, `/verificacion` da 404. Arriba dice "Todos los chequeos cumplen · 6 de 6 puntos" cuando están los 3 períodos (con 2, el punto 6 no cumple).
 - **Mostrar los 6 puntos de la sección 11.1**, cada uno con su chequeo (✓):
   1. **Calidad:** E1–E4 y universo válido por período.
   2. **Rankings obligatorios:** HIPOTECARIO, CONSTRUCCION, INDUSTRIA y AGROPECUARIO, con posición y saldo.
@@ -259,5 +260,5 @@ Empieza en la pestaña 2 (5174, Administrador); el caso de Público va en la pes
 - No hablar de un "selector de perfil" ni del header `X-Perfil` como forma de entrar: no existe en la UI (solo vale en llamadas directas al API desde la misma máquina). Entrar al interno es con usuario y contraseña.
 - No decir que la IA "controla" la app libremente: las acciones de pantalla (#131 y #137: ir, elegir, ordenar, resaltar y señalar) son una lista cerrada que el server valida contra el catálogo y el perfil. El front las ejecuta en dos modos: **ejecutar** (deja la pantalla lista, con "Muéstrame cómo") y **demostrar** (cursor paso a paso, con "Ver de nuevo").
 - No prometer que el cursor señala cualquier campo en modo demostrar: hoy llega a cualquier página por el menú, pero solo señala el período, el ranking, la tabla y los dos filtros de Rankings. Para el resto está la guía clásica ("Mostrarme en la pantalla").
-- No hablar de un enlace del sitio público al interno, de la burbuja del asistente abajo a la derecha, del "Panel" público ni de "Instalar app": ya no existen. Tampoco decir que el chat muestra las consultas que usó la IA.
+- No hablar de un enlace del sitio público al interno, de la burbuja del asistente abajo a la derecha, ni de "Instalar app": ya no existen. El Panel público sí existe, en `/panel`; la landing está en `/`. Tampoco decir que el chat muestra las consultas que usó la IA.
 - No leer ni mostrar contraseñas ni el `.env` en pantalla.

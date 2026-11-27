@@ -38,7 +38,7 @@ SALIDA = AQUI / "deck.pptx"
 # ---------------------------------------------------------------------------------------------
 CIFRAS = {
     "pruebas_server": "374",
-    "pruebas_client": "103",
+    "pruebas_client": "105",
     "cobertura_lineas": "93 %",
     "cobertura_ramas": "90 %",
     "cobertura_funciones": "93 %",
@@ -831,7 +831,7 @@ def lamina_perfiles(prs, d):
         ("02", "Analista", "Análisis · con login", ["Todo lo de Público", "Compara períodos y entidades",
                                          "Reportes personalizados y entregable 5"]),
         ("03", "Administrador", "Control · con login", ["Todo lo de Analista", "Carga o actualiza un período",
-                                             "Parámetros, catálogos y registro de operaciones"]),
+                                             "Parámetros, catálogos, usuarios y permisos", "Registro de operaciones"]),
     ]
     ancho = 3.95
     for i, (n, nombre, rol, items) in enumerate(perfiles):
@@ -850,9 +850,9 @@ def lamina_perfiles(prs, d):
     L.pie()
     L.notas("""
 [Agustín: lo que ve cada perfil en la UI · 30 s. Jesús: el control de acceso del servidor · 20 s]
-Agustín: son los tres perfiles de la lámina 6 del reto y cada uno ve opciones distintas. Público consulta, filtra, ve gráficos y tablas y descarga los entregables 2 a 4; no ve Comparar ni Administración, y su sitio no pide login. Analista, además, compara períodos y entidades y genera reportes personalizados. Administrador, además, carga o actualiza un período, administra parámetros y catálogos y consulta el registro de operaciones.
+Agustín: son los tres perfiles de la lámina 6 del reto y cada uno ve opciones distintas. Público consulta, filtra, ve gráficos y tablas y descarga los entregables 2 a 4; no ve Comparar ni Administración, y su sitio no pide login. Analista, además, compara períodos y entidades y genera reportes personalizados. Administrador, además, carga o actualiza un período, administra parámetros, catálogos, usuarios y permisos, y consulta el registro de operaciones.
 
-Jesús: son dos sitios. El público no pide login y siempre es Público. El interno sí: usuario y contraseña en /entrar, y el perfil sale de la cuenta, no de lo que elija el navegador. Va en una cookie HttpOnly firmada, y los cambios llevan además un header X-Sbp contra CSRF. Las cuentas están en Supabase, con respaldo en la variable USUARIOS del .env; ninguna contraseña está en el repositorio (R5). La UI esconde lo que no corresponde, pero lo importante es que el servidor responde 403 PERFIL_NO_AUTORIZADO aunque alguien llame al API directo, sin pasar por la pantalla. La tabla de opciones por perfil está en un solo lugar: server/src/middleware/perfiles.js, y el login en server/src/auth/. Los intentos rechazados quedan en la bitácora.
+Jesús: son dos sitios. El público no pide login y siempre es Público. El interno sí: usuario y contraseña en /entrar, y el perfil sale de la cuenta, no de lo que elija el navegador. Va en una cookie HttpOnly firmada, y los cambios llevan además un header X-Sbp contra CSRF. Las cuentas están en Supabase, con respaldo en la variable USUARIOS del .env; ninguna contraseña está en el repositorio (R5). La UI esconde lo que no corresponde, pero lo importante es que el servidor responde 403 PERFIL_NO_AUTORIZADO aunque alguien llame al API directo, sin pasar por la pantalla. Los permisos por defecto están en server/src/middleware/perfiles.js y el Administrador los ajusta en Perfiles y permisos; el login está en server/src/auth/. Los intentos rechazados quedan en la bitácora.
 
 Esto lo vimos en la demo: en el sitio público no se puede cargar un período; en el interno, como Administrador, sí.
 """)
