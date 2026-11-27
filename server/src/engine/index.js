@@ -1,7 +1,8 @@
 // Motor del reto: JavaScript puro, sin Express ni acceso a disco. Recibe textos CSV y devuelve resultados.
-// Flujo por período: leer -> validar -> (siguientes issues: cascada, clasificación, agregación, rankings)
+// Flujo por período: leer -> validar -> cascada E1-E4 -> (siguientes issues: clasificación, agregación, rankings)
 import { leerCsv, ErrorDeDatos } from './csv.js';
 import { validarEsquema, validarTipos, revisarIntegridad } from './validacion.js';
+import { aplicarCascada, conteosIndependientes } from './cascada.js';
 
 export { cargarCatalogos } from './catalogos.js';
 export { ErrorDeDatos } from './csv.js';
@@ -40,13 +41,34 @@ export function procesarPeriodo(filas, catalogos, opciones = {}) {
 
   const alertasTipo = validarTipos(filas, catalogos.campos, nombreArchivo); // rechaza si Fecha o Saldo son inválidos
   const alertasIntegridad = revisarIntegridad(filas, catalogos);
+  const cascada = aplicarCascada(filas, catalogos);
   const alertas = [...alertasIntegridad, ...alertasTipo];
 
   return {
     fecha,
     nombreArchivo,
-    calidad: { filasLeidas: filas.length, ...contarAlertas(alertas) },
+    calidad: resumenDeCalidad(filas, cascada, alertas, catalogos),
+    filasValidas: cascada.validas,
+    excluidas: cascada.excluidas,
     alertas,
+  };
+}
+
+// Reporte de calidad del período (entregable 4).
+function resumenDeCalidad(filas, cascada, alertas, catalogos) {
+  const { E1, E2, E3, E4 } = cascada.conteos;
+  const universoValido = cascada.validas.length;
+  return {
+    filasLeidas: filas.length,
+    e1Duplicados: E1,
+    e2DestinoExtranjero: E2,
+    e3SaldoNoPositivo: E3,
+    e4ActividadNoCatalogada: E4,
+    universoValido,
+    cascadaCuadra: filas.length === E1 + E2 + E3 + E4 + universoValido,
+    ...contarAlertas(alertas),
+    // Rotulado aparte: cuántas filas incumplen cada regla por sí sola (NO es el reporte oficial).
+    conteosIndependientes: conteosIndependientes(filas, catalogos),
   };
 }
 
