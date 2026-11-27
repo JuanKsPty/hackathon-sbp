@@ -9,6 +9,7 @@ import {
 import { Cargando } from '@/components/estados/Cargando.jsx'
 import { ErrorApi } from '@/components/estados/ErrorApi.jsx'
 import { Vacio } from '@/components/estados/Vacio.jsx'
+import { AlertasPorCorreo } from '@/components/reportes/AlertasPorCorreo.jsx'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -31,8 +32,9 @@ const DESCARGAS_ABIERTAS = [
 ]
 
 
-// Página Reportes (#68): descargas de los entregables 2 a 5 y el reporte personalizado del Analista.
-// Todas las cifras salen del API (R2); aquí solo se eligen filtros y se piden los CSV.
+// Página Reportes (#68): descargas de los entregables 2 a 5, el reporte personalizado del Analista y
+// la suscripción a las alertas por correo (#7). Todas las cifras salen del API (R2); aquí solo se
+// eligen filtros y se piden los CSV.
 export default function Reportes() {
   const { perfil, puede, opcionesListas } = usePerfil()
   const { periodos, cargando, error, reintentar } = usePeriodo()
@@ -101,13 +103,15 @@ export default function Reportes() {
           </CardContent>
         </Card>
       )}
+      {/* Abierta a los 3 perfiles y a los dos sitios: no depende de las opciones del perfil. */}
+      <AlertasPorCorreo bancos={bancos} rankings={rankings} />
     </Contenedor>
   )
 }
 
 function Contenedor({ children }) {
   return (
-    <Pagina titulo="Reportes" descripcion="Descargas CSV de los entregables: rankings, subactividades, calidad, excluidas, alertas, movimientos y el reporte personalizado.">
+    <Pagina titulo="Reportes" descripcion="Descargas CSV de los entregables: rankings, subactividades, calidad, excluidas, alertas, movimientos y el reporte personalizado. Aquí también te suscribes a las alertas por correo.">
       {children}
     </Pagina>
   )

@@ -40,7 +40,7 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 
 | Carpeta | Contenido |
 | :--- | :--- |
-| `api/` | Cliente del API (`cliente.js`): header `X-Sbp`, errores `ApiError`, fuente y aviso, modo mock. Sesión en `sesion.js`. |
+| `api/` | Cliente del API (`cliente.js`): header `X-Sbp`, errores `ApiError`, fuente y aviso, modo mock; incluye `suscribirse()` (POST de las alertas por correo, también con mock). Sesión en `sesion.js`. |
 | `contexto/` | Tema (claro, oscuro, sistema), perfil de la sesión (con sus opciones) y período elegido. |
 | `sitios/` | Tabla de rutas de cada sitio (`publico.jsx`, `interno.jsx`). |
 | `hooks/` | `useConsulta`: carga, error y reintento de una consulta. |
@@ -50,6 +50,8 @@ El mismo código genera dos bundles con `SITIO=publico | interno` (`npm run dev:
 | `components/ui/` | Componentes de shadcn/ui (`npx shadcn add <componente>`). |
 | `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes`, `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |
 | `styles/tema.css` | Tokens de la base visual (#138, ver [`DISENO.md`](DISENO.md)): único lugar con colores. Se registran como clases en `index.css`. |
+| `paginas/` | Una página por ruta: `/`, `/rankings`, `/comparar`, `/reportes` (descargas, reporte personalizado y la tarjeta **Alertas por correo** con el botón Suscribirse, #7), `/calidad`, `/verificacion` (modo verificación del jurado: los 6 puntos de la sección 11.1 con sus chequeos), `/admin`. |
+| `styles/tema.css` | Paleta D (SBP): único lugar con colores. Se registran como clases en `index.css`. |
 
 ## Perfiles
 
