@@ -25,7 +25,9 @@ function motivos(mov, participaEnCambioLider, regla) {
     lista.push('cambio_posicion');
   }
   if (regla.cambio_lider && participaEnCambioLider) lista.push('cambio_lider');
-  if (regla.min_var_saldo_pct_abs !== null && mov.varSaldoPctE4 !== null
+  // Un 0 % no es un movimiento: con umbral 0, "|variación| >= 0" marcaría a todos los bancos,
+  // así que el 0 % se excluye igual que el cambio de posición nulo (C8 de #86).
+  if (regla.min_var_saldo_pct_abs !== null && mov.varSaldoPctE4 !== null && mov.varSaldoPctE4 !== 0
       && Math.abs(mov.varSaldoPctE4) >= regla.min_var_saldo_pct_abs * 10000) {
     lista.push('var_saldo_pct');
   }

@@ -151,7 +151,7 @@ Un movimiento es **significativo** si cumple al menos uno de estos criterios:
 | Cambio de líder (marca al anterior y al nuevo) | `cambio_lider` | `true` |
 | Variación de saldo en valor absoluto ≥ N % | `min_var_saldo_pct_abs` | 10 |
 
-La regla **no está fija en el código**: vive en `server/config/parametros.json` (o en el archivo que indique `PARAMETROS_FILE`), el Administrador la cambia desde la app y se aplica sin reiniciar. Un umbral en `null` desactiva su criterio. Cada respuesta de `/api/movimientos` incluye la regla que se usó.
+La regla **no está fija en el código**: vive en `server/config/parametros.json` (o en el archivo que indique `PARAMETROS_FILE`), el Administrador la cambia desde la app y se aplica sin reiniciar. Un umbral en `null` desactiva su criterio. Un umbral en `0` marca todo lo que cambió, pero un cambio de 0 (de posición o de `Var_Saldo_Pct`) nunca es significativo: con umbral 0 no se marcan todos los bancos. Cada respuesta de `/api/movimientos` incluye la regla que se usó.
 
 ## Perfiles
 

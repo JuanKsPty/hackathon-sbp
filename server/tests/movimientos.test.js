@@ -5,7 +5,7 @@ import { once } from 'node:events';
 import { crearApp } from '../src/app.js';
 import { crearAlmacen } from '../src/datos/almacen.js';
 import { crearObtenerMovimientos } from '../src/routes/movimientos.js';
-import { variacionPctE4 } from '../src/automation/movimientos.js';
+import { variacionPctE4, compararPeriodos } from '../src/automation/movimientos.js';
 import { leerReglaMovimientos, validarRegla } from '../src/automation/reglaMovimientos.js';
 import { paqueteReal } from './ayuda.js';
 
@@ -117,6 +117,25 @@ test('cambiar la regla cambia el resultado sin tocar código', () => {
   });
   for (const r of amplia({}).rankings) {
     for (const m of r.movimientos) assert.equal(m.Significativo, m.Cambio_Posicion !== 0);
+  }
+});
+
+test('#86 (C8): con umbral 0, un 0 % o un cambio de posición nulo no son significativos', () => {
+  const { periodos } = paqueteReal();
+  const [julio, agosto] = periodos;
+  const regla = { min_cambio_posicion_abs: 0, cambio_lider: false, min_var_saldo_pct_abs: 0 };
+
+  // Un período contra sí mismo: ningún banco cambia de posición ni de saldo.
+  const iguales = compararPeriodos(julio, julio, regla).flatMap((r) => r.movimientos);
+  assert.ok(iguales.length > 0);
+  assert.ok(iguales.every((m) => m.motivos.length === 0 && m.significativo === false));
+
+  // Entre dos períodos distintos: significativo es lo que realmente cambió, con umbral 0.
+  const movimientos = compararPeriodos(julio, agosto, regla).flatMap((r) => r.movimientos);
+  assert.ok(movimientos.some((m) => m.significativo), 'algún banco cambió entre julio y agosto');
+  for (const m of movimientos) {
+    assert.equal(m.motivos.includes('var_saldo_pct'), m.varSaldoPctE4 !== null && m.varSaldoPctE4 !== 0);
+    assert.equal(m.motivos.includes('cambio_posicion'), m.cambioPosicion !== null && m.cambioPosicion !== 0);
   }
 });
 

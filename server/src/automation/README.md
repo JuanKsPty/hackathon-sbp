@@ -19,7 +19,7 @@ Automatizaciones de la lámina 8 y la sección 8 de las indicaciones:
   - `cambio_lider`: el líder anterior y el nuevo, cuando cambia el primer puesto;
   - `min_var_saldo_pct_abs`: `|Var_Saldo_Pct| >= N`.
 
-  Un umbral en `null` desactiva ese criterio. El Administrador la edita desde la app: [`contracts/administracion.md`](../../../contracts/administracion.md).
+  Un umbral en `null` desactiva ese criterio. Un umbral en `0` marca todo lo que cambió, pero un cambio nulo (0 posiciones o 0 %) nunca es significativo. El Administrador la edita desde la app: [`contracts/administracion.md`](../../../contracts/administracion.md).
 - La misma función alimenta la exportación del entregable 5 (`/api/exportar/movimientos.csv`).
 
 ## Verificación del jurado (#63)
