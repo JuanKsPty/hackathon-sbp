@@ -2,8 +2,9 @@
 // Sin ?periodo exportan todos los períodos cargados (cada fila trae su Fecha).
 import { Router } from 'express';
 import { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovimientos } from '../engine/index.js';
-import { periodosPedidos } from './parametros.js';
+import { periodosPedidos, periodoPedido, rankingPedido, bancoPedido } from './parametros.js';
 import { ErrorApi } from './errores.js';
+import { requiereOpcion } from '../middleware/perfiles.js';
 
 const DESCARGAS = {
   'rankings.csv': csvRankings, // entregable 2
@@ -35,7 +36,32 @@ export function rutasDeExportacion(almacen, { obtenerMovimientos } = {}) {
     enviarCsv(res, `movimientos_${respuesta.periodo_anterior}_${respuesta.periodo_actual}.csv`, csvMovimientos(respuesta));
   });
 
+  // Reporte personalizado (solo Analista y Administrador): los períodos, rankings y bancos elegidos,
+  // con las mismas columnas del entregable 2. Cada parámetro es una lista separada por comas;
+  // si falta o viene vacío, entran todos.
+  rutas.get('/exportar/personalizado.csv', requiereOpcion('reportes_personalizados'), (req, res) => {
+    const fechas = lista(req.query.periodos);
+    const periodos = fechas.length > 0 ? fechas.map((f) => periodoPedido(almacen, f)) : periodosPedidos(almacen);
+    const rankings = new Set(lista(req.query.rankings).map((r) => rankingPedido(almacen, r)));
+    const bancos = new Set(lista(req.query.bancos).map((b) => bancoPedido(almacen, b)));
+
+    const filtrados = periodos.map((p) => ({
+      ...p,
+      rankings: p.rankings
+        .filter((r) => rankings.size === 0 || rankings.has(r.ranking))
+        .map((r) => ({ ...r, filas: r.filas.filter((f) => bancos.size === 0 || bancos.has(f.codigoBanco)) })),
+    }));
+    enviarCsv(res, 'reporte_personalizado.csv', csvRankings(filtrados));
+  });
+
   return rutas;
+}
+
+// "a,b,,c" -> ['a', 'b', 'c']. Si el parámetro se repite (?bancos=1&bancos=2), se juntan.
+function lista(valor) {
+  if (valor === undefined) return [];
+  const texto = Array.isArray(valor) ? valor.join(',') : String(valor);
+  return [...new Set(texto.split(',').map((v) => v.trim()).filter((v) => v !== ''))];
 }
 
 function enviarCsv(res, nombreArchivo, contenido) {
