@@ -19,7 +19,7 @@ test('cascada sintética: cada fila cuenta una sola vez, en el primer filtro que
     filaSintetica({ Numero_Prestamo: 'G', Destino: 'l' }), // fila 10: E2 (mayúscula exacta)
     filaSintetica({ Numero_Prestamo: 'H' }), // fila 11: válida
   ]);
-  const { calidad, excluidas, filasValidas } = procesarPeriodo(filas, catalogosReales());
+  const { calidad, excluidas, operaciones } = procesarPeriodo(filas, catalogosReales());
 
   assert.equal(calidad.filasLeidas, 10);
   assert.equal(calidad.e1Duplicados, 2);
@@ -28,7 +28,7 @@ test('cascada sintética: cada fila cuenta una sola vez, en el primer filtro que
   assert.equal(calidad.e4ActividadNoCatalogada, 1);
   assert.equal(calidad.universoValido, 2);
   assert.equal(calidad.cascadaCuadra, true);
-  assert.deepEqual(filasValidas.map((f) => f.datos.Numero_Prestamo), ['B', 'H']);
+  assert.deepEqual(operaciones.map((op) => op.numeroPrestamo), ['B', 'H']);
   assert.deepEqual(
     excluidas.map((e) => `${e.fila}:${e.motivo}`),
     ['2:E2', '4:E1', '5:E3', '6:E3', '7:E2', '8:E4', '9:E1', '10:E2'],
@@ -66,7 +66,7 @@ for (const esperado of referenciaCalidad) {
     assert.equal(periodo.excluidas.every((e) => e.motivo && e.detalle && e.fila >= 2), true);
 
     // Ningún Numero_Prestamo se repite en el universo válido.
-    const numeros = periodo.filasValidas.map((f) => f.datos.Numero_Prestamo);
+    const numeros = periodo.operaciones.map((op) => op.numeroPrestamo);
     assert.equal(new Set(numeros).size, numeros.length);
   });
 }
