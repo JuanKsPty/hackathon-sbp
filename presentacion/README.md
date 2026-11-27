@@ -7,8 +7,8 @@ Todo lo que el equipo necesita para presentar: el deck, el guion de la demo en v
 | Archivo | Para qué sirve |
 | :--- | :--- |
 | [`deck.pptx`](deck.pptx) | El deck: 16:9, 15 láminas, con notas del orador en cada una. Es el archivo que se presenta. |
-| `/presentacion` (sitio público) | Versión web y corta del deck (14 láminas) dentro de la app: misma capa de diseño y cifras en vivo del API. Se navega con las flechas o deslizando, `F` pone pantalla completa y `?lamina=N` abre una lámina. Código en `client/src/paginas/Presentacion.jsx` y `client/src/components/presentacion/`. |
-| [`guion.md`](guion.md) | Guion de la demo en vivo (unos 10 minutos): tiempos, clics exactos, en qué sitio (público 5173 o interno 5174) va cada paso, quién habla, plan B y preguntas probables del jurado con la ruta donde está la respuesta. |
+| `/presentacion` (sitio público) | Alternativa web al deck, dentro de la app (estilo SBP): 14 láminas, 9 con la historia por roles (problema, propuesta, Público, Analista, Administrador, confianza y cierre) y 5 de anexo técnico para las preguntas del jurado. Las cifras salen en vivo del API (con 2 períodos cargados dicen 2, con septiembre dicen 3). Se abre desde el botón "Ver la presentación" del Inicio o la tarjeta "Presentación" del menú, se navega con las flechas o deslizando, `F` pone pantalla completa y `?lamina=N` abre una lámina. No reemplaza al `.pptx`: no trae notas del orador ni reparto (ver [`guion.md`](guion.md#presentación-web-alternativa-al-pptx-156)). Código en `client/src/paginas/Presentacion.jsx` y `client/src/components/presentacion/`. |
+| [`guion.md`](guion.md) | Guion de la demo en vivo (unos 10 minutos): tiempos, clics exactos, en qué sitio (público 5173 o interno 5174) va cada paso, quién habla, plan B y preguntas probables del jurado con la ruta donde está la respuesta. Revisado contra `main` (`a472aad`) y la app real. |
 | [`generar_deck.py`](generar_deck.py) | Genera `deck.pptx` con python-pptx. Los textos, las notas y las cifras están en este archivo. |
 | [`preparar-demo.mjs`](preparar-demo.mjs) | Deja la app corriendo (API, sitio público y sitio interno) con solo julio y agosto cargados, para cargar septiembre en vivo (entregable 7). Avisa si faltan las cuentas del interno. |
 | [`requirements.txt`](requirements.txt) | Dependencia de Python del generador (`python-pptx`). |
@@ -51,17 +51,17 @@ En Windows, `presentacion\.venv\Scripts\pip` y `presentacion\.venv\Scripts\pytho
 Cómo está armado:
 
 - **Diseños, no imágenes sueltas:** el archivo tiene tres diseños (Portada, Sección y Contenido) con su fondo de `assets/`, y el título de cada lámina es un marcador de posición. Así se puede editar en PowerPoint sin mover el fondo.
-- **Colores y tipografía:** la paleta D (índigo y dorado) está en el tema del archivo y la tipografía es Arial, que no depende de fuentes instaladas.
+- **Colores y tipografía:** la paleta D (índigo y dorado) y el logo de la escalera, de los fondos de Higgsfield, están en el tema del archivo y la tipografía es Arial, que no depende de fuentes instaladas. La app ya no usa esa paleta: pasó a la azul clara (E+) y al logo oficial de la SBP (#154). El deck conserva la suya.
 - **Notas del orador:** cada función `lamina_*` de `generar_deck.py` trae sus notas con quién habla y cuánto dura.
 
 ### Cifras y contenido
 
-El deck **no tiene cifras de resultados** (saldos, posiciones ni ganadores): esas solo las muestra la app en vivo. Solo usa números del documento del reto (25,000 / 27,500 / 30,000 filas, 61 campos, 12 bancos, 6 rankings y 22 subactividades) y los del bloque `CIFRAS` de `generar_deck.py`, medidos el 27 de noviembre de 2026:
+El deck **no tiene cifras de resultados** (saldos, posiciones ni ganadores): esas solo las muestra la app en vivo. Solo usa números del documento del reto (25,000 / 27,500 / 30,000 filas, 61 campos, 12 bancos, 6 rankings y 22 subactividades) y los del bloque `CIFRAS` de `generar_deck.py`, medidos el 27 de noviembre de 2026 sobre `main` (`a472aad`):
 
 | Cifra | Cómo se mide |
 | :--- | :--- |
-| 366 pruebas del server | `cd server && npm test` |
-| 73 pruebas del client | `cd client && npm test` |
+| 374 pruebas del server | `cd server && npm test` |
+| 105 pruebas del client | `cd client && npm test` |
 | Cobertura del server: 93 % de líneas, 90 % de ramas y 93 % de funciones (línea "all files") | `cd server && npm run test:cobertura` |
 | 18 casos de evaluación del agente | `server/evals/agente/casos.js` |
 
@@ -96,9 +96,9 @@ La app son dos sitios: el **público** (http://localhost:5173), sin login, y el 
 
 ## Pendiente antes de presentar
 
-- **Ensayar con la app final:** las etiquetas del guion se revisaron contra el código de `main` después del login y los dos sitios (#120): `client/src/sitios/`, el menú, `SesionUsuario` (usuario, perfil y Salir), la página de entrar, el Panel (#60), Comparar períodos (#61), la Verificación del jurado (#63) y el chat flotante (#127). En el ensayo, confirmar que todo se ve igual en la máquina de la demo.
+- **Ensayar con la app final:** las etiquetas del guion se revisaron contra el código de `main` (`a472aad`) y recorriendo la app real: el rediseño de #154 (menú lateral, logo de la SBP, botón "Asistente IA" arriba a la derecha, perfil y tema al pie del menú, período junto al título), el Inicio público con su dashboard (#139), el Panel interno por perfil (#140), el chat mínimo, el cursor que hace clic (#157) y los correos de Reportes (#7). Falta lo que solo se ve con llave de IA. En el ensayo, confirmar que todo se ve igual en la máquina de la demo.
 - **Cuentas del sitio interno:** poner `USUARIOS` (un admin y un analista) en el `.env` de la máquina de la demo, y dejar la pestaña del interno con la sesión de Administrador iniciada. Sin eso, y sin `DATABASE_URL` o sin internet, nadie entra. Las contraseñas no se muestran ni se suben al repo (R5).
-- **Acciones de pantalla (#131 y #137):** el server las valida y el front las ejecuta en dos modos. **Ejecutar** deja la pantalla lista al instante, con "Muéstrame cómo" para deshacer y demostrar. **Demostrar** mueve el cursor paso a paso, con "Ver de nuevo" y Esc para cerrar. En el ensayo, probar las preguntas de los pasos 9.2 y 9.4 del guion para saber qué modo sale.
-- **Rediseño en curso (`feat/ux-actores`, todavía sin PR):** si entra antes de la demo, cambian varias cosas que el guion nombra. La paleta pasa a azul claro y llega el logo oficial de la SBP. Arriba a la derecha queda solo el botón "Asistente IA", que abre el chat flotante debajo, sin burbuja ni panel lateral. El período, el perfil y el tema van al pie del menú lateral. Desaparece "Instalar app", y Rankings trae el período entre sus filtros. Si se mergea, actualizar los pasos 1, 5 y 9 del guion.
-- **Alertas por correo (#7):** ya están en `main`. Mostrarlas en vivo solo si la máquina de la demo tiene `ZAPIER_WEBHOOK_URL` en el `.env`.
-- **Cifras de pruebas:** volver a medirlas (tabla de arriba) el día de la presentación. La cobertura del server bajó de 99 % a 93 % de líneas porque el inicio de sesión (`server/src/auth/`, `routes/sesion.js` y la parte de sesión de `middleware/perfiles.js`) aún no tiene pruebas propias; si se agregan, la cifra sube.
+- **Ensayar con la llave de IA** (`ANTHROPIC_API_KEY`): el ensayo de la app se hizo sin llave (las reglas arman las acciones de pantalla). Con llave, probar las preguntas de los pasos 9.2 y 9.4 del guion para saber qué modo sale, y confirmar que a Público no se le menciona el sitio interno.
+- **Cursor en modo demostrar:** el front solo maneja el período, el ranking, la tabla y los dos filtros de Rankings (`useControlGuia`). Con `¿Cómo cargo un nuevo período?` el cursor llega al menú y entra a Administración, pero no señala el campo del archivo (tampoco las descargas de Reportes). Sin IA, esa misma pregunta señala el selector de período, no la carga (las reglas no reconocen "cargo"). El guion usa `¿Cómo veo el banco con más operaciones?`, que sí funciona completa. Si se arregla, actualizar el paso 9.4.
+- **Alertas y reporte por correo (#7):** ya están en `main` (Reportes, #161). Mostrarlas en vivo solo si la máquina de la demo tiene `ZAPIER_WEBHOOK_URL` en el `.env`; sin él, "Enviar reporte" responde que no pudo enviarlo y la bitácora marca el aviso como pendiente.
+- **Cifras de pruebas:** volver a medirlas (tabla de arriba) el día de la presentación. La cobertura del server está en 93 % de líneas porque el inicio de sesión (`server/src/auth/`, `routes/sesion.js` y la parte de sesión de `middleware/perfiles.js`) y el envío del reporte por correo (`POST /api/reportes/correo`) aún no tienen pruebas propias; si se agregan, la cifra sube.
