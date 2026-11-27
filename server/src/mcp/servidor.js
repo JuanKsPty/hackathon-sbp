@@ -3,7 +3,7 @@
 // Cada herramienta es un GET a la API del motor: este servidor no calcula ni lee la base de datos.
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { DEFINICIONES } from '../ai/herramientas.js';
+import { definicionesPara } from '../ai/herramientas.js';
 
 const INSTRUCCIONES = `Rankings de crédito bancario de la Hackathon SBP 2026 con datos 100% ficticios (12 bancos sintéticos).
 Las herramientas devuelven resultados de un motor de cálculo determinista: cita los valores tal como vienen, sin recalcularlos.
@@ -12,15 +12,16 @@ Indica siempre el período (AAAAMMDD) y que los datos son ficticios y no constit
 /**
  * @param {object} deps
  * @param {(nombre: string, entrada: object) => Promise<{ ok, datos?, error? }>} deps.ejecutar ejecutor de herramientas
+ * @param {string} [deps.perfil] perfil con el que consulta (#28): solo se listan sus herramientas
  */
-export function crearServidorMcp({ ejecutar }) {
+export function crearServidorMcp({ ejecutar, perfil = 'publico' }) {
   const servidor = new Server(
     { name: 'rankings-credito-sbp', version: '0.1.0' },
     { capabilities: { tools: {} }, instructions: INSTRUCCIONES },
   );
 
   servidor.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: DEFINICIONES.map(({ name, description, input_schema }) => ({
+    tools: definicionesPara(perfil).map(({ name, description, input_schema }) => ({
       name,
       description,
       inputSchema: input_schema,

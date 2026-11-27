@@ -25,7 +25,7 @@ before(async () => {
   base = `http://127.0.0.1:${api.address().port}/api`;
 
   const [lado, otroLado] = InMemoryTransport.createLinkedPair();
-  await crearServidorMcp({ ejecutar: crearEjecutor(base) }).connect(otroLado);
+  await crearServidorMcp({ ejecutar: crearEjecutor(base, { perfil: 'analista' }), perfil: 'analista' }).connect(otroLado);
   cliente = new Client({ name: 'test', version: '0.0.0' });
   await cliente.connect(lado);
 });
@@ -64,6 +64,19 @@ test('consultar_movimientos usa la comparación entre períodos', async () => {
   assert.equal(datos.rankings[0].Cambio_Lider, true);
 });
 
+test('con perfil Público no ofrece movimientos y la API los rechaza (403)', async () => {
+  const [lado, otroLado] = InMemoryTransport.createLinkedPair();
+  await crearServidorMcp({ ejecutar: crearEjecutor(base), perfil: 'publico' }).connect(otroLado);
+  const publico = new Client({ name: 'test-publico', version: '0.0.0' });
+  await publico.connect(lado);
+  const { tools } = await publico.listTools();
+  assert.equal(tools.length, 6);
+  assert.ok(!tools.some((t) => t.name === 'consultar_movimientos'));
+  const resultado = await publico.callTool({ name: 'consultar_movimientos', arguments: {} });
+  assert.equal(resultado.isError, true);
+  await publico.close();
+});
+
 test('un parámetro inválido vuelve como error de herramienta', async () => {
   const resultado = await cliente.callTool({ name: 'consultar_rankings', arguments: { ranking: 'VIVIENDA' } });
   assert.equal(resultado.isError, true);
@@ -85,7 +98,7 @@ test('arranca por stdio como lo lanza Claude Desktop', async () => {
   const transporte = new StdioClientTransport({
     command: process.execPath,
     args: [fileURLToPath(new URL('../src/mcp/index.js', import.meta.url))],
-    env: { ...process.env, API_URL: base },
+    env: { ...process.env, MCP_API_URL: base },
     stderr: 'ignore',
   });
   const porStdio = new Client({ name: 'test-stdio', version: '0.0.0' });
