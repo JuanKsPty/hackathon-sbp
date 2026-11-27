@@ -13,6 +13,7 @@ export const ELEMENTOS_GUIA = [
   el('global.menu-comparar', null, 'Enlace del menú a Comparar períodos', 'comparar_periodos'),
   el('global.menu-reportes', null, 'Enlace del menú a Reportes'),
   el('global.menu-calidad', null, 'Enlace del menú a Calidad de datos'),
+  el('global.menu-verificacion', null, 'Enlace del menú a Verificación del jurado'),
   el('global.menu-admin', null, 'Enlace del menú a Administración', 'cargar_periodo'),
   el('global.selector-perfil', null, 'Selector de perfil'),
   el('global.selector-periodo', null, 'Selector de período'),
@@ -52,6 +53,14 @@ export const ELEMENTOS_GUIA = [
   el('calidad.reconciliaciones', '/calidad', 'Reconciliaciones 1, 2, 3 y unicidad'),
   el('calidad.alertas', '/calidad', 'Alertas por tipo'),
   el('calidad.excluidas', '/calidad', 'Filas excluidas con su motivo'),
+  // Verificación del jurado
+  el('verificacion.filtros', '/verificacion', 'Filtros de período y banco'),
+  el('verificacion.punto-1', '/verificacion', 'Punto 1: calidad E1–E4 y universo local válido'),
+  el('verificacion.punto-2', '/verificacion', 'Punto 2: rankings obligatorios, posiciones y saldos'),
+  el('verificacion.punto-3', '/verificacion', 'Punto 3: rankings COMERCIO y CONSUMO'),
+  el('verificacion.punto-4', '/verificacion', 'Punto 4: total de cartera y ponderación'),
+  el('verificacion.punto-5', '/verificacion', 'Punto 5: desglose por subactividad con la reclasificación a Tarjeta'),
+  el('verificacion.punto-6', '/verificacion', 'Punto 6: los períodos procesados y las reconciliaciones 1 y 2'),
   // Administración
   el('admin.subir-archivo', '/admin', 'Subir un AT03', 'cargar_periodo'),
   el('admin.resultado-carga', '/admin', 'Resultado de la carga: E1–E4, universo y cambios de ranking', 'cargar_periodo'),
