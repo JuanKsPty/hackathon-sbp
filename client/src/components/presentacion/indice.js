@@ -1,5 +1,5 @@
 // Orden de las láminas de /presentacion. `titulo` va al lector de pantalla y al título de la pestaña.
-// La historia: problema, propuesta, Público, lo que nos diferencia, confianza y cierre.
+// La historia: problema, propuesta, Público, lo que nos diferencia, confianza, QR y cierre.
 // Después del cierre, el anexo técnico, solo para las preguntas del jurado.
 import {
   Anexo,
@@ -13,6 +13,7 @@ import {
   Portada,
   Problema,
   Propuesta,
+  Qr,
   RolPublico,
 } from './laminas.jsx'
 
@@ -23,6 +24,7 @@ export const LAMINAS = [
   { id: 'publico', titulo: 'Público', Componente: RolPublico },
   { id: 'diferencia', titulo: 'Lo que nos diferencia', Componente: Diferencia },
   { id: 'confianza', titulo: 'Por qué confiar en los números', Componente: Confianza },
+  { id: 'qr', titulo: 'Pruébalo: código QR al sitio público', Componente: Qr },
   { id: 'cierre', titulo: 'Cierre', Componente: Cierre },
   { id: 'anexo', titulo: 'Anexo técnico', Componente: Anexo },
   { id: 'flujo', titulo: 'Anexo: del archivo al ranking', Componente: Flujo },
