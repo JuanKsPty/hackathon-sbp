@@ -13,6 +13,7 @@ export { ErrorDeDatos } from './csv.js';
 export { formatearCentavos, formatearE4 } from './montos.js';
 export { csvRankings, csvDesglose, csvCalidad, csvExcluidas, csvAlertas, csvMovimientos, csvDescomposicion, COLUMNAS } from './exportar.js';
 export { calcularIndicadores } from './indicadores.js'; // análisis adicional (#35)
+export { calcularProductos } from './productos.js'; // totales por producto (las 22 subactividades)
 export { acumularPeriodos, TODOS } from './acumulado.js'; // "Todos los períodos"
 
 // Lee un AT03 completo y lo separa por período. El período sale del campo Fecha,

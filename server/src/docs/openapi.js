@@ -248,6 +248,15 @@ export function crearDocumentoOpenApi(catalogos) {
           responses: { ...jsonOk('Morosidad, vencimientos y concentración (top 3 y HHI)', 'indicadores.json'), ...errores(400, 404) },
         },
       },
+      '/productos': {
+        get: {
+          tags: ['Consulta'],
+          summary: 'Totales por producto de crédito: las 22 subactividades con saldo, operaciones, % del ranking y del total, líder y los 12 bancos',
+          description: 'Lo calcula el motor (engine/productos.js) con el desglose del período, que ya incluye la reclasificación SB21 en Tarjeta. `Lider` es el banco con más saldo (en empate, el código menor) y es `null` si la subactividad no tiene saldo. Acepta `periodo=todos`. Formato en contracts/productos.md.',
+          parameters: [ref('periodo')],
+          responses: { ...jsonOk('Productos y bancos del período'), ...errores(400, 404) },
+        },
+      },
       '/excluidas': {
         get: {
           tags: ['Consulta'],
@@ -288,6 +297,18 @@ export function crearDocumentoOpenApi(catalogos) {
           parameters: [ref('periodo'), ref('ranking'), ref('banco')],
           responses: {
             200: { description: 'HTML descargable (Content-Disposition: attachment)', content: { 'text/html': { schema: { type: 'string' } } } },
+            ...errores(400, 404),
+          },
+        },
+      },
+      '/exportar/informe.pdf': {
+        get: {
+          tags: ['Descargas'],
+          summary: 'Informe PDF del período (carta, 2 páginas): indicadores, barras por banco y por actividad, líderes y los 22 productos',
+          description: 'Generado en el server con pdfkit. Sin `periodo`, el último cargado; acepta `todos`. Analista y Administrador reciben además la evolución por corte. Los errores de parámetros responden JSON con el formato común.',
+          parameters: [ref('periodo')],
+          responses: {
+            200: { description: 'PDF descargable (Content-Disposition: attachment; filename="informe_<periodo>.pdf")', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } },
             ...errores(400, 404),
           },
         },

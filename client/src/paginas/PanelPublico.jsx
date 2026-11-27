@@ -4,6 +4,7 @@ import { GraficoPrincipal } from '@/components/landing/GraficoPrincipal.jsx'
 import { LideresDelCorte } from '@/components/landing/LideresDelCorte.jsx'
 import { useDatosLanding } from '@/components/landing/useDatosLanding.js'
 import { SeccionGris } from '@/components/marca'
+import { ProductosCredito } from '@/components/productos/ProductosCredito.jsx'
 
 // Panel del sitio público (/panel; / es la landing, paginas/Inicio.jsx): dashboard del corte elegido,
 // con gráficas de datos del API (R2). Solo el corte vigente: no compara períodos. Conserva los
@@ -21,6 +22,8 @@ export default function PanelPublico() {
           <GraficoPrincipal datos={datos} />
           {/* Sin el bloque "Calidad del corte": la calidad de datos no se muestra en el sitio público. */}
           <ComposicionCartera indicadores={datos.indicadores} />
+          {/* Saldo, tarjetas de crédito y demás productos del corte (#200). Sin evolución: el Público no compara cortes. */}
+          <ProductosCredito periodo={datos.periodo} />
           {/* Análisis adicional (concentración y morosidad), fuera de los 6 rankings oficiales. */}
           <div data-guia="panel.indicadores-adicionales" className="grid min-w-0 gap-4 lg:grid-cols-2">
             <Concentracion indicadores={datos.indicadores} />

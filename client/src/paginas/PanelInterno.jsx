@@ -16,6 +16,7 @@ import { MovimientosExplicados } from '@/components/panel/interno/MovimientosExp
 import { ResumenCorte } from '@/components/panel/interno/ResumenCorte.jsx'
 import { RiesgoCartera } from '@/components/panel/interno/RiesgoCartera.jsx'
 import { Seccion } from '@/components/panel/interno/Seccion.jsx'
+import { ProductosCredito } from '@/components/productos/ProductosCredito.jsx'
 import { usePerfil } from '@/contexto/PerfilContext.jsx'
 import { usePeriodo } from '@/contexto/PeriodoContext.jsx'
 import { useConsulta } from '@/hooks/useConsulta.js'
@@ -78,6 +79,11 @@ export default function PanelInterno() {
       <ResumenCorte desde={desde} movimientos={movimientos} descomposicion={descomposicion} />
 
       <CarteraPorCorte consultaIndicadores={consultaIndicadores} />
+
+      {/* Saldo, tarjetas de crédito y demás productos (#200). Quien compara períodos ve además su evolución por corte. */}
+      <Seccion id="titulo-productos-interno" titulo="Saldo y productos de crédito" descripcion="Tarjetas, automóvil, vivienda y cualquier otro producto, banco por banco.">
+        <ProductosCredito periodo={periodo} fechas={analiza ? fechas : []} />
+      </Seccion>
 
       {analiza && <DescomposicionBancos desde={desde} hasta={periodo} consulta={comparar ? consultaDescomposicion : SIN_CONSULTA} />}
 
