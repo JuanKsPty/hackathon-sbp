@@ -1,4 +1,5 @@
-import { BadgeCheckIcon, BotIcon, BotOffIcon, CircleAlertIcon, RotateCwIcon, SearchXIcon } from 'lucide-react'
+import { BadgeCheckIcon, BotIcon, BotOffIcon, CircleAlertIcon, MousePointer2Icon, RotateCwIcon, SearchXIcon } from 'lucide-react'
+import { useGuia } from '@/guia/GuiaContext.jsx'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ETIQUETA_RESPUESTA } from '@/api/ia.js'
@@ -77,8 +78,23 @@ export function MensajeAsistente({ datos, guiaFuentes }) {
           </Badge>
         )}
       </div>
+      <BotonGuia pasos={datos.guia?.pasos} />
       <FuentesConsultadas consultas={datos.consultas} guia={guiaFuentes} />
     </Burbuja>
+  )
+}
+
+// Cursor guía (#72): si la IA respondió con pasos (`guia`), los muestra sobre la pantalla.
+function BotonGuia({ pasos }) {
+  const { iniciar } = useGuia()
+  if (!pasos?.length) return null
+  return (
+    <div>
+      <Button variant="outline" size="sm" onClick={() => iniciar(pasos)}>
+        <MousePointer2Icon aria-hidden="true" />
+        Mostrarme en la pantalla ({pasos.length} {pasos.length === 1 ? 'paso' : 'pasos'})
+      </Button>
+    </div>
   )
 }
 

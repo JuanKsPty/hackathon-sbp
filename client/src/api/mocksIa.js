@@ -76,6 +76,25 @@ function mockPreguntar({ pregunta = '' } = {}) {
       consultas: [{ herramienta: 'listar_periodos', entrada: {}, ok: true, ruta: '/periodos' }],
     }
   }
+  // Cursor guía (#72): preguntas de "cómo" o "dónde" traen pasos para probar la guía sin IA.
+  if (/c[oó]mo|d[oó]nde/i.test(pregunta)) {
+    return {
+      ...base,
+      ia_disponible: true,
+      motivo: null,
+      respuesta: 'Guía de ejemplo (modo mock): te muestro en la pantalla cómo ver un ranking y su desglose.',
+      verificada: true,
+      consultas: [],
+      guia: {
+        pasos: [
+          { ruta: null, guia: 'global.menu-rankings', texto: 'Entra a Rankings desde el menú.' },
+          { ruta: '/rankings', guia: 'rankings.selector-ranking', texto: 'Elige aquí el ranking que quieres ver.' },
+          { ruta: '/rankings', guia: 'rankings.tabla', texto: 'En la tabla ves la posición, el saldo y la ponderación de cada banco.' },
+          { ruta: '/rankings', guia: 'rankings.desglose-subactividades', texto: 'Abajo está el desglose por subactividad.' },
+        ],
+      },
+    }
+  }
   return {
     ...base,
     ia_disponible: true,

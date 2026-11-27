@@ -6,10 +6,8 @@
  */
 export function esperarElemento(selector, { timeout = 4000, signal, raiz = document } = {}) {
   return new Promise((resolver) => {
-    const buscar = () => {
-      const el = raiz.querySelector(selector)
-      return el && esVisible(el) ? el : null
-    }
+    // El primero visible: un mismo data-guia puede repetirse (por ejemplo, el menú de escritorio y el de móvil).
+    const buscar = () => [...raiz.querySelectorAll(selector)].find(esVisible) ?? null
     const inmediato = buscar()
     if (inmediato) return resolver(inmediato)
 

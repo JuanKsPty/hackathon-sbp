@@ -15,10 +15,11 @@ export function Navegacion({ alNavegar }) {
       </div>
       <nav aria-label="Secciones">
         <ul className="flex flex-col gap-1">
-          {SECCIONES.map(({ ruta, nombre, icono: Icono }) => (
+          {SECCIONES.map(({ ruta, nombre, icono: Icono, guia }) => (
             <li key={ruta}>
               <NavLink
                 to={ruta}
+                data-guia={guia}
                 end={ruta === '/'}
                 onClick={alNavegar}
                 className={({ isActive }) =>

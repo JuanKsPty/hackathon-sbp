@@ -4,6 +4,8 @@ import { AppShell } from '@/components/layout/AppShell.jsx'
 import { PeriodoProvider } from '@/contexto/PeriodoContext.jsx'
 import { PerfilProvider } from '@/contexto/PerfilContext.jsx'
 import { TemaProvider } from '@/contexto/TemaContext.jsx'
+import { GuiaProvider } from '@/guia/GuiaContext.jsx'
+import { CapaGuia } from '@/guia/CapaGuia.jsx'
 import Admin from '@/paginas/Admin.jsx'
 import Calidad from '@/paginas/Calidad.jsx'
 import Comparar from '@/paginas/Comparar.jsx'
@@ -19,6 +21,8 @@ export default function App() {
         <PeriodoProvider>
           <TooltipProvider>
             <BrowserRouter>
+              {/* Cursor guía (#72): necesita el router para cambiar de página entre pasos. */}
+              <GuiaProvider>
               <Routes>
                 <Route element={<AppShell />}>
                   <Route index element={<Panel />} />
@@ -30,6 +34,8 @@ export default function App() {
                   <Route path="*" element={<NoEncontrada />} />
                 </Route>
               </Routes>
+              <CapaGuia />
+              </GuiaProvider>
             </BrowserRouter>
           </TooltipProvider>
         </PeriodoProvider>
